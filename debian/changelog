@@ -1,3 +1,13 @@
+gnome-shell (3.28.3+git20190124-0ubuntu18.04.2) bionic-security; urgency=medium
+
+  * SECURITY UPDATE: Potential keyboard shortcuts and other actions
+    - debian/patches/CVE-2019-3820-*.patch: fix in
+      js/ui/panel.js, js/gdm/authPrompt.js, js/gdm/loginDialog.js,
+      js/ui/shellEntry.js.
+    - CVE-2019-3820
+
+ -- Leonidas S. Barbosa <leo.barbosa@canonical.com>  Mon, 25 Feb 2019 12:53:33 -0300
+
 gnome-shell (3.28.3+git20190124-0ubuntu18.04.1) bionic; urgency=medium
 
   * New git snapshot release up to commit 24cdcc56d (LP: #1811900)
