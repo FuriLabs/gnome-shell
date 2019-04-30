@@ -1,3 +1,12 @@
+gnome-shell (3.28.3+git20190124-0ubuntu18.04.2) UNRELEASED; urgency=medium
+
+  * d/p/switchMonitor-switch-to-next-config-upon-initial-keypress.patch
+    - Ensure switch display mode is cyclic (LP: #1772811)
+  * debian/control:
+    - Depends on mutter 3.28.3+git20190124-0ubuntu18.04.3
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 29 Apr 2019 23:53:08 -0500
+
 gnome-shell (3.28.3+git20190124-0ubuntu18.04.1) bionic; urgency=medium
 
   * New git snapshot release up to commit 24cdcc56d (LP: #1811900)

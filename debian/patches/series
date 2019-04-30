@@ -21,3 +21,4 @@ st-scroll-view-Remove-scrollbars-references-on-dispose.patch
 keyboard-Filter-redundant-FocusTracker-position-changed-s.patch
 keyboard-Listen-to-IbusPanelService-focus-in-out-to-track.patch
 power-Label-the-PENDING_CHARGE-state-as-Not-Charging.patch
+switchMonitor-switch-to-next-config-upon-initial-keypress.patch
