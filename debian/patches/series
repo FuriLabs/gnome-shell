@@ -24,3 +24,4 @@ power-Label-the-PENDING_CHARGE-state-as-Not-Charging.patch
 switchMonitor-switch-to-next-config-upon-initial-keypress.patch
 dnd-Only-handle-touch-events-in-wayland.patch
 st-widget-Add-missing-g_return_val_if_fail.patch
+windowManager-listen-actively-to-windows-being-destroyed-.patch
