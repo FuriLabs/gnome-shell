@@ -11,6 +11,8 @@ gnome-shell (3.28.3+git20190124-0ubuntu18.04.2) UNRELEASED; urgency=medium
   * d/p/windowManager-listen-actively-to-windows-being-destroyed-.patch:
     - windowManager: listen actively to windows being destroyed during WS switch
       (LP: #1812527)
+  * d/p/dialog-Really-set-ellipsize-mode-in-subtitle-and-body.patch:
+    - Really set ellipsize mode in subtitle and body (LP: #1809788)
 
  -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 29 Apr 2019 23:53:08 -0500
 
