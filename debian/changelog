@@ -1,3 +1,21 @@
+gnome-shell (3.28.3+git20190124-0ubuntu18.04.3) UNRELEASED; urgency=medium
+
+  * d/p/switchMonitor-switch-to-next-config-upon-initial-keypress.patch
+    - Ensure switch display mode is cyclic (LP: #1772811)
+  * debian/control:
+    - Depends on mutter 3.28.3+git20190124-0ubuntu18.04.3
+  * d/p/dnd-Only-handle-touch-events-in-wayland.patch:
+    - dnd: Only handle touch events in wayland (LP: #1817020)
+  * d/p/st-widget-Add-missing-g_return_val_if_fail.patch:
+    - st-widget: Protect from NULL obj in get_theme_node (LP: #1796606)
+  * d/p/windowManager-listen-actively-to-windows-being-destroyed-.patch:
+    - windowManager: listen actively to windows being destroyed during WS switch
+      (LP: #1812527)
+  * d/p/dialog-Really-set-ellipsize-mode-in-subtitle-and-body.patch:
+    - Really set ellipsize mode in subtitle and body (LP: #1809788)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 29 Apr 2019 23:53:08 -0500
+
 gnome-shell (3.28.3+git20190124-0ubuntu18.04.2) bionic-security; urgency=medium
 
   * SECURITY UPDATE: Potential keyboard shortcuts and other actions

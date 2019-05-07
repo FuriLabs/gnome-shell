@@ -1,0 +1,32 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Tue, 5 Mar 2019 19:42:01 +0100
+Subject: st-widget: Add missing g_return_val_if_fail()
+
+It's a public function, so it's good practice to sanity-check its
+input (unless disabled at compile time of course).
+
+https://gitlab.gnome.org/GNOME/gnome-shell/issues/1018
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/438
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/1796606
+---
+ src/st/st-widget.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/src/st/st-widget.c b/src/st/st-widget.c
+index 7c39b35..09a06e7 100644
+--- a/src/st/st-widget.c
++++ b/src/st/st-widget.c
+@@ -571,7 +571,11 @@ get_root_theme_node (ClutterStage *stage)
+ StThemeNode *
+ st_widget_get_theme_node (StWidget *widget)
+ {
+-  StWidgetPrivate *priv = st_widget_get_instance_private (widget);
++  StWidgetPrivate *priv;
++
++  g_return_val_if_fail (ST_IS_WIDGET (widget), NULL);
++
++  priv = st_widget_get_instance_private (widget);
+ 
+   if (priv->theme_node == NULL)
+     {

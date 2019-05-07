@@ -1,0 +1,58 @@
+From: Daniel Drake <drake@endlessm.com>
+Date: Mon, 30 Jul 2018 21:17:44 -0300
+Subject: switchMonitor: switch to next config upon initial keypress
+
+In GNOME-3.24, pressing Super+P or a similar function key would cause
+a switch to the next available monitor configuration.
+
+However, in GNOME-3.26, this was reimplemented in mutter and gnome-shell
+and the behaviour is now different: pressing Super+P and releasing will
+cause no change in montor configuration[1]. In this new design you have
+to press Super+P and keep holding Super in order to keep the switcher
+open, then press P again (or use the arrow keys or mouse) to
+select the next one in the list.
+
+This is incompatible with many Asus products such as Asus X530UN, where
+pressing the presentation mode media key (Fn+F8) actually generates
+the following keypress events from the keyboard controller:
+
+Fn pressed: nothing
+F8 pressed: nothing
+F8 released: Super press, p press, p release, Super release (quick burst)
+Fn released: nothing
+
+With this firmware behaviour it's not possible to hold the keys and have
+the dialog come up so that you can select another new mode.
+
+To solve this, when the switcher is opened, select the next available
+display config by default, which is more similar to the pre-GNOME-3.26
+behaviour. Now pressing Fn+F8 on this laptop will result in the display
+mode switch taking place.
+
+[1]: The mentioned desired behaviour will at least happen after
+https://gitlab.gnome.org/GNOME/mutter/issues/281 has been fixed
+
+https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/208
+
+Ubuntu-Bug: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/1772811
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/208
+Applied-Upstream: yes, 3.30.1
+---
+ js/ui/switchMonitor.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/js/ui/switchMonitor.js b/js/ui/switchMonitor.js
+index 96fb854..31b4f33 100644
+--- a/js/ui/switchMonitor.js
++++ b/js/ui/switchMonitor.js
+@@ -49,8 +49,8 @@ var SwitchMonitorPopup = new Lang.Class({
+ 
+     _initialSelection() {
+         let currentConfig = Meta.MonitorManager.get().get_switch_config();
+-        currentConfig %= Meta.MonitorSwitchConfigType.UNKNOWN;
+-        this._select(currentConfig);
++        let selectConfig = (currentConfig + 1) % Meta.MonitorSwitchConfigType.UNKNOWN;
++        this._select(selectConfig);
+     },
+ 
+     _keyPressHandler(keysym, action) {
