@@ -1,4 +1,4 @@
-gnome-shell (3.28.3+git20190124-0ubuntu18.04.3) UNRELEASED; urgency=medium
+gnome-shell (3.28.3+git20190124-0ubuntu18.04.3) bionic; urgency=medium
 
   * d/p/switchMonitor-switch-to-next-config-upon-initial-keypress.patch
     - Ensure switch display mode is cyclic (LP: #1772811)
@@ -14,7 +14,7 @@ gnome-shell (3.28.3+git20190124-0ubuntu18.04.3) UNRELEASED; urgency=medium
   * d/p/dialog-Really-set-ellipsize-mode-in-subtitle-and-body.patch:
     - Really set ellipsize mode in subtitle and body (LP: #1809788)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 29 Apr 2019 23:53:08 -0500
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 07 May 2019 18:37:41 +0100
 
 gnome-shell (3.28.3+git20190124-0ubuntu18.04.2) bionic-security; urgency=medium
 
