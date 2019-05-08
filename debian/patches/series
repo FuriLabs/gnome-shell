@@ -28,3 +28,4 @@ dnd-Only-handle-touch-events-in-wayland.patch
 st-widget-Add-missing-g_return_val_if_fail.patch
 windowManager-listen-actively-to-windows-being-destroyed-.patch
 dialog-Really-set-ellipsize-mode-in-subtitle-and-body.patch
+st-adjustment-Mark-all-properties-as-EXPLICIT_NOTIFY.patch
