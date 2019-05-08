@@ -2,6 +2,7 @@ gnome-shell (3.28.3+git20190124-0ubuntu18.04.4) UNRELEASED; urgency=medium
 
   * d/p/st-adjustment-Mark-all-properties-as-EXPLICIT_NOTIFY.patch:
     - Fix regression on missing spread animation (LP: #1827284)
+  * Refreshed patches
 
  -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 08 May 2019 14:49:43 -0500
 
