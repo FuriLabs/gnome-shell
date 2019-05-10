@@ -1,4 +1,4 @@
-gnome-shell (3.28.3+git20190124-0ubuntu18.04.3) UNRELEASED; urgency=medium
+gnome-shell (3.28.3+git20190124-0ubuntu18.04.3) bionic; urgency=medium
 
   * d/p/switchMonitor-switch-to-next-config-upon-initial-keypress.patch
     - Ensure switch display mode is cyclic (LP: #1772811)
@@ -16,7 +16,7 @@ gnome-shell (3.28.3+git20190124-0ubuntu18.04.3) UNRELEASED; urgency=medium
   * d/p/st-adjustment-Mark-all-properties-as-EXPLICIT_NOTIFY.patch:
     - Fix regression on missing spread animation (LP: #1827284)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 29 Apr 2019 23:53:08 -0500
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 10 May 2019 11:43:10 +0100
 
 gnome-shell (3.28.3+git20190124-0ubuntu18.04.2) bionic-security; urgency=medium
 
