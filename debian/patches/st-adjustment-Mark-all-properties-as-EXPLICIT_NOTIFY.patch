@@ -1,0 +1,85 @@
+From: Carlos Garnacho <carlosg@gnome.org>
+Date: Thu, 28 Jun 2018 20:22:40 +0200
+Subject: st-adjustment: Mark all properties as EXPLICIT_NOTIFY
+
+All adjustment setter functions take good care of avoiding emission of
+notify:: when it's not needed. The set_property() implementation already
+calls into the setter functions, so mark the properties as EXPLICITY_NOTIFY
+in order to optimize notify:: emission away through g_object_set (rather
+common from JS code).
+
+(cherry picked from commit b1b455ff1a0e856149142747e77fb1c98df34c03)
+
+Closes: https://gitlab.gnome.org/GNOME/gnome-shell/issues/1270
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/commit/8702d66
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/1827284
+Applied-Upstream: 3.28.4
+---
+ src/st/st-adjustment.c | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
+
+diff --git a/src/st/st-adjustment.c b/src/st/st-adjustment.c
+index 005c6eb..598df4e 100644
+--- a/src/st/st-adjustment.c
++++ b/src/st/st-adjustment.c
+@@ -205,7 +205,8 @@ st_adjustment_class_init (StAdjustmentClass *klass)
+                                                         G_MAXDOUBLE,
+                                                         0.0,
+                                                         ST_PARAM_READWRITE |
+-                                                        G_PARAM_CONSTRUCT));
++                                                        G_PARAM_CONSTRUCT |
++                                                        G_PARAM_EXPLICIT_NOTIFY));
+   g_object_class_install_property (object_class,
+                                    PROP_UPPER,
+                                    g_param_spec_double ("upper",
+@@ -215,7 +216,8 @@ st_adjustment_class_init (StAdjustmentClass *klass)
+                                                         G_MAXDOUBLE,
+                                                         0.0,
+                                                         ST_PARAM_READWRITE |
+-                                                        G_PARAM_CONSTRUCT));
++                                                        G_PARAM_CONSTRUCT |
++                                                        G_PARAM_EXPLICIT_NOTIFY));
+   g_object_class_install_property (object_class,
+                                    PROP_VALUE,
+                                    g_param_spec_double ("value",
+@@ -225,7 +227,8 @@ st_adjustment_class_init (StAdjustmentClass *klass)
+                                                         G_MAXDOUBLE,
+                                                         0.0,
+                                                         ST_PARAM_READWRITE |
+-                                                        G_PARAM_CONSTRUCT));
++                                                        G_PARAM_CONSTRUCT |
++                                                        G_PARAM_EXPLICIT_NOTIFY));
+   g_object_class_install_property (object_class,
+                                    PROP_STEP_INC,
+                                    g_param_spec_double ("step-increment",
+@@ -235,7 +238,8 @@ st_adjustment_class_init (StAdjustmentClass *klass)
+                                                         G_MAXDOUBLE,
+                                                         0.0,
+                                                         ST_PARAM_READWRITE |
+-                                                        G_PARAM_CONSTRUCT));
++                                                        G_PARAM_CONSTRUCT |
++                                                        G_PARAM_EXPLICIT_NOTIFY));
+   g_object_class_install_property (object_class,
+                                    PROP_PAGE_INC,
+                                    g_param_spec_double ("page-increment",
+@@ -245,7 +249,8 @@ st_adjustment_class_init (StAdjustmentClass *klass)
+                                                         G_MAXDOUBLE,
+                                                         0.0,
+                                                         ST_PARAM_READWRITE |
+-                                                        G_PARAM_CONSTRUCT));
++                                                        G_PARAM_CONSTRUCT |
++                                                        G_PARAM_EXPLICIT_NOTIFY));
+   g_object_class_install_property (object_class,
+                                    PROP_PAGE_SIZE,
+                                    g_param_spec_double ("page-size",
+@@ -255,7 +260,8 @@ st_adjustment_class_init (StAdjustmentClass *klass)
+                                                         G_MAXDOUBLE,
+                                                         0.0,
+                                                         ST_PARAM_READWRITE |
+-                                                        G_PARAM_CONSTRUCT));
++                                                        G_PARAM_CONSTRUCT |
++                                                        G_PARAM_EXPLICIT_NOTIFY));
+   /**
+    * StAdjustment::changed:
+    * @self: the #StAdjustment
