@@ -1,11 +1,3 @@
-gnome-shell (3.28.3+git20190124-0ubuntu18.04.4) UNRELEASED; urgency=medium
-
-  * d/p/st-adjustment-Mark-all-properties-as-EXPLICIT_NOTIFY.patch:
-    - Fix regression on missing spread animation (LP: #1827284)
-  * Refreshed patches
-
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 08 May 2019 14:49:43 -0500
-
 gnome-shell (3.28.3+git20190124-0ubuntu18.04.3) UNRELEASED; urgency=medium
 
   * d/p/switchMonitor-switch-to-next-config-upon-initial-keypress.patch
@@ -21,6 +13,8 @@ gnome-shell (3.28.3+git20190124-0ubuntu18.04.3) UNRELEASED; urgency=medium
       (LP: #1812527)
   * d/p/dialog-Really-set-ellipsize-mode-in-subtitle-and-body.patch:
     - Really set ellipsize mode in subtitle and body (LP: #1809788)
+  * d/p/st-adjustment-Mark-all-properties-as-EXPLICIT_NOTIFY.patch:
+    - Fix regression on missing spread animation (LP: #1827284)
 
  -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 29 Apr 2019 23:53:08 -0500
 
