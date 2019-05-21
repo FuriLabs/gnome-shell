@@ -2,6 +2,7 @@
 #
 # Modifications should be made to debian/control.in instead.
 # This file is regenerated automatically in the clean target.
+
 Source: gnome-shell
 Section: gnome
 Priority: optional
@@ -83,7 +84,7 @@ Depends: ${gir:Depends},
          gir1.2-gtk-3.0 (>= 3.16),
          gir1.2-gweather-3.0,
          gir1.2-ibus-1.0 (>= 1.5.2),
-         gir1.2-mutter-2 (>= 3.28.3+git20190124-0ubuntu18.04.3),
+         gir1.2-mutter-2 (>= 3.28.4-0ubuntu18.04.1),
          gir1.2-nm-1.0 [linux-any],
          gir1.2-nma-1.0 [linux-any],
          gir1.2-pango-1.0,
@@ -96,7 +97,7 @@ Depends: ${gir:Depends},
          gnome-shell-common (= ${source:Version}),
          ubuntu-wallpapers,
          gsettings-desktop-schemas (>= 3.21.3),
-         mutter (>= 3.28.3+git20190124-0ubuntu18.04.3),
+         mutter (>= 3.28.4-0ubuntu18.04.1),
          python3,
          libglib2.0-bin (>= 2.53.0),
 Recommends: xserver-xorg-legacy,
