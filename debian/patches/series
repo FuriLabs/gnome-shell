@@ -24,8 +24,4 @@ power-Label-the-PENDING_CHARGE-state-as-Not-Charging.patch
 CVE-2019-3820-1.patch
 CVE-2019-3820-2.patch
 switchMonitor-switch-to-next-config-upon-initial-keypress.patch
-dnd-Only-handle-touch-events-in-wayland.patch
 st-widget-Add-missing-g_return_val_if_fail.patch
-windowManager-listen-actively-to-windows-being-destroyed-.patch
-dialog-Really-set-ellipsize-mode-in-subtitle-and-body.patch
-st-adjustment-Mark-all-properties-as-EXPLICIT_NOTIFY.patch

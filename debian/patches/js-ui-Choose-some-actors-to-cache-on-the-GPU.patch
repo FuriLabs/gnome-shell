@@ -76,7 +76,7 @@ index d75af65..4d3fe73 100644
          this._showAppsIcon = new ShowAppsIcon();
          this._showAppsIcon.childScale = 1;
 diff --git a/js/ui/dialog.js b/js/ui/dialog.js
-index cfa192d..89db963 100644
+index 66cc851..3377957 100644
 --- a/js/ui/dialog.js
 +++ b/js/ui/dialog.js
 @@ -6,6 +6,7 @@ const GObject = imports.gi.GObject;

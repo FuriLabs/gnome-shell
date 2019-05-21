@@ -33,7 +33,7 @@ Forwarded: yes, https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/4
  2 files changed, 89 insertions(+), 39 deletions(-)
 
 diff --git a/js/ui/dnd.js b/js/ui/dnd.js
-index ec1ba1d..9e961a1 100644
+index a36b1f6..af7a27a 100644
 --- a/js/ui/dnd.js
 +++ b/js/ui/dnd.js
 @@ -27,6 +27,12 @@ var DragMotionResult = {
@@ -75,7 +75,7 @@ index ec1ba1d..9e961a1 100644
          this._animationInProgress = false; // The drag is over and the item is in the process of animating to its original position (snapping back or reverting).
          this._dragCancellable = true;
  
-@@ -206,9 +213,10 @@ var _Draggable = new Lang.Class({
+@@ -216,9 +223,10 @@ var _Draggable = new Lang.Class({
              (event.type() == Clutter.EventType.TOUCH_END &&
               global.display.is_pointer_emulating_sequence(event.get_event_sequence()))) {
              this._buttonDown = false;
@@ -88,7 +88,7 @@ index ec1ba1d..9e961a1 100644
                  // Drag must have been cancelled with Esc.
                  this._dragComplete();
                  return Clutter.EVENT_STOP;
-@@ -222,14 +230,14 @@ var _Draggable = new Lang.Class({
+@@ -232,14 +240,14 @@ var _Draggable = new Lang.Class({
          } else if (event.type() == Clutter.EventType.MOTION ||
                     (event.type() == Clutter.EventType.TOUCH_UPDATE &&
                      global.display.is_pointer_emulating_sequence(event.get_event_sequence()))) {
@@ -106,7 +106,7 @@ index ec1ba1d..9e961a1 100644
              let symbol = event.get_key_symbol();
              if (symbol == Clutter.Escape) {
                  this._cancelDrag(event.get_time());
-@@ -265,7 +273,7 @@ var _Draggable = new Lang.Class({
+@@ -275,7 +283,7 @@ var _Draggable = new Lang.Class({
       */
      startDrag(stageX, stageY, time, sequence) {
          currentDraggable = this;
@@ -115,7 +115,7 @@ index ec1ba1d..9e961a1 100644
  
          // Special-case St.Button: the pointer grab messes with the internal
          // state, so force a reset to a reasonable state here
-@@ -342,6 +350,13 @@ var _Draggable = new Lang.Class({
+@@ -352,6 +360,13 @@ var _Draggable = new Lang.Class({
              Shell.util_set_hidden_from_pick(this._dragActor, true);
          }
  
@@ -129,7 +129,7 @@ index ec1ba1d..9e961a1 100644
          this._dragOrigOpacity = this._dragActor.opacity;
          if (this._dragActorOpacity != undefined)
              this._dragActor.opacity = this._dragActorOpacity;
-@@ -518,7 +533,7 @@ var _Draggable = new Lang.Class({
+@@ -528,7 +543,7 @@ var _Draggable = new Lang.Class({
                                                  event.get_time())) {
                      // If it accepted the drop without taking the actor,
                      // handle it ourselves.
@@ -138,7 +138,7 @@ index ec1ba1d..9e961a1 100644
                          if (this._restoreOnSuccess) {
                              this._restoreDragActor(event.get_time());
                              return true;
-@@ -526,7 +541,7 @@ var _Draggable = new Lang.Class({
+@@ -536,7 +551,7 @@ var _Draggable = new Lang.Class({
                              this._dragActor.destroy();
                      }
  
@@ -147,7 +147,7 @@ index ec1ba1d..9e961a1 100644
                      global.screen.set_cursor(Meta.Cursor.DEFAULT);
                      this.emit('drag-end', event.get_time(), true);
                      this._dragComplete();
-@@ -575,20 +590,22 @@ var _Draggable = new Lang.Class({
+@@ -585,20 +600,22 @@ var _Draggable = new Lang.Class({
  
      _cancelDrag(eventTime) {
          this.emit('drag-cancelled', eventTime);
@@ -174,7 +174,7 @@ index ec1ba1d..9e961a1 100644
          this._animateDragEnd(eventTime,
                               { x: snapBackX,
                                 y: snapBackY,
-@@ -599,7 +616,7 @@ var _Draggable = new Lang.Class({
+@@ -609,7 +626,7 @@ var _Draggable = new Lang.Class({
      },
  
      _restoreDragActor(eventTime) {
@@ -183,7 +183,7 @@ index ec1ba1d..9e961a1 100644
          let [restoreX, restoreY, restoreScale] = this._getRestoreLocation();
  
          // fade the actor back in at its original location
-@@ -614,12 +631,6 @@ var _Draggable = new Lang.Class({
+@@ -624,12 +641,6 @@ var _Draggable = new Lang.Class({
      _animateDragEnd(eventTime, params) {
          this._animationInProgress = true;
  
@@ -196,7 +196,7 @@ index ec1ba1d..9e961a1 100644
          params['opacity']          = this._dragOrigOpacity;
          params['transition']       = 'easeOutQuad';
          params['onComplete']       = this._onAnimationComplete;
-@@ -642,9 +653,6 @@ var _Draggable = new Lang.Class({
+@@ -652,9 +663,6 @@ var _Draggable = new Lang.Class({
      },
  
      _onAnimationComplete(dragActor, eventTime) {
@@ -206,7 +206,7 @@ index ec1ba1d..9e961a1 100644
          if (this._dragOrigParent) {
              Main.uiGroup.remove_child(this._dragActor);
              this._dragOrigParent.add_actor(this._dragActor);
-@@ -659,7 +667,7 @@ var _Draggable = new Lang.Class({
+@@ -669,7 +677,7 @@ var _Draggable = new Lang.Class({
      },
  
      _dragComplete() {
@@ -215,7 +215,7 @@ index ec1ba1d..9e961a1 100644
              Shell.util_set_hidden_from_pick(this._dragActor, false);
  
          this._ungrabEvents();
-@@ -670,7 +678,12 @@ var _Draggable = new Lang.Class({
+@@ -680,7 +688,12 @@ var _Draggable = new Lang.Class({
              this._updateHoverId = 0;
          }
  
