@@ -1,20 +1,21 @@
-gnome-shell (3.28.3+git20190124-0ubuntu18.04.3) bionic; urgency=medium
+gnome-shell (3.28.4-0ubuntu18.04.1) bionic; urgency=medium
 
+  * New upstream stable release
+    - Fix ellipsization in dialog subtitles/bodies (LP: #1809788)
+    - dnd: Only handle touch events in wayland (LP: #1817020)
+    - windowManager: listen actively to windows being destroyed during WS switch
+      (LP: #1812527)
+    - Fix unresponsive-app dialog blocking input in other windows (LP: #1740869)
+    - Fix regression on missing spread animation (LP: #1827284)
+  * d/p/js-fix-invalid-access-errors.patch,
+    d/p/js-ui-Choose-some-actors-to-cache-on-the-GPU.patch:
+    - Refreshed
   * d/p/switchMonitor-switch-to-next-config-upon-initial-keypress.patch
     - Ensure switch display mode is cyclic (LP: #1772811)
   * debian/control:
-    - Depends on mutter 3.28.3+git20190124-0ubuntu18.04.3
-  * d/p/dnd-Only-handle-touch-events-in-wayland.patch:
-    - dnd: Only handle touch events in wayland (LP: #1817020)
+    - Depends on mutter 3.28.4-0ubuntu18.04.1
   * d/p/st-widget-Add-missing-g_return_val_if_fail.patch:
     - st-widget: Protect from NULL obj in get_theme_node (LP: #1796606)
-  * d/p/windowManager-listen-actively-to-windows-being-destroyed-.patch:
-    - windowManager: listen actively to windows being destroyed during WS switch
-      (LP: #1812527)
-  * d/p/dialog-Really-set-ellipsize-mode-in-subtitle-and-body.patch:
-    - Really set ellipsize mode in subtitle and body (LP: #1809788)
-  * d/p/st-adjustment-Mark-all-properties-as-EXPLICIT_NOTIFY.patch:
-    - Fix regression on missing spread animation (LP: #1827284)
 
  -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 10 May 2019 11:43:10 +0100
 
