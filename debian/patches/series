@@ -25,3 +25,4 @@ CVE-2019-3820-1.patch
 CVE-2019-3820-2.patch
 switchMonitor-switch-to-next-config-upon-initial-keypress.patch
 st-widget-Add-missing-g_return_val_if_fail.patch
+osk-layouts-Fix-French-layout.patch
