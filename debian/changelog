@@ -1,8 +1,8 @@
-gnome-shell (3.32.2-2ubuntu1~ubuntu19.04.1) UNRELEASED; urgency=medium
+gnome-shell (3.32.2-2ubuntu1~ubuntu19.04.1) disco; urgency=medium
 
   * No-change SRU backport from eoan to disco. (LP: #1834517)
 
- -- Iain Lane <iain.lane@canonical.com>  Thu, 27 Jun 2019 20:34:59 +0100
+ -- Iain Lane <iain.lane@canonical.com>  Thu, 27 Jun 2019 20:35:50 +0100
 
 gnome-shell (3.32.2-2ubuntu1) eoan; urgency=medium
 
