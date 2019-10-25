@@ -1,3 +1,12 @@
+gnome-shell (3.28.4-0ubuntu18.04.3) bionic; urgency=medium
+
+  * d/p/ubuntu/search-call-XUbuntuCancel-method-on-providers-when-no-dat.patch:
+    - Add support for cancelling remote search providers when the overlay
+      is closed (and actually stop searches when requested from UI, LP: #1756826)
+  * debian/rules: Honour nocheck parameter
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 25 Oct 2019 05:23:08 +0200
+
 gnome-shell (3.28.4-0ubuntu18.04.2) bionic; urgency=medium
 
   * d/p/osk-layouts-Fix-French-layout.patch:
