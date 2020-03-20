@@ -56,10 +56,10 @@ Build-Depends: debhelper (>= 10.3~),
                sassc,
 Standards-Version: 4.0.0
 Homepage: https://wiki.gnome.org/Projects/GnomeShell
-XS-Debian-Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell
 XS-Debian-Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell
-Vcs-Browser: https://code.launchpad.net/~ubuntu-desktop/ubuntu/+source/gnome-shell/+git/gnome-shell/+ref/ubuntu/bionic
-Vcs-Git: https://git.launchpad.net/~ubuntu-desktop/ubuntu/+source/gnome-shell -b ubuntu/bionic
+XS-Debian-Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell
+Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell -b ubuntu/bionic
+Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell/tree/ubuntu/bionic
 
 Package: gnome-shell
 Architecture: linux-any
