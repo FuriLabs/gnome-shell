@@ -1,3 +1,11 @@
+gnome-shell (3.28.4-0ubuntu18.04.4) bionic; urgency=medium
+
+  * d/p/keyboardManager_apply-added-input-sources-instantly.patch:
+    - Make added input sources work instantly without relogin/reboot
+      or other tricks (LP: #1890875).
+
+ -- Gunnar Hjalmarsson <gunnarhj@ubuntu.com>  Fri, 14 Aug 2020 18:26:00 +0200
+
 gnome-shell (3.28.4-0ubuntu18.04.3) bionic; urgency=medium
 
   * d/p/ubuntu/search-call-XUbuntuCancel-method-on-providers-when-no-dat.patch:
