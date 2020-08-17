@@ -28,3 +28,4 @@ st-widget-Add-missing-g_return_val_if_fail.patch
 osk-layouts-Fix-French-layout.patch
 ubuntu/search-call-XUbuntuCancel-method-on-providers-when-no-dat.patch
 keyboardManager-Avoid-idempotent-calls-to-meta_backend_se.patch
+shell-global-Make-saving-of-persistent-state-asynchronous.patch
