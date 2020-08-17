@@ -1,4 +1,4 @@
-gnome-shell (3.28.4-0ubuntu18.04.5) UNRELEASED; urgency=medium
+gnome-shell (3.28.4-0ubuntu18.04.5) bionic; urgency=medium
 
   * d/p/keyboardManager_apply-added-input-sources-instantly.patch:
     - Renamed to keyboardManager-Avoid-idempotent-calls-to-meta_backend_se.patch
@@ -6,7 +6,7 @@ gnome-shell (3.28.4-0ubuntu18.04.5) UNRELEASED; urgency=medium
   * d/p/shell-global-Make-saving-of-persistent-state-asynchronous.patch:
     - Make saving of persistent state asynchronous (LP: #1838152)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 17 Aug 2020 13:35:00 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 17 Aug 2020 13:48:08 +0200
 
 gnome-shell (3.28.4-0ubuntu18.04.4) bionic; urgency=medium
 
