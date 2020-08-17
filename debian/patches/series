@@ -27,4 +27,4 @@ switchMonitor-switch-to-next-config-upon-initial-keypress.patch
 st-widget-Add-missing-g_return_val_if_fail.patch
 osk-layouts-Fix-French-layout.patch
 ubuntu/search-call-XUbuntuCancel-method-on-providers-when-no-dat.patch
-keyboardManager_apply-added-input-sources-instantly.patch
+keyboardManager-Avoid-idempotent-calls-to-meta_backend_se.patch

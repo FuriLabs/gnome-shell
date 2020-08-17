@@ -1,11 +1,6 @@
-Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/b405ed64
-Bug-Ubuntu: https://launchpad.net/bugs/1890875
-
-From b405ed64427a9d518d1714df678d04ad11267e15 Mon Sep 17 00:00:00 2001
 From: Carlos Garnacho <carlosg@gnome.org>
 Date: Tue, 23 Oct 2018 00:06:36 +0200
-Subject: [PATCH] keyboardManager: Avoid idempotent calls to
- meta_backend_set_keymap()
+Subject: keyboardManager: Avoid idempotent calls to meta_backend_set_keymap()
 
 But still try to apply the keymap whenever the input sources changed. This
 is a different approach to gnome-shell#240 that still avoid redundant
@@ -15,12 +10,16 @@ are added.
 https://bugzilla.redhat.com/show_bug.cgi?id=1637418
 
 Closes: https://gitlab.gnome.org/GNOME/gnome-shell/issues/691
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/ac3738f4b
+Bug-Ubuntu: https://launchpad.net/bugs/1890875
+Applied-Upstream: 3.28.5
 ---
  js/misc/keyboardManager.js | 14 +++++++++-----
  1 file changed, 9 insertions(+), 5 deletions(-)
 
 diff --git a/js/misc/keyboardManager.js b/js/misc/keyboardManager.js
-index ae59f00149..f4001f1301 100644
+index ae59f00..f4001f1 100644
 --- a/js/misc/keyboardManager.js
 +++ b/js/misc/keyboardManager.js
 @@ -52,11 +52,20 @@ var KeyboardManager = new Lang.Class({
@@ -63,6 +62,3 @@ index ae59f00149..f4001f1301 100644
              i += 1;
          }
      },
--- 
-GitLab
-
