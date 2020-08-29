@@ -27,3 +27,4 @@ st-widget-Add-missing-g_return_val_if_fail.patch
 ShellApp-Use-g_signal_connect_object-for-window-signals.patch
 tweener-Save-handlers-on-target-and-remove-them-on-destro.patch
 workaround_crasher_fractional_scaling.patch
+loginDialog-Reset-auth-prompt-on-vt-switch-before-fade-in_CVE-2020-17489.patch
