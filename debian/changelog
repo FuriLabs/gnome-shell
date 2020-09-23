@@ -1,4 +1,4 @@
-gnome-shell (3.28.4-0ubuntu18.04.6) UNRELEASED; urgency=medium
+gnome-shell (3.28.4-0ubuntu18.04.6) bionic; urgency=medium
 
   - d/p/util-cache-local-GTimeZone.patch
     d/p/ShellAppCache-add-cache-to-help-keep-I-O-off-main-thread.patch,
@@ -12,7 +12,7 @@ gnome-shell (3.28.4-0ubuntu18.04.6) UNRELEASED; urgency=medium
       (LP: #1838152).
   - d/p/series: Reorder so that upstream fixes come first
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 23 Sep 2020 20:11:33 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 23 Sep 2020 20:16:18 +0200
 
 gnome-shell (3.28.4-0ubuntu18.04.5) bionic; urgency=medium
 
