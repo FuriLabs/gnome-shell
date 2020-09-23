@@ -1,3 +1,14 @@
+osk-layouts-Fix-French-layout.patch
+util-cache-local-GTimeZone.patch
+ShellAppCache-add-cache-to-help-keep-I-O-off-main-thread.patch
+appDisplay-use-ShellAppCache-to-translate-folder-names.patch
+appDisplay-use-ShellAppCache-to-access-GAppInfo.patch
+Revert-appDisplay-use-ShellAppCache-to-access-GAppInfo.patch
+Revert-appDisplay-use-ShellAppCache-to-translate-folder-n.patch
+Revert-ShellAppCache-add-cache-to-help-keep-I-O-off-main-.patch
+Revert-util-cache-local-GTimeZone.patch
+keyboardManager-Avoid-idempotent-calls-to-meta_backend_se.patch
+shell-global-Make-saving-of-persistent-state-asynchronous.patch
 41-handle-logind-fail.patch
 50_add_ubuntu_desktop_detect.patch
 70_allow_sound_above_100.patch
@@ -25,7 +36,4 @@ CVE-2019-3820-1.patch
 CVE-2019-3820-2.patch
 switchMonitor-switch-to-next-config-upon-initial-keypress.patch
 st-widget-Add-missing-g_return_val_if_fail.patch
-osk-layouts-Fix-French-layout.patch
 ubuntu/search-call-XUbuntuCancel-method-on-providers-when-no-dat.patch
-keyboardManager-Avoid-idempotent-calls-to-meta_backend_se.patch
-shell-global-Make-saving-of-persistent-state-asynchronous.patch

@@ -1,0 +1,34 @@
+From: Christian Hergert <chergert@redhat.com>
+Date: Wed, 26 Feb 2020 23:43:00 -0800
+Subject: Revert "appDisplay: use ShellAppCache to access GAppInfo"
+
+This reverts commit cfb92ad392c6ae459b1d8fb6008d7cdc53d5c151.
+
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/commits/gnome-3-28
+---
+ js/ui/appDisplay.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
+index f04adc3..18bad24 100644
+--- a/js/ui/appDisplay.js
++++ b/js/ui/appDisplay.js
+@@ -491,7 +491,7 @@ var AllView = new Lang.Class({
+     },
+ 
+     _loadApps() {
+-        let apps = Shell.AppCache.get_default().get_all().filter(appInfo => {
++        let apps = Gio.AppInfo.get_all().filter(appInfo => {
+             try {
+                 let id = appInfo.get_id(); // catch invalid file encodings
+             } catch(e) {
+@@ -1321,7 +1321,7 @@ var FolderIcon = new Lang.Class({
+         folderApps.forEach(addAppId);
+ 
+         let folderCategories = this._folder.get_strv('categories');
+-        Shell.AppCache.get_default().get_all().forEach(appInfo => {
++        Gio.AppInfo.get_all().forEach(appInfo => {
+             let appCategories = _getCategories(appInfo);
+             if (!_listsIntersect(folderCategories, appCategories))
+                 return;

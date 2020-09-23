@@ -1,0 +1,101 @@
+From: Christian Hergert <chergert@redhat.com>
+Date: Wed, 26 Feb 2020 23:43:25 -0800
+Subject: Revert "util: cache local GTimeZone"
+
+This reverts commit f597a0a11c822743c72e28d1e0abf2f4e9eeb3b3.
+
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/commits/gnome-3-28
+---
+ js/ui/dateMenu.js    |  5 -----
+ js/ui/environment.js |  2 +-
+ src/shell-util.c     | 26 --------------------------
+ src/shell-util.h     |  2 --
+ 4 files changed, 1 insertion(+), 34 deletions(-)
+
+diff --git a/js/ui/dateMenu.js b/js/ui/dateMenu.js
+index 79b1ce3..60f5bdc 100644
+--- a/js/ui/dateMenu.js
++++ b/js/ui/dateMenu.js
+@@ -573,11 +573,6 @@ var DateMenuButton = new Lang.Class({
+         // https://bugzilla.gnome.org/show_bug.cgi?id=678507
+         System.clearDateCaches();
+ 
+-        // To reduce the number of times that Shell opens /etc/localtime on
+-        // the main thread to parse timezone info, we cache the result. That
+-        // needs to be cleared when we change timezones.
+-        Shell.util_clear_timezone_cache();
+-
+         this._calendar.updateTimeZone();
+     },
+ 
+diff --git a/js/ui/environment.js b/js/ui/environment.js
+index a2a15a5..719680f 100644
+--- a/js/ui/environment.js
++++ b/js/ui/environment.js
+@@ -118,7 +118,7 @@ function init() {
+ 
+     // Work around https://bugzilla.mozilla.org/show_bug.cgi?id=508783
+     Date.prototype.toLocaleFormat = function(format) {
+-        return Shell.util_format_now(format);
++        return Shell.util_format_date(format, this.getTime());
+     };
+ 
+     let slowdownEnv = GLib.getenv('GNOME_SHELL_SLOWDOWN_FACTOR');
+diff --git a/src/shell-util.c b/src/shell-util.c
+index 7652612..70b8c06 100644
+--- a/src/shell-util.c
++++ b/src/shell-util.c
+@@ -20,8 +20,6 @@
+ #include <langinfo.h>
+ #endif
+ 
+-static GTimeZone *local_tz;
+-
+ static void
+ stop_pick (ClutterActor       *actor,
+            const ClutterColor *color)
+@@ -156,30 +154,6 @@ shell_util_format_date (const char *format,
+   return result;
+ }
+ 
+-char *
+-shell_util_format_now (const char *format)
+-{
+-  GDateTime *datetime;
+-  char *ret;
+-
+-  if (local_tz == NULL)
+-    local_tz = g_time_zone_new_local ();
+-
+-  datetime = g_date_time_new_now (local_tz);
+-  if (!datetime)
+-    return g_strdup ("");
+-
+-  ret = g_date_time_format (datetime, format);
+-  g_date_time_unref (datetime);
+-  return ret;
+-}
+-
+-void
+-shell_util_clear_timezone_cache (void)
+-{
+-  g_clear_pointer (&local_tz, g_time_zone_unref);
+-}
+-
+ /**
+  * shell_util_get_week_start:
+  *
+diff --git a/src/shell-util.h b/src/shell-util.h
+index 8b31c9e..2218594 100644
+--- a/src/shell-util.h
++++ b/src/shell-util.h
+@@ -22,8 +22,6 @@ int      shell_util_get_week_start             (void);
+ 
+ char    *shell_util_format_date                (const char       *format,
+                                                 gint64            time_ms);
+-char    *shell_util_format_now                 (const char       *format);
+-void     shell_util_clear_timezone_cache       (void);
+ const char *shell_util_translate_time_string   (const char *str);
+ 
+ char    *shell_util_regex_escape               (const char *str);

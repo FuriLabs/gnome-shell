@@ -1,0 +1,35 @@
+From: Christian Hergert <chergert@redhat.com>
+Date: Wed, 26 Feb 2020 23:09:23 -0800
+Subject: appDisplay: use ShellAppCache to translate folder names
+
+This was performing quite a bit of I/O on the main thread previously. Now,
+all the I/O is deferred to a worker thread and the translated names are
+cached for immediate lookup.
+
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/commits/gnome-3-28
+---
+ js/ui/appDisplay.js | 10 +---------
+ 1 file changed, 1 insertion(+), 9 deletions(-)
+
+diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
+index 74c772d..18bad24 100644
+--- a/js/ui/appDisplay.js
++++ b/js/ui/appDisplay.js
+@@ -93,15 +93,7 @@ function _getFolderName(folder) {
+     let name = folder.get_string('name');
+ 
+     if (folder.get_boolean('translate')) {
+-        let keyfile = new GLib.KeyFile();
+-        let path = 'desktop-directories/' + name;
+-
+-        try {
+-            keyfile.load_from_data_dirs(path, GLib.KeyFileFlags.NONE);
+-            name = keyfile.get_locale_string('Desktop Entry', 'Name', null);
+-        } catch(e) {
+-            return name;
+-        }
++        return Shell.AppCache.get_default().translate_folder(name);
+     }
+ 
+     return name;

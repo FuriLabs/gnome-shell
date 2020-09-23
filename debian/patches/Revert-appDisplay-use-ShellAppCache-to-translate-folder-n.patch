@@ -1,0 +1,33 @@
+From: Christian Hergert <chergert@redhat.com>
+Date: Wed, 26 Feb 2020 23:43:10 -0800
+Subject: Revert "appDisplay: use ShellAppCache to translate folder names"
+
+This reverts commit f87b9f374ad8c87957cb9c4e99e89efa79661e54.
+
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/commits/gnome-3-28
+---
+ js/ui/appDisplay.js | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
+index 18bad24..74c772d 100644
+--- a/js/ui/appDisplay.js
++++ b/js/ui/appDisplay.js
+@@ -93,7 +93,15 @@ function _getFolderName(folder) {
+     let name = folder.get_string('name');
+ 
+     if (folder.get_boolean('translate')) {
+-        return Shell.AppCache.get_default().translate_folder(name);
++        let keyfile = new GLib.KeyFile();
++        let path = 'desktop-directories/' + name;
++
++        try {
++            keyfile.load_from_data_dirs(path, GLib.KeyFileFlags.NONE);
++            name = keyfile.get_locale_string('Desktop Entry', 'Name', null);
++        } catch(e) {
++            return name;
++        }
+     }
+ 
+     return name;

@@ -1,0 +1,42 @@
+From: Christian Hergert <chergert@redhat.com>
+Date: Wed, 26 Feb 2020 23:11:33 -0800
+Subject: appDisplay: use ShellAppCache to access GAppInfo
+
+Calls to Gio.AppInfo.get_all() can perform quite a bit of I/O on the
+calling thread. This can potentially stall the compositor if the disk
+controller is saturated.
+
+Instead we can call the new ShellAppCache which contains cached information
+and performs all update I/O on a thread.
+
+Notifications of changes work very similar to GAppInfoMonitor via the
+ShellAppCache::changed() signal.
+
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/commits/gnome-3-28
+---
+ js/ui/appDisplay.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
+index 18bad24..f04adc3 100644
+--- a/js/ui/appDisplay.js
++++ b/js/ui/appDisplay.js
+@@ -491,7 +491,7 @@ var AllView = new Lang.Class({
+     },
+ 
+     _loadApps() {
+-        let apps = Gio.AppInfo.get_all().filter(appInfo => {
++        let apps = Shell.AppCache.get_default().get_all().filter(appInfo => {
+             try {
+                 let id = appInfo.get_id(); // catch invalid file encodings
+             } catch(e) {
+@@ -1321,7 +1321,7 @@ var FolderIcon = new Lang.Class({
+         folderApps.forEach(addAppId);
+ 
+         let folderCategories = this._folder.get_strv('categories');
+-        Gio.AppInfo.get_all().forEach(appInfo => {
++        Shell.AppCache.get_default().get_all().forEach(appInfo => {
+             let appCategories = _getCategories(appInfo);
+             if (!_listsIntersect(folderCategories, appCategories))
+                 return;
