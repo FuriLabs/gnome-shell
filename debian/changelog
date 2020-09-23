@@ -1,3 +1,19 @@
+gnome-shell (3.28.4-0ubuntu18.04.6) UNRELEASED; urgency=medium
+
+  - d/p/util-cache-local-GTimeZone.patch
+    d/p/ShellAppCache-add-cache-to-help-keep-I-O-off-main-thread.patch,
+    d/p/appDisplay-use-ShellAppCache-to-translate-folder-names.patch,
+    d/p/appDisplay-use-ShellAppCache-to-access-GAppInfo.patch,
+    d/p/Revert-appDisplay-use-ShellAppCache-to-access-GAppInfo.patch,
+    d/p/Revert-appDisplay-use-ShellAppCache-to-translate-folder-n.patch,
+    d/p/Revert-ShellAppCache-add-cache-to-help-keep-I-O-off-main-.patch,
+    d/p/Revert-util-cache-local-GTimeZone.patch:
+    + Include all the upstream patches to fix notification freezes
+      (LP: #1838152).
+  - d/p/series: Reorder so that upstream fixes come first
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 23 Sep 2020 20:11:33 +0200
+
 gnome-shell (3.28.4-0ubuntu18.04.5) bionic; urgency=medium
 
   * d/p/keyboardManager_apply-added-input-sources-instantly.patch:
