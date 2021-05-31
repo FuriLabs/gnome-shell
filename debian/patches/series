@@ -33,6 +33,7 @@ gdm-Don-t-try-to-retry-authenticating-when-the-service-is.patch
 authPrompt-Only-wiggle-the-entry-on-failures-coming-from-.patch
 authPrompt-Wiggle-error-messages-coming-from-the-Fingerpr.patch
 authPrompt-Bump-the-user-verifier-timeout-when-wiggling-t.patch
+calendar-server-Fix-double-free-detection-abort.patch
 ubuntu/search-call-XUbuntuCancel-method-on-providers-when-no-dat.patch
 ubuntu/resolve_alternate_theme_path.patch
 ubuntu/secure_mode_extension.patch
