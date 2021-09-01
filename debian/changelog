@@ -1,3 +1,9 @@
+gnome-shell (3.38.6-1~deb11u1) bullseye; urgency=medium
+
+  * Rebuild for bullseye
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 01 Sep 2021 21:18:10 +0100
+
 gnome-shell (3.38.6-1) unstable; urgency=medium
 
   * Team upload
