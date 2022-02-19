@@ -1,3 +1,10 @@
+gnome-shell (41.4-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+  * Drop patches that were applied upstream
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 16 Feb 2022 18:17:19 +0000
+
 gnome-shell (41.3-2) unstable; urgency=medium
 
   * Team upload
