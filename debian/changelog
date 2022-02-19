@@ -1,10 +1,16 @@
-gnome-shell (41.4-1) unstable; urgency=medium
+gnome-shell (41.4-1) UNRELEASED; urgency=medium
 
   * Team upload
+
+  [ Marco Trevisan ]
+  * debian: Prepare for unstable branching
+  * debian/watch: Only monitor 41 releases
+
+  [ Simon McVittie ]
   * New upstream release
   * Drop patches that were applied upstream
 
- -- Simon McVittie <smcv@debian.org>  Wed, 16 Feb 2022 18:30:46 +0000
+ -- Simon McVittie <smcv@debian.org>  Sat, 19 Feb 2022 18:58:25 +0000
 
 gnome-shell (41.3-2) unstable; urgency=medium
 
