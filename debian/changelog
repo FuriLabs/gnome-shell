@@ -1,3 +1,12 @@
+gnome-shell (42~beta-1ubuntu3) UNRELEASED; urgency=medium
+
+  * debian/patches: Adapt the theme-switcher code to keep gtk and shell in sync
+    We only used dark theme for the shell before while now it will match the
+    rest of the system.
+  * debian/patch: Fix a crash on shadow computation (LP: #1947315)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 18 Mar 2022 05:36:45 +0100
+
 gnome-shell (42~beta-1ubuntu2) jammy; urgency=medium
 
   * Add patch to restore Settings item in system menu, because we're
