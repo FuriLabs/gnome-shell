@@ -11,6 +11,7 @@ screenshot-Update-method-name-in-screenshot-bind.patch
 workspacesView-Disable-workspace-switching-while-in-searc.patch
 network-Get-dbus-path-from-NMDevice.patch
 dateMenu-Don-t-manipulate-passed-events.patch
+st-theme-node-Add-missing-precondition-checks.patch
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 ubuntu/desktop_detect.patch
 ubuntu/lightdm-user-switching.patch
