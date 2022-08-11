@@ -1,3 +1,11 @@
+gnome-shell (42.4-1) unstable; urgency=medium
+
+  * New upstream release (LP: #1985304):
+    - Fix logging in with realmd (LP: #1985128)
+  * debian/patches: Drop applied patches
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 11 Aug 2022 23:14:29 +0200
+
 gnome-shell (42.3.1-2ubuntu1) kinetic; urgency=medium
 
   * Merge with Debian (LP: #1981937) Remaining changes with Debian:
