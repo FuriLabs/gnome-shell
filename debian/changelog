@@ -1,4 +1,4 @@
-gnome-shell (42.4-1ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (42.4-1ubuntu1) kinetic; urgency=medium
 
   * Merge with Debian, remaining changes:
     - Replace gnome-backgrounds dep with ubuntu-wallpapers and Suggests
@@ -72,7 +72,7 @@ gnome-shell (42.4-1ubuntu1) UNRELEASED; urgency=medium
     - ubuntu/Revert-dash-Use-pin-instead-of-favorites
   * debian/patches: Refresh
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 11 Aug 2022 17:29:49 -0400
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 11 Aug 2022 17:31:32 -0400
 
 gnome-shell (42.4-1) unstable; urgency=medium
 
