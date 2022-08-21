@@ -59,7 +59,7 @@ index 3cc0048..86d7882 100644
 +++ b/js/ui/extensionSystem.js
 @@ -4,6 +4,7 @@
  const { GLib, Gio, GObject, Shell, St } = imports.gi;
- const Signals = imports.signals;
+ const Signals = imports.misc.signals;
  
 +const Desktop = imports.misc.desktop;
  const ExtensionDownloader = imports.ui.extensionDownloader;

@@ -91,7 +91,7 @@ index 8ebb550..aab2bf8 100644
 +    }
 +
      activateResult(id) {
-         this.proxy.ActivateResultRemote(id);
+         this.proxy.ActivateResultRemote(id).catch(logError);
      }
 diff --git a/js/ui/search.js b/js/ui/search.js
 index 3bfb83f..58ea12b 100644
