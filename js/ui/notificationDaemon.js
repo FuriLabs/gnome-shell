@@ -34,11 +34,6 @@ var FdoNotificationDaemon = class FdoNotificationDaemon {
         this._notifications = {};
 
         this._nextNotificationId = 1;
-
-        Shell.WindowTracker.get_default().connect('notify::focus-app',
-            this._onFocusAppChanged.bind(this));
-        Main.overview.connect('hidden',
-            this._onFocusAppChanged.bind(this));
     }
 
     _imageForNotificationData(hints) {
@@ -135,7 +130,7 @@ var FdoNotificationDaemon = class FdoNotificationDaemon {
 
         for (let hint in hints) {
             // unpack the variants
-            hints[hint] = hints[hint].deep_unpack();
+            hints[hint] = hints[hint].deepUnpack();
         }
 
         hints = Params.parse(hints, { urgency: Urgency.NORMAL }, true);
@@ -326,20 +321,6 @@ var FdoNotificationDaemon = class FdoNotificationDaemon {
         ];
     }
 
-    _onFocusAppChanged() {
-        let tracker = Shell.WindowTracker.get_default();
-        if (!tracker.focus_app)
-            return;
-
-        for (let i = 0; i < this._sources.length; i++) {
-            let source = this._sources[i];
-            if (source.app == tracker.focus_app) {
-                source.destroyNonResidentNotifications();
-                return;
-            }
-        }
-    }
-
     _emitNotificationClosed(id, reason) {
         this._dbusImpl.emit_signal('NotificationClosed',
                                    GLib.Variant.new('(uu)', [id, reason]));
@@ -507,7 +488,7 @@ class GtkNotificationDaemonNotification extends MessageTray.Notification {
         }
 
         if (buttons) {
-            buttons.deep_unpack().forEach(button => {
+            buttons.deepUnpack().forEach(button => {
                 this.addAction(button.label.unpack(), () => {
                     this._onButtonClicked(button);
                 });
@@ -594,32 +575,41 @@ class GtkNotificationDaemonAppSource extends MessageTray.Source {
         return new MessageTray.NotificationApplicationPolicy(this._appId);
     }
 
-    _createApp(callback) {
-        return new FdoApplicationProxy(Gio.DBus.session, this._appId, this._objectPath, callback);
+    _createApp() {
+        return new Promise((resolve, reject) => {
+            new FdoApplicationProxy(Gio.DBus.session,
+                this._appId, this._objectPath, (proxy, err) => {
+                    if (err)
+                        reject(err);
+                    else
+                        resolve(proxy);
+                });
+        });
     }
 
     _createNotification(params) {
         return new GtkNotificationDaemonNotification(this, params);
     }
 
-    activateAction(actionId, target) {
-        this._createApp((app, error) => {
-            if (error == null)
-                app.ActivateActionRemote(actionId, target ? [target] : [], getPlatformData());
-            else
-                logError(error, 'Failed to activate application proxy');
-        });
+    async activateAction(actionId, target) {
+        try {
+            const app = await this._createApp();
+            const params = target ? [target] : [];
+            app.ActivateActionAsync(actionId, params, getPlatformData());
+        } catch (error) {
+            logError(error, 'Failed to activate application proxy');
+        }
         Main.overview.hide();
         Main.panel.closeCalendar();
     }
 
-    open() {
-        this._createApp((app, error) => {
-            if (error == null)
-                app.ActivateRemote(getPlatformData());
-            else
-                logError(error, 'Failed to open application proxy');
-        });
+    async open() {
+        try {
+            const app = await this._createApp();
+            app.ActivateAsync(getPlatformData());
+        } catch (error) {
+            logError(error, 'Failed to open application proxy');
+        }
         Main.overview.hide();
         Main.panel.closeCalendar();
     }
@@ -701,7 +691,7 @@ var GtkNotificationDaemon = class GtkNotificationDaemon {
         try {
             let value = global.get_persistent_state('a(sa(sv))', 'notifications');
             if (value) {
-                let sources = value.deep_unpack();
+                let sources = value.deepUnpack();
                 sources.forEach(([appId, notifications]) => {
                     if (notifications.length == 0)
                         return;
@@ -716,7 +706,7 @@ var GtkNotificationDaemon = class GtkNotificationDaemon {
                     }
 
                     notifications.forEach(([notificationId, notification]) => {
-                        source.addNotification(notificationId, notification.deep_unpack(), false);
+                        source.addNotification(notificationId, notification.deepUnpack(), false);
                     });
                 });
             }

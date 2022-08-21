@@ -11,12 +11,15 @@ const DND = imports.ui.dnd;
 const Overview = imports.ui.overview;
 const PopupMenu = imports.ui.popupMenu;
 const PanelMenu = imports.ui.panelMenu;
+const {QuickSettingsMenu, SystemIndicator} = imports.ui.quickSettings;
 const Main = imports.ui.main;
 
 var PANEL_ICON_SIZE = 16;
 var APP_MENU_ICON_MARGIN = 0;
 
 var BUTTON_DND_ACTIVATION_TIMEOUT = 250;
+
+const N_QUICK_SETTINGS_COLUMNS = 2;
 
 /**
  * AppMenuButton:
@@ -316,7 +319,7 @@ class ActivitiesButton extends PanelMenu.Button {
 });
 
 const UnsafeModeIndicator = GObject.registerClass(
-class UnsafeModeIndicator extends PanelMenu.SystemIndicator {
+class UnsafeModeIndicator extends SystemIndicator {
     _init() {
         super._init();
 
@@ -329,49 +332,20 @@ class UnsafeModeIndicator extends PanelMenu.SystemIndicator {
     }
 });
 
-var AggregateLayout = GObject.registerClass(
-class AggregateLayout extends Clutter.BoxLayout {
-    _init(params = {}) {
-        params['orientation'] = Clutter.Orientation.VERTICAL;
-        super._init(params);
-
-        this._sizeChildren = [];
-    }
-
-    addSizeChild(actor) {
-        this._sizeChildren.push(actor);
-        this.layout_changed();
-    }
-
-    vfunc_get_preferred_width(container, forHeight) {
-        let themeNode = container.get_theme_node();
-        let minWidth = themeNode.get_min_width();
-        let natWidth = minWidth;
-
-        for (let i = 0; i < this._sizeChildren.length; i++) {
-            let child = this._sizeChildren[i];
-            let [childMin, childNat] = child.get_preferred_width(forHeight);
-            minWidth = Math.max(minWidth, childMin);
-            natWidth = Math.max(natWidth, childNat);
-        }
-        return [minWidth, natWidth];
-    }
-});
-
-var AggregateMenu = GObject.registerClass(
-class AggregateMenu extends PanelMenu.Button {
+var QuickSettings = GObject.registerClass(
+class QuickSettings extends PanelMenu.Button {
     _init() {
-        super._init(0.0, C_("System menu in the top bar", "System"), false);
-        this.menu.actor.add_style_class_name('aggregate-menu');
+        super._init(0.0, C_('System menu in the top bar', 'System'), true);
 
-        let menuLayout = new AggregateLayout();
-        this.menu.box.set_layout_manager(menuLayout);
-
-        this._indicators = new St.BoxLayout({ style_class: 'panel-status-indicators-box' });
+        this._indicators = new St.BoxLayout({
+            style_class: 'panel-status-indicators-box',
+        });
         this.add_child(this._indicators);
 
+        this.setMenu(new QuickSettingsMenu(this, N_QUICK_SETTINGS_COLUMNS));
+
         if (Config.HAVE_NETWORKMANAGER)
-            this._network = new imports.ui.status.network.NMApplet();
+            this._network = new imports.ui.status.network.Indicator();
         else
             this._network = null;
 
@@ -380,67 +354,70 @@ class AggregateMenu extends PanelMenu.Button {
         else
             this._bluetooth = null;
 
-        this._remoteAccess = new imports.ui.status.remoteAccess.RemoteAccessApplet();
-        this._power = new imports.ui.status.power.Indicator();
-        this._powerProfiles = new imports.ui.status.powerProfiles.Indicator();
-        this._rfkill = new imports.ui.status.rfkill.Indicator();
+        this._system = new imports.ui.status.system.Indicator();
         this._volume = new imports.ui.status.volume.Indicator();
         this._brightness = new imports.ui.status.brightness.Indicator();
-        this._system = new imports.ui.status.system.Indicator();
+        this._remoteAccess = new imports.ui.status.remoteAccess.RemoteAccessApplet();
         this._location = new imports.ui.status.location.Indicator();
-        this._nightLight = new imports.ui.status.nightLight.Indicator();
         this._thunderbolt = new imports.ui.status.thunderbolt.Indicator();
+        this._nightLight = new imports.ui.status.nightLight.Indicator();
+        this._darkMode = new imports.ui.status.darkMode.Indicator();
+        this._powerProfiles = new imports.ui.status.powerProfiles.Indicator();
+        this._rfkill = new imports.ui.status.rfkill.Indicator();
+        this._autoRotate = new imports.ui.status.autoRotate.Indicator();
         this._unsafeMode = new UnsafeModeIndicator();
 
+        this._indicators.add_child(this._brightness);
         this._indicators.add_child(this._remoteAccess);
         this._indicators.add_child(this._thunderbolt);
         this._indicators.add_child(this._location);
         this._indicators.add_child(this._nightLight);
         if (this._network)
             this._indicators.add_child(this._network);
+        this._indicators.add_child(this._darkMode);
+        this._indicators.add_child(this._powerProfiles);
         if (this._bluetooth)
             this._indicators.add_child(this._bluetooth);
         this._indicators.add_child(this._rfkill);
+        this._indicators.add_child(this._autoRotate);
         this._indicators.add_child(this._volume);
         this._indicators.add_child(this._unsafeMode);
-        this._indicators.add_child(this._power);
-        this._indicators.add_child(this._powerProfiles);
+        this._indicators.add_child(this._system);
 
-        this.menu.addMenuItem(this._volume.menu);
-        this.menu.addMenuItem(this._brightness.menu);
-        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this._addItems(this._system.quickSettingsItems, N_QUICK_SETTINGS_COLUMNS);
+        this._addItems(this._volume.quickSettingsItems, N_QUICK_SETTINGS_COLUMNS);
+        this._addItems(this._brightness.quickSettingsItems, N_QUICK_SETTINGS_COLUMNS);
+
+        this._addItems(this._remoteAccess.quickSettingsItems);
+        this._addItems(this._thunderbolt.quickSettingsItems);
+        this._addItems(this._location.quickSettingsItems);
         if (this._network)
-            this.menu.addMenuItem(this._network.menu);
-
+            this._addItems(this._network.quickSettingsItems);
         if (this._bluetooth)
-            this.menu.addMenuItem(this._bluetooth.menu);
+            this._addItems(this._bluetooth.quickSettingsItems);
+        this._addItems(this._powerProfiles.quickSettingsItems);
+        this._addItems(this._nightLight.quickSettingsItems);
+        this._addItems(this._darkMode.quickSettingsItems);
+        this._addItems(this._rfkill.quickSettingsItems);
+        this._addItems(this._autoRotate.quickSettingsItems);
+        this._addItems(this._unsafeMode.quickSettingsItems);
+    }
 
-        this.menu.addMenuItem(this._remoteAccess.menu);
-        this.menu.addMenuItem(this._location.menu);
-        this.menu.addMenuItem(this._rfkill.menu);
-        this.menu.addMenuItem(this._power.menu);
-        this.menu.addMenuItem(this._powerProfiles.menu);
-        this.menu.addMenuItem(this._nightLight.menu);
-        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        this.menu.addMenuItem(this._system.menu);
-
-        menuLayout.addSizeChild(this._location.menu.actor);
-        menuLayout.addSizeChild(this._rfkill.menu.actor);
-        menuLayout.addSizeChild(this._power.menu.actor);
-        menuLayout.addSizeChild(this._powerProfiles.menu.actor);
-        menuLayout.addSizeChild(this._system.menu.actor);
+    _addItems(items, colSpan = 1) {
+        items.forEach(item => this.menu.addItem(item, colSpan));
     }
 });
 
 const PANEL_ITEM_IMPLEMENTATIONS = {
     'activities': ActivitiesButton,
-    'aggregateMenu': AggregateMenu,
     'appMenu': AppMenuButton,
+    'quickSettings': QuickSettings,
     'dateMenu': imports.ui.dateMenu.DateMenuButton,
     'a11y': imports.ui.status.accessibility.ATIndicator,
     'keyboard': imports.ui.status.keyboard.InputSourceIndicator,
     'dwellClick': imports.ui.status.dwellClick.DwellClickIndicator,
     'screenRecording': imports.ui.status.remoteAccess.ScreenRecordingIndicator,
+    'screenSharing': imports.ui.status.remoteAccess.ScreenSharingIndicator,
 };
 
 var Panel = GObject.registerClass(
@@ -620,6 +597,16 @@ class Panel extends St.Widget {
             menu.actor.navigate_focus(null, St.DirectionType.TAB_FORWARD, false);
     }
 
+    _closeMenu(indicator) {
+        if (!indicator || !indicator.mapped)
+            return; // menu not supported by current session mode
+
+        if (!indicator.reactive)
+            return;
+
+        indicator.menu.close();
+    }
+
     toggleAppMenu() {
         this._toggleMenu(this.statusArea.appMenu);
     }
@@ -629,15 +616,11 @@ class Panel extends St.Widget {
     }
 
     closeCalendar() {
-        let indicator = this.statusArea.dateMenu;
-        if (!indicator) // calendar not supported by current session mode
-            return;
+        this._closeMenu(this.statusArea.dateMenu);
+    }
 
-        let menu = indicator.menu;
-        if (!indicator.reactive)
-            return;
-
-        menu.close();
+    closeQuickSettings() {
+        this._closeMenu(this.statusArea.quickSettings);
     }
 
     set boxOpacity(value) {

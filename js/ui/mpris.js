@@ -1,6 +1,6 @@
 /* exported MediaSection */
 const { Gio, GObject, Shell, St } = imports.gi;
-const Signals = imports.signals;
+const Signals = imports.misc.signals;
 
 const Main = imports.ui.main;
 const MessageList = imports.ui.messageList;
@@ -37,7 +37,7 @@ class MediaMessage extends MessageList.Message {
                 this._player.previous();
             });
 
-        this._playPauseButton = this.addMediaControl(null,
+        this._playPauseButton = this.addMediaControl('',
             () => {
                 this._player.playPause();
             });
@@ -86,14 +86,16 @@ class MediaMessage extends MessageList.Message {
     }
 });
 
-var MprisPlayer = class MprisPlayer {
+var MprisPlayer = class MprisPlayer extends Signals.EventEmitter {
     constructor(busName) {
+        super();
+
         this._mprisProxy = new MprisProxy(Gio.DBus.session, busName,
-                                          '/org/mpris/MediaPlayer2',
-                                          this._onMprisProxyReady.bind(this));
+            '/org/mpris/MediaPlayer2',
+            this._onMprisProxyReady.bind(this));
         this._playerProxy = new MprisPlayerProxy(Gio.DBus.session, busName,
-                                                 '/org/mpris/MediaPlayer2',
-                                                 this._onPlayerProxyReady.bind(this));
+            '/org/mpris/MediaPlayer2',
+            this._onPlayerProxyReady.bind(this));
 
         this._visible = false;
         this._trackArtists = [];
@@ -119,7 +121,7 @@ var MprisPlayer = class MprisPlayer {
     }
 
     playPause() {
-        this._playerProxy.PlayPauseRemote();
+        this._playerProxy.PlayPauseAsync().catch(logError);
     }
 
     get canGoNext() {
@@ -127,7 +129,7 @@ var MprisPlayer = class MprisPlayer {
     }
 
     next() {
-        this._playerProxy.NextRemote();
+        this._playerProxy.NextAsync().catch(logError);
     }
 
     get canGoPrevious() {
@@ -135,7 +137,7 @@ var MprisPlayer = class MprisPlayer {
     }
 
     previous() {
-        this._playerProxy.PreviousRemote();
+        this._playerProxy.PreviousAsync().catch(logError);
     }
 
     raise() {
@@ -150,7 +152,7 @@ var MprisPlayer = class MprisPlayer {
         if (app)
             app.activate();
         else if (this._mprisProxy.CanRaise)
-            this._mprisProxy.RaiseRemote();
+            this._mprisProxy.RaiseAsync().catch(logError);
     }
 
     _close() {
@@ -185,7 +187,7 @@ var MprisPlayer = class MprisPlayer {
     _updateState() {
         let metadata = {};
         for (let prop in this._playerProxy.Metadata)
-            metadata[prop] = this._playerProxy.Metadata[prop].deep_unpack();
+            metadata[prop] = this._playerProxy.Metadata[prop].deepUnpack();
 
         // Validate according to the spec; some clients send buggy metadata:
         // https://www.freedesktop.org/wiki/Specifications/mpris-spec/metadata
@@ -233,7 +235,6 @@ var MprisPlayer = class MprisPlayer {
         }
     }
 };
-Signals.addSignalMethods(MprisPlayer.prototype);
 
 var MediaSection = GObject.registerClass(
 class MediaSection extends MessageList.MessageListSection {
@@ -274,14 +275,13 @@ class MediaSection extends MessageList.MessageListSection {
         this._players.set(busName, player);
     }
 
-    _onProxyReady() {
-        this._proxy.ListNamesRemote(([names]) => {
-            names.forEach(name => {
-                if (!name.startsWith(MPRIS_PLAYER_PREFIX))
-                    return;
+    async _onProxyReady() {
+        const [names] = await this._proxy.ListNamesAsync();
+        names.forEach(name => {
+            if (!name.startsWith(MPRIS_PLAYER_PREFIX))
+                return;
 
-                this._addPlayer(name);
-            });
+            this._addPlayer(name);
         });
         this._proxy.connectSignal('NameOwnerChanged',
                                   this._onNameOwnerChanged.bind(this));

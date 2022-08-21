@@ -13,6 +13,7 @@ stages:
   - deploy
 
 default:
+  image: registry.gitlab.gnome.org/gnome/mutter/fedora/35:x86_64-2022-08-02.0
   # Cancel jobs if newer commits are pushed to the branch
   interruptible: true
   # Auto-retry jobs in case of infra failures
@@ -30,8 +31,6 @@ variables:
   JS_LOG: "js-report.txt"
   LINT_LOG: "eslint-report.xml"
   LINT_MR_LOG: "eslint-mr-report.xml"
-
-image: registry.gitlab.gnome.org/gnome/mutter/fedora/35:x86_64-2022-03-04.1
 
 workflow:
   rules:
@@ -185,6 +184,8 @@ potfile_js_check:
 build:
   stage: build
   needs: ["check_commit_log"]
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
   before_script:
     - .gitlab-ci/checkout-mutter.sh
     - meson mutter mutter/build --prefix=/usr
@@ -203,6 +204,7 @@ test:
   stage: test
   needs: ["build"]
   variables:
+    GIT_SUBMODULE_STRATEGY: normal
     XDG_RUNTIME_DIR: "$CI_PROJECT_DIR/runtime-dir"
     NO_AT_BRIDGE: "1"
   before_script:
@@ -225,6 +227,8 @@ test-coverity:
   needs: ["build"]
   stage: analyze
   allow_failure: true
+  variables:
+    GIT_SUBMODULE_STRATEGY: normal
   before_script:
     - meson install -C mutter/build
   script:
@@ -252,17 +256,15 @@ flatpak:
     FLATPAK_MODULE: "gnome-extensions-app"
     APP_ID: "org.gnome.Extensions.Devel"
   extends: .flatpak
-  allow_failure: true
 
 nightly:
   extends: '.publish_nightly'
-  variables:
-    BUNDLES: '$BUNDLE'
 
 dist:
   variables:
     XDG_RUNTIME_DIR: "$CI_PROJECT_DIR/runtime-dir"
     NO_AT_BRIDGE: "1"
+    GIT_SUBMODULE_STRATEGY: normal
   stage: deploy
   needs: ["build"]
   before_script:

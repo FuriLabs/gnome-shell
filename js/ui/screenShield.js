@@ -1,10 +1,11 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported ScreenShield */
 
 const {
     AccountsService, Clutter, Gio,
     GLib, Graphene, Meta, Shell, St,
 } = imports.gi;
-const Signals = imports.signals;
+const Signals = imports.misc.signals;
 
 const GnomeSession = imports.misc.gnomeSession;
 const OVirt = imports.gdm.oVirt;
@@ -44,8 +45,10 @@ var CURTAIN_SLIDE_TIME = 300;
  * This will ensure that the screen blanks at the right time when it fades out.
  * https://bugzilla.gnome.org/show_bug.cgi?id=668703 explains the dependency.
  */
-var ScreenShield = class {
+var ScreenShield = class extends Signals.EventEmitter {
     constructor() {
+        super();
+
         this.actor = Main.layoutManager.screenShieldGroup;
 
         this._lockScreenState = MessageTray.State.HIDDEN;
@@ -103,15 +106,7 @@ var ScreenShield = class {
                                    this._prepareForSleep.bind(this));
 
         this._loginSession = null;
-        this._loginManager.getCurrentSessionProxy(sessionProxy => {
-            this._loginSession = sessionProxy;
-            this._loginSession.connectSignal('Lock',
-                                             () => this.lock(false));
-            this._loginSession.connectSignal('Unlock',
-                                             () => this.deactivate(false));
-            this._loginSession.connect('g-properties-changed', this._syncInhibitor.bind(this));
-            this._syncInhibitor();
-        });
+        this._getLoginSession();
 
         this._settings = new Gio.Settings({ schema_id: SCREENSAVER_SCHEMA });
         this._settings.connect(`changed::${LOCK_ENABLED_KEY}`, this._syncInhibitor.bind(this));
@@ -149,6 +144,17 @@ var ScreenShield = class {
         this._syncInhibitor();
     }
 
+    async _getLoginSession() {
+        this._loginSession = await this._loginManager.getCurrentSessionProxy();
+        this._loginSession.connectSignal('Lock',
+            () => this.lock(false));
+        this._loginSession.connectSignal('Unlock',
+            () => this.deactivate(false));
+        this._loginSession.connect('g-properties-changed',
+            () => this._syncInhibitor());
+        this._syncInhibitor();
+    }
+
     _setActive(active) {
         let prevIsActive = this._isActive;
         this._isActive = active;
@@ -167,7 +173,7 @@ var ScreenShield = class {
             this.emit('locked-changed');
 
         if (this._loginSession)
-            this._loginSession.SetLockedHintRemote(locked);
+            this._loginSession.SetLockedHintAsync(locked).catch(logError);
     }
 
     _activateDialog() {
@@ -678,4 +684,3 @@ var ScreenShield = class {
         });
     }
 };
-Signals.addSignalMethods(ScreenShield.prototype);

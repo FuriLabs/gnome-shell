@@ -65,7 +65,6 @@ gnome_shell_deps = [
 ]
 
 gnome_shell_deps += nm_deps
-gnome_shell_deps += recorder_deps
 
 tools_cflags = '-DLOCALEDIR="@0@"'.format(localedir)
 tools_deps = [gio_dep, gjs_dep]
@@ -113,7 +112,8 @@ libshell_public_headers = [
   'shell-window-preview.h',
   'shell-window-preview-layout.h',
   'shell-window-tracker.h',
-  'shell-wm.h'
+  'shell-wm.h',
+  'shell-workspace-background.h'
 ]
 
 if have_networkmanager
@@ -158,7 +158,8 @@ libshell_sources = [
   'shell-window-preview.c',
   'shell-window-preview-layout.c',
   'shell-window-tracker.c',
-  'shell-wm.c'
+  'shell-wm.c',
+  'shell-workspace-background.c'
 ]
 
 if have_networkmanager
@@ -214,7 +215,7 @@ libshell_dep = declare_dependency(link_with: libshell)
 libshell_gir_includes = [
   'Clutter-@0@'.format(mutter_api_version),
   'Meta-@0@'.format(mutter_api_version),
-  'Gcr-3',
+  'Gcr-4',
   'PolkitAgent-1.0'
 ]
 

@@ -33,6 +33,7 @@
     <file>ke.json</file>
     <file>kg.json</file>
     <file>kh.json</file>
+    <file>kr.json</file>
     <file>la.json</file>
     <file>latam.json</file>
     <file>lt.json</file>
@@ -56,6 +57,7 @@
     <file>ua.json</file>
     <file>uk.json</file>
     <file>us.json</file>
+    <file>us-extended.json</file>
     <file>vn.json</file>
     <file>za.json</file>
     <file>emoji.json</file>

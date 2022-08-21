@@ -14,6 +14,7 @@
     <file>misc/config.js</file>
     <file>misc/extensionUtils.js</file>
     <file>misc/fileUtils.js</file>
+    <file>misc/dbusUtils.js</file>
     <file>misc/gnomeSession.js</file>
     <file>misc/history.js</file>
     <file>misc/ibusManager.js</file>
@@ -29,6 +30,7 @@
     <file>misc/permissionStore.js</file>
     <file>misc/signalTracker.js</file>
     <file>misc/smartcardManager.js</file>
+    <file>misc/signals.js</file>
     <file>misc/systemActions.js</file>
     <file>misc/util.js</file>
     <file>misc/weather.js</file>
@@ -91,6 +93,7 @@
     <file>ui/pointerA11yTimeout.js</file>
     <file>ui/pointerWatcher.js</file>
     <file>ui/popupMenu.js</file>
+    <file>ui/quickSettings.js</file>
     <file>ui/remoteSearch.js</file>
     <file>ui/ripples.js</file>
     <file>ui/runDialog.js</file>
@@ -130,13 +133,14 @@
     <file>ui/components/keyring.js</file>
 
     <file>ui/status/accessibility.js</file>
+    <file>ui/status/autoRotate.js</file>
     <file>ui/status/brightness.js</file>
+    <file>ui/status/darkMode.js</file>
     <file>ui/status/dwellClick.js</file>
     <file>ui/status/location.js</file>
     <file>ui/status/keyboard.js</file>
     <file>ui/status/nightLight.js</file>
     <file>ui/status/network.js</file>
-    <file>ui/status/power.js</file>
     <file>ui/status/powerProfiles.js</file>
     <file>ui/status/rfkill.js</file>
     <file>ui/status/volume.js</file>

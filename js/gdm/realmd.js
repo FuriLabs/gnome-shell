@@ -1,7 +1,8 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported Manager */
 
 const Gio = imports.gi.Gio;
-const Signals = imports.signals;
+const Signals = imports.misc.signals;
 
 const { loadInterfaceXML } = imports.misc.fileUtils;
 
@@ -14,8 +15,10 @@ const Service = Gio.DBusProxy.makeProxyWrapper(ServiceIface);
 const RealmIface = loadInterfaceXML("org.freedesktop.realmd.Realm");
 const Realm = Gio.DBusProxy.makeProxyWrapper(RealmIface);
 
-var Manager = class {
+var Manager = class extends Signals.EventEmitter {
     constructor() {
+        super();
+
         this._aggregateProvider = Provider(Gio.DBus.system,
                                            'org.freedesktop.realmd',
                                            '/org/freedesktop/realmd',
@@ -25,7 +28,8 @@ var Manager = class {
 
         this._aggregateProvider.connectObject('g-properties-changed',
             (proxy, properties) => {
-                if ('Realms' in properties.deep_unpack())
+                const realmsChanged = !!properties.lookup_value('Realms', null);
+                if (realmsChanged)
                     this._reloadRealms();
             }, this);
     }
@@ -64,7 +68,8 @@ var Manager = class {
         this._reloadRealm(realm);
 
         realm.connect('g-properties-changed', (proxy, properties) => {
-            if ('Configured' in properties.deep_unpack())
+            const configuredChanged = !!properties.lookup_value('Configured', null);
+            if (configuredChanged)
                 this._reloadRealm(realm);
         });
     }
@@ -97,12 +102,11 @@ var Manager = class {
 
     release() {
         Service(Gio.DBus.system,
-                'org.freedesktop.realmd',
-                '/org/freedesktop/realmd',
-                service => service.ReleaseRemote());
+            'org.freedesktop.realmd',
+            '/org/freedesktop/realmd',
+            service => service.ReleaseAsync().catch(logError));
         this._aggregateProvider.disconnectObject(this);
         this._realms = { };
         this._updateLoginFormat();
     }
 };
-Signals.addSignalMethods(Manager.prototype);

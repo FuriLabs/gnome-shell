@@ -1,178 +1,316 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported Indicator */
 
-const { GObject, Shell, St } = imports.gi;
+const {Atk, Clutter, Gio, GObject, Shell, St, UPowerGlib: UPower} = imports.gi;
 
-const BoxPointer = imports.ui.boxpointer;
 const SystemActions = imports.misc.systemActions;
 const Main = imports.ui.main;
-const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 
+const {QuickSettingsItem, QuickToggle, SystemIndicator} = imports.ui.quickSettings;
+const {loadInterfaceXML} = imports.misc.fileUtils;
 
-var Indicator = GObject.registerClass(
-class Indicator extends PanelMenu.SystemIndicator {
+const BUS_NAME = 'org.freedesktop.UPower';
+const OBJECT_PATH = '/org/freedesktop/UPower/devices/DisplayDevice';
+
+const DisplayDeviceInterface = loadInterfaceXML('org.freedesktop.UPower.Device');
+const PowerManagerProxy = Gio.DBusProxy.makeProxyWrapper(DisplayDeviceInterface);
+
+const SHOW_BATTERY_PERCENTAGE = 'show-battery-percentage';
+
+const PowerToggle = GObject.registerClass({
+    Properties: {
+        'fallback-icon-name': GObject.ParamSpec.string('fallback-icon-name', '', '',
+            GObject.ParamFlags.READWRITE,
+            ''),
+    },
+}, class PowerToggle extends QuickToggle {
     _init() {
-        super._init();
+        super._init({
+            accessible_role: Atk.Role.PUSH_BUTTON,
+        });
+
+        this.add_style_class_name('power-item');
+
+        this._proxy = new PowerManagerProxy(Gio.DBus.system, BUS_NAME, OBJECT_PATH,
+            (proxy, error) => {
+                if (error)
+                    console.error(error.message);
+                else
+                    this._proxy.connect('g-properties-changed', () => this._sync());
+                this._sync();
+            });
+
+        this.bind_property('fallback-icon-name',
+            this._icon, 'fallback-icon-name',
+            GObject.BindingFlags.SYNC_CREATE);
+
+        this.connect('clicked', () => {
+            const app = Shell.AppSystem.get_default().lookup_app('gnome-power-panel.desktop');
+            Main.overview.hide();
+            Main.panel.closeQuickSettings();
+            app.activate();
+        });
+
+        Main.sessionMode.connect('updated', () => this._sessionUpdated());
+        this._sessionUpdated();
+        this._sync();
+    }
+
+    _sessionUpdated() {
+        this.reactive = Main.sessionMode.allowSettings;
+    }
+
+    _sync() {
+        // Do we have batteries or a UPS?
+        this.visible = this._proxy.IsPresent;
+        if (!this.visible)
+            return;
+
+        // The icons
+        let chargingState = this._proxy.State === UPower.DeviceState.CHARGING
+            ? '-charging' : '';
+        let fillLevel = 10 * Math.floor(this._proxy.Percentage / 10);
+        const charged =
+            this._proxy.State === UPower.DeviceState.FULLY_CHARGED ||
+            (this._proxy.State === UPower.DeviceState.CHARGING && fillLevel === 100);
+        const icon = charged
+            ? 'battery-level-100-charged-symbolic'
+            : `battery-level-${fillLevel}${chargingState}-symbolic`;
+
+        // Make sure we fall back to fallback-icon-name and not GThemedIcon's
+        // default fallbacks
+        const gicon = new Gio.ThemedIcon({
+            name: icon,
+            use_default_fallbacks: false,
+        });
+
+        this.set({
+            label: _('%d\u2009%%').format(this._proxy.Percentage),
+            fallback_icon_name: this._proxy.IconName,
+            gicon,
+        });
+    }
+});
+
+const SettingsItem = GObject.registerClass(
+class SettingsItem extends QuickSettingsItem {
+    _init() {
+        super._init({
+            style_class: 'icon-button',
+            can_focus: true,
+            child: new St.Icon(),
+        });
+
+        this._settingsApp = Shell.AppSystem.get_default().lookup_app(
+            'org.gnome.Settings.desktop');
+
+        if (!this._settingsApp)
+            console.warn('Missing required core component Settings, expect trouble…');
+
+        this.child.gicon = this._settingsApp?.get_icon() ?? null;
+        this.accessible_name = this._settingsApp?.get_name() ?? null;
+
+        this.connect('clicked', () => {
+            Main.overview.hide();
+            Main.panel.closeQuickSettings();
+            this._settingsApp.activate();
+        });
+
+        Main.sessionMode.connectObject('updated', () => this._sync(), this);
+        this._sync();
+    }
+
+    _sync() {
+        this.visible =
+            this._settingsApp != null && Main.sessionMode.allowSettings;
+    }
+});
+
+const ShutdownItem = GObject.registerClass(
+class ShutdownItem extends QuickSettingsItem {
+    _init() {
+        super._init({
+            style_class: 'icon-button',
+            hasMenu: true,
+            canFocus: true,
+            child: new St.Icon({
+                icon_name: 'system-shutdown-symbolic',
+            }),
+            accessible_name: _('Power Off Menu'),
+        });
 
         this._systemActions = new SystemActions.getDefault();
+        this._items = [];
 
-        this._createSubMenu();
+        this.menu.setHeader('system-shutdown-symbolic', 'Power Off');
 
-        this._loginScreenItem.connect('notify::visible',
-            () => this._updateSessionSubMenu());
-        this._logoutItem.connect('notify::visible',
-            () => this._updateSessionSubMenu());
-        this._suspendItem.connect('notify::visible',
-            () => this._updateSessionSubMenu());
-        this._powerOffItem.connect('notify::visible',
-            () => this._updateSessionSubMenu());
-        this._restartItem.connect('notify::visible',
-            () => this._updateSessionSubMenu());
+        this._addSystemAction(_('Suspend'), 'can-suspend', () => {
+            this._systemActions.activateSuspend();
+            Main.panel.closeQuickSettings();
+        });
+
+        this._addSystemAction(_('Restart…'), 'can-restart', () => {
+            this._systemActions.activateRestart();
+            Main.panel.closeQuickSettings();
+        });
+
+        this._addSystemAction(_('Power Off…'), 'can-power-off', () => {
+            this._systemActions.activatePowerOff();
+            Main.panel.closeQuickSettings();
+        });
+
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+
+        this._addSystemAction(_('Log Out'), 'can-logout', () => {
+            this._systemActions.activateLogout();
+            Main.panel.closeQuickSettings();
+        });
+
+        this._addSystemAction(_('Switch User…'), 'can-switch-user', () => {
+            this._systemActions.activateSwitchUser();
+            Main.panel.closeQuickSettings();
+        });
+
         // Whether shutdown is available or not depends on both lockdown
         // settings (disable-log-out) and Polkit policy - the latter doesn't
-        // notify, so we update the menu item each time the menu opens or
+        // notify, so we update the item each time we become visible or
         // the lockdown setting changes, which should be close enough.
-        this.menu.connect('open-state-changed', (menu, open) => {
-            if (!open)
+        this.connect('notify::mapped', () => {
+            if (!this.mapped)
                 return;
 
             this._systemActions.forceUpdate();
         });
-        this._updateSessionSubMenu();
 
-        Main.sessionMode.connect('updated', this._sessionUpdated.bind(this));
-        this._sessionUpdated();
+        this.connect('clicked', () => this.menu.open());
+        this.connect('popup-menu', () => this.menu.open());
     }
 
-    _sessionUpdated() {
-        this._settingsItem.visible = Main.sessionMode.allowSettings;
+    _addSystemAction(label, propName, callback) {
+        const item = this.menu.addAction(label, callback);
+        this._items.push(item);
+
+        this._systemActions.bind_property(propName,
+            item, 'visible',
+            GObject.BindingFlags.DEFAULT | GObject.BindingFlags.SYNC_CREATE);
+        item.connect('notify::visible', () => this._sync());
     }
 
-    _updateSessionSubMenu() {
-        this._sessionSubMenu.visible =
-            this._loginScreenItem.visible ||
-            this._logoutItem.visible ||
-            this._suspendItem.visible ||
-            this._restartItem.visible ||
-            this._powerOffItem.visible;
+    _sync() {
+        this.visible = this._items.some(i => i.visible);
     }
+});
 
-    _createSubMenu() {
-        let bindFlags = GObject.BindingFlags.DEFAULT | GObject.BindingFlags.SYNC_CREATE;
-        let item;
+const LockItem = GObject.registerClass(
+class LockItem extends QuickSettingsItem {
+    _init() {
+        this._systemActions = new SystemActions.getDefault();
 
-        item = new PopupMenu.PopupImageMenuItem(
-            this._systemActions.getName('lock-orientation'),
-            this._systemActions.orientation_lock_icon);
-
-        item.connect('activate', () => {
-            this.menu.itemActivated(BoxPointer.PopupAnimation.NONE);
-            this._systemActions.activateLockOrientation();
-        });
-        this.menu.addMenuItem(item);
-        this._orientationLockItem = item;
-        this._systemActions.bind_property('can-lock-orientation',
-            this._orientationLockItem, 'visible',
-            bindFlags);
-        this._systemActions.connect('notify::orientation-lock-icon', () => {
-            let iconName = this._systemActions.orientation_lock_icon;
-            let labelText = this._systemActions.getName("lock-orientation");
-
-            this._orientationLockItem.setIcon(iconName);
-            this._orientationLockItem.label.text = labelText;
+        super._init({
+            style_class: 'icon-button',
+            can_focus: true,
+            child: new St.Icon({
+                icon_name: 'system-lock-screen-symbolic',
+            }),
+            accessible_name: _('Lock Screen'),
         });
 
-        let app = this._settingsApp = Shell.AppSystem.get_default().lookup_app(
-            'org.gnome.Settings.desktop');
-        if (app) {
-            const [icon] = app.app_info.get_icon().names;
-            const name = app.app_info.get_name();
-            item = new PopupMenu.PopupImageMenuItem(name, icon);
-            item.connect('activate', () => {
-                this.menu.itemActivated(BoxPointer.PopupAnimation.NONE);
-                Main.overview.hide();
-                this._settingsApp.activate();
-            });
-            this.menu.addMenuItem(item);
-            this._settingsItem = item;
-        } else {
-            log('Missing required core component Settings, expect trouble…');
-            this._settingsItem = new St.Widget();
-        }
-
-        item = new PopupMenu.PopupImageMenuItem(_('Lock'), 'changes-prevent-symbolic');
-        item.connect('activate', () => {
-            this.menu.itemActivated(BoxPointer.PopupAnimation.NONE);
-            this._systemActions.activateLockScreen();
-        });
-        this.menu.addMenuItem(item);
-        this._lockScreenItem = item;
         this._systemActions.bind_property('can-lock-screen',
-            this._lockScreenItem, 'visible',
-            bindFlags);
+            this, 'visible',
+            GObject.BindingFlags.DEFAULT |
+            GObject.BindingFlags.SYNC_CREATE);
 
-        this._sessionSubMenu = new PopupMenu.PopupSubMenuMenuItem(
-            _('Power Off / Log Out'), true);
-        this._sessionSubMenu.icon.icon_name = 'system-shutdown-symbolic';
+        this.connect('clicked',
+            () => this._systemActions.activateLockScreen());
+    }
+});
 
-        item = new PopupMenu.PopupMenuItem(_('Suspend'));
-        item.connect('activate', () => {
-            this.menu.itemActivated(BoxPointer.PopupAnimation.NONE);
-            this._systemActions.activateSuspend();
+
+const SystemItem = GObject.registerClass(
+class SystemItem extends QuickSettingsItem {
+    _init() {
+        super._init({
+            style_class: 'quick-settings-system-item',
+            reactive: false,
         });
-        this._sessionSubMenu.menu.addMenuItem(item);
-        this._suspendItem = item;
-        this._systemActions.bind_property('can-suspend',
-            this._suspendItem, 'visible',
-            bindFlags);
 
-        item = new PopupMenu.PopupMenuItem(_('Restart…'));
-        item.connect('activate', () => {
-            this.menu.itemActivated(BoxPointer.PopupAnimation.NONE);
-            this._systemActions.activateRestart();
+        this.child = new St.BoxLayout();
+
+        this._powerToggle = new PowerToggle();
+        this.child.add_child(this._powerToggle);
+
+        // spacer
+        this.child.add_child(new Clutter.Actor({x_expand: true}));
+
+        const settingsItem = new SettingsItem();
+        this.child.add_child(settingsItem);
+
+        const lockItem = new LockItem();
+        this.child.add_child(lockItem);
+
+        const shutdownItem = new ShutdownItem();
+        this.child.add_child(shutdownItem);
+
+        this.menu = shutdownItem.menu;
+    }
+
+    get powerToggle() {
+        return this._powerToggle;
+    }
+});
+
+var Indicator = GObject.registerClass(
+class Indicator extends SystemIndicator {
+    _init() {
+        super._init();
+
+        this._desktopSettings = new Gio.Settings({
+            schema_id: 'org.gnome.desktop.interface',
         });
-        this._sessionSubMenu.menu.addMenuItem(item);
-        this._restartItem = item;
-        this._systemActions.bind_property('can-restart',
-            this._restartItem, 'visible',
-            bindFlags);
+        this._desktopSettings.connectObject(
+            `changed::${SHOW_BATTERY_PERCENTAGE}`, () => this._sync(), this);
 
-        item = new PopupMenu.PopupMenuItem(_('Power Off…'));
-        item.connect('activate', () => {
-            this.menu.itemActivated(BoxPointer.PopupAnimation.NONE);
-            this._systemActions.activatePowerOff();
+        this._indicator = this._addIndicator();
+        this._percentageLabel = new St.Label({
+            y_expand: true,
+            y_align: Clutter.ActorAlign.CENTER,
         });
-        this._sessionSubMenu.menu.addMenuItem(item);
-        this._powerOffItem = item;
-        this._systemActions.bind_property('can-power-off',
-            this._powerOffItem, 'visible',
-            bindFlags);
+        this.add_child(this._percentageLabel);
+        this.add_style_class_name('power-status');
 
-        this._sessionSubMenu.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this._systemItem = new SystemItem();
 
-        item = new PopupMenu.PopupMenuItem(_('Log Out'));
-        item.connect('activate', () => {
-            this.menu.itemActivated(BoxPointer.PopupAnimation.NONE);
-            this._systemActions.activateLogout();
-        });
-        this._sessionSubMenu.menu.addMenuItem(item);
-        this._logoutItem = item;
-        this._systemActions.bind_property('can-logout',
-            this._logoutItem, 'visible',
-            bindFlags);
+        const {powerToggle} = this._systemItem;
 
-        item = new PopupMenu.PopupMenuItem(_('Switch User…'));
-        item.connect('activate', () => {
-            this.menu.itemActivated(BoxPointer.PopupAnimation.NONE);
-            this._systemActions.activateSwitchUser();
-        });
-        this._sessionSubMenu.menu.addMenuItem(item);
-        this._loginScreenItem = item;
-        this._systemActions.bind_property('can-switch-user',
-            this._loginScreenItem, 'visible',
-            bindFlags);
+        powerToggle.bind_property('label',
+            this._percentageLabel, 'text',
+            GObject.BindingFlags.SYNC_CREATE);
 
-        this.menu.addMenuItem(this._sessionSubMenu);
+        powerToggle.connectObject(
+            'notify::visible', () => this._sync(),
+            'notify::gicon', () => this._sync(),
+            'notify::fallback-icon-name', () => this._sync(),
+            this);
+
+        this.quickSettingsItems.push(this._systemItem);
+
+        this._sync();
+    }
+
+    _sync() {
+        const {powerToggle} = this._systemItem;
+        if (powerToggle.visible) {
+            this._indicator.set({
+                gicon: powerToggle.gicon,
+                fallback_icon_name: powerToggle.fallback_icon_name,
+            });
+            this._percentageLabel.visible =
+                this._desktopSettings.get_boolean(SHOW_BATTERY_PERCENTAGE);
+        } else {
+            // If there's no battery, then we use the power icon.
+            this._indicator.icon_name = 'system-shutdown-symbolic';
+            this._percentageLabel.hide();
+        }
     }
 });

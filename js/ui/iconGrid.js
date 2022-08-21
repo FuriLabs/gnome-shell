@@ -1180,7 +1180,7 @@ var IconGrid = GObject.registerClass({
         }
     }
 
-    findBestModeForSize(width, height) {
+    _findBestModeForSize(width, height) {
         const { pagePadding } = this.layout_manager;
         width -= pagePadding.left + pagePadding.right;
         height -= pagePadding.top + pagePadding.bottom;
@@ -1205,6 +1205,13 @@ var IconGrid = GObject.registerClass({
     _childRemoved(grid, child) {
         child.disconnect(child._iconGridKeyFocusInId);
         delete child._iconGridKeyFocusInId;
+    }
+
+    vfunc_allocate(box) {
+        const [width, height] = box.get_size();
+        this._findBestModeForSize(width, height);
+        this.layout_manager.adaptToSize(width, height);
+        super.vfunc_allocate(box);
     }
 
     vfunc_style_changed() {
@@ -1389,10 +1396,6 @@ var IconGrid = GObject.registerClass({
 
     get nPages() {
         return this.layout_manager.nPages;
-    }
-
-    adaptToSize(width, height) {
-        this.layout_manager.adaptToSize(width, height);
     }
 
     setGridModes(modes) {

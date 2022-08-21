@@ -1,56 +1,84 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported Indicator */
 
-const { Gio, GObject } = imports.gi;
-const Signals = imports.signals;
+const {Gio, GLib, GObject} = imports.gi;
 
-const Main = imports.ui.main;
-const PanelMenu = imports.ui.panelMenu;
-const PopupMenu = imports.ui.popupMenu;
+const {QuickToggle, SystemIndicator} = imports.ui.quickSettings;
 
-const { loadInterfaceXML } = imports.misc.fileUtils;
+const {loadInterfaceXML} = imports.misc.fileUtils;
 
 const BUS_NAME = 'org.gnome.SettingsDaemon.Rfkill';
 const OBJECT_PATH = '/org/gnome/SettingsDaemon/Rfkill';
 
 const RfkillManagerInterface = loadInterfaceXML('org.gnome.SettingsDaemon.Rfkill');
-const RfkillManagerProxy = Gio.DBusProxy.makeProxyWrapper(RfkillManagerInterface);
+const rfkillManagerInfo = Gio.DBusInterfaceInfo.new_for_xml(RfkillManagerInterface);
 
-var RfkillManager = class {
+const RfkillManager = GObject.registerClass({
+    Properties: {
+        'airplane-mode': GObject.ParamSpec.boolean(
+            'airplane-mode', '', '',
+            GObject.ParamFlags.READWRITE,
+            false),
+        'hw-airplane-mode': GObject.ParamSpec.boolean(
+            'hw-airplane-mode', '', '',
+            GObject.ParamFlags.READABLE,
+            false),
+        'show-airplane-mode': GObject.ParamSpec.boolean(
+            'show-airplane-mode', '', '',
+            GObject.ParamFlags.READABLE,
+            false),
+    },
+}, class RfkillManager extends GObject.Object {
     constructor() {
-        this._proxy = new RfkillManagerProxy(Gio.DBus.session, BUS_NAME, OBJECT_PATH,
-                                             (proxy, error) => {
-                                                 if (error) {
-                                                     log(error.message);
-                                                     return;
-                                                 }
-                                                 this._proxy.connect('g-properties-changed',
-                                                                     this._changed.bind(this));
-                                                 this._changed();
-                                             });
+        super();
+
+        this._proxy = new Gio.DBusProxy({
+            g_connection: Gio.DBus.session,
+            g_name: BUS_NAME,
+            g_object_path: OBJECT_PATH,
+            g_interface_name: rfkillManagerInfo.name,
+            g_interface_info: rfkillManagerInfo,
+        });
+        this._proxy.connect('g-properties-changed', this._changed.bind(this));
+        this._proxy.init_async(GLib.PRIORITY_DEFAULT, null)
+            .catch(e => console.error(e.message));
     }
 
-    get airplaneMode() {
+    /* eslint-disable camelcase */
+    get airplane_mode() {
         return this._proxy.AirplaneMode;
     }
 
-    set airplaneMode(v) {
+    set airplane_mode(v) {
         this._proxy.AirplaneMode = v;
     }
 
-    get hwAirplaneMode() {
+    get hw_airplane_mode() {
         return this._proxy.HardwareAirplaneMode;
     }
 
-    get shouldShowAirplaneMode() {
-        return this._proxy.ShouldShowAirplaneMode;
+    get show_airplane_mode() {
+        return this._proxy.HasAirplaneMode && this._proxy.ShouldShowAirplaneMode;
     }
+    /* eslint-enable camelcase */
 
-    _changed() {
-        this.emit('airplane-mode-changed');
+    _changed(proxy, properties) {
+        for (const prop in properties.deepUnpack()) {
+            switch (prop) {
+            case 'AirplaneMode':
+                this.notify('airplane-mode');
+                break;
+            case 'HardwareAirplaneMode':
+                this.notify('hw-airplane-mode');
+                break;
+            case 'HasAirplaneMode':
+            case 'ShouldShowAirplaneMode':
+                this.notify('show-airplane-mode');
+                break;
+            }
+        }
     }
-};
-Signals.addSignalMethods(RfkillManager.prototype);
+});
 
 var _manager;
 function getRfkillManager() {
@@ -61,52 +89,48 @@ function getRfkillManager() {
     return _manager;
 }
 
+const RfkillToggle = GObject.registerClass(
+class RfkillToggle extends QuickToggle {
+    _init() {
+        super._init({
+            label: _('Airplane Mode'),
+            iconName: 'airplane-mode-symbolic',
+        });
+
+        this._manager = getRfkillManager();
+        this._manager.bind_property('show-airplane-mode',
+            this, 'visible',
+            GObject.BindingFlags.SYNC_CREATE);
+        this._manager.bind_property('airplane-mode',
+            this, 'checked',
+            GObject.BindingFlags.SYNC_CREATE);
+
+        this.connect('clicked',
+            () => (this._manager.airplaneMode = !this._manager.airplaneMode));
+    }
+});
+
 var Indicator = GObject.registerClass(
-class Indicator extends PanelMenu.SystemIndicator {
+class Indicator extends SystemIndicator {
     _init() {
         super._init();
 
-        this._manager = getRfkillManager();
-        this._manager.connect('airplane-mode-changed', this._sync.bind(this));
-
         this._indicator = this._addIndicator();
         this._indicator.icon_name = 'airplane-mode-symbolic';
-        this._indicator.hide();
 
-        // The menu only appears when airplane mode is on, so just
-        // statically build it as if it was on, rather than dynamically
-        // changing the menu contents.
-        this._item = new PopupMenu.PopupSubMenuMenuItem(_("Airplane Mode On"), true);
-        this._item.icon.icon_name = 'airplane-mode-symbolic';
-        this._offItem = this._item.menu.addAction(_("Turn Off"), () => {
-            this._manager.airplaneMode = false;
-        });
-        this._item.menu.addSettingsAction(_("Network Settings"), 'gnome-network-panel.desktop');
-        this.menu.addMenuItem(this._item);
-
-        Main.sessionMode.connect('updated', this._sessionUpdated.bind(this));
-        this._sessionUpdated();
+        this._rfkillToggle = new RfkillToggle();
+        this._rfkillToggle.connectObject(
+            'notify::visible', () => this._sync(),
+            'notify::checked', () => this._sync(),
+            this);
+        this.quickSettingsItems.push(this._rfkillToggle);
 
         this._sync();
     }
 
-    _sessionUpdated() {
-        let sensitive = !Main.sessionMode.isLocked && !Main.sessionMode.isGreeter;
-        this.menu.setSensitive(sensitive);
-    }
-
     _sync() {
-        let airplaneMode = this._manager.airplaneMode;
-        let hwAirplaneMode = this._manager.hwAirplaneMode;
-        let showAirplaneMode = this._manager.shouldShowAirplaneMode;
-
-        this._indicator.visible = airplaneMode && showAirplaneMode;
-        this._item.visible = airplaneMode && showAirplaneMode;
-        this._offItem.setSensitive(!hwAirplaneMode);
-
-        if (hwAirplaneMode)
-            this._offItem.label.text = _("Use hardware switch to turn off");
-        else
-            this._offItem.label.text = _("Turn Off");
+        // Only show indicator when airplane mode is on
+        const {visible, checked} = this._rfkillToggle;
+        this._indicator.visible = visible && checked;
     }
 });

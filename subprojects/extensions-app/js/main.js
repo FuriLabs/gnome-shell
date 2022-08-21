@@ -51,16 +51,18 @@ class Application extends Adw.Application {
     }
 
     vfunc_activate() {
-        this._shellProxy.CheckForUpdatesRemote();
+        this._shellProxy.CheckForUpdatesAsync().catch(logError);
         this._window.present();
     }
 
     vfunc_startup() {
         super.vfunc_startup();
 
-        const action = new Gio.SimpleAction({ name: 'quit' });
-        action.connect('activate', () => this._window.close());
-        this.add_action(action);
+        this.add_action_entries(
+            [{
+                name: 'quit',
+                activate: () => this._window.close(),
+            }]);
 
         this.set_accels_for_action('app.quit', ['<Primary>q']);
 
@@ -95,24 +97,20 @@ var ExtensionsWindow = GObject.registerClass({
         this._exporter = new Shew.WindowExporter({ window: this });
         this._exportedHandle = '';
 
-        let action;
-        action = new Gio.SimpleAction({ name: 'show-about' });
-        action.connect('activate', this._showAbout.bind(this));
-        this.add_action(action);
-
-        action = new Gio.SimpleAction({ name: 'logout' });
-        action.connect('activate', this._logout.bind(this));
-        this.add_action(action);
-
-        action = new Gio.SimpleAction({
-            name: 'user-extensions-enabled',
-            state: new GLib.Variant('b', false),
-        });
-        action.connect('activate', toggleState);
-        action.connect('change-state', (a, state) => {
-            this._shellProxy.UserExtensionsEnabled = state.get_boolean();
-        });
-        this.add_action(action);
+        this.add_action_entries(
+            [{
+                name: 'show-about',
+                activate: () => this._showAbout(),
+            }, {
+                name: 'logout',
+                activate: () => this._logout(),
+            }, {
+                name: 'user-extensions-enabled',
+                state: 'false',
+                change_state: (a, state) => {
+                    this._shellProxy.UserExtensionsEnabled = state.get_boolean();
+                },
+            }]);
 
         this._searchTerms = [];
         this._searchEntry.connect('search-changed', () => {
@@ -178,7 +176,7 @@ var ExtensionsWindow = GObject.registerClass({
 
         dialog.connect('response', (dlg, response) => {
             if (response === Gtk.ResponseType.ACCEPT)
-                this._shellProxy.UninstallExtensionRemote(uuid);
+                this._shellProxy.UninstallExtensionAsync(uuid).catch(logError);
             dialog.destroy();
         });
         dialog.present();
@@ -193,30 +191,35 @@ var ExtensionsWindow = GObject.registerClass({
             }
         }
 
-        this._shellProxy.OpenExtensionPrefsRemote(uuid,
+        this._shellProxy.OpenExtensionPrefsAsync(uuid,
             this._exportedHandle,
-            { modal: new GLib.Variant('b', true) });
+            {modal: new GLib.Variant('b', true)}).catch(logError);
     }
 
     _showAbout() {
-        let aboutDialog = new Gtk.AboutDialog({
-            authors: [
+        let aboutWindow = new Adw.AboutWindow({
+            developers: [
                 'Florian Müllner <fmuellner@gnome.org>',
                 'Jasper St. Pierre <jstpierre@mecheye.net>',
                 'Didier Roche <didrocks@ubuntu.com>',
                 'Romain Vigier <contact@romainvigier.fr>',
             ],
+            designers: [
+                'Allan Day <allanpday@gmail.com>',
+                'Tobias Bernard <tbernard@gnome.org>',
+            ],
             translator_credits: _('translator-credits'),
-            program_name: _('Extensions'),
-            comments: _('Manage your GNOME Extensions'),
+            application_name: _('Extensions'),
             license_type: Gtk.License.GPL_2_0,
-            logo_icon_name: Package.name,
+            application_icon: Package.name,
             version: Package.version,
+            developer_name: _('The GNOME Project'),
+            website: 'https://apps.gnome.org/app/org.gnome.Extensions/',
+            issue_url: 'https://gitlab.gnome.org/GNOME/gnome-shell/issues/new',
 
             transient_for: this,
-            modal: true,
         });
-        aboutDialog.present();
+        aboutWindow.present();
     }
 
     _logout() {
@@ -278,24 +281,23 @@ var ExtensionsWindow = GObject.registerClass({
         this._syncListVisibility();
     }
 
-    _scanExtensions() {
-        this._shellProxy.ListExtensionsRemote(([extensionsMap], e) => {
-            if (e) {
-                if (e instanceof Gio.DBusError) {
-                    log(`Failed to connect to shell proxy: ${e}`);
-                    this._mainStack.visible_child_name = 'noshell';
-                } else {
-                    throw e;
-                }
-                return;
-            }
+    async _scanExtensions() {
+        try {
+            const [extensionsMap] = await this._shellProxy.ListExtensionsAsync();
 
             for (let uuid in extensionsMap) {
                 let extension = ExtensionUtils.deserializeExtension(extensionsMap[uuid]);
                 this._addExtensionRow(extension);
             }
             this._extensionsLoaded();
-        });
+        } catch (e) {
+            if (e instanceof Gio.DBusError) {
+                log(`Failed to connect to shell proxy: ${e}`);
+                this._mainStack.visible_child_name = 'noshell';
+            } else {
+                throw e;
+            }
+        }
     }
 
     _addExtensionRow(extension) {
@@ -404,9 +406,9 @@ var ExtensionRow = GObject.registerClass({
         action.connect('activate', toggleState);
         action.connect('change-state', (a, state) => {
             if (state.get_boolean())
-                this._app.shellProxy.EnableExtensionRemote(this.uuid);
+                this._app.shellProxy.EnableExtensionAsync(this.uuid).catch(logError);
             else
-                this._app.shellProxy.DisableExtensionRemote(this.uuid);
+                this._app.shellProxy.DisableExtensionAsync(this.uuid).catch(logError);
         });
         this._actionGroup.add_action(action);
 

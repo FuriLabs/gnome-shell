@@ -147,7 +147,7 @@ var AuthPrompt = GObject.registerClass({
             can_focus: this._hasCancelButton,
             x_align: Clutter.ActorAlign.START,
             y_align: Clutter.ActorAlign.CENTER,
-            child: new St.Icon({ icon_name: 'go-previous-symbolic' }),
+            icon_name: 'go-previous-symbolic',
         });
         if (this._hasCancelButton)
             this.cancelButton.connect('clicked', () => this.cancel());
@@ -351,7 +351,7 @@ var AuthPrompt = GObject.registerClass({
     }
 
     _onShowMessage(_userVerifier, serviceName, message, type) {
-        let wiggleParameters = { duration: 0 };
+        let wiggleParameters = {duration: 0};
 
         if (type === GdmUtil.MessageType.ERROR &&
             this._userVerifier.serviceIsFingerprint(serviceName)) {
@@ -538,7 +538,7 @@ var AuthPrompt = GObject.registerClass({
         });
     }
 
-    setMessage(message, type, wiggleParameters = { duration: 0 }) {
+    setMessage(message, type, wiggleParameters = {duration: 0}) {
         if (type == GdmUtil.MessageType.ERROR)
             this._message.add_style_class_name('login-dialog-message-warning');
         else

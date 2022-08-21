@@ -235,12 +235,12 @@ class RunDialog extends ModalDialog.ModalDialog {
 
     _restart() {
         if (Meta.is_wayland_compositor()) {
-            this._showError(_("Restart is not available on Wayland"));
+            this._showError(_('Restart is not available on Wayland'));
             return;
         }
         this._shouldFadeOut = false;
         this.close();
-        Meta.restart(_("Restarting…"));
+        Meta.restart(_('Restarting…'), global.context);
     }
 
     open() {

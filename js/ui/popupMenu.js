@@ -4,7 +4,7 @@
             PopupMenuSection, PopupSubMenuMenuItem, PopupMenuManager */
 
 const { Atk, Clutter, Gio, GObject, Graphene, Shell, St } = imports.gi;
-const Signals = imports.signals;
+const Signals = imports.misc.signals;
 
 const BoxPointer = imports.ui.boxpointer;
 const Main = imports.ui.main;
@@ -468,6 +468,8 @@ class PopupImageMenuItem extends PopupBaseMenuItem {
         this.add_child(this.label);
         this.label_actor = this.label;
 
+        this.set_child_above_sibling(this._ornamentLabel, this.label);
+
         this.setIcon(icon);
     }
 
@@ -480,8 +482,10 @@ class PopupImageMenuItem extends PopupBaseMenuItem {
     }
 });
 
-var PopupMenuBase = class {
+var PopupMenuBase = class extends Signals.EventEmitter {
     constructor(sourceActor, styleClass) {
+        super();
+
         if (this.constructor === PopupMenuBase)
             throw new TypeError(`Cannot instantiate abstract class ${this.constructor.name}`);
 
@@ -568,6 +572,7 @@ var PopupMenuBase = class {
             }
 
             Main.overview.hide();
+            Main.panel.closeQuickSettings();
             app.activate();
         });
 
@@ -805,7 +810,6 @@ var PopupMenuBase = class {
         Main.sessionMode.disconnectObject(this);
     }
 };
-Signals.addSignalMethods(PopupMenuBase.prototype);
 
 var PopupMenu = class extends PopupMenuBase {
     constructor(sourceActor, arrowAlignment, arrowSide) {
@@ -951,8 +955,10 @@ var PopupMenu = class extends PopupMenuBase {
     }
 };
 
-var PopupDummyMenu = class {
+var PopupDummyMenu = class extends Signals.EventEmitter {
     constructor(sourceActor) {
+        super();
+
         this.sourceActor = sourceActor;
         this.actor = sourceActor;
         this.actor._delegate = this;
@@ -986,7 +992,6 @@ var PopupDummyMenu = class {
         this.emit('destroy');
     }
 };
-Signals.addSignalMethods(PopupDummyMenu.prototype);
 
 var PopupSubMenu = class extends PopupMenuBase {
     constructor(sourceActor, sourceArrow) {

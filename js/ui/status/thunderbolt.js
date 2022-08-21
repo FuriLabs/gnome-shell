@@ -4,11 +4,11 @@
 // the following is a modified version of bolt/contrib/js/client.js
 
 const { Gio, GLib, GObject, Polkit, Shell } = imports.gi;
-const Signals = imports.signals;
+const Signals = imports.misc.signals;
 
 const Main = imports.ui.main;
 const MessageTray = imports.ui.messageTray;
-const PanelMenu = imports.ui.panelMenu;
+const {SystemIndicator} = imports.ui.quickSettings;
 
 const { loadInterfaceXML } = imports.misc.fileUtils;
 
@@ -49,8 +49,10 @@ const BOLT_DBUS_CLIENT_IFACE = 'org.freedesktop.bolt1.Manager';
 const BOLT_DBUS_NAME = 'org.freedesktop.bolt';
 const BOLT_DBUS_PATH = '/org/freedesktop/bolt';
 
-var Client = class {
+var Client = class extends Signals.EventEmitter {
     constructor() {
+        super();
+
         this._proxy = null;
         this.probing = false;
         this._getProxy();
@@ -81,12 +83,11 @@ var Client = class {
     }
 
     _onPropertiesChanged(proxy, properties) {
-        let unpacked = properties.deep_unpack();
-        if (!('Probing' in unpacked))
-            return;
-
-        this.probing = this._proxy.Probing;
-        this.emit('probing-changed', this.probing);
+        const probingChanged = !!properties.lookup_value('Probing', null);
+        if (probingChanged) {
+            this.probing = this._proxy.Probing;
+            this.emit('probing-changed', this.probing);
+        }
     }
 
     _onDeviceAdded(proxy, emitter, params) {
@@ -107,31 +108,27 @@ var Client = class {
         this._proxy = null;
     }
 
-    enrollDevice(id, policy, callback) {
-        this._proxy.EnrollDeviceRemote(id, policy, AuthCtrl.NONE, (res, error) => {
-            if (error) {
-                Gio.DBusError.strip_remote_error(error);
-                callback(null, error);
-                return;
-            }
-
-            let [path] = res;
-            let device = new BoltDeviceProxy(Gio.DBus.system,
-                                             BOLT_DBUS_NAME,
-                                             path);
-            callback(device, null);
-        });
+    async enrollDevice(id, policy) {
+        try {
+            const [path] = await this._proxy.EnrollDeviceAsync(id, policy, AuthCtrl.NONE);
+            const device = new BoltDeviceProxy(Gio.DBus.system, BOLT_DBUS_NAME, path);
+            return device;
+        } catch (error) {
+            Gio.DBusError.strip_remote_error(error);
+            throw error;
+        }
     }
 
     get authMode() {
         return this._proxy.AuthMode;
     }
 };
-Signals.addSignalMethods(Client.prototype);
 
 /* helper class to automatically authorize new devices */
-var AuthRobot = class {
+var AuthRobot = class extends Signals.EventEmitter {
     constructor(client) {
+        super();
+
         this._client = client;
 
         this._devicesToEnroll = [];
@@ -188,41 +185,37 @@ var AuthRobot = class {
                       this._enrollDevicesIdle.bind(this));
     }
 
-    _onEnrollDone(device, error) {
-        if (error)
-            this.emit('enroll-failed', device, error);
-
-        /* TODO: scan the list of devices to be authorized for children
-         *  of this device and remove them (and their children and
-         *  their children and ....) from the device queue
-         */
-        this._enrolling = this._devicesToEnroll.length > 0;
-
-        if (this._enrolling) {
-            GLib.idle_add(GLib.PRIORITY_DEFAULT,
-                          this._enrollDevicesIdle.bind(this));
-        }
-    }
-
-    _enrollDevicesIdle() {
+    async _enrollDevicesIdle() {
         let devices = this._devicesToEnroll;
 
         let dev = devices.shift();
         if (dev === undefined)
             return GLib.SOURCE_REMOVE;
 
-        this._client.enrollDevice(dev.Uid,
-                                  Policy.DEFAULT,
-                                  this._onEnrollDone.bind(this));
+        try {
+            await this._client.enrollDevice(dev.Uid, Policy.DEFAULT);
+
+            /* TODO: scan the list of devices to be authorized for children
+             *  of this device and remove them (and their children and
+             *  their children and ....) from the device queue
+             */
+            this._enrolling = this._devicesToEnroll.length > 0;
+
+            if (this._enrolling) {
+                GLib.idle_add(GLib.PRIORITY_DEFAULT,
+                    this._enrollDevicesIdle.bind(this));
+            }
+        } catch (error) {
+            this.emit('enroll-failed', null, error);
+        }
         return GLib.SOURCE_REMOVE;
     }
 };
-Signals.addSignalMethods(AuthRobot.prototype);
 
 /* eof client.js  */
 
 var Indicator = GObject.registerClass(
-class Indicator extends PanelMenu.SystemIndicator {
+class Indicator extends SystemIndicator {
     _init() {
         super._init();
 

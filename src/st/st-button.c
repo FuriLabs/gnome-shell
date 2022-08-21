@@ -40,6 +40,7 @@
 
 #include "st-button.h"
 
+#include "st-icon.h"
 #include "st-enum-types.h"
 #include "st-texture-cache.h"
 #include "st-private.h"
@@ -51,6 +52,7 @@ enum
   PROP_0,
 
   PROP_LABEL,
+  PROP_ICON_NAME,
   PROP_BUTTON_MASK,
   PROP_TOGGLE_MODE,
   PROP_CHECKED,
@@ -400,6 +402,9 @@ st_button_set_property (GObject      *gobject,
     case PROP_LABEL:
       st_button_set_label (button, g_value_get_string (value));
       break;
+    case PROP_ICON_NAME:
+      st_button_set_icon_name (button, g_value_get_string (value));
+      break;
     case PROP_BUTTON_MASK:
       st_button_set_button_mask (button, g_value_get_flags (value));
       break;
@@ -429,6 +434,9 @@ st_button_get_property (GObject    *gobject,
     {
     case PROP_LABEL:
       g_value_set_string (value, priv->text);
+      break;
+    case PROP_ICON_NAME:
+      g_value_set_string (value, st_button_get_icon_name (ST_BUTTON (gobject)));
       break;
     case PROP_BUTTON_MASK:
       g_value_set_flags (value, priv->button_mask);
@@ -492,6 +500,18 @@ st_button_class_init (StButtonClass *klass)
     g_param_spec_string ("label",
                          "Label",
                          "Label of the button",
+                         NULL,
+                         ST_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
+
+  /**
+   * StButton:icon-name:
+   *
+   * The icon name of the #StButton.
+   */
+  props[PROP_ICON_NAME] =
+    g_param_spec_string ("icon-name",
+                         "Icon name",
+                         "Icon name of the button",
                          NULL,
                          ST_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
@@ -642,6 +662,9 @@ st_button_set_label (StButton    *button,
 
   priv = st_button_get_instance_private (button);
 
+  if (g_strcmp0 (priv->text, text) == 0)
+    return;
+
   g_free (priv->text);
 
   if (text)
@@ -672,6 +695,69 @@ st_button_set_label (StButton    *button,
   st_widget_style_changed (ST_WIDGET (button));
 
   g_object_notify_by_pspec (G_OBJECT (button), props[PROP_LABEL]);
+}
+
+/**
+ * st_button_get_icon_name:
+ * @button: a #StButton
+ *
+ * Get the icon name of the button. If the button isn't showing an icon,
+ * the return value will be %NULL.
+ *
+ * Returns: (transfer none) (nullable): the icon name of the button
+ */
+const char *
+st_button_get_icon_name (StButton *button)
+{
+  ClutterActor *icon;
+
+  g_return_val_if_fail (ST_IS_BUTTON (button), NULL);
+
+  icon = st_bin_get_child (ST_BIN (button));
+  if (ST_IS_ICON (icon))
+    return st_icon_get_icon_name (ST_ICON (icon));
+  return NULL;
+}
+
+/**
+ * st_button_set_icon_name:
+ * @button: a #Stbutton
+ * @icon_name: an icon name
+ *
+ * Adds an `StIcon` with the given icon name as a child.
+ *
+ * If @button already contains a child actor, that child will
+ * be removed and replaced with the icon.
+ */
+void
+st_button_set_icon_name (StButton   *button,
+                         const char *icon_name)
+{
+  ClutterActor *icon;
+
+  g_return_if_fail (ST_IS_BUTTON (button));
+  g_return_if_fail (icon_name != NULL);
+
+  icon = st_bin_get_child (ST_BIN (button));
+
+  if (ST_IS_ICON (icon))
+    {
+      if (g_strcmp0 (st_icon_get_icon_name (ST_ICON (icon)), icon_name) == 0)
+        return;
+
+      st_icon_set_icon_name (ST_ICON (icon), icon_name);
+    }
+  else
+    {
+      icon = g_object_new (ST_TYPE_ICON,
+                           "icon-name", icon_name,
+                           "x-align", CLUTTER_ACTOR_ALIGN_CENTER,
+                           "y-align", CLUTTER_ACTOR_ALIGN_CENTER,
+                           NULL);
+      st_bin_set_child (ST_BIN (button), icon);
+    }
+
+  g_object_notify_by_pspec (G_OBJECT (button), props[PROP_ICON_NAME]);
 }
 
 /**
@@ -708,6 +794,10 @@ st_button_set_button_mask (StButton     *button,
   g_return_if_fail (ST_IS_BUTTON (button));
 
   priv = st_button_get_instance_private (button);
+
+  if (priv->button_mask == mask)
+    return;
+
   priv->button_mask = mask;
 
   g_object_notify_by_pspec (G_OBJECT (button), props[PROP_BUTTON_MASK]);
@@ -746,6 +836,10 @@ st_button_set_toggle_mode (StButton *button,
   g_return_if_fail (ST_IS_BUTTON (button));
 
   priv = st_button_get_instance_private (button);
+
+  if (priv->is_toggle == toggle)
+    return;
+
   priv->is_toggle = toggle;
 
   g_object_notify_by_pspec (G_OBJECT (button), props[PROP_TOGGLE_MODE]);
@@ -784,15 +878,15 @@ st_button_set_checked (StButton *button,
   g_return_if_fail (ST_IS_BUTTON (button));
 
   priv = st_button_get_instance_private (button);
-  if (priv->is_checked != checked)
-    {
-      priv->is_checked = checked;
+  if (priv->is_checked == checked)
+    return;
 
-      if (checked)
-        st_widget_add_style_pseudo_class (ST_WIDGET (button), "checked");
-      else
-        st_widget_remove_style_pseudo_class (ST_WIDGET (button), "checked");
-    }
+  priv->is_checked = checked;
+
+  if (checked)
+    st_widget_add_style_pseudo_class (ST_WIDGET (button), "checked");
+  else
+    st_widget_remove_style_pseudo_class (ST_WIDGET (button), "checked");
 
   g_object_notify_by_pspec (G_OBJECT (button), props[PROP_CHECKED]);
 }

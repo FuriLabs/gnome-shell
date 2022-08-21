@@ -3,14 +3,19 @@
 const { Clutter, GLib, Gio, GObject, IBus } = imports.gi;
 
 const Keyboard = imports.ui.status.keyboard;
+const Main = imports.ui.main;
 
 Gio._promisify(IBus.Bus.prototype,
     'create_input_context_async', 'create_input_context_async_finish');
 
 var HIDE_PANEL_TIME = 50;
 
-var InputMethod = GObject.registerClass(
-class InputMethod extends Clutter.InputMethod {
+var InputMethod = GObject.registerClass({
+    Signals: {
+        'surrounding-text-set': {},
+        'terminal-mode-changed': {},
+    },
+}, class InputMethod extends Clutter.InputMethod {
     _init() {
         super._init();
         this._hints = 0;
@@ -18,8 +23,10 @@ class InputMethod extends Clutter.InputMethod {
         this._currentFocus = null;
         this._preeditStr = '';
         this._preeditPos = 0;
+        this._preeditAnchor = 0;
         this._preeditVisible = false;
         this._hidePanelId = 0;
+        this.terminalMode = false;
         this._ibus = IBus.Bus.new_async();
         this._ibus.connect('connected', this._onConnected.bind(this));
         this._ibus.connect('disconnected', this._clear.bind(this));
@@ -40,6 +47,9 @@ class InputMethod extends Clutter.InputMethod {
 
     _updateCapabilities() {
         let caps = IBus.Capabilite.PREEDIT_TEXT | IBus.Capabilite.FOCUS | IBus.Capabilite.SURROUNDING_TEXT;
+
+        if (Main.keyboard.visible)
+            caps |= IBus.Capabilite.OSK;
 
         if (this._context)
             this._context.set_capabilities(caps);
@@ -71,10 +81,14 @@ class InputMethod extends Clutter.InputMethod {
         this._context.connect('forward-key-event', this._onForwardKeyEvent.bind(this));
         this._context.connect('destroy', this._clear.bind(this));
 
+        Main.keyboard.connectObject('visibility-changed', () => this._updateCapabilities());
+
         this._updateCapabilities();
     }
 
     _clear() {
+        Main.keyboard.disconnectObject(this);
+
         if (this._cancellable) {
             this._cancellable.cancel();
             this._cancellable = null;
@@ -85,6 +99,7 @@ class InputMethod extends Clutter.InputMethod {
         this._purpose = 0;
         this._preeditStr = '';
         this._preeditPos = 0;
+        this._preeditAnchor = 0;
         this._preeditVisible = false;
     }
 
@@ -114,24 +129,30 @@ class InputMethod extends Clutter.InputMethod {
         if (preedit === '')
             preedit = null;
 
+        const anchor = pos;
         if (visible)
-            this.set_preedit_text(preedit, pos, mode);
+            this.set_preedit_text(preedit, pos, anchor, mode);
         else if (this._preeditVisible)
-            this.set_preedit_text(null, pos, mode);
+            this.set_preedit_text(null, pos, anchor, mode);
 
         this._preeditStr = preedit;
         this._preeditPos = pos;
+        this._preeditAnchor = anchor;
         this._preeditVisible = visible;
         this._preeditCommitMode = mode;
     }
 
     _onShowPreeditText() {
         this._preeditVisible = true;
-        this.set_preedit_text(this._preeditStr, this._preeditPos, this._preeditCommitMode);
+        this.set_preedit_text(
+            this._preeditStr, this._preeditPos, this._preeditAnchor,
+            this._preeditCommitMode);
     }
 
     _onHidePreeditText() {
-        this.set_preedit_text(null, this._preeditPos, this._preeditCommitMode);
+        this.set_preedit_text(
+            null, this._preeditPos, this._preeditAnchor,
+            this._preeditCommitMode);
         this._preeditVisible = false;
     }
 
@@ -169,7 +190,7 @@ class InputMethod extends Clutter.InputMethod {
 
         if (this._preeditStr && this._preeditVisible) {
             // Unset any preedit text
-            this.set_preedit_text(null, 0, this._preeditCommitMode);
+            this.set_preedit_text(null, 0, 0, this._preeditCommitMode);
             this._preeditStr = null;
         }
 
@@ -186,7 +207,10 @@ class InputMethod extends Clutter.InputMethod {
             this._emitRequestSurrounding();
         }
 
+        this._surroundingText = null;
+        this._surroundingTextCursor = null;
         this._preeditStr = null;
+        this._setTerminalMode(false);
     }
 
     vfunc_set_cursor_location(rect) {
@@ -198,6 +222,10 @@ class InputMethod extends Clutter.InputMethod {
     }
 
     vfunc_set_surrounding(text, cursor, anchor) {
+        this._surroundingText = text;
+        this._surroundingTextCursor = cursor;
+        this.emit('surrounding-text-set');
+
         if (!this._context || !text)
             return;
 
@@ -246,9 +274,19 @@ class InputMethod extends Clutter.InputMethod {
         else if (purpose == Clutter.InputContentPurpose.PASSWORD)
             ibusPurpose = IBus.InputPurpose.PASSWORD;
 
+        this._setTerminalMode(
+            purpose === Clutter.InputContentPurpose.TERMINAL);
+
         this._purpose = ibusPurpose;
         if (this._context)
             this._context.set_content_type(this._purpose, this._hints);
+    }
+
+    _setTerminalMode(terminalMode) {
+        if (this.terminalMode !== terminalMode) {
+            this.terminalMode = terminalMode;
+            this.emit('terminal-mode-changed');
+        }
     }
 
     vfunc_filter_key_event(event) {
@@ -281,5 +319,20 @@ class InputMethod extends Clutter.InputMethod {
                 }
             });
         return true;
+    }
+
+    getSurroundingText() {
+        return [this._surroundingText, this._surroundingTextCursor];
+    }
+
+    hasPreedit() {
+        return this._preeditVisible && this._preeditStr !== '' && this._preeditStr !== null;
+    }
+
+    handleVirtualKey(keyval) {
+        this._context.process_key_event_async(
+            keyval, 0, 0, -1, null, null);
+        this._context.process_key_event_async(
+            keyval, 0, IBus.ModifierType.RELEASE_MASK, -1, null, null);
     }
 });

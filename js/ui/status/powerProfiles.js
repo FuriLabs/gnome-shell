@@ -1,13 +1,13 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported Indicator */
 
-const { Gio, GObject } = imports.gi;
+const {Gio, GObject} = imports.gi;
 
-const Main = imports.ui.main;
-const PanelMenu = imports.ui.panelMenu;
+const {QuickMenuToggle, SystemIndicator} = imports.ui.quickSettings;
+
 const PopupMenu = imports.ui.popupMenu;
 
-const { loadInterfaceXML } = imports.misc.fileUtils;
+const {loadInterfaceXML} = imports.misc.fileUtils;
 
 const BUS_NAME = 'net.hadess.PowerProfiles';
 const OBJECT_PATH = '/net/hadess/PowerProfiles';
@@ -15,93 +15,110 @@ const OBJECT_PATH = '/net/hadess/PowerProfiles';
 const PowerProfilesIface = loadInterfaceXML('net.hadess.PowerProfiles');
 const PowerProfilesProxy = Gio.DBusProxy.makeProxyWrapper(PowerProfilesIface);
 
-const PROFILE_LABELS = {
-    'performance': C_('Power profile', 'Performance'),
-    'balanced': C_('Power profile', 'Balanced'),
-    'power-saver': C_('Power profile', 'Power Saver'),
-};
-const PROFILE_ICONS = {
-    'performance': 'power-profile-performance-symbolic',
-    'balanced': 'power-profile-balanced-symbolic',
-    'power-saver': 'power-profile-power-saver-symbolic',
+const PROFILE_PARAMS = {
+    'performance': {
+        label: C_('Power profile', 'Performance'),
+        iconName: 'power-profile-performance-symbolic',
+    },
+
+    'balanced': {
+        label: C_('Power profile', 'Balanced'),
+        iconName: 'power-profile-balanced-symbolic',
+    },
+
+    'power-saver': {
+        label: C_('Power profile', 'Power Saver'),
+        iconName: 'power-profile-power-saver-symbolic',
+    },
 };
 
-var Indicator = GObject.registerClass(
-class Indicator extends PanelMenu.SystemIndicator {
+const LAST_PROFILE_KEY = 'last-selected-power-profile';
+
+const PowerProfilesToggle = GObject.registerClass(
+class PowerProfilesToggle extends QuickMenuToggle {
     _init() {
         super._init();
 
         this._profileItems = new Map();
-        this._updateProfiles = true;
+
+        this.connect('clicked', () => {
+            this._proxy.ActiveProfile = this.checked
+                ? 'balanced'
+                : global.settings.get_string(LAST_PROFILE_KEY);
+        });
 
         this._proxy = new PowerProfilesProxy(Gio.DBus.system, BUS_NAME, OBJECT_PATH,
             (proxy, error) => {
                 if (error) {
                     log(error.message);
                 } else {
-                    this._proxy.connect('g-properties-changed',
-                        (p, properties) => {
-                            const propertyNames = properties.deep_unpack();
-                            this._updateProfiles = 'Profiles' in propertyNames;
-                            this._sync();
-                        });
+                    this._proxy.connect('g-properties-changed', (p, properties) => {
+                        const profilesChanged = !!properties.lookup_value('Profiles', null);
+                        if (profilesChanged)
+                            this._syncProfiles();
+                        this._sync();
+                    });
+                    this._syncProfiles();
                 }
                 this._sync();
             });
 
-        this._item = new PopupMenu.PopupSubMenuMenuItem('', true);
-
         this._profileSection = new PopupMenu.PopupMenuSection();
-        this._item.menu.addMenuItem(this._profileSection);
-        this._item.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        this._item.menu.addSettingsAction(_('Power Settings'),
-            'gnome-power-panel.desktop');
-        this.menu.addMenuItem(this._item);
+        this.menu.addMenuItem(this._profileSection);
+        this.menu.setHeader('power-profile-balanced-symbolic', _('Power Profiles'));
 
-        Main.sessionMode.connect('updated', this._sessionUpdated.bind(this));
-        this._sessionUpdated();
         this._sync();
     }
 
-    _sessionUpdated() {
-        const sensitive = !Main.sessionMode.isLocked && !Main.sessionMode.isGreeter;
-        this.menu.setSensitive(sensitive);
+    _syncProfiles() {
+        this._profileSection.removeAll();
+        this._profileItems.clear();
+
+        const profiles = this._proxy.Profiles
+            .map(p => p.Profile.unpack())
+            .reverse();
+        for (const profile of profiles) {
+            const {label, iconName} = PROFILE_PARAMS[profile];
+            if (!label)
+                continue;
+
+            const item = new PopupMenu.PopupImageMenuItem(label, iconName);
+            item.connect('activate',
+                () => (this._proxy.ActiveProfile = profile));
+            this._profileItems.set(profile, item);
+            this._profileSection.addMenuItem(item);
+        }
+
+        this.menuEnabled = this._profileItems.size > 2;
     }
 
     _sync() {
-        this._item.visible = this._proxy.g_name_owner !== null;
+        this.visible = this._proxy.g_name_owner !== null;
 
-        if (!this._item.visible)
+        if (!this.visible)
             return;
 
-        if (this._updateProfiles) {
-            this._profileSection.removeAll();
-            this._profileItems.clear();
-
-            const profiles = this._proxy.Profiles
-                .map(p => p.Profile.unpack())
-                .reverse();
-            for (const profile of profiles) {
-                const label = PROFILE_LABELS[profile];
-                if (!label)
-                    continue;
-
-                const item = new PopupMenu.PopupMenuItem(label);
-                item.connect('activate',
-                    () => (this._proxy.ActiveProfile = profile));
-                this._profileItems.set(profile, item);
-                this._profileSection.addMenuItem(item);
-            }
-            this._updateProfiles = false;
-        }
+        const {ActiveProfile: activeProfile} = this._proxy;
 
         for (const [profile, item] of this._profileItems) {
-            item.setOrnament(profile === this._proxy.ActiveProfile
-                ? PopupMenu.Ornament.DOT
+            item.setOrnament(profile === activeProfile
+                ? PopupMenu.Ornament.CHECK
                 : PopupMenu.Ornament.NONE);
         }
 
-        this._item.label.text = PROFILE_LABELS[this._proxy.ActiveProfile];
-        this._item.icon.icon_name = PROFILE_ICONS[this._proxy.ActiveProfile];
+        this.set(PROFILE_PARAMS[activeProfile]);
+        this.checked = activeProfile !== 'balanced';
+
+        if (this.checked)
+            global.settings.set_string(LAST_PROFILE_KEY, activeProfile);
+    }
+});
+
+var Indicator = GObject.registerClass(
+class Indicator extends SystemIndicator {
+    _init() {
+        super._init();
+
+        this.quickSettingsItems.push(new PowerProfilesToggle());
     }
 });

@@ -308,9 +308,9 @@ var SessionMenuButton = GObject.registerClass({
     Signals: { 'session-activated': { param_types: [GObject.TYPE_STRING] } },
 }, class SessionMenuButton extends St.Bin {
     _init() {
-        let gearIcon = new St.Icon({ icon_name: 'emblem-system-symbolic' });
         let button = new St.Button({
             style_class: 'modal-dialog-button button login-dialog-session-list-button',
+            icon_name: 'emblem-system-symbolic',
             reactive: true,
             track_hover: true,
             can_focus: true,
@@ -318,7 +318,6 @@ var SessionMenuButton = GObject.registerClass({
             accessible_role: Atk.Role.MENU,
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
-            child: gearIcon,
         });
 
         super._init({ child: button });
@@ -530,7 +529,7 @@ var LoginDialog = GObject.registerClass({
         this._realmManager.connectObject('login-format-changed',
             this._showRealmLoginHint.bind(this), this);
 
-        LoginManager.getLoginManager().getCurrentSessionProxy(this._gotGreeterSessionProxy.bind(this));
+        this._getGreeterSessionProxy();
 
         // If the user list is enabled, it should take key focus; make sure the
         // screen shield is initialized first to prevent it from stealing the
@@ -983,9 +982,10 @@ var LoginDialog = GObject.registerClass({
         });
     }
 
-    _gotGreeterSessionProxy(proxy) {
-        this._greeterSessionProxy = proxy;
-        proxy.connectObject('g-properties-changed', (_proxy, properties) => {
+    async _getGreeterSessionProxy() {
+        const loginManager = LoginManager.getLoginManager();
+        this._greeterSessionProxy = await loginManager.getCurrentSessionProxy();
+        this._greeterSessionProxy?.connectObject('g-properties-changed', (proxy, properties) => {
             const activeChanged = !!properties.lookup_value('Active', null);
             if (activeChanged && proxy.Active)
                 this._loginScreenSessionActivated();

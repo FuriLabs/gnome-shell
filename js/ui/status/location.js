@@ -4,11 +4,9 @@
 const { Clutter, Gio, GLib, GObject, Shell, St } = imports.gi;
 
 const Dialog = imports.ui.dialog;
-const Main = imports.ui.main;
-const PanelMenu = imports.ui.panelMenu;
-const PopupMenu = imports.ui.popupMenu;
 const ModalDialog = imports.ui.modalDialog;
 const PermissionStore = imports.misc.permissionStore;
+const {SystemIndicator} = imports.ui.quickSettings;
 
 const { loadInterfaceXML } = imports.misc.fileUtils;
 
@@ -112,17 +110,15 @@ var GeoclueAgent = GObject.registerClass({
         }
     }
 
-    AuthorizeAppAsync(params, invocation) {
+    async AuthorizeAppAsync(params, invocation) {
         let [desktopId, reqAccuracyLevel] = params;
 
         let authorizer = new AppAuthorizer(desktopId,
             reqAccuracyLevel, this._permStoreProxy, this.maxAccuracyLevel);
 
-        authorizer.authorize(accuracyLevel => {
-            let ret = accuracyLevel != GeoclueAccuracyLevel.NONE;
-            invocation.return_value(GLib.Variant.new('(bu)',
-                                                     [ret, accuracyLevel]));
-        });
+        const accuracyLevel = await authorizer.authorize();
+        const ret = accuracyLevel !== GeoclueAccuracyLevel.NONE;
+        invocation.return_value(GLib.Variant.new('(bu)', [ret, accuracyLevel]));
     }
 
     get MaxAccuracyLevel() {
@@ -141,7 +137,7 @@ var GeoclueAgent = GObject.registerClass({
         return true;
     }
 
-    _onManagerProxyReady(proxy, error) {
+    async _onManagerProxyReady(proxy, error) {
         if (error != null) {
             log(error.message);
             this._connecting = false;
@@ -154,15 +150,13 @@ var GeoclueAgent = GObject.registerClass({
 
         this.notify('in-use');
 
-        this._managerProxy.AddAgentRemote('gnome-shell', this._onAgentRegistered.bind(this));
-    }
-
-    _onAgentRegistered(result, error) {
-        this._connecting = false;
-        this._notifyMaxAccuracyLevel();
-
-        if (error != null)
-            log(error.message);
+        try {
+            await this._managerProxy.AddAgentAsync('gnome-shell');
+            this._connecting = false;
+            this._notifyMaxAccuracyLevel();
+        } catch (e) {
+            log(e.message);
+        }
     }
 
     _onGeoclueVanished() {
@@ -187,8 +181,8 @@ var GeoclueAgent = GObject.registerClass({
     }
 
     _onGeocluePropsChanged(proxy, properties) {
-        let unpacked = properties.deep_unpack();
-        if ("InUse" in unpacked)
+        const inUseChanged = !!properties.lookup_value('InUse', null);
+        if (inUseChanged)
             this.notify('in-use');
     }
 
@@ -208,7 +202,7 @@ var GeoclueAgent = GObject.registerClass({
 });
 
 var Indicator = GObject.registerClass(
-class Indicator extends PanelMenu.SystemIndicator {
+class Indicator extends SystemIndicator {
     _init() {
         super._init();
 
@@ -220,44 +214,6 @@ class Indicator extends PanelMenu.SystemIndicator {
             this._indicator,
             'visible',
             GObject.BindingFlags.SYNC_CREATE);
-
-        this._item = new PopupMenu.PopupSubMenuMenuItem('', true);
-        this._item.icon.icon_name = 'find-location-symbolic';
-        this._agent.bind_property('in-use',
-            this._item,
-            'visible',
-            GObject.BindingFlags.SYNC_CREATE);
-
-        this._item.label.text = _('Location Enabled');
-        this._onOffAction = this._item.menu.addAction(_('Disable'),
-            () => (this._agent.enabled = !this._agent.enabled));
-        this._item.menu.addSettingsAction(_('Privacy Settings'), 'gnome-location-panel.desktop');
-
-        this.menu.addMenuItem(this._item);
-
-        this._agent.connectObject(
-            'notify::enabled', () => this._sync(),
-            'notify::in-use', () => this._sync(), this);
-
-        Main.sessionMode.connect('updated', this._onSessionUpdated.bind(this));
-        this._onSessionUpdated();
-    }
-
-    _onSessionUpdated() {
-        let sensitive = !Main.sessionMode.isLocked && !Main.sessionMode.isGreeter;
-        this.menu.setSensitive(sensitive);
-    }
-
-    _sync() {
-        if (this._agent.enabled) {
-            this._item.label.text = this._indicator.visible
-                ? _('Location In Use')
-                : _('Location Enabled');
-            this._onOffAction.label.text = _('Disable');
-        } else {
-            this._item.label.text = _('Location Disabled');
-            this._onOffAction.label.text = _('Enable');
-        }
     }
 });
 
@@ -272,29 +228,22 @@ var AppAuthorizer = class {
         this._accuracyLevel = GeoclueAccuracyLevel.NONE;
     }
 
-    authorize(onAuthDone) {
-        this._onAuthDone = onAuthDone;
-
+    async authorize() {
         let appSystem = Shell.AppSystem.get_default();
         this._app = appSystem.lookup_app(`${this.desktopId}.desktop`);
-        if (this._app == null || this._permStoreProxy == null) {
-            this._completeAuth();
+        if (this._app == null || this._permStoreProxy == null)
+            return this._completeAuth();
 
-            return;
-        }
-
-        this._permStoreProxy.LookupRemote(APP_PERMISSIONS_TABLE,
-                                          APP_PERMISSIONS_ID,
-                                          this._onPermLookupDone.bind(this));
-    }
-
-    _onPermLookupDone(result, error) {
-        if (error != null) {
-            if (error.domain == Gio.DBusError) {
+        try {
+            [this._permissions] = await this._permStoreProxy.LookupAsync(
+                APP_PERMISSIONS_TABLE,
+                APP_PERMISSIONS_ID);
+        } catch (error) {
+            if (error.domain === Gio.DBusError) {
                 // Likely no xdg-app installed, just authorize the app
                 this._accuracyLevel = this.reqAccuracyLevel;
                 this._permStoreProxy = null;
-                this._completeAuth();
+                return this._completeAuth();
             } else {
                 // Currently xdg-app throws an error if we lookup for
                 // unknown ID (which would be the case first time this code
@@ -302,23 +251,20 @@ var AppAuthorizer = class {
                 // and ID is added to the store if user says "yes".
                 log(error.message);
                 this._permissions = {};
-                this._userAuthorizeApp();
             }
-
-            return;
         }
 
-        [this._permissions] = result;
         let permission = this._permissions[this.desktopId];
 
         if (permission == null) {
-            this._userAuthorizeApp();
+            await this._userAuthorizeApp();
         } else {
             let [levelStr] = permission || ['NONE'];
             this._accuracyLevel = GeoclueAccuracyLevel[levelStr] ||
                                   GeoclueAccuracyLevel.NONE;
-            this._completeAuth();
         }
+
+        return this._completeAuth();
     }
 
     _userAuthorizeApp() {
@@ -326,21 +272,18 @@ var AppAuthorizer = class {
         let appInfo = this._app.get_app_info();
         let reason = appInfo.get_locale_string("X-Geoclue-Reason");
 
-        this._showAppAuthDialog(name, reason);
-    }
+        this._dialog =
+            new GeolocationDialog(name, reason, this.reqAccuracyLevel);
 
-    _showAppAuthDialog(name, reason) {
-        this._dialog = new GeolocationDialog(name,
-                                             reason,
-                                             this.reqAccuracyLevel);
-
-        let responseId = this._dialog.connect('response', (dialog, level) => {
-            this._dialog.disconnect(responseId);
-            this._accuracyLevel = level;
-            this._completeAuth();
+        return new Promise(resolve => {
+            const responseId = this._dialog.connect('response',
+                (dialog, level) => {
+                    this._dialog.disconnect(responseId);
+                    this._accuracyLevel = level;
+                    resolve();
+                });
+            this._dialog.open();
         });
-
-        this._dialog.open();
     }
 
     _completeAuth() {
@@ -350,10 +293,10 @@ var AppAuthorizer = class {
         }
         this._saveToPermissionStore();
 
-        this._onAuthDone(this._accuracyLevel);
+        return this._accuracyLevel;
     }
 
-    _saveToPermissionStore() {
+    async _saveToPermissionStore() {
         if (this._permStoreProxy == null)
             return;
 
@@ -363,15 +306,16 @@ var AppAuthorizer = class {
 
         let data = GLib.Variant.new('av', {});
 
-        this._permStoreProxy.SetRemote(APP_PERMISSIONS_TABLE,
-                                       true,
-                                       APP_PERMISSIONS_ID,
-                                       this._permissions,
-                                       data,
-            (result, error) => {
-                if (error != null)
-                    log(error.message);
-            });
+        try {
+            await this._permStoreProxy.SetAsync(
+                APP_PERMISSIONS_TABLE,
+                true,
+                APP_PERMISSIONS_ID,
+                this._permissions,
+                data);
+        } catch (error) {
+            log(error.message);
+        }
     }
 };
 

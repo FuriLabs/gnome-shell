@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '42.4',
+  version: '43.beta',
   meson_version: '>= 0.58.0',
   license: 'GPLv2+'
 )
@@ -10,7 +10,7 @@ split_version = meson.project_version().split('.')
 # the Cogl and Clutter libraries also use this API version.
 # The API version is increased each development cycle,
 # starting with 0 in 3.23.x
-mutter_api_version = '10'
+mutter_api_version = '11'
 
 clutter_pc = 'mutter-clutter-' + mutter_api_version
 cogl_pc = 'mutter-cogl-' + mutter_api_version
@@ -20,20 +20,18 @@ libmutter_test_pc = 'libmutter-test-' + mutter_api_version
 
 ecal_req = '>= 3.33.1'
 eds_req = '>= 3.33.1'
-gcr_req = '>= 3.7.5'
+gcr_req = '>= 3.90.0'
 gio_req = '>= 2.56.0'
 gi_req = '>= 1.49.1'
-gjs_req = '>= 1.71.1'
+gjs_req = '>= 1.73.1'
 gtk_req = '>= 3.15.0'
-mutter_req = '>= 42.0'
+mutter_req = '>= 43.beta'
 polkit_req = '>= 0.100'
 schemas_req = '>= 42.beta'
 startup_req = '>= 0.11'
 ibus_req = '>= 1.5.19'
 gnome_desktop_req = '>= 3.35.90'
 
-bt_req = '>= 3.9.0'
-gst_req = '>= 0.11.92'
 nm_req = '>= 1.10.4'
 secret_req = '>= 0.18'
 
@@ -73,7 +71,7 @@ endif
 atk_bridge_dep = dependency('atk-bridge-2.0')
 ecal_dep = dependency('libecal-2.0', version: ecal_req)
 eds_dep = dependency('libedataserver-1.2', version: eds_req)
-gcr_dep = dependency('gcr-base-3', version: gcr_req)
+gcr_dep = dependency('gcr-4', version: gcr_req)
 gdk_x11_dep = dependency('gdk-x11-3.0')
 gdk_pixbuf_dep = dependency('gdk-pixbuf-2.0')
 gi_dep = dependency('gobject-introspection-1.0', version: gi_req)
@@ -92,17 +90,6 @@ ibus_dep = dependency('ibus-1.0', version: ibus_req)
 x11_dep = dependency('x11')
 schemas_dep = dependency('gsettings-desktop-schemas', version: schemas_req)
 gnome_desktop_dep = dependency('gnome-desktop-3.0', version: gnome_desktop_req)
-
-bt_dep = dependency('gnome-bluetooth-3.0', version: bt_req, required: false)
-gst_dep = dependency('gstreamer-1.0', version: gst_req, required: false)
-gst_base_dep = dependency('gstreamer-base-1.0', required: false)
-pipewire_dep = dependency('libpipewire-0.3', required: false)
-
-recorder_deps = []
-enable_recorder = gst_dep.found() and gst_base_dep.found() and pipewire_dep.found()
-if enable_recorder
-  recorder_deps += [gst_dep, gst_base_dep, gtk_dep, x11_dep]
-endif
 
 nm_deps = []
 if get_option('networkmanager')

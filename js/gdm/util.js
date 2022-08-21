@@ -1,9 +1,10 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported BANNER_MESSAGE_KEY, BANNER_MESSAGE_TEXT_KEY, LOGO_KEY,
-            DISABLE_USER_LIST_KEY, fadeInActor, fadeOutActor, cloneAndFadeOutActor */
+            DISABLE_USER_LIST_KEY, fadeInActor, fadeOutActor, cloneAndFadeOutActor,
+            ShellUserVerifier */
 
 const { Clutter, Gdm, Gio, GLib } = imports.gi;
-const Signals = imports.signals;
+const Signals = imports.misc.signals;
 
 const Batch = imports.gdm.batch;
 const OVirt = imports.gdm.oVirt;
@@ -135,8 +136,9 @@ function cloneAndFadeOutActor(actor) {
     return hold;
 }
 
-var ShellUserVerifier = class {
+var ShellUserVerifier = class extends Signals.EventEmitter {
     constructor(client, params) {
+        super();
         params = Params.parse(params, { reauthenticationOnly: false });
         this._reauthOnly = params.reauthenticationOnly;
 
@@ -371,7 +373,7 @@ var ShellUserVerifier = class {
         this.emit('show-message', null, null, MessageType.NONE);
     }
 
-    _checkForFingerprintReader() {
+    async _checkForFingerprintReader() {
         this._fingerprintReaderType = FingerprintReaderType.NONE;
 
         if (!this._settings.get_boolean(FINGERPRINT_AUTHENTICATION_KEY) ||
@@ -380,21 +382,19 @@ var ShellUserVerifier = class {
             return;
         }
 
-        this._fprintManager.GetDefaultDeviceRemote(Gio.DBusCallFlags.NONE, this._cancellable,
-            (params, error) => {
-                if (!error && params) {
-                    const [device] = params;
-                    const fprintDeviceProxy = new FprintDeviceProxy(Gio.DBus.system,
-                        'net.reactivated.Fprint',
-                        device);
-                    const fprintDeviceType = fprintDeviceProxy['scan-type'];
+        try {
+            const [device] = await this._fprintManager.GetDefaultDeviceAsync(
+                Gio.DBusCallFlags.NONE, this._cancellable);
+            const fprintDeviceProxy = new FprintDeviceProxy(Gio.DBus.system,
+                'net.reactivated.Fprint',
+                device);
+            const fprintDeviceType = fprintDeviceProxy['scan-type'];
 
-                    this._fingerprintReaderType = fprintDeviceType === 'swipe'
-                        ? FingerprintReaderType.SWIPE
-                        : FingerprintReaderType.PRESS;
-                    this._updateDefaultService();
-                }
-            });
+            this._fingerprintReaderType = fprintDeviceType === 'swipe'
+                ? FingerprintReaderType.SWIPE
+                : FingerprintReaderType.PRESS;
+            this._updateDefaultService();
+        } catch (e) {}
     }
 
     _onCredentialManagerAuthenticated(credentialManager, _token) {
@@ -587,7 +587,7 @@ var ShellUserVerifier = class {
         if (!this.serviceIsForeground(serviceName))
             return;
 
-        this.emit('show-choice-list', serviceName, promptMessage, list.deep_unpack());
+        this.emit('show-choice-list', serviceName, promptMessage, list.deepUnpack());
     }
 
     _onInfo(client, serviceName, info) {
@@ -782,4 +782,3 @@ var ShellUserVerifier = class {
         this._verificationFailed(serviceName, true);
     }
 };
-Signals.addSignalMethods(ShellUserVerifier.prototype);

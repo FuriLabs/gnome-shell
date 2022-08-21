@@ -2,7 +2,7 @@
 /* exported SessionMode, listModes */
 
 const GLib = imports.gi.GLib;
-const Signals = imports.signals;
+const Signals = imports.misc.signals;
 
 const FileUtils = imports.misc.fileUtils;
 const Params = imports.misc.params;
@@ -59,7 +59,7 @@ const _modes = {
         panel: {
             left: [],
             center: ['dateMenu'],
-            right: ['dwellClick', 'a11y', 'keyboard', 'aggregateMenu'],
+            right: ['dwellClick', 'a11y', 'keyboard', 'quickSettings'],
         },
         panelStyle: 'login-screen',
     },
@@ -71,7 +71,7 @@ const _modes = {
         panel: {
             left: [],
             center: [],
-            right: ['dwellClick', 'a11y', 'keyboard', 'aggregateMenu'],
+            right: ['dwellClick', 'a11y', 'keyboard', 'quickSettings'],
         },
         panelStyle: 'unlock-screen',
     },
@@ -94,7 +94,7 @@ const _modes = {
         panel: {
             left: ['activities', 'appMenu'],
             center: ['dateMenu'],
-            right: ['screenRecording', 'dwellClick', 'a11y', 'keyboard', 'aggregateMenu'],
+            right: ['screenRecording', 'screenSharing', 'dwellClick', 'a11y', 'keyboard', 'quickSettings'],
         },
     },
 };
@@ -145,8 +145,10 @@ function listModes() {
     loop.run();
 }
 
-var SessionMode = class {
+var SessionMode = class extends Signals.EventEmitter {
     constructor() {
+        super();
+
         _loadModes();
         let isPrimary = _modes[global.session_mode] &&
                          _modes[global.session_mode].isPrimary;
@@ -202,4 +204,3 @@ var SessionMode = class {
         this.emit('updated');
     }
 };
-Signals.addSignalMethods(SessionMode.prototype);

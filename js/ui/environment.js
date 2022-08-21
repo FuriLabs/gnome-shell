@@ -8,7 +8,7 @@ imports.gi.versions.Atk = '1.0';
 imports.gi.versions.Atspi = '2.0';
 imports.gi.versions.Clutter = Config.LIBMUTTER_API_VERSION;
 imports.gi.versions.Cogl = Config.LIBMUTTER_API_VERSION;
-imports.gi.versions.Gcr = '3';
+imports.gi.versions.Gcr = '4';
 imports.gi.versions.Gdk = '3.0';
 imports.gi.versions.Gdm = '1.0';
 imports.gi.versions.Geoclue = '2.0';
@@ -45,7 +45,6 @@ try {
 
 const { Clutter, Gio, GLib, GObject, Meta, Polkit, Shell, St } = imports.gi;
 const Gettext = imports.gettext;
-const Signals = imports.signals;
 const System = imports.system;
 const SignalTracker = imports.misc.signalTracker;
 
@@ -317,26 +316,9 @@ function _easeActorProperty(actor, propName, target, params) {
     transition.connect('stopped', (t, finished) => callback(finished));
 }
 
-function _loggingFunc(...args) {
-    let fields = { 'MESSAGE': args.join(', ') };
-    let domain = "GNOME Shell";
-
-    // If the caller is an extension, add it as metadata
-    let extension = imports.misc.extensionUtils.getCurrentExtension();
-    if (extension != null) {
-        domain = extension.metadata.name;
-        fields['GNOME_SHELL_EXTENSION_UUID'] = extension.uuid;
-        fields['GNOME_SHELL_EXTENSION_NAME'] = extension.metadata.name;
-    }
-
-    GLib.log_structured(domain, GLib.LogLevelFlags.LEVEL_MESSAGE, fields);
-}
-
 function init() {
     // Add some bindings to the global JS namespace
     globalThis.global = Shell.Global.get();
-
-    globalThis.log = _loggingFunc;
 
     globalThis._ = Gettext.gettext;
     globalThis.C_ = Gettext.pgettext;
@@ -356,12 +338,6 @@ function init() {
     };
     GObject.Object.prototype.disconnect_object = function (...args) {
         SignalTracker.disconnectObject(this, ...args);
-    };
-
-    const _addSignalMethods = Signals.addSignalMethods;
-    Signals.addSignalMethods = function (prototype) {
-        _addSignalMethods(prototype);
-        SignalTracker.addObjectSignalMethods(prototype);
     };
 
     SignalTracker.registerDestroyableType(Clutter.Actor);

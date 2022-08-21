@@ -1,7 +1,8 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+/* exported WeatherClient */
 
 const { Geoclue, Gio, GLib, GWeather, Shell } = imports.gi;
-const Signals = imports.signals;
+const Signals = imports.misc.signals;
 
 const PermissionStore = imports.misc.permissionStore;
 
@@ -20,8 +21,10 @@ const WEATHER_APP_ID = 'org.gnome.Weather.desktop';
 // Minimum time between updates to show loading indication
 var UPDATE_THRESHOLD = 10 * GLib.TIME_SPAN_MINUTE;
 
-var WeatherClient = class {
+var WeatherClient = class extends Signals.EventEmitter {
     constructor() {
+        super();
+
         this._loading = false;
         this._locationValid = false;
         this._lastUpdate = GLib.DateTime.new_from_unix_local(0);
@@ -36,7 +39,7 @@ var WeatherClient = class {
 
         this._needsAuth = true;
         this._weatherAuthorized = false;
-        this._permStore = new PermissionStore.PermissionStore((proxy, error) => {
+        this._permStore = new PermissionStore.PermissionStore(async (proxy, error) => {
             if (error) {
                 log(`Failed to connect to permissionStore: ${error.message}`);
                 return;
@@ -50,14 +53,15 @@ var WeatherClient = class {
                 return;
             }
 
-            this._permStore.LookupRemote('gnome', 'geolocation', (res, err) => {
-                if (err)
-                    log(`Error looking up permission: ${err.message}`);
+            let [perms, data] = [{}, null];
+            try {
+                [perms, data] = await this._permStore.LookupAsync('gnome', 'geolocation');
+            } catch (err) {
+                log(`Error looking up permission: ${err.message}`);
+            }
 
-                let [perms, data] = err ? [{}, null] : res;
-                let  params = ['gnome', 'geolocation', false, data, perms];
-                this._onPermStoreChanged(this._permStore, '', params);
-            });
+            const params = ['gnome', 'geolocation', false, data, perms];
+            this._onPermStoreChanged(this._permStore, '', params);
         });
         this._permStore.connectSignal('Changed',
                                       this._onPermStoreChanged.bind(this));
@@ -290,7 +294,7 @@ var WeatherClient = class {
     }
 
     _onLocationsChanged() {
-        let locations = this._settings.get_value('locations').deep_unpack();
+        let locations = this._settings.get_value('locations').deepUnpack();
         let serialized = locations.shift();
         let mostRecentLocation = null;
 
@@ -319,4 +323,3 @@ var WeatherClient = class {
         this._updateAutoLocation();
     }
 };
-Signals.addSignalMethods(WeatherClient.prototype);
