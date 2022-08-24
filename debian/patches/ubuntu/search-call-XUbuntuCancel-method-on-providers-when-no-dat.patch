@@ -17,9 +17,9 @@ Forwarded: not-needed
 ---
  .../org.gnome.ShellSearchProvider.xml              |  6 ++++
  .../org.gnome.ShellSearchProvider2.xml             |  6 ++++
- js/ui/remoteSearch.js                              | 15 ++++++++++
- js/ui/search.js                                    | 34 ++++++++++++++++++++++
- 4 files changed, 61 insertions(+)
+ js/ui/remoteSearch.js                              | 12 ++++++++
+ js/ui/search.js                                    | 33 ++++++++++++++++++++++
+ 4 files changed, 57 insertions(+)
 
 diff --git a/data/dbus-interfaces/org.gnome.ShellSearchProvider.xml b/data/dbus-interfaces/org.gnome.ShellSearchProvider.xml
 index 78ad305..393cb01 100644
@@ -54,7 +54,7 @@ index 9502340..8141bc0 100644
    </interface>
  </node>
 diff --git a/js/ui/remoteSearch.js b/js/ui/remoteSearch.js
-index 8ebb550..aab2bf8 100644
+index 87ee384..74f9c38 100644
 --- a/js/ui/remoteSearch.js
 +++ b/js/ui/remoteSearch.js
 @@ -26,6 +26,7 @@ const SearchProviderIface = `
@@ -73,69 +73,65 @@ index 8ebb550..aab2bf8 100644
  </interface>
  </node>`;
  
-@@ -310,6 +312,19 @@ var RemoteSearchProvider = class {
-                                         cancellable);
+@@ -301,6 +303,16 @@ var RemoteSearchProvider = class {
+         return resultMetas;
      }
  
-+    XUbuntuCancel(cancellable, callback) {
-+        this.proxy.XUbuntuCancelRemote((results, error) => {
-+                if (error &&
-+                    !error.matches(Gio.DBusError, Gio.DBusError.UNKNOWN_METHOD) &&
-+                    !error.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED)) {
-+                    log('Received error from DBus search provider %s during XUbuntuCancel: %s'.format(this.id, String(error)));
-+                } else if (callback && !error) {
-+                    callback();
-+                }
-+            },
-+            cancellable);
++    async XUbuntuCancel(cancellable) {
++        try {
++            await this.proxy.XUbuntuCancelAsync(cancellable);
++        } catch (error) {
++            if (!error.matches(Gio.DBusError, Gio.DBusError.UNKNOWN_METHOD) &&
++                !error.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
++                log(`Received error from D-Bus search provider ${this.id} during XUbuntuCancel: ${error}`);
++        }
 +    }
 +
      activateResult(id) {
-         this.proxy.ActivateResultRemote(id).catch(logError);
+         this.proxy.ActivateResultAsync(id).catch(logError);
      }
 diff --git a/js/ui/search.js b/js/ui/search.js
-index 3bfb83f..58ea12b 100644
+index 71870a0..fc668fb 100644
 --- a/js/ui/search.js
 +++ b/js/ui/search.js
 @@ -218,7 +218,9 @@ var SearchResultsBase = GObject.registerClass({
-             this._cancellable.cancel();
-             this._cancellable.reset();
+         this._cancellable.cancel();
+         this._cancellable.reset();
  
-+            this.provider.resultsMetasInProgress = true;
-             this.provider.getResultMetas(metasNeeded, metas => {
-+                this.provider.resultsMetasInProgress = this._cancellable.is_cancelled();
-                 if (this._cancellable.is_cancelled()) {
-                     if (metas.length > 0)
-                         log(`Search provider ${this.provider.id} returned results after the request was canceled`);
-@@ -597,6 +599,10 @@ var SearchResultsView = GObject.registerClass({
++        this.provider.resultsMetasInProgress = true;
+         const metas = await this.provider.getResultMetas(metasNeeded, this._cancellable);
++        this.provider.resultsMetasInProgress = this._cancellable.is_cancelled();
+ 
+         if (this._cancellable.is_cancelled()) {
+             if (metas.length > 0)
+@@ -588,6 +590,10 @@ var SearchResultsView = GObject.registerClass({
  
          this._searchTimeoutId = 0;
          this._cancellable = new Gio.Cancellable();
 +        this._searchCancelCancellable = new Gio.Cancellable();
-+        this._cancellable.connect(() => {
-+            this._cancelSearchProviderRequest();
-+        });
++        const cancellableCancelledId = this._cancellable.connect(() =>
++            this._cancelSearchProviderRequest());
++        this.connect('destroy', () => this._cancellable.disconnect(cancellableCancelledId));
  
          this._registerProvider(new AppDisplay.AppSearchProvider());
  
-@@ -651,11 +657,32 @@ var SearchResultsView = GObject.registerClass({
+@@ -636,11 +642,31 @@ var SearchResultsView = GObject.registerClass({
          }
      }
  
 +    _cancelSearchProviderRequest() {
-+        if (this._terms.length != 0 || this._searchCancelTimeoutId)
++        if (this._terms.length !== 0 || this._searchCancelTimeoutId)
 +            return;
 +
 +        this._searchCancelTimeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 100, () => {
-+            this._providers.forEach(provider => {
++            Promise.all(this._providers.map(async provider => {
 +                if (provider.isRemoteProvider &&
 +                    (provider.searchInProgress || provider.resultsMetasInProgress)) {
-+                    provider.XUbuntuCancel(this._searchCancelCancellable, () => {
-+                        provider.searchInProgress = false;
-+                        provider.resultsMetasInProgress = false;
-+                    });
++                    await provider.XUbuntuCancel(this._searchCancelCancellable);
++                    provider.searchInProgress = false;
++                    provider.resultsMetasInProgress = false;
 +                }
-+            });
++            })).catch(logError);
 +
 +            delete this._searchCancelTimeoutId;
 +            return GLib.SOURCE_REMOVE;
@@ -151,7 +147,7 @@ index 3bfb83f..58ea12b 100644
          this._defaultResult = null;
          this._startingSearch = false;
  
-@@ -723,6 +750,13 @@ var SearchResultsView = GObject.registerClass({
+@@ -712,6 +738,13 @@ var SearchResultsView = GObject.registerClass({
          if (this._terms.length > 0)
              isSubSearch = searchString.indexOf(previousSearchString) == 0;
  
