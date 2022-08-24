@@ -7,7 +7,7 @@ Section: gnome
 Priority: optional
 Maintainer: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
 XSBC-Original-Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
-Uploaders: Iain Lane <laney@debian.org>, Jeremy Bicha <jbicha@ubuntu.com>
+Uploaders: Jeremy Bicha <jbicha@ubuntu.com>
 Build-Depends: appstream,
                asciidoc-base,
                bash-completion,
@@ -167,7 +167,7 @@ Description: graphical shell for the GNOME desktop
 Package: gnome-shell-common
 Architecture: all
 Depends: ${misc:Depends}
-Recommends: yaru-theme-gnome-shell (>= 22.04.1~)
+Recommends: yaru-theme-gnome-shell (>= 22.10.1~)
 Breaks: gnome-shell (<< 3.36.1-6~)
 Replaces: gnome-shell (<< 3.36.1-6~)
 Description: common files for the GNOME graphical shell
