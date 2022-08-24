@@ -10,12 +10,12 @@ https://bugzilla.gnome.org/show_bug.cgi?id=789377
 Bug-GNOME: https://bugzilla.gnome.org/show_bug.cgi?id=789377
 Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
 ---
- js/ui/main.js        | 3 +++
+ js/ui/main.js        | 7 +++++++
  js/ui/sessionMode.js | 1 +
- 2 files changed, 4 insertions(+)
+ 2 files changed, 8 insertions(+)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 2d8804aca8..fc5ae80e44 100644
+index 2d8804a..fc5ae80 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -139,6 +139,13 @@ function _sessionUpdated() {
@@ -33,7 +33,7 @@ index 2d8804aca8..fc5ae80e44 100644
  
  /**
 diff --git a/js/ui/sessionMode.js b/js/ui/sessionMode.js
-index b38bcdfabf..9580ff63d7 100644
+index 4284366..053e678 100644
 --- a/js/ui/sessionMode.js
 +++ b/js/ui/sessionMode.js
 @@ -29,6 +29,7 @@ const _modes = {

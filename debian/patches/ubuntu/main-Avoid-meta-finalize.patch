@@ -46,10 +46,10 @@ Last-Update: 2022-03-25
  1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/src/main.c b/src/main.c
-index f4fc012..5681651 100644
+index 6604fde..77b035c 100644
 --- a/src/main.c
 +++ b/src/main.c
-@@ -653,11 +653,17 @@ main (int argc, char **argv)
+@@ -668,11 +668,17 @@ main (int argc, char **argv)
        ecode = EXIT_FAILURE;
      }
  

@@ -27,10 +27,10 @@ Forwarded: not-needed
  3 files changed, 14 insertions(+), 6 deletions(-)
 
 diff --git a/js/ui/appFavorites.js b/js/ui/appFavorites.js
-index 18fc3d0..da3a263 100644
+index d8a3018..b4460bb 100644
 --- a/js/ui/appFavorites.js
 +++ b/js/ui/appFavorites.js
-@@ -161,7 +161,11 @@ class AppFavorites {
+@@ -163,7 +163,11 @@ class AppFavorites extends Signals.EventEmitter {
  
          let app = Shell.AppSystem.get_default().lookup_app(appId);
  
@@ -43,7 +43,7 @@ index 18fc3d0..da3a263 100644
          Main.overview.setMessage(msg, {
              forFeedback: true,
              undoCallback: () => this._removeFavorite(appId),
-@@ -194,7 +198,11 @@ class AppFavorites {
+@@ -196,7 +200,11 @@ class AppFavorites extends Signals.EventEmitter {
          if (!this._removeFavorite(appId))
              return;
  

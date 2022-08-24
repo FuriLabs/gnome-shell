@@ -70,10 +70,10 @@ index 0000000..6f9cc62
 +  </schema>
 +</schemalist>
 diff --git a/js/ui/main.js b/js/ui/main.js
-index b81b264..2e844de 100644
+index 33f62be..7568376 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
-@@ -162,6 +162,12 @@ function start() {
+@@ -186,6 +186,12 @@ function start() {
      sessionMode.connect('updated', _sessionUpdated);
  
      St.Settings.get().connect('notify::high-contrast', _loadDefaultStylesheet);
@@ -86,7 +86,7 @@ index b81b264..2e844de 100644
  
      // Initialize ParentalControlsManager before the UI
      ParentalControlsManager.getDefault();
-@@ -399,6 +405,38 @@ function _getStylesheet(name) {
+@@ -423,6 +429,38 @@ function _getStylesheet(name) {
      return null;
  }
  
@@ -125,7 +125,7 @@ index b81b264..2e844de 100644
  function _getDefaultStylesheet() {
      let stylesheet = null;
      let name = sessionMode.stylesheetName;
-@@ -407,6 +445,13 @@ function _getDefaultStylesheet() {
+@@ -431,6 +469,13 @@ function _getDefaultStylesheet() {
      if (St.Settings.get().high_contrast)
          stylesheet = _getStylesheet(name.replace('.css', '-high-contrast.css'));
  
