@@ -15,21 +15,25 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  2 files changed, 4 insertions(+)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
-index d1a2076..8b5217e 100644
+index 2d8804aca8..fc5ae80e44 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
-@@ -139,6 +139,9 @@ function _sessionUpdated() {
+@@ -139,6 +139,13 @@ function _sessionUpdated() {
              _remoteAccessInhibited = true;
          }
      }
 +
-+    if (!GLib.getenv("SHELL_DEBUG"))
-+        global.set_debug_flags(sessionMode.debugFlags.join(':'));
++    if (!GLib.getenv('SHELL_DEBUG')) {
++        if (typeof sessionMode.debugFlags === 'string')
++            global.set_debug_flags(sessionMode.debugFlags);
++        else if (Array.isArray(sessionMode.debugFlags))
++            global.set_debug_flags(sessionMode.debugFlags.join(':'))
++    }
  }
  
- function start() {
+ /**
 diff --git a/js/ui/sessionMode.js b/js/ui/sessionMode.js
-index c1bc48b..72d5553 100644
+index b38bcdfabf..9580ff63d7 100644
 --- a/js/ui/sessionMode.js
 +++ b/js/ui/sessionMode.js
 @@ -29,6 +29,7 @@ const _modes = {
