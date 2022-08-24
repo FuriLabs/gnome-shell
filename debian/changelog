@@ -1,5 +1,6 @@
 gnome-shell (43~beta-1ubuntu1) UNRELEASED; urgency=medium
 
+  [ Jeremy Bicha ]
   * Merge with Debian, remaining changes:
     - Replace gnome-backgrounds dep with ubuntu-wallpapers and Suggests
       gnome-themes-standard-data, gnome-backgrounds
@@ -67,12 +68,23 @@ gnome-shell (43~beta-1ubuntu1) UNRELEASED; urgency=medium
       (LP: #1964458)
     - ubuntu/sessionMode-Add-support-for-configuring-an-icons-resource.patch:
       + Support loading iconsResourceName from session file
-    - ubuntu/main-Support-loading-multiple-Yaru-theme-variants.patch:
+    - ubuntu/main-Support-loading-multiple-Yaru-theme-variants.patch,
+    - ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch:
       + Support loading Yaru theme variants (for accent color)
     - ubuntu/Revert-dash-Use-pin-instead-of-favorites
   * debian/patches: Refresh
 
- -- Jeremy Bicha <jbicha@ubuntu.com>  Sun, 21 Aug 2022 12:05:27 -0400
+  [ Marco Trevisan (Treviño) ]
+  * debian/patches:
+    - Update GDM fingerprint init patch
+    - Update debug improvements patches
+    - Update search provider patch to support XUbuntuCancel
+    - Refresh
+    - Move ubuntu settings handling to St.Settings
+    - Add support for toggling dark mode with Yaru variants
+  * debian/control: Bump recommends on newer Yaru theme
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 25 Aug 2022 01:56:37 +0200
 
 gnome-shell (43~beta-1) experimental; urgency=medium
 
