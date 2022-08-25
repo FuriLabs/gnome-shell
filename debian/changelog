@@ -1,3 +1,9 @@
+gnome-shell (43~beta-1ubuntu2) kinetic; urgency=medium
+
+  * Build with libsoup3
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Thu, 25 Aug 2022 16:50:58 -0400
+
 gnome-shell (43~beta-1ubuntu1) kinetic; urgency=medium
 
   [ Jeremy Bicha ]
