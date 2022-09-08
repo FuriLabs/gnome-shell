@@ -1021,8 +1021,6 @@ var ScreenshotUI = GObject.registerClass({
 
         this._lockdownSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.lockdown' });
 
-        Main.sessionMode.connect('updated', () => this.close(true));
-
         // The full-screen screenshot has a separate container so that we can
         // show it without the screenshot UI fade-in for a nicer animation.
         this._stageScreenshotContainer = new St.Widget({ visible: false });
@@ -1287,10 +1285,10 @@ var ScreenshotUI = GObject.registerClass({
         });
 
         const uiModes =
-            Shell.ActionMode.ALL &
-            ~(Shell.ActionMode.LOCK_SCREEN |
-                Shell.ActionMode.UNLOCK_SCREEN |
-                Shell.ActionMode.LOGIN_SCREEN);
+            Shell.ActionMode.ALL & ~Shell.ActionMode.LOGIN_SCREEN;
+        const restrictedModes =
+            uiModes &
+            ~(Shell.ActionMode.LOCK_SCREEN | Shell.ActionMode.UNLOCK_SCREEN);
 
         Main.wm.addKeybinding(
             'show-screenshot-ui',
@@ -1304,7 +1302,7 @@ var ScreenshotUI = GObject.registerClass({
             'show-screen-recording-ui',
             new Gio.Settings({ schema_id: 'org.gnome.shell.keybindings' }),
             Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
-            uiModes,
+            restrictedModes,
             showScreenRecordingUI
         );
 
@@ -1312,7 +1310,7 @@ var ScreenshotUI = GObject.registerClass({
             'screenshot-window',
             new Gio.Settings({ schema_id: 'org.gnome.shell.keybindings' }),
             Meta.KeyBindingFlags.IGNORE_AUTOREPEAT | Meta.KeyBindingFlags.PER_WINDOW,
-            uiModes,
+            restrictedModes,
             async (_display, window, _binding) => {
                 try {
                     const actor = window.get_compositor_private();
@@ -1343,6 +1341,15 @@ var ScreenshotUI = GObject.registerClass({
                 }
             }
         );
+
+        Main.sessionMode.connect('updated',
+            () => this._sessionUpdated());
+        this._sessionUpdated();
+    }
+
+    _sessionUpdated() {
+        this.close(true);
+        this._castButton.reactive = Main.sessionMode.allowScreencast;
     }
 
     _refreshButtonLayout() {
@@ -1462,7 +1469,9 @@ var ScreenshotUI = GObject.registerClass({
             }
 
             this._windowButton.reactive =
-                windows.length > 0 && !this._castButton.checked;
+                Main.sessionMode.hasWindows &&
+                windows.length > 0 &&
+                !this._castButton.checked;
             if (!this._windowButton.reactive)
                 this._selectionButton.checked = true;
 

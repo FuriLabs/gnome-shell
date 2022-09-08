@@ -34,13 +34,11 @@ var QuickSettingsItem = GObject.registerClass({
 
 var QuickToggle = GObject.registerClass({
     Properties: {
+        'label': GObject.ParamSpec.override('label', St.Button),
         'icon-name': GObject.ParamSpec.override('icon-name', St.Button),
         'gicon': GObject.ParamSpec.object('gicon', '', '',
             GObject.ParamFlags.READWRITE,
             Gio.Icon),
-        'label': GObject.ParamSpec.string('label', '', '',
-            GObject.ParamFlags.READWRITE,
-            ''),
     },
 }, class QuickToggle extends QuickSettingsItem {
     _init(params) {
@@ -195,6 +193,7 @@ var QuickSlider = GObject.registerClass({
         });
         box.add_child(sliderBin);
 
+        sliderBin.set_accessible(this.slider.get_accessible());
         sliderBin.connect('event', (bin, event) => this.slider.event(event, false));
 
         this._menuButton = new St.Button({

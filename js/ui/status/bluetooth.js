@@ -7,6 +7,8 @@ const {QuickToggle, SystemIndicator} = imports.ui.quickSettings;
 
 const {loadInterfaceXML} = imports.misc.fileUtils;
 
+const {AdapterState} = GnomeBluetooth;
+
 const BUS_NAME = 'org.gnome.SettingsDaemon.Rfkill';
 const OBJECT_PATH = '/org/gnome/SettingsDaemon/Rfkill';
 
@@ -23,6 +25,9 @@ const BtClient = GObject.registerClass({
         'active': GObject.ParamSpec.boolean('active', '', '',
             GObject.ParamFlags.READABLE,
             false),
+        'adapter-state': GObject.ParamSpec.enum('adapter-state', '', '',
+            GObject.ParamFlags.READABLE,
+            AdapterState, AdapterState.ABSENT),
     },
     Signals: {
         'devices-changed': {},
@@ -38,6 +43,8 @@ const BtClient = GObject.registerClass({
             this.notify('active');
             this.notify('available');
         });
+        this._client.connect('notify::default-adapter-state',
+            () => this.notify('adapter-state'));
         this._client.connect('notify::default-adapter', () => {
             const newAdapter = this._client.default_adapter ?? null;
 
@@ -93,6 +100,10 @@ const BtClient = GObject.registerClass({
 
     get active() {
         return this._client.default_adapter_powered;
+    }
+
+    get adapter_state() {
+        return this._client.default_adapter_state;
     }
 
     toggleActive() {
@@ -167,13 +178,30 @@ class BluetoothToggle extends QuickToggle {
         this._client.bind_property('active',
             this, 'checked',
             GObject.BindingFlags.SYNC_CREATE);
-        this._client.bind_property_full('active',
+        this._client.bind_property_full('adapter-state',
             this, 'icon-name',
             GObject.BindingFlags.SYNC_CREATE,
-            (bind, source) => [true, source ? 'bluetooth-active-symbolic' : 'bluetooth-disabled-symbolic'],
+            (bind, source) => [true, this._getIconNameFromState(source)],
             null);
 
         this.connect('clicked', () => this._client.toggleActive());
+    }
+
+    _getIconNameFromState(state) {
+        switch (state) {
+        case AdapterState.ON:
+            return 'bluetooth-active-symbolic';
+        case AdapterState.OFF:
+        case AdapterState.ABSENT:
+            return 'bluetooth-disabled-symbolic';
+        case AdapterState.TURNING_ON:
+        case AdapterState.TURNING_OFF:
+            return 'bluetooth-acquiring-symbolic';
+        default:
+            console.warn(`Unexpected state ${
+                GObject.enum_to_string(AdapterState, state)}`);
+            return '';
+        }
     }
 });
 

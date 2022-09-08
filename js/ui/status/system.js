@@ -1,11 +1,12 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported Indicator */
 
-const {Atk, Clutter, Gio, GObject, Shell, St, UPowerGlib: UPower} = imports.gi;
+const {Atk, Clutter, Gio, GLib, GObject, Meta, Shell, St, UPowerGlib: UPower} = imports.gi;
 
 const SystemActions = imports.misc.systemActions;
 const Main = imports.ui.main;
 const PopupMenu = imports.ui.popupMenu;
+const {PopupAnimation} = imports.ui.boxpointer;
 
 const {QuickSettingsItem, QuickToggle, SystemIndicator} = imports.ui.quickSettings;
 const {loadInterfaceXML} = imports.misc.fileUtils;
@@ -93,6 +94,28 @@ const PowerToggle = GObject.registerClass({
     }
 });
 
+const ScreenshotItem = GObject.registerClass(
+class ScreenshotItem extends QuickSettingsItem {
+    _init() {
+        super._init({
+            style_class: 'icon-button',
+            can_focus: true,
+            icon_name: 'camera-photo-symbolic',
+            visible: !Main.sessionMode.isGreeter,
+            accessible_name: _('Take Screenshot'),
+        });
+
+        this.connect('clicked', () => {
+            const topMenu = Main.panel.statusArea.quickSettings.menu;
+            Meta.later_add(Meta.LaterType.BEFORE_REDRAW, () => {
+                Main.screenshotUI.open().catch(logError);
+                return GLib.SOURCE_REMOVE;
+            });
+            topMenu.close(PopupAnimation.NONE);
+        });
+    }
+});
+
 const SettingsItem = GObject.registerClass(
 class SettingsItem extends QuickSettingsItem {
     _init() {
@@ -134,9 +157,7 @@ class ShutdownItem extends QuickSettingsItem {
             style_class: 'icon-button',
             hasMenu: true,
             canFocus: true,
-            child: new St.Icon({
-                icon_name: 'system-shutdown-symbolic',
-            }),
+            icon_name: 'system-shutdown-symbolic',
             accessible_name: _('Power Off Menu'),
         });
 
@@ -210,9 +231,7 @@ class LockItem extends QuickSettingsItem {
         super._init({
             style_class: 'icon-button',
             can_focus: true,
-            child: new St.Icon({
-                icon_name: 'system-lock-screen-symbolic',
-            }),
+            icon_name: 'system-lock-screen-symbolic',
             accessible_name: _('Lock Screen'),
         });
 
@@ -240,11 +259,24 @@ class SystemItem extends QuickSettingsItem {
         this._powerToggle = new PowerToggle();
         this.child.add_child(this._powerToggle);
 
-        // spacer
-        this.child.add_child(new Clutter.Actor({x_expand: true}));
+        this._laptopSpacer = new Clutter.Actor({x_expand: true});
+        this._powerToggle.bind_property('visible',
+            this._laptopSpacer, 'visible',
+            GObject.BindingFlags.SYNC_CREATE);
+        this.child.add_child(this._laptopSpacer);
+
+        const screenshotItem = new ScreenshotItem();
+        this.child.add_child(screenshotItem);
 
         const settingsItem = new SettingsItem();
         this.child.add_child(settingsItem);
+
+        this._desktopSpacer = new Clutter.Actor({x_expand: true});
+        this._powerToggle.bind_property('visible',
+            this._desktopSpacer, 'visible',
+            GObject.BindingFlags.INVERT_BOOLEAN |
+            GObject.BindingFlags.SYNC_CREATE);
+        this.child.add_child(this._desktopSpacer);
 
         const lockItem = new LockItem();
         this.child.add_child(lockItem);
