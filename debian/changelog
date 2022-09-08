@@ -1,4 +1,4 @@
-gnome-shell (43~rc-1ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (43~rc-1ubuntu1) kinetic; urgency=medium
 
   * Merge with Debian, remaining changes:
     - Replace gnome-backgrounds dep with ubuntu-wallpapers and Suggests
@@ -9,8 +9,6 @@ gnome-shell (43~rc-1ubuntu1) UNRELEASED; urgency=medium
       + yaru-theme-gnome-shell for the default ubuntu theming
     - Moved some Recommends to Suggests:
       + chrome-gnome-shell
-    - Break gnome-shell-extension-desktop-icons (<< 68ubuntu20.10.1)
-    - gnome-shell-common.prerm: Remove deprecated ubuntu theme alternative
     - Update debian/gbp.conf with Ubuntu settings
     - debian/ubuntu-session-mods/ubuntu.json: Use Yaru's gnome-shell icons
     - debian/patches: Do not hang & crash if fingerprint service fails to start
@@ -71,9 +69,9 @@ gnome-shell (43~rc-1ubuntu1) UNRELEASED; urgency=medium
     - ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch:
       + Support loading Yaru theme variants (for accent color)
     - ubuntu/Revert-dash-Use-pin-instead-of-favorites
-  * debian/patches: Refresh
+  * Drop obsolete maintainer scripts handling Ubuntu theme migration
 
- -- Jeremy Bicha <jbicha@ubuntu.com>  Thu, 08 Sep 2022 16:48:31 -0400
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Thu, 08 Sep 2022 17:03:28 -0400
 
 gnome-shell (43~rc-1) experimental; urgency=medium
 
