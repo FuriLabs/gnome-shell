@@ -1,3 +1,9 @@
+gnome-shell (43~rc-1ubuntu2) kinetic; urgency=medium
+
+  * Suggest instead of depend on gnome-backgrounds
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Thu, 08 Sep 2022 21:27:52 -0400
+
 gnome-shell (43~rc-1ubuntu1) kinetic; urgency=medium
 
   * Merge with Debian, remaining changes:
@@ -265,14 +271,13 @@ gnome-shell (42.4-1ubuntu1) kinetic; urgency=medium
   * debian/patches: Refresh
 
  -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 11 Aug 2022 17:31:32 -0400
-=======
+
 gnome-shell (42.4-2) unstable; urgency=medium
 
   * Build with libsoup3
   * Update Vcs branches since debian/master is tracking 43
 
  -- Jeremy Bicha <jbicha@ubuntu.com>  Mon, 05 Sep 2022 16:09:52 -0400
->>>>>>> debian/43_rc-1
 
 gnome-shell (42.4-1) unstable; urgency=medium
 
