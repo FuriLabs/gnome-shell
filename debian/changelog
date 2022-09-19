@@ -1,4 +1,4 @@
-gnome-shell (43.0-1ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (43.0-1ubuntu1) kinetic; urgency=medium
 
   * Merge with Debian, remaining changes:
     - Replace gnome-backgrounds dep with ubuntu-wallpapers and Suggests
@@ -69,9 +69,8 @@ gnome-shell (43.0-1ubuntu1) UNRELEASED; urgency=medium
     - ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch:
       + Support loading Yaru theme variants (for accent color)
     - ubuntu/Revert-dash-Use-pin-instead-of-favorites
-  * Drop obsolete maintainer scripts handling Ubuntu theme migration
 
- -- Jeremy Bicha <jbicha@ubuntu.com>  Mon, 19 Sep 2022 14:24:18 -0400
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Mon, 19 Sep 2022 14:50:17 -0400
 
 gnome-shell (43.0-1) experimental; urgency=medium
 
