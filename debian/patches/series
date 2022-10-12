@@ -24,3 +24,4 @@ ubuntu/sessionMode-Add-support-for-configuring-an-icons-resource.patch
 ubuntu/main-Support-loading-multiple-Yaru-theme-variants.patch
 ubuntu/Revert-dash-Use-pin-instead-of-favorites.patch
 ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch
+config-Assume-screen-recording-is-always-available.patch
