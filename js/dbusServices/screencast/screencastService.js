@@ -231,7 +231,8 @@ var Recorder = class {
     _ensurePipeline(nodeId) {
         const framerate = this._framerate;
         const needsCopy =
-            Gst.Registry.get().check_feature_version('pipewiresrc', 0, 3, 57);
+            Gst.Registry.get().check_feature_version('pipewiresrc', 0, 3, 57) &&
+            !Gst.Registry.get().check_feature_version('videoconvert', 1, 20, 4);
 
         let fullPipeline = `
             pipewiresrc path=${nodeId}
@@ -257,8 +258,20 @@ var Recorder = class {
 };
 
 var ScreencastService = class extends ServiceImplementation {
+    static canScreencast() {
+        const elements = [
+            'pipewiresrc',
+            'filesink',
+            ...DEFAULT_PIPELINE.split('!').map(e => e.trim().split(' ').at(0)),
+        ];
+        return Gst.init_check(null) &&
+            elements.every(e => Gst.ElementFactory.find(e) != null);
+    }
+
     constructor() {
         super(ScreencastIface, '/org/gnome/Shell/Screencast');
+
+        this._canScreencast = ScreencastService.canScreencast();
 
         Gst.init(null);
         Gtk.init();
@@ -277,6 +290,10 @@ var ScreencastService = class extends ServiceImplementation {
         this._introspectProxy = new IntrospectProxy(Gio.DBus.session,
             'org.gnome.Shell.Introspect',
             '/org/gnome/Shell/Introspect');
+    }
+
+    get ScreencastSupported() {
+        return this._canScreencast;
     }
 
     _removeRecorder(sender) {

@@ -1510,31 +1510,8 @@ var Keyboard = GObject.registerClass({
                 button.setWidth(key.width);
 
             if (key.action !== 'modifier') {
-                button.connect('commit', (actor, keyval, str) => {
-                    if (this._modifiers.size === 0 && str !== '' &&
-                        keyval && this._oskCompletionEnabled) {
-                        Main.inputMethod.handleVirtualKey(keyval);
-                        return;
-                    }
-
-                    if (str === '' || !Main.inputMethod.currentFocus ||
-                        (keyval && this._oskCompletionEnabled) ||
-                        this._modifiers.size > 0 ||
-                        !this._keyboardController.commitString(str, true)) {
-                        if (keyval !== 0) {
-                            this._forwardModifiers(this._modifiers, Clutter.EventType.KEY_PRESS);
-                            this._keyboardController.keyvalPress(keyval);
-                            GLib.timeout_add(GLib.PRIORITY_DEFAULT, KEY_RELEASE_TIMEOUT, () => {
-                                this._keyboardController.keyvalRelease(keyval);
-                                this._forwardModifiers(this._modifiers, Clutter.EventType.KEY_RELEASE);
-                                this._disableAllModifiers();
-                                return GLib.SOURCE_REMOVE;
-                            });
-                        }
-                    }
-
-                    if (!this._latched)
-                        this._setActiveLayer(0);
+                button.connect('commit', (_actor, keyval, str) => {
+                    this._commitAction(keyval, str);
                 });
             }
 
@@ -1590,6 +1567,33 @@ var Keyboard = GObject.registerClass({
 
             layout.appendKey(button, button.keyButton.keyWidth);
         }
+    }
+
+    async _commitAction(keyval, str) {
+        if (this._modifiers.size === 0 && str !== '' &&
+            keyval && this._oskCompletionEnabled) {
+            if (await Main.inputMethod.handleVirtualKey(keyval))
+                return;
+        }
+
+        if (str === '' || !Main.inputMethod.currentFocus ||
+            (keyval && this._oskCompletionEnabled) ||
+            this._modifiers.size > 0 ||
+            !this._keyboardController.commitString(str, true)) {
+            if (keyval !== 0) {
+                this._forwardModifiers(this._modifiers, Clutter.EventType.KEY_PRESS);
+                this._keyboardController.keyvalPress(keyval);
+                GLib.timeout_add(GLib.PRIORITY_DEFAULT, KEY_RELEASE_TIMEOUT, () => {
+                    this._keyboardController.keyvalRelease(keyval);
+                    this._forwardModifiers(this._modifiers, Clutter.EventType.KEY_RELEASE);
+                    this._disableAllModifiers();
+                    return GLib.SOURCE_REMOVE;
+                });
+            }
+        }
+
+        if (!this._latched)
+            this._setActiveLayer(0);
     }
 
     _previousWordPosition(text, cursor) {
@@ -1889,7 +1893,7 @@ var Keyboard = GObject.registerClass({
         }
 
         this._oskCompletionEnabled =
-            IBusManager.getIBusManager().setCompletionEnabled(true);
+            IBusManager.getIBusManager().setCompletionEnabled(true, () => Main.inputMethod.update());
         this._clearKeyboardRestTimer();
 
         if (immediate) {
@@ -1924,7 +1928,7 @@ var Keyboard = GObject.registerClass({
         if (!this._keyboardVisible)
             return;
 
-        IBusManager.getIBusManager().setCompletionEnabled(false);
+        IBusManager.getIBusManager().setCompletionEnabled(false, () => Main.inputMethod.update());
         this._oskCompletionEnabled = false;
         this._clearKeyboardRestTimer();
 

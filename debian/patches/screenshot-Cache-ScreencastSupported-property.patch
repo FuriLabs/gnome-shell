@@ -1,0 +1,47 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Sun, 6 Nov 2022 13:06:44 +0100
+Subject: screenshot: Cache ScreencastSupported property
+
+The screencast service shuts down when not in use, so it is almost
+certainly not running when handling the screencast shortcut.
+
+Instead of making sure the service is restarted, just cache the
+property when initializing the proxy.
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2533
+Applied-upstream: 43.2, commit:b23de7f5309dcff34b2245d3797bb39381dff60c
+---
+ js/ui/screenshot.js | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/js/ui/screenshot.js b/js/ui/screenshot.js
+index a01fbe3..b2ea6fa 100644
+--- a/js/ui/screenshot.js
++++ b/js/ui/screenshot.js
+@@ -1017,6 +1017,7 @@ var ScreenshotUI = GObject.registerClass({
+         });
+ 
+         this._screencastInProgress = false;
++        this._screencastSupported = false;
+ 
+         this._screencastProxy = new ScreencastProxy(
+             Gio.DBus.session,
+@@ -1028,7 +1029,8 @@ var ScreenshotUI = GObject.registerClass({
+                     return;
+                 }
+ 
+-                this._castButton.visible = this._screencastProxy.ScreencastSupported;
++                this._screencastSupported = this._screencastProxy.ScreencastSupported;
++                this._castButton.visible = this._screencastSupported;
+             });
+ 
+         this._lockdownSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.lockdown' });
+@@ -1450,7 +1452,7 @@ var ScreenshotUI = GObject.registerClass({
+         if (this._screencastInProgress)
+             return;
+ 
+-        if (mode === UIMode.SCREENCAST && !this._screencastProxy.ScreencastSupported)
++        if (mode === UIMode.SCREENCAST && !this._screencastSupported)
+             return;
+ 
+         this._castButton.checked = mode === UIMode.SCREENCAST;

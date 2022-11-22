@@ -7,6 +7,8 @@ const Main = imports.ui.main;
 
 Gio._promisify(IBus.Bus.prototype,
     'create_input_context_async', 'create_input_context_async_finish');
+Gio._promisify(IBus.InputContext.prototype,
+    'process_key_event_async', 'process_key_event_async_finish');
 
 var HIDE_PANEL_TIME = 50;
 
@@ -185,8 +187,10 @@ var InputMethod = GObject.registerClass({
 
     vfunc_focus_out() {
         this._currentFocus = null;
-        if (this._context)
+        if (this._context) {
+            this._fullReset();
             this._context.focus_out();
+        }
 
         if (this._preeditStr && this._preeditVisible) {
             // Unset any preedit text
@@ -215,8 +219,13 @@ var InputMethod = GObject.registerClass({
 
     vfunc_set_cursor_location(rect) {
         if (this._context) {
-            this._context.set_cursor_location(rect.get_x(), rect.get_y(),
-                                              rect.get_width(), rect.get_height());
+            this._cursorRect = {
+                x: rect.get_x(), y: rect.get_y(),
+                width: rect.get_width(), height: rect.get_height(),
+            };
+            this._context.set_cursor_location(
+                this._cursorRect.x, this._cursorRect.y,
+                this._cursorRect.width, this._cursorRect.height);
             this._emitRequestSurrounding();
         }
     }
@@ -273,6 +282,9 @@ var InputMethod = GObject.registerClass({
             ibusPurpose = IBus.InputPurpose.NAME;
         else if (purpose == Clutter.InputContentPurpose.PASSWORD)
             ibusPurpose = IBus.InputPurpose.PASSWORD;
+        else if (purpose === Clutter.InputContentPurpose.TERMINAL &&
+                 IBus.InputPurpose.TERMINAL)
+            ibusPurpose = IBus.InputPurpose.TERMINAL;
 
         this._setTerminalMode(
             purpose === Clutter.InputContentPurpose.TERMINAL);
@@ -329,10 +341,35 @@ var InputMethod = GObject.registerClass({
         return this._preeditVisible && this._preeditStr !== '' && this._preeditStr !== null;
     }
 
-    handleVirtualKey(keyval) {
-        this._context.process_key_event_async(
-            keyval, 0, 0, -1, null, null);
-        this._context.process_key_event_async(
-            keyval, 0, IBus.ModifierType.RELEASE_MASK, -1, null, null);
+    async handleVirtualKey(keyval) {
+        try {
+            if (!await this._context.process_key_event_async(
+                keyval, 0, 0, -1, null))
+                return false;
+
+            await this._context.process_key_event_async(
+                keyval, 0, IBus.ModifierType.RELEASE_MASK, -1, null);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    _fullReset() {
+        this._context.set_content_type(0, 0);
+        this._context.set_cursor_location(0, 0, 0, 0);
+        this._context.set_capabilities(0);
+        this._context.reset();
+    }
+
+    update() {
+        if (!this._context)
+            return;
+        this._updateCapabilities();
+        this._context.set_content_type(this._purpose, this._hints);
+        this._context.set_cursor_location(
+            this._cursorRect.x, this._cursorRect.y,
+            this._cursorRect.width, this._cursorRect.height);
+        this._emitRequestSurrounding();
     }
 });

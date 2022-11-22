@@ -1,6 +1,4 @@
 gdm-util-Only-start-fingerprint-service-synchronously-whe.patch
-debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
-Revert-build-Port-to-gcr4.patch
 ubuntu/desktop_detect.patch
 ubuntu/lightdm-user-switching.patch
 ubuntu/lock_on_suspend.patch
@@ -24,8 +22,8 @@ ubuntu/sessionMode-Add-support-for-configuring-an-icons-resource.patch
 ubuntu/main-Support-loading-multiple-Yaru-theme-variants.patch
 ubuntu/Revert-dash-Use-pin-instead-of-favorites.patch
 ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch
-config-Assume-screen-recording-is-always-available.patch
-status-Use-fixed-sorting-of-input-sources-on-empty-MRU.patch
-bluetooth-Show-the-Bluetooth-switch-in-more-cases.patch
-status-volume-Include-origin-in-device-names.patch
-inhibitShortcutsDialog-Don-t-override-resource.patch
+dbusService-screencast-Hold-during-gstreamer-checks.patch
+screenshot-Cache-ScreencastSupported-property.patch
+Update-Russian-translation.patch
+debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
+debian/Revert-build-Port-to-gcr4.patch

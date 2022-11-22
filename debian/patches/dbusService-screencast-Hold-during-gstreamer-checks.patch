@@ -1,0 +1,48 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Sun, 6 Nov 2022 11:56:41 +0100
+Subject: dbusService/screencast: Hold during gstreamer checks
+
+Some gstreamer plugins require a connection to the display server,
+so they block until the server is up and running. That's why we
+moved the check into the D-Bus service, so that the blocking would
+not lock up the compositor itself.
+
+However the block can still delay the service initialization so
+much that auto-shutdown hits immediately when returning from the
+constructor. If that happens, the proxy on the shell side is no
+longer backed by a remote object when the init callback runs, and
+all properties therefore resolve as `null`.
+
+As a result, gnome-shell thinks that screencasts aren't supported
+and hides the screencast button.
+
+Fix this by holding the service during the gstreamer checks, so
+that the auto-shutdown timeout only starts after the service is
+ready.
+
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6051
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2533
+Applied-upstream: 43.2, commit:f9ac8890d0a714c7cb44005def66fb5d0d15f6e4
+---
+ js/dbusServices/screencast/screencastService.js | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/js/dbusServices/screencast/screencastService.js b/js/dbusServices/screencast/screencastService.js
+index f7f36da..a2bb23c 100644
+--- a/js/dbusServices/screencast/screencastService.js
++++ b/js/dbusServices/screencast/screencastService.js
+@@ -271,11 +271,14 @@ var ScreencastService = class extends ServiceImplementation {
+     constructor() {
+         super(ScreencastIface, '/org/gnome/Shell/Screencast');
+ 
++        this.hold(); // gstreamer initializing can take a bit
+         this._canScreencast = ScreencastService.canScreencast();
+ 
+         Gst.init(null);
+         Gtk.init();
+ 
++        this.release();
++
+         this._recorders = new Map();
+         this._senders = new Map();
+ 
