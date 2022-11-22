@@ -1,6 +1,6 @@
-gnome-shell (43.1-2ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (43.1-2ubuntu1) lunar; urgency=medium
 
-  * Merge with Debian, remaining changes:
+  * Merge with Debian (LP: #1995134, LP: #1997481). Remaining changes:
     - Add some Recommends:
       + ubuntu-session (| gnome-session) to have the ubuntu session available
       + ubuntu-wallpapers
