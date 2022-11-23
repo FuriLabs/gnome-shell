@@ -1,9 +1,18 @@
-gnome-shell (43.1-0ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (43.1-0ubuntu1) kinetic; urgency=medium
 
+  [ Jeremy Bicha ]
   * New upstream release (LP: #1997481)
     - Fix captive portal helper feature (LP: #1995134)
+  * Update Vcs fields
+  * Drop 5 patches applied in new release
+  * Add post-release patches from upstream gnome-43 branch
+    - Screencast bug fixes
+    - Showing shortcut dialog
 
- -- Jeremy Bicha <jbicha@ubuntu.com>  Wed, 23 Nov 2022 14:02:14 -0500
+  [ Simon McVittie ]
+  * d/.gitignore: Don't ignore patches, overriding upstream .gitignore
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Wed, 23 Nov 2022 14:12:25 -0500
 
 gnome-shell (43.0-1ubuntu2) kinetic; urgency=medium
 
