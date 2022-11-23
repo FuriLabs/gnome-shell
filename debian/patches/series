@@ -24,8 +24,3 @@ ubuntu/sessionMode-Add-support-for-configuring-an-icons-resource.patch
 ubuntu/main-Support-loading-multiple-Yaru-theme-variants.patch
 ubuntu/Revert-dash-Use-pin-instead-of-favorites.patch
 ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch
-config-Assume-screen-recording-is-always-available.patch
-status-Use-fixed-sorting-of-input-sources-on-empty-MRU.patch
-bluetooth-Show-the-Bluetooth-switch-in-more-cases.patch
-status-volume-Include-origin-in-device-names.patch
-inhibitShortcutsDialog-Don-t-override-resource.patch
