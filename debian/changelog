@@ -1,3 +1,10 @@
+gnome-shell (43.1-0ubuntu1) UNRELEASED; urgency=medium
+
+  * New upstream release (LP: #1997481)
+    - Fix captive portal helper feature (LP: #1995134)
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Wed, 23 Nov 2022 14:02:14 -0500
+
 gnome-shell (43.0-1ubuntu2) kinetic; urgency=medium
 
   [ Daniel van Vugt ]
