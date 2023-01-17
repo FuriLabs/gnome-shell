@@ -78,6 +78,14 @@ class OverviewActor extends St.BoxLayout {
         this.add_child(this._controls);
     }
 
+    prepareToEnterOverview() {
+        this._controls.prepareToEnterOverview();
+    }
+
+    prepareToLeaveOverview() {
+        this._controls.prepareToLeaveOverview();
+    }
+
     animateToOverview(state, callback) {
         this._controls.animateToOverview(state, callback);
     }
@@ -450,7 +458,8 @@ var Overview = class extends Signals.EventEmitter {
         if (this._shown) {
             let shouldBeModal = !this._inXdndDrag;
             if (shouldBeModal && !this._modal) {
-                if (global.display.get_grab_op() !== Meta.GrabOp.NONE) {
+                if (global.display.get_grab_op() !== Meta.GrabOp.NONE &&
+                    global.display.get_grab_op() !== Meta.GrabOp.WAYLAND_POPUP) {
                     this.hide();
                     return false;
                 }
@@ -510,12 +519,13 @@ var Overview = class extends Signals.EventEmitter {
 
         Meta.disable_unredirect_for_display(global.display);
 
-        this._overview.animateToOverview(state, () => this._showDone());
-
         Main.layoutManager.overviewGroup.set_child_above_sibling(
             this._coverPane, null);
         this._coverPane.show();
+
+        this._overview.prepareToEnterOverview();
         this.emit('showing');
+        this._overview.animateToOverview(state, () => this._showDone());
     }
 
     _showDone() {
@@ -563,12 +573,13 @@ var Overview = class extends Signals.EventEmitter {
         this._animationInProgress = true;
         this._visibleTarget = false;
 
-        this._overview.animateFromOverview(() => this._hideDone());
-
         Main.layoutManager.overviewGroup.set_child_above_sibling(
             this._coverPane, null);
         this._coverPane.show();
+
+        this._overview.prepareToLeaveOverview();
         this.emit('hiding');
+        this._overview.animateFromOverview(() => this._hideDone());
     }
 
     _hideDone() {

@@ -1,3 +1,11 @@
+gnome-shell (43.2-1) unstable; urgency=medium
+
+  * New upstream release (Closes: #1028972)
+  * Drop patches applied in new release
+  * Cherry-pick fix for screen share window titles
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Tue, 17 Jan 2023 11:09:16 -0500
+
 gnome-shell (43.1-2ubuntu1) lunar; urgency=medium
 
   * Merge with Debian (LP: #1995134, LP: #1997481). Remaining changes:
@@ -117,7 +125,6 @@ gnome-shell (43.0-1ubuntu2) kinetic; urgency=medium
 
   [ Daniel van Vugt ]
   * Avoid deadlocking in gst_init_check() on startup (LP: #1988488)
-
 gnome-shell (43.0-1ubuntu1) kinetic; urgency=medium
 
   * Merge with Debian, remaining changes:

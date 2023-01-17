@@ -1559,6 +1559,7 @@ class NMDeviceToggle extends NMToggle {
 
         this._deviceType = deviceType;
         this._nmDevices = new Set();
+        this._deviceNames = new Map();
     }
 
     setClient(client) {
@@ -1613,8 +1614,12 @@ class NMDeviceToggle extends NMToggle {
     _syncDeviceNames() {
         const devices = [...this._nmDevices];
         const names = NM.Device.disambiguate_names(devices);
+        this._deviceNames.clear();
         devices.forEach(
-            (dev, i) => this._items.get(dev)?.setDeviceName(names[i]));
+            (dev, i) => {
+                this._deviceNames.set(dev, names[i]);
+                this._items.get(dev)?.setDeviceName(names[i]);
+            });
     }
 
     _syncDeviceItem(device) {
@@ -1647,6 +1652,7 @@ class NMDeviceToggle extends NMToggle {
             return;
 
         const item = this._createDeviceMenuItem(device);
+        item.setDeviceName(this._deviceNames.get(device) ?? '');
         this._addItem(device, item);
     }
 
@@ -1992,7 +1998,7 @@ class Indicator extends SystemIndicator {
             this._portalHelperProxy?.CloseAsync(path);
     }
 
-    async _portalHelperDone(proxy, emitter, parameters) {
+    async _portalHelperDone(parameters) {
         let [path, result] = parameters;
 
         if (result == PortalHelperResult.CANCELLED) {
@@ -2045,7 +2051,9 @@ class Indicator extends SystemIndicator {
                 g_interface_info: PortalHelperInfo,
             });
             this._portalHelperProxy.connectSignal('Done',
-                () => this._portalHelperDone().catch(logError));
+                (proxy, emitter, params) => {
+                    this._portalHelperDone(params).catch(logError);
+                });
 
             try {
                 await this._portalHelperProxy.init_async(

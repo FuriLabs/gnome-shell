@@ -22,8 +22,6 @@ ubuntu/sessionMode-Add-support-for-configuring-an-icons-resource.patch
 ubuntu/main-Support-loading-multiple-Yaru-theme-variants.patch
 ubuntu/Revert-dash-Use-pin-instead-of-favorites.patch
 ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch
-dbusService-screencast-Hold-during-gstreamer-checks.patch
-screenshot-Cache-ScreencastSupported-property.patch
-Update-Russian-translation.patch
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 debian/Revert-build-Port-to-gcr4.patch
+window-tracker-Emit-tracked-windows-changed-on-title-chan.patch

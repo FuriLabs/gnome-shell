@@ -1228,7 +1228,7 @@ var BaseAppView = GObject.registerClass({
     }
 
     goToPage(pageNumber, animate = true) {
-        pageNumber = Math.clamp(pageNumber, 0, this._grid.nPages - 1);
+        pageNumber = Math.clamp(pageNumber, 0, Math.max(this._grid.nPages - 1, 0));
 
         if (this._grid.currentPage === pageNumber)
             return;
@@ -1324,9 +1324,12 @@ class AppDisplay extends BaseAppView {
 
         this._placeholder = null;
 
-        Main.overview.connect('hidden', () => this.goToPage(0));
-
-        this._redisplayWorkId = Main.initializeDeferredWork(this, this._redisplay.bind(this));
+        this._overviewHiddenId = 0;
+        this._redisplayWorkId = Main.initializeDeferredWork(this, () => {
+            this._redisplay();
+            if (this._overviewHiddenId === 0)
+                this._overviewHiddenId = Main.overview.connect('hidden', () => this.goToPage(0));
+        });
 
         Shell.AppSystem.get_default().connect('installed-changed', () => {
             Main.queueDeferredWork(this._redisplayWorkId);
@@ -1570,7 +1573,7 @@ class AppDisplay extends BaseAppView {
     }
 
     goToPage(pageNumber, animate = true) {
-        pageNumber = Math.clamp(pageNumber, 0, this._grid.nPages - 1);
+        pageNumber = Math.clamp(pageNumber, 0, Math.max(this._grid.nPages - 1, 0));
 
         if (this._grid.currentPage === pageNumber &&
             this._displayingDialog &&

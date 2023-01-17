@@ -685,6 +685,19 @@ var EmojiPager = GObject.registerClass({
         swipeTracker.connect('update', this._onSwipeUpdate.bind(this));
         swipeTracker.connect('end', this._onSwipeEnd.bind(this));
         this._swipeTracker = swipeTracker;
+
+        this.connect('destroy', () => this._onDestroy());
+
+        this.bind_property(
+            'visible', this._swipeTracker, 'enabled',
+            GObject.BindingFlags.DEFAULT);
+    }
+
+    _onDestroy() {
+        if (this._swipeTracker) {
+            this._swipeTracker.destroy();
+            delete this._swipeTracker;
+        }
     }
 
     get delta() {
@@ -1375,6 +1388,8 @@ var Keyboard = GObject.registerClass({
             this._languagePopup.destroy();
             this._languagePopup = null;
         }
+
+        IBusManager.getIBusManager().setCompletionEnabled(false, () => Main.inputMethod.update());
     }
 
     _setupKeyboard() {
@@ -1417,8 +1432,9 @@ var Keyboard = GObject.registerClass({
         this._ensureKeysForGroup(this._keyboardController.getCurrentGroup());
         this._setActiveLayer(0);
 
-        Main.inputMethod.connect(
-            'terminal-mode-changed', this._onTerminalModeChanged.bind(this));
+        Main.inputMethod.connectObject(
+            'terminal-mode-changed', this._onTerminalModeChanged.bind(this),
+            this);
 
         this._keyboardController.connectObject(
             'active-group', this._onGroupChanged.bind(this),
