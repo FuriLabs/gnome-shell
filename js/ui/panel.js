@@ -366,6 +366,7 @@ class QuickSettings extends PanelMenu.Button {
         this._rfkill = new imports.ui.status.rfkill.Indicator();
         this._autoRotate = new imports.ui.status.autoRotate.Indicator();
         this._unsafeMode = new UnsafeModeIndicator();
+        this._backgroundApps = new imports.ui.status.backgroundApps.Indicator();
 
         this._indicators.add_child(this._brightness);
         this._indicators.add_child(this._remoteAccess);
@@ -401,6 +402,8 @@ class QuickSettings extends PanelMenu.Button {
         this._addItems(this._rfkill.quickSettingsItems);
         this._addItems(this._autoRotate.quickSettingsItems);
         this._addItems(this._unsafeMode.quickSettingsItems);
+
+        this._addItems(this._backgroundApps.quickSettingsItems, N_QUICK_SETTINGS_COLUMNS);
     }
 
     _addItems(items, colSpan = 1) {
@@ -540,24 +543,17 @@ class Panel extends St.Widget {
         if (targetActor !== this)
             return Clutter.EVENT_PROPAGATE;
 
-        const [x, y] = event.get_coords();
+        const [x, y_] = event.get_coords();
         let dragWindow = this._getDraggableWindowForPosition(x);
 
         if (!dragWindow)
             return Clutter.EVENT_PROPAGATE;
 
-        const button = event.type() === Clutter.EventType.BUTTON_PRESS
-            ? event.get_button() : -1;
-
-        return global.display.begin_grab_op(
-            dragWindow,
+        return dragWindow.begin_grab_op(
             Meta.GrabOp.MOVING,
-            false, /* pointer grab */
-            true, /* frame action */
-            button,
-            event.get_state(),
-            event.get_time(),
-            x, y) ? Clutter.EVENT_STOP : Clutter.EVENT_PROPAGATE;
+            event.get_device(),
+            event.get_event_sequence(),
+            event.get_time()) ? Clutter.EVENT_STOP : Clutter.EVENT_PROPAGATE;
     }
 
     _onButtonPress(actor, event) {

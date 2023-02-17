@@ -221,6 +221,24 @@ var LayoutManager = GObject.registerClass({
 
         global.stage.remove_actor(global.window_group);
         this.uiGroup.add_actor(global.window_group);
+        global.connect('shutdown', () => {
+            const monitorManager = global.backend.get_monitor_manager();
+            monitorManager.disconnectObject(this);
+
+            const adoptedUiGroupActors = [
+                global.window_group,
+                global.top_window_group,
+                Meta.get_feedback_group_for_display(global.display),
+            ];
+
+            for (let adoptedActor of adoptedUiGroupActors) {
+                this.uiGroup.remove_actor(adoptedActor);
+                global.stage.add_actor(adoptedActor);
+            }
+
+            this._destroyHotCorners();
+            this.uiGroup.destroy();
+        });
 
         // Using addChrome() to add actors to uiGroup will position actors
         // underneath the top_window_group.
@@ -315,9 +333,10 @@ var LayoutManager = GObject.registerClass({
         display.connect('in-fullscreen-changed',
                         this._updateFullscreen.bind(this));
 
-        let monitorManager = Meta.MonitorManager.get();
-        monitorManager.connect('monitors-changed',
-                               this._monitorsChanged.bind(this));
+        const monitorManager = global.backend.get_monitor_manager();
+        monitorManager.connectObject(
+            'monitors-changed', this._monitorsChanged.bind(this),
+            this);
         this._monitorsChanged();
 
         this.screenTransition = new ScreenTransition();
@@ -397,13 +416,14 @@ var LayoutManager = GObject.registerClass({
         }
     }
 
+    _destroyHotCorners() {
+        this.hotCorners.forEach(corner => corner?.destroy());
+        this.hotCorners = [];
+    }
+
     _updateHotCorners() {
         // destroy old hot corners
-        this.hotCorners.forEach(corner => {
-            if (corner)
-                corner.destroy();
-        });
-        this.hotCorners = [];
+        this._destroyHotCorners();
 
         if (!this._interfaceSettings.get_boolean('enable-hot-corners')) {
             this.emit('hot-corners-changed');
@@ -725,7 +745,11 @@ var LayoutManager = GObject.registerClass({
             await this._updateBackgrounds();
         }
 
-        this.emit('startup-prepared');
+        // Hack: Work around grab issue when testing greeter UI in nested
+        if (GLib.getenv('GDM_GREETER_TEST') === '1')
+            setTimeout(() => this.emit('startup-prepared'), 200);
+        else
+            this.emit('startup-prepared');
 
         this._startupAnimation();
     }
@@ -968,8 +992,9 @@ var LayoutManager = GObject.registerClass({
 
     _queueUpdateRegions() {
         if (!this._updateRegionIdle) {
-            this._updateRegionIdle = Meta.later_add(Meta.LaterType.BEFORE_REDRAW,
-                                                    this._updateRegions.bind(this));
+            const laters = global.compositor.get_laters();
+            this._updateRegionIdle = laters.add(
+                Meta.LaterType.BEFORE_REDRAW, this._updateRegions.bind(this));
         }
     }
 
@@ -992,7 +1017,8 @@ var LayoutManager = GObject.registerClass({
 
     _updateRegions() {
         if (this._updateRegionIdle) {
-            Meta.later_remove(this._updateRegionIdle);
+            const laters = global.compositor.get_laters();
+            laters.remove(this._updateRegionIdle);
             delete this._updateRegionIdle;
         }
 

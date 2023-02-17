@@ -854,15 +854,6 @@ class WorkspacesDisplay extends St.Widget {
         this._leavingOverview = false;
 
         this._gestureActive = false; // touch(pad) gestures
-
-        this.connect('destroy', this._onDestroy.bind(this));
-    }
-
-    _onDestroy() {
-        if (this._parentSetLater) {
-            Meta.later_remove(this._parentSetLater);
-            this._parentSetLater = 0;
-        }
     }
 
     _windowDragBegin() {

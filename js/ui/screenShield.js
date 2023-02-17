@@ -94,12 +94,8 @@ var ScreenShield = class extends Signals.EventEmitter {
                                                this._activateDialog();
                                        });
 
-        this._oVirtCredentialsManager = OVirt.getOVirtCredentialsManager();
-        this._oVirtCredentialsManager.connect('user-authenticated',
-                                              () => {
-                                                  if (this._isLocked)
-                                                      this._activateDialog();
-                                              });
+        this._credentialManagers = {};
+        this.addCredentialManager(OVirt.SERVICE_NAME, OVirt.getOVirtCredentialsManager());
 
         this._loginManager = LoginManager.getLoginManager();
         this._loginManager.connect('prepare-for-sleep',
@@ -272,8 +268,9 @@ var ScreenShield = class extends Signals.EventEmitter {
             //
             // XXX: another option is to kick the user into the gdm login
             // screen, where we're not affected by grabs
-            Main.notifyError(_("Unable to lock"),
-                             _("Lock was blocked by an application"));
+            Main.notifyError(
+                _('Unable to lock'),
+                _('Lock was blocked by an app'));
             return;
         }
 
@@ -641,6 +638,26 @@ var ScreenShield = class extends Signals.EventEmitter {
         // activate without animation in that case.
     }
 
+    addCredentialManager(serviceName, credentialManager) {
+        if (this._credentialManagers[serviceName])
+            return;
+
+        this._credentialManagers[serviceName] = credentialManager;
+        credentialManager.connectObject('user-authenticated', () => {
+            if (this._isLocked)
+                this._activateDialog();
+        }, this);
+    }
+
+    removeCredentialManager(serviceName) {
+        let credentialManager = this._credentialManagers[serviceName];
+        if (!credentialManager)
+            return;
+
+        credentialManager.disconnectObject(this);
+        delete this._credentialManagers[serviceName];
+    }
+
     lock(animate) {
         if (this._lockSettings.get_boolean(DISABLE_LOCK_KEY)) {
             log('Screen lock is locked down, not locking'); // lock, lock - who's there?
@@ -649,8 +666,9 @@ var ScreenShield = class extends Signals.EventEmitter {
 
         // Warn the user if we can't become modal
         if (!this._becomeModal()) {
-            Main.notifyError(_("Unable to lock"),
-                             _("Lock was blocked by an application"));
+            Main.notifyError(
+                _('Unable to lock'),
+                _('Lock was blocked by an app'));
             return;
         }
 
@@ -678,7 +696,8 @@ var ScreenShield = class extends Signals.EventEmitter {
         let wasLocked = global.get_runtime_state('b', LOCKED_STATE_STR);
         if (wasLocked === null)
             return;
-        Meta.later_add(Meta.LaterType.BEFORE_REDRAW, () => {
+        const laters = global.compositor.get_laters();
+        laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
             this.lock(false);
             return GLib.SOURCE_REMOVE;
         });

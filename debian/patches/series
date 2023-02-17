@@ -24,4 +24,4 @@ ubuntu/Revert-dash-Use-pin-instead-of-favorites.patch
 ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 debian/Revert-build-Port-to-gcr4.patch
-window-tracker-Emit-tracked-windows-changed-on-title-chan.patch
+debian/Revert-tests-Fail-on-warnings-too.patch

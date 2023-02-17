@@ -677,7 +677,8 @@ var IconGridLayout = GObject.registerClass({
 
     _onDestroy() {
         if (this._updateIconSizesLaterId >= 0) {
-            Meta.later_remove(this._updateIconSizesLaterId);
+            const laters = global.compositor.get_laters();
+            laters.remove(this._updateIconSizesLaterId);
             this._updateIconSizesLaterId = 0;
         }
     }
@@ -797,6 +798,19 @@ var IconGridLayout = GObject.registerClass({
         this._shouldEaseItems = false;
     }
 
+    _findBestPageToAppend(startPage) {
+        const itemsPerPage = this.columnsPerPage * this.rowsPerPage;
+
+        for (let i = startPage; i < this._pages.length; i++) {
+            const visibleItems = this._pages[i].visibleChildren;
+
+            if (visibleItems.length < itemsPerPage)
+                return i;
+        }
+
+        return this._pages.length;
+    }
+
     /**
      * addItem:
      * @param {Clutter.Actor} item: item to append to the grid
@@ -820,6 +834,9 @@ var IconGridLayout = GObject.registerClass({
 
         if (!this._container)
             return;
+
+        if (page !== -1 && index === -1)
+            page = this._findBestPageToAppend(page);
 
         this._shouldEaseItems = true;
 
@@ -852,6 +869,10 @@ var IconGridLayout = GObject.registerClass({
         this._shouldEaseItems = true;
 
         this._removeItemData(item);
+
+        if (newPage !== -1 && newPosition === -1)
+            newPage = this._findBestPageToAppend(newPage);
+
         this._addItemToPage(item, newPage, newPosition);
     }
 
@@ -962,8 +983,9 @@ var IconGridLayout = GObject.registerClass({
         this._pageSizeChanged = true;
 
         if (this._updateIconSizesLaterId === 0) {
+            const laters = global.compositor.get_laters();
             this._updateIconSizesLaterId =
-                Meta.later_add(Meta.LaterType.BEFORE_REDRAW, () => {
+                laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
                     const iconSize = this._findBestIconSize();
 
                     if (this._iconSize !== iconSize) {
@@ -1006,19 +1028,18 @@ var IconGridLayout = GObject.registerClass({
 
         // Out of bounds
         if (page >= this._pages.length)
-            return [null, DragLocation.INVALID];
+            return [0, 0, DragLocation.INVALID];
 
         if (isRtl && this._orientation === Clutter.Orientation.HORIZONTAL)
             page = swap(page, this._pages.length);
 
-        // Page-relative coordinates from now on
+        // Get page-relative coordinates
+        let adjX = x;
+        let adjY = y;
         if (this._orientation === Clutter.Orientation.HORIZONTAL)
-            x %= this._pageWidth;
+            adjX %= this._pageWidth;
         else
-            y %= this._pageHeight;
-
-        if (x < leftEmptySpace || y < topEmptySpace)
-            return [null, DragLocation.INVALID];
+            adjY %= this._pageHeight;
 
         const gridWidth =
             childSize * this.columnsPerPage +
@@ -1027,32 +1048,39 @@ var IconGridLayout = GObject.registerClass({
             childSize * this.rowsPerPage +
             vSpacing * (this.rowsPerPage - 1);
 
-        if (x > leftEmptySpace + gridWidth || y > topEmptySpace + gridHeight)
-            return [null, DragLocation.INVALID];
+        const inTopEmptySpace = adjY < topEmptySpace;
+        const inLeftEmptySpace = adjX < leftEmptySpace;
+        const inRightEmptySpace = adjX > leftEmptySpace + gridWidth;
+        const inBottomEmptySpace = adjY > topEmptySpace + gridHeight;
+
+        if (inTopEmptySpace || inBottomEmptySpace)
+            return [0, 0, DragLocation.INVALID];
 
         const halfHSpacing = hSpacing / 2;
         const halfVSpacing = vSpacing / 2;
         const visibleItems = this._pages[page].visibleChildren;
 
-        for (const item of visibleItems) {
-            const childBox = item.allocation.copy();
+        for (let i = 0; i < visibleItems.length; i++) {
+            const item = visibleItems[i];
+            const childBox = item.allocation;
 
-            // Page offset
-            switch (this._orientation) {
-            case Clutter.Orientation.HORIZONTAL:
-                childBox.set_origin(childBox.x1 % this._pageWidth, childBox.y1);
-                break;
-            case Clutter.Orientation.VERTICAL:
-                childBox.set_origin(childBox.x1, childBox.y1 % this._pageHeight);
-                break;
+            const firstInRow = i % this.columnsPerPage === 0;
+            const lastInRow = i % this.columnsPerPage === this.columnsPerPage - 1;
+
+            // Check icon boundaries
+            if ((inLeftEmptySpace && firstInRow) ||
+                (inRightEmptySpace && lastInRow)) {
+                if (y < childBox.y1 - halfVSpacing ||
+                    y > childBox.y2 + halfVSpacing)
+                    continue;
+            } else {
+                // eslint-disable-next-line no-lonely-if
+                if (x < childBox.x1 - halfHSpacing ||
+                    x > childBox.x2 + halfHSpacing ||
+                    y < childBox.y1 - halfVSpacing ||
+                    y > childBox.y2 + halfVSpacing)
+                    continue;
             }
-
-            // Outside the icon boundaries
-            if (x < childBox.x1 - halfHSpacing ||
-                x > childBox.x2 + halfHSpacing ||
-                y < childBox.y1 - halfVSpacing ||
-                y > childBox.y2 + halfVSpacing)
-                continue;
 
             let dragLocation;
 
@@ -1070,10 +1098,10 @@ var IconGridLayout = GObject.registerClass({
                     dragLocation = DragLocation.START_EDGE;
             }
 
-            return [item, dragLocation];
+            return [page, i, dragLocation];
         }
 
-        return [null, DragLocation.EMPTY_SPACE];
+        return [page, -1, DragLocation.EMPTY_SPACE];
     }
 
     get iconSize() {

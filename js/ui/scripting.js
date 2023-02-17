@@ -77,7 +77,7 @@ function _getPerfHelper() {
 }
 
 function _spawnPerfHelper() {
-    let path = Config.LIBEXECDIR;
+    let path = GLib.getenv('GNOME_SHELL_BUILDDIR') || Config.LIBEXECDIR;
     let command = `${path}/gnome-shell-perf-helper`;
     Util.trySpawnCommandLine(command);
 }
@@ -284,7 +284,16 @@ async function _runPerfScript(scriptModule, outputFile) {
         log(`Script failed: ${err}\n${err.stack}`);
         Meta.exit(Meta.ExitCode.ERROR);
     }
-    Meta.exit(Meta.ExitCode.SUCCESS);
+
+    try {
+        const perfHelper = _getPerfHelper();
+        perfHelper.ExitSync();
+    } catch (err) {
+        log(`Failed to exit helper: ${err}\n${err.stack}`);
+        Meta.exit(Meta.ExitCode.ERROR);
+    }
+
+    global.context.terminate();
 }
 
 /**

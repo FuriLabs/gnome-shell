@@ -13,7 +13,7 @@ stages:
   - deploy
 
 default:
-  image: registry.gitlab.gnome.org/gnome/mutter/fedora/36:x86_64-2022-09-01.0
+  image: registry.gitlab.gnome.org/gnome/mutter/fedora/37:x86_64-2022-12-22.0
   # Cancel jobs if newer commits are pushed to the branch
   interruptible: true
   # Auto-retry jobs in case of infra failures
@@ -209,6 +209,7 @@ test:
     NO_AT_BRIDGE: "1"
   before_script:
     - meson install -C mutter/build
+    - mkdir -m 700 $XDG_RUNTIME_DIR
   script:
     - dbus-run-session -- xvfb-run meson test -C build --no-rebuild
   artifacts:

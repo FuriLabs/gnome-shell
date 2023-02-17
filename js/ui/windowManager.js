@@ -56,7 +56,8 @@ class DisplayChangeDialog extends ModalDialog.ModalDialog {
 
         this._wm = wm;
 
-        this._countDown = Meta.MonitorManager.get_display_configuration_timeout();
+        const monitorManager = global.backend.get_monitor_manager();
+        this._countDown = monitorManager.get_display_configuration_timeout();
 
         // Translators: This string should be shorter than 30 characters
         let title = _('Keep these display settings?');
@@ -327,8 +328,11 @@ var WorkspaceTracker = class {
     }
 
     _queueCheckWorkspaces() {
-        if (this._checkWorkspacesId == 0)
-            this._checkWorkspacesId = Meta.later_add(Meta.LaterType.BEFORE_REDRAW, this._checkWorkspaces.bind(this));
+        if (this._checkWorkspacesId === 0) {
+            const laters = global.compositor.get_laters();
+            this._checkWorkspacesId =
+                laters.add(Meta.LaterType.BEFORE_REDRAW, this._checkWorkspaces.bind(this));
+        }
     }
 
     _nWorkspacesChanged() {
@@ -468,10 +472,6 @@ var AppSwitchAction = GObject.registerClass({
     _init() {
         super._init();
         this.set_n_touch_points(3);
-
-        global.display.connect('grab-op-begin', () => {
-            this.cancel();
-        });
     }
 
     vfunc_gesture_prepare(_actor) {
@@ -1773,7 +1773,7 @@ var WindowManager = class {
             target--;
             newWs = workspaceManager.get_workspace_by_index(target);
 
-            if (workspaceManager.get_active_workspace().index() > target) {
+            if (workspaceManager.get_active_workspace_index() > target) {
                 if (vertical)
                     direction = Meta.MotionDirection.UP;
                 else if (rtl)

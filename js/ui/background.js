@@ -101,8 +101,6 @@ const LoginManager = imports.misc.loginManager;
 const Main = imports.ui.main;
 const Params = imports.misc.params;
 
-Gio._promisify(Gio.File.prototype, 'query_info_async');
-
 var DEFAULT_BACKGROUND_COLOR = Clutter.Color.from_pixel(0x2e3436ff);
 
 const BACKGROUND_SCHEMA = 'org.gnome.desktop.background';
@@ -555,7 +553,7 @@ var BackgroundSource = class BackgroundSource {
         this._settings = new Gio.Settings({ schema_id: settingsSchema });
         this._backgrounds = [];
 
-        let monitorManager = Meta.MonitorManager.get();
+        const monitorManager = global.backend.get_monitor_manager();
         this._monitorsChangedId =
             monitorManager.connect('monitors-changed',
                                    this._onMonitorsChanged.bind(this));
@@ -630,7 +628,7 @@ var BackgroundSource = class BackgroundSource {
     }
 
     destroy() {
-        let monitorManager = Meta.MonitorManager.get();
+        const monitorManager = global.backend.get_monitor_manager();
         monitorManager.disconnect(this._monitorsChangedId);
 
         for (let monitorIndex in this._backgrounds) {

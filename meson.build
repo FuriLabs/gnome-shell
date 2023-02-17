@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '43.2',
+  version: '44.beta',
   meson_version: '>= 0.58.0',
   license: 'GPLv2+'
 )
@@ -10,7 +10,7 @@ split_version = meson.project_version().split('.')
 # the Cogl and Clutter libraries also use this API version.
 # The API version is increased each development cycle,
 # starting with 0 in 3.23.x
-mutter_api_version = '11'
+mutter_api_version = '12'
 
 clutter_pc = 'mutter-clutter-' + mutter_api_version
 cogl_pc = 'mutter-cogl-' + mutter_api_version
@@ -25,7 +25,7 @@ gio_req = '>= 2.56.0'
 gi_req = '>= 1.49.1'
 gjs_req = '>= 1.73.1'
 gtk_req = '>= 3.15.0'
-mutter_req = '>= 43.0'
+mutter_req = '>= 44.beta'
 polkit_req = '>= 0.100'
 schemas_req = '>= 42.beta'
 startup_req = '>= 0.11'
@@ -148,6 +148,8 @@ cdata.set('HAVE_FDWALK', cc.has_function('fdwalk'))
 cdata.set('HAVE_MALLINFO', cc.has_function('mallinfo'))
 cdata.set('HAVE_MALLINFO2', cc.has_function('mallinfo2'))
 cdata.set('HAVE_SYS_RESOURCE_H', cc.has_header('sys/resource.h'))
+cdata.set('HAVE_EXE_INTROSPECTION',
+  cc.has_header('elf.h') and cc.has_header('link.h'))
 cdata.set('HAVE__NL_TIME_FIRST_WEEKDAY',
   cc.has_header_symbol('langinfo.h', '_NL_TIME_FIRST_WEEKDAY')
 )
@@ -281,7 +283,6 @@ subdir('js')
 subdir('src')
 subdir('po')
 subdir('data')
-subdir('tools')
 
 if get_option('tests')
   subdir('tests')

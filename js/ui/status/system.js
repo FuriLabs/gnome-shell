@@ -87,7 +87,7 @@ const PowerToggle = GObject.registerClass({
         });
 
         this.set({
-            label: _('%d\u2009%%').format(this._proxy.Percentage),
+            title: _('%d\u2009%%').format(this._proxy.Percentage),
             fallback_icon_name: this._proxy.IconName,
             gicon,
         });
@@ -100,14 +100,15 @@ class ScreenshotItem extends QuickSettingsItem {
         super._init({
             style_class: 'icon-button',
             can_focus: true,
-            icon_name: 'camera-photo-symbolic',
+            icon_name: 'screenshooter-symbolic',
             visible: !Main.sessionMode.isGreeter,
             accessible_name: _('Take Screenshot'),
         });
 
         this.connect('clicked', () => {
             const topMenu = Main.panel.statusArea.quickSettings.menu;
-            Meta.later_add(Meta.LaterType.BEFORE_REDRAW, () => {
+            const laters = global.compositor.get_laters();
+            laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
                 Main.screenshotUI.open().catch(logError);
                 return GLib.SOURCE_REMOVE;
             });

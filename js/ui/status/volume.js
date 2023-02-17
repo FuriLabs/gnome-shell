@@ -32,7 +32,9 @@ const StreamSlider = GObject.registerClass({
     },
 }, class StreamSlider extends QuickSlider {
     _init(control) {
-        super._init();
+        super._init({
+            icon_reactive: true,
+        });
 
         this._control = control;
 
@@ -52,6 +54,13 @@ const StreamSlider = GObject.registerClass({
         this.slider.connect('drag-end', () => {
             this._inDrag = false;
             this._notifyVolumeChange();
+        });
+
+        this.connect('icon-clicked', () => {
+            if (!this._stream)
+                return;
+
+            this._stream.change_is_muted(!this._stream.is_muted);
         });
 
         this._deviceItems = new Map();
@@ -83,8 +92,6 @@ const StreamSlider = GObject.registerClass({
             this._connectStream(this._stream);
             this._updateVolume();
         } else {
-            this._deviceSection.removeAll();
-            this._deviceItems.clear();
             this.emit('stream-updated');
         }
 
@@ -206,6 +213,8 @@ const StreamSlider = GObject.registerClass({
         let muted = this._stream.is_muted;
         this._changeSlider(muted
             ? 0 : this._stream.volume / this._control.get_vol_max_norm());
+        this.iconLabel = muted ? _('Unmute') : _('Mute');
+        this._updateIcon();
         this.emit('stream-updated');
     }
 
@@ -217,6 +226,10 @@ const StreamSlider = GObject.registerClass({
 
         if (this._stream)
             this._updateVolume();
+    }
+
+    _updateIcon() {
+        this.iconName = this.getIcon();
     }
 
     getIcon() {
@@ -310,9 +323,13 @@ class OutputStreamSlider extends StreamSlider {
             return;
 
         this._hasHeadphones = hasHeadphones;
+        this._updateIcon();
+    }
+
+    _updateIcon() {
         this.iconName = this._hasHeadphones
             ? 'audio-headphones-symbolic'
-            : 'audio-speakers-symbolic';
+            : this.getIcon();
     }
 });
 

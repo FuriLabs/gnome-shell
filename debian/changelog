@@ -1,3 +1,66 @@
+gnome-shell (44~beta-1) experimental; urgency=medium
+
+  * New upstream release
+  * Drop translation patches: applied in new release
+  * Bump mutter dependency to 44~beta
+  * Update install files
+  * Build-Depend on mutter-12-tests instead of libmutter-test-12
+  * Build-Depend on gir1.2-nma-1.0 for build tests
+  * Temporarily disable change to make test warnings fail the build
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Fri, 17 Feb 2023 18:10:36 -0500
+
+gnome-shell (43.3-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream release
+    - Don't dereference symlinks when deleting extensions
+      (GNOME/gnome-shell#6182, which can be a data loss bug)
+    - Fix windows disappearing from Alt+Tab if their title changes at
+      just the wrong time (GNOME/gnome-shell#6385)
+    - Log warnings on invalid state transitions (GNOME/gnome-shell#4561)
+    - Fix some memory leaks in gdm (GNOME/gnome-shell#6395)
+    - gnome-extensions tool: Fix the ability to enable and disable
+      extensions while GNOME is installed but not running
+      (GNOME/gnome-shell#6127)
+    - Silence compiler warnings with newer GLib (GNOME/gnome-shell!2625)
+    - Add precondition checks to prevent some crashes
+      (GNOME/gnome-shell!2622)
+    - Provide context to IBus input method when the surrounding text
+      becomes empty (GNOME/gnome-shell#5895)
+    - Avoid warnings with audio streams on a device not corresponding
+      to a sound card, such as network sinks (GNOME/gnome-shell!2616)
+    - Avoid some strings being untranslatable by working around an xgettext
+      bug (GNOME/gnome-shell#5280)
+    - Fix drag-and-drop in the dash when animations are disabled
+      (GNOME/gnome-shell!2604)
+    - Avoid warnings when dragging an app from the dash to the grid
+      (GNOME/gnome-shell#6317)
+    - Save screencasts to home directory if the Videos directory has been
+      deleted, instead of failing to record (GNOME/gnome-shell!2594)
+    - Make Shell less susceptible to the OOM-killer, since it is required
+      for basic functionality of desktops that use it
+      (GNOME/gnome-shell!2582)
+  * d/patches: Drop patches that were applied upstream
+  * d/patches: Add translation updates from upstream:
+    fi, id, ka, pt, sv, tr, uk
+  * d/control.in, d/gbp.conf, d/watch: Set up branches for 43.x in bookworm.
+    This leaves the default branch available for GNOME 44 betas in
+    experimental and Ubuntu.
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 15 Feb 2023 17:02:45 +0000
+
+gnome-shell (43.2-2) unstable; urgency=medium
+
+  * Team upload
+  * d/patches: Sort closest-to-upstream first
+  * d/patches: Update to upstream gnome-43 branch commit 43.2-8-ga1b834297
+    - Ensure that buttons in quick settings menu are aligned to pixel grid
+    - Translation updates: ab, en_GB, ie, ka, ru
+  * Update standards version to 4.6.2 (no changes needed)
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 29 Jan 2023 15:26:02 +0000
+
 gnome-shell (43.2-1ubuntu1) lunar; urgency=medium
 
   * Merge with Debian. Remaining changes:

@@ -17,17 +17,17 @@ const PowerProfilesProxy = Gio.DBusProxy.makeProxyWrapper(PowerProfilesIface);
 
 const PROFILE_PARAMS = {
     'performance': {
-        label: C_('Power profile', 'Performance'),
+        name: C_('Power profile', 'Performance'),
         iconName: 'power-profile-performance-symbolic',
     },
 
     'balanced': {
-        label: C_('Power profile', 'Balanced'),
+        name: C_('Power profile', 'Balanced'),
         iconName: 'power-profile-balanced-symbolic',
     },
 
     'power-saver': {
-        label: C_('Power profile', 'Power Saver'),
+        name: C_('Power profile', 'Power Saver'),
         iconName: 'power-profile-power-saver-symbolic',
     },
 };
@@ -37,7 +37,7 @@ const LAST_PROFILE_KEY = 'last-selected-power-profile';
 const PowerProfilesToggle = GObject.registerClass(
 class PowerProfilesToggle extends QuickMenuToggle {
     _init() {
-        super._init();
+        super._init({title: _('Power Mode')});
 
         this._profileItems = new Map();
 
@@ -68,6 +68,9 @@ class PowerProfilesToggle extends QuickMenuToggle {
         this._profileSection = new PopupMenu.PopupMenuSection();
         this.menu.addMenuItem(this._profileSection);
         this.menu.setHeader('power-profile-balanced-symbolic', _('Power Profiles'));
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this.menu.addSettingsAction(_('Power Settings'),
+            'gnome-power-panel.desktop');
 
         this._sync();
     }
@@ -80,11 +83,11 @@ class PowerProfilesToggle extends QuickMenuToggle {
             .map(p => p.Profile.unpack())
             .reverse();
         for (const profile of profiles) {
-            const {label, iconName} = PROFILE_PARAMS[profile];
-            if (!label)
+            const {name, iconName} = PROFILE_PARAMS[profile];
+            if (!name)
                 continue;
 
-            const item = new PopupMenu.PopupImageMenuItem(label, iconName);
+            const item = new PopupMenu.PopupImageMenuItem(name, iconName);
             item.connect('activate',
                 () => (this._proxy.ActiveProfile = profile));
             this._profileItems.set(profile, item);
@@ -108,7 +111,9 @@ class PowerProfilesToggle extends QuickMenuToggle {
                 : PopupMenu.Ornament.NONE);
         }
 
-        this.set(PROFILE_PARAMS[activeProfile]);
+        const {name: subtitle, iconName} = PROFILE_PARAMS[activeProfile];
+        this.set({subtitle, iconName});
+
         this.checked = activeProfile !== 'balanced';
 
         if (this.checked)

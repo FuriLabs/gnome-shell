@@ -127,7 +127,7 @@ var GnomeShell = class {
 
         let monitorIndex = -1;
         if (connector) {
-            let monitorManager = Meta.MonitorManager.get();
+            const monitorManager = global.backend.get_monitor_manager();
             monitorIndex = monitorManager.get_monitor_for_connector(connector);
         }
 
@@ -160,7 +160,7 @@ var GnomeShell = class {
             invocation.return_error_literal(
                 Gio.DBusError,
                 Gio.DBusError.FILE_NOT_FOUND,
-                `No application with ID ${id}`);
+                `No app with ID ${id}`);
             return;
         }
 

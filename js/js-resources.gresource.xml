@@ -37,6 +37,7 @@
 
     <file>perf/basic.js</file>
     <file>perf/core.js</file>
+    <file>perf/headlessStart.js</file>
     <file>perf/hwtest.js</file>
 
     <file>ui/accessDialog.js</file>
@@ -134,6 +135,7 @@
 
     <file>ui/status/accessibility.js</file>
     <file>ui/status/autoRotate.js</file>
+    <file>ui/status/backgroundApps.js</file>
     <file>ui/status/brightness.js</file>
     <file>ui/status/darkMode.js</file>
     <file>ui/status/dwellClick.js</file>

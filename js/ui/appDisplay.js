@@ -43,8 +43,10 @@ const PAGE_PREVIEW_ANIMATION_TIME = 150;
 const PAGE_INDICATOR_FADE_TIME = 200;
 const PAGE_PREVIEW_RATIO = 0.20;
 
-const OVERSHOOT_THRESHOLD = 20;
-const OVERSHOOT_TIMEOUT = 1000;
+const DRAG_PAGE_SWITCH_INITIAL_TIMEOUT = 1000;
+const DRAG_PAGE_SWITCH_IMMEDIATELY_THRESHOLD_PX = 20;
+
+const DRAG_PAGE_SWITCH_REPEAT_TIMEOUT = 1000;
 
 const DELAYED_MOVE_TIMEOUT = 200;
 
@@ -543,7 +545,7 @@ var BaseAppView = GObject.registerClass({
             style_class: 'page-navigation-hint next',
             opacity: 0,
             visible: false,
-            reactive: true,
+            reactive: false,
             x_expand: true,
             y_expand: true,
             x_align: Clutter.ActorAlign.FILL,
@@ -554,7 +556,7 @@ var BaseAppView = GObject.registerClass({
             style_class: 'page-navigation-hint previous',
             opacity: 0,
             visible: false,
-            reactive: true,
+            reactive: false,
             x_expand: true,
             y_expand: true,
             x_align: Clutter.ActorAlign.FILL,
@@ -638,7 +640,7 @@ var BaseAppView = GObject.registerClass({
             () => this._redisplay(), this);
 
         // Drag n' Drop
-        this._overshootTimeoutId = 0;
+        this._lastOvershootCoord = -1;
         this._delayedMoveData = null;
 
         this._dragBeginId = 0;
@@ -796,6 +798,8 @@ var BaseAppView = GObject.registerClass({
 
         // Dragging over invalid parts of the grid cancels the timeout
         if (item === source ||
+            this._adjustment.get_transition('value') !== null ||
+            page !== this._grid.currentPage ||
             dragLocation === IconGrid.DragLocation.INVALID ||
             dragLocation === IconGrid.DragLocation.ON_ICON) {
             this._removeDelayedMove();
@@ -838,69 +842,101 @@ var BaseAppView = GObject.registerClass({
         this._delayedMoveData = null;
     }
 
-    _resetOvershoot() {
-        if (this._overshootTimeoutId)
-            GLib.source_remove(this._overshootTimeoutId);
-        this._overshootTimeoutId = 0;
+    _resetDragPageSwitch() {
+        if (this._dragPageSwitchInitialTimeoutId) {
+            GLib.source_remove(this._dragPageSwitchInitialTimeoutId);
+            delete this._dragPageSwitchInitialTimeoutId;
+        }
+
+        if (this._dragPageSwitchRepeatTimeoutId) {
+            GLib.source_remove(this._dragPageSwitchRepeatTimeoutId);
+            delete this._dragPageSwitchRepeatTimeoutId;
+        }
+
+        this._lastOvershootCoord = -1;
     }
 
-    _dragWithinOvershootRegion(dragEvent) {
-        const rtl = this.get_text_direction() === Clutter.TextDirection.RTL;
-        const {x, y, targetActor: indicator} = dragEvent;
-        const [indicatorX, indicatorY] = indicator.get_transformed_position();
-        const [indicatorWidth, indicatorHeight] = indicator.get_transformed_size();
+    _setupDragPageSwitchRepeat(direction) {
+        this._resetDragPageSwitch();
 
-        let overshootX = indicatorX;
-        if (indicator === this._nextPageIndicator || rtl)
-            overshootX += indicatorWidth - OVERSHOOT_THRESHOLD;
+        this._dragPageSwitchRepeatTimeoutId =
+            GLib.timeout_add(GLib.PRIORITY_DEFAULT, DRAG_PAGE_SWITCH_REPEAT_TIMEOUT, () => {
+                this.goToPage(this._grid.currentPage + direction);
 
-        const overshootBox = new Clutter.ActorBox();
-        overshootBox.set_origin(overshootX, indicatorY);
-        overshootBox.set_size(OVERSHOOT_THRESHOLD, indicatorHeight);
-
-        return overshootBox.contains(x, y);
+                return GLib.SOURCE_CONTINUE;
+            });
+        GLib.Source.set_name_by_id(this._dragPageSwitchRepeatTimeoutId,
+            '[gnome-shell] this._dragPageSwitchRepeatTimeoutId');
     }
 
-    _handleDragOvershoot(dragEvent) {
+    _dragMaybeSwitchPageImmediately(dragEvent) {
+        // When there's an adjacent monitor, this gesture conflicts with
+        // dragging to the adjacent monitor, so disable in multi-monitor setups
+        if (Main.layoutManager.monitors.length > 1)
+            return false;
+
         // Already animating
         if (this._adjustment.get_transition('value') !== null)
+            return false;
+
+        const [gridX, gridY] = this.get_transformed_position();
+        const [gridWidth, gridHeight] = this.get_transformed_size();
+
+        const vertical = this._orientation === Clutter.Orientation.VERTICAL;
+        const gridStart = vertical
+            ? gridY + DRAG_PAGE_SWITCH_IMMEDIATELY_THRESHOLD_PX
+            : gridX + DRAG_PAGE_SWITCH_IMMEDIATELY_THRESHOLD_PX;
+        const gridEnd = vertical
+            ? gridY + gridHeight - DRAG_PAGE_SWITCH_IMMEDIATELY_THRESHOLD_PX
+            : gridX + gridWidth - DRAG_PAGE_SWITCH_IMMEDIATELY_THRESHOLD_PX;
+
+        const dragCoord = vertical ? dragEvent.y : dragEvent.x;
+        if (dragCoord > gridStart && dragCoord < gridEnd) {
+            const moveDelta = Math.abs(this._lastOvershootCoord - dragCoord);
+
+            // We moved back out of the overshoot region into the grid. If the
+            // move was sufficiently large, reset the overshoot so that it's
+            // possible to repeatedly bump against the edge and quickly switch
+            // pages.
+            if (this._lastOvershootCoord >= 0 &&
+                moveDelta > DRAG_PAGE_SWITCH_IMMEDIATELY_THRESHOLD_PX)
+                this._resetDragPageSwitch();
+
+            return false;
+        }
+
+        // Still in the area of the previous overshoot
+        if (this._lastOvershootCoord >= 0)
+            return false;
+
+        let direction = dragCoord <= gridStart ? -1 : 1;
+        if (this.get_text_direction() === Clutter.TextDirection.RTL)
+            direction *= -1;
+
+        this.goToPage(this._grid.currentPage + direction);
+        this._setupDragPageSwitchRepeat(direction);
+
+        this._lastOvershootCoord = dragCoord;
+
+        return true;
+    }
+
+    _maybeSetupDragPageSwitchInitialTimeout(dragEvent) {
+        if (this._dragPageSwitchInitialTimeoutId || this._dragPageSwitchRepeatTimeoutId)
             return;
 
         const {targetActor} = dragEvent;
 
-        if (targetActor !== this._prevPageIndicator &&
-            targetActor !== this._nextPageIndicator) {
-            this._resetOvershoot();
-            return;
-        }
+        this._dragPageSwitchInitialTimeoutId =
+            GLib.timeout_add(GLib.PRIORITY_DEFAULT, DRAG_PAGE_SWITCH_INITIAL_TIMEOUT, () => {
+                const direction = targetActor === this._prevPageIndicator ? -1 : 1;
 
-        if (this._overshootTimeoutId > 0)
-            return;
+                this.goToPage(this._grid.currentPage + direction);
+                this._setupDragPageSwitchRepeat(direction);
 
-        let targetPage;
-        if (dragEvent.targetActor === this._prevPageIndicator)
-            targetPage = this._grid.currentPage - 1;
-        else
-            targetPage = this._grid.currentPage + 1;
-
-        if (targetPage < 0 || targetPage >= this._grid.nPages)
-            return; // don't go beyond first/last page
-
-        // If dragging over the drag overshoot threshold region, immediately
-        // switch pages
-        if (this._dragWithinOvershootRegion(dragEvent)) {
-            this._resetOvershoot();
-            this.goToPage(targetPage);
-        }
-
-        this._overshootTimeoutId =
-            GLib.timeout_add(GLib.PRIORITY_DEFAULT, OVERSHOOT_TIMEOUT, () => {
-                this._resetOvershoot();
-                this.goToPage(targetPage);
+                delete this._dragPageSwitchInitialTimeoutId;
                 return GLib.SOURCE_REMOVE;
             });
-        GLib.Source.set_name_by_id(this._overshootTimeoutId,
-            '[gnome-shell] this._overshootTimeoutId');
     }
 
     _onDragBegin() {
@@ -920,11 +956,23 @@ var BaseAppView = GObject.registerClass({
 
         const appIcon = dragEvent.source;
 
-        // Handle the drag overshoot. When dragging to above the
-        // icon grid, move to the page above; when dragging below,
-        // move to the page below.
-        if (appIcon instanceof AppViewItem)
-            this._handleDragOvershoot(dragEvent);
+        if (appIcon instanceof AppViewItem) {
+            // Two ways of switching pages during DND:
+            // 1) When "bumping" the cursor against the monitor edge, we switch
+            //    page immediately.
+            // 2) When hovering over the next-page indicator for a certain time,
+            //    we also switch page.
+
+            if (!this._dragMaybeSwitchPageImmediately(dragEvent)) {
+                const {targetActor} = dragEvent;
+
+                if (targetActor === this._prevPageIndicator ||
+                    targetActor === this._nextPageIndicator)
+                    this._maybeSetupDragPageSwitchInitialTimeout(dragEvent);
+                else
+                    this._resetDragPageSwitch();
+            }
+        }
 
         this._maybeMoveItem(dragEvent);
 
@@ -944,7 +992,8 @@ var BaseAppView = GObject.registerClass({
             this._dragMonitor = null;
         }
 
-        this._resetOvershoot();
+        this._resetDragPageSwitch();
+
         this._appGridLayout.hidePageIndicators();
         this._swipeTracker.enabled = true;
     }
@@ -1007,36 +1056,28 @@ var BaseAppView = GObject.registerClass({
         return -1;
     }
 
-    _getLinearPosition(page, position) {
+    _getLinearPosition(item) {
+        const [page, position] = this._grid.getItemPosition(item);
+        if (page === -1 || position === -1)
+            throw new Error('Item not found in grid');
+
         let itemIndex = 0;
 
         if (this._grid.nPages > 0) {
-            const realPage = page === -1 ? this._grid.nPages - 1 : page;
+            for (let i = 0; i < page; i++)
+                itemIndex += this._grid.getItemsAtPage(i).filter(c => c.visible).length;
 
-            itemIndex = position === -1
-                ? this._grid.getItemsAtPage(realPage).filter(c => c.visible).length - 1
-                : position;
-
-            for (let i = 0; i < realPage; i++) {
-                const pageItems = this._grid.getItemsAtPage(i).filter(c => c.visible);
-                itemIndex += pageItems.length;
-            }
+            itemIndex += position;
         }
 
         return itemIndex;
     }
 
     _addItem(item, page, position) {
-        // Append icons to the first page with empty slot, starting from
-        // the second page
-        if (this._grid.nPages > 1 && page === -1 && position === -1)
-            page = this._findBestPageToAppend();
-
-        const itemIndex = this._getLinearPosition(page, position);
-
-        this._orderedItems.splice(itemIndex, 0, item);
         this._items.set(item.id, item);
         this._grid.addItem(item, page, position);
+
+        this._orderedItems.splice(this._getLinearPosition(item), 0, item);
     }
 
     _removeItem(item) {
@@ -1079,10 +1120,18 @@ var BaseAppView = GObject.registerClass({
         // Add new app icons, or move existing ones
         newApps.forEach(icon => {
             const [page, position] = this._getItemPosition(icon);
-            if (addedApps.includes(icon))
-                this._addItem(icon, page, position);
-            else if (page !== -1 && position !== -1)
+            if (addedApps.includes(icon)) {
+                // If there's two pages, newly installed apps should not appear
+                // on page 0
+                if (page === -1 && position === -1 && this._grid.nPages > 1)
+                    this._addItem(icon, 1, -1);
+                else
+                    this._addItem(icon, page, position);
+            } else if (page !== -1 && position !== -1) {
                 this._moveItem(icon, page, position);
+            } else {
+                // App is part of a folder
+            }
         });
 
         this.emit('view-loaded');
@@ -1100,7 +1149,7 @@ var BaseAppView = GObject.registerClass({
         if (this._items.has(id))
             this._items.get(id).navigate_focus(null, St.DirectionType.TAB_FORWARD, false);
         else
-            log(`No such application ${id}`);
+            log(`No such app ${id}`);
     }
 
     selectApp(id) {
@@ -1128,14 +1177,18 @@ var BaseAppView = GObject.registerClass({
     }
 
     _getDropTarget(x, y, source) {
-        const { currentPage } = this._grid;
-
-        let [item, dragLocation] = this._grid.getDropTarget(x, y);
-
         const [sourcePage, sourcePosition] = this._grid.getItemPosition(source);
-        const targetPage = currentPage;
-        let targetPosition = item
-            ? this._grid.getItemPosition(item)[1] : -1;
+        let [targetPage, targetPosition, dragLocation] = this._grid.getDropTarget(x, y);
+
+        let reflowDirection = Clutter.ActorAlign.END;
+
+        if (sourcePosition === targetPosition)
+            reflowDirection = -1;
+
+        if (sourcePage === targetPage && sourcePosition < targetPosition)
+            reflowDirection = Clutter.ActorAlign.START;
+        if (!this._grid.layout_manager.allow_incomplete_pages && sourcePage < targetPage)
+            reflowDirection = Clutter.ActorAlign.START;
 
         // In case we're hovering over the edge of an item but the
         // reflow will happen in the opposite direction (the drag
@@ -1147,8 +1200,7 @@ var BaseAppView = GObject.registerClass({
         // or last column though, in that case there is no adjacent
         // icon we could push away.
         if (dragLocation === IconGrid.DragLocation.START_EDGE &&
-            targetPosition > sourcePosition &&
-            targetPage === sourcePage) {
+            reflowDirection === Clutter.ActorAlign.START) {
             const nColumns = this._grid.layout_manager.columns_per_page;
             const targetColumn = targetPosition % nColumns;
 
@@ -1157,8 +1209,7 @@ var BaseAppView = GObject.registerClass({
                 dragLocation = IconGrid.DragLocation.END_EDGE;
             }
         } else if (dragLocation === IconGrid.DragLocation.END_EDGE &&
-            (targetPosition < sourcePosition ||
-             targetPage !== sourcePage)) {
+                   reflowDirection === Clutter.ActorAlign.END) {
             const nColumns = this._grid.layout_manager.columns_per_page;
             const targetColumn = targetPosition % nColumns;
 
@@ -1168,30 +1219,15 @@ var BaseAppView = GObject.registerClass({
             }
         }
 
-        // Append to the page if dragging over empty area
-        if (dragLocation === IconGrid.DragLocation.EMPTY_SPACE) {
-            const pageItems =
-                this._grid.getItemsAtPage(currentPage).filter(c => c.visible);
-
-            targetPosition = pageItems.length;
-        }
-
         return [targetPage, targetPosition, dragLocation];
     }
 
     _moveItem(item, newPage, newPosition) {
-        const [page, position] = this._grid.getItemPosition(item);
-        if (page === newPage && position === newPosition)
-            return;
+        this._grid.moveItem(item, newPage, newPosition);
 
         // Update the _orderedItems array
-        let index = this._orderedItems.indexOf(item);
-        this._orderedItems.splice(index, 1);
-
-        index = this._getLinearPosition(newPage, newPosition);
-        this._orderedItems.splice(index, 0, item);
-
-        this._grid.moveItem(item, newPage, newPosition);
+        this._orderedItems.splice(this._orderedItems.indexOf(item), 1);
+        this._orderedItems.splice(this._getLinearPosition(item), 0, item);
     }
 
     vfunc_map() {
@@ -1426,9 +1462,9 @@ class AppDisplay extends BaseAppView {
             global.settings.is_writable('app-picker-layout');
 
         this._placeholder = new AppIcon(app, { isDraggable });
-        this._placeholder.connect('notify::pressed', () => {
-            if (this._placeholder.pressed)
-                this.updateDragFocus(this._placeholder);
+        this._placeholder.connect('notify::pressed', icon => {
+            if (icon.pressed)
+                this.updateDragFocus(icon);
         });
         this._placeholder.scaleAndFade();
         this._redisplay();
@@ -1451,7 +1487,7 @@ class AppDisplay extends BaseAppView {
             let [page, position] = this._grid.getItemPosition(item);
 
             if (page === -1)
-                page = this._findBestPageToAppend(this._grid.currentPage);
+                page = this._grid.currentPage;
 
             return [page, position];
         }
@@ -2101,7 +2137,7 @@ class FolderView extends BaseAppView {
         this._scrollView.add_action(action);
 
         this._deletingFolder = false;
-        this._appIds = [];
+        this._apps = [];
         this._redisplay();
     }
 
@@ -2109,48 +2145,8 @@ class FolderView extends BaseAppView {
         return new FolderGrid();
     }
 
-    _getFolderApps() {
-        const appIds = [];
-        const excludedApps = this._folder.get_strv('excluded-apps');
-        const appSys = Shell.AppSystem.get_default();
-        const addAppId = appId => {
-            if (excludedApps.includes(appId))
-                return;
-
-            if (this._appFavorites.isFavorite(appId))
-                return;
-
-            const app = appSys.lookup_app(appId);
-            if (!app)
-                return;
-
-            if (!this._parentalControlsManager.shouldShowApp(app.get_app_info()))
-                return;
-
-            if (appIds.indexOf(appId) !== -1)
-                return;
-
-            appIds.push(appId);
-        };
-
-        const folderApps = this._folder.get_strv('apps');
-        folderApps.forEach(addAppId);
-
-        const folderCategories = this._folder.get_strv('categories');
-        const appInfos = this._parentView.getAppInfos();
-        appInfos.forEach(appInfo => {
-            let appCategories = _getCategories(appInfo);
-            if (!_listsIntersect(folderCategories, appCategories))
-                return;
-
-            addAppId(appInfo.get_id());
-        });
-
-        return appIds;
-    }
-
     _getItemPosition(item) {
-        const appIndex = this._appIds.indexOf(item.id);
+        const appIndex = this._apps.indexOf(item.app);
 
         if (appIndex === -1)
             return [-1, -1];
@@ -2160,8 +2156,8 @@ class FolderView extends BaseAppView {
     }
 
     _compareItems(a, b) {
-        const aPosition = this._appIds.indexOf(a.id);
-        const bPosition = this._appIds.indexOf(b.id);
+        const aPosition = this._apps.indexOf(a.app);
+        const bPosition = this._apps.indexOf(b.app);
 
         if (aPosition === -1 && bPosition === -1)
             return a.name.localeCompare(b.name);
@@ -2207,27 +2203,52 @@ class FolderView extends BaseAppView {
     }
 
     _loadApps() {
-        let apps = [];
-        let appSys = Shell.AppSystem.get_default();
+        this._apps = [];
+        const excludedApps = this._folder.get_strv('excluded-apps');
+        const appSys = Shell.AppSystem.get_default();
+        const addAppId = appId => {
+            if (excludedApps.includes(appId))
+                return;
 
-        this._appIds.forEach(appId => {
+            if (this._appFavorites.isFavorite(appId))
+                return;
+
             const app = appSys.lookup_app(appId);
+            if (!app)
+                return;
 
-            let icon = this._items.get(appId);
+            if (!this._parentalControlsManager.shouldShowApp(app.get_app_info()))
+                return;
+
+            if (this._apps.indexOf(app) !== -1)
+                return;
+
+            this._apps.push(app);
+        };
+
+        const folderApps = this._folder.get_strv('apps');
+        folderApps.forEach(addAppId);
+
+        const folderCategories = this._folder.get_strv('categories');
+        const appInfos = this._parentView.getAppInfos();
+        appInfos.forEach(appInfo => {
+            let appCategories = _getCategories(appInfo);
+            if (!_listsIntersect(folderCategories, appCategories))
+                return;
+
+            addAppId(appInfo.get_id());
+        });
+
+        let items = [];
+        this._apps.forEach(app => {
+            let icon = this._items.get(app.get_id());
             if (!icon)
                 icon = new AppIcon(app);
 
-            apps.push(icon);
+            items.push(icon);
         });
 
-        return apps;
-    }
-
-    _redisplay() {
-        // Keep the app ids list cached
-        this._appIds = this._getFolderApps();
-
-        super._redisplay();
+        return items;
     }
 
     acceptDrop(source) {

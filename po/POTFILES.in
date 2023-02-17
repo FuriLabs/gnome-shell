@@ -48,6 +48,7 @@ js/ui/overview.js
 js/ui/padOsd.js
 js/ui/panel.js
 js/ui/popupMenu.js
+js/ui/quickSettings.js
 js/ui/runDialog.js
 js/ui/screenShield.js
 js/ui/screenshot.js
@@ -57,6 +58,7 @@ js/ui/shellEntry.js
 js/ui/shellMountOperation.js
 js/ui/status/accessibility.js
 js/ui/status/autoRotate.js
+js/ui/status/backgroundApps.js
 js/ui/status/bluetooth.js
 js/ui/status/brightness.js
 js/ui/status/darkMode.js
@@ -77,7 +79,6 @@ js/ui/welcomeDialog.js
 js/ui/windowAttentionHandler.js
 js/ui/windowManager.js
 js/ui/windowMenu.js
-src/calendar-server/evolution-calendar.desktop.in
 src/main.c
 src/shell-app.c
 src/shell-app-system.c
@@ -85,6 +86,7 @@ src/shell-global.c
 src/shell-keyring-prompt.c
 src/shell-polkit-authentication-agent.c
 src/shell-util.c
+src/st/st-icon-theme.c
 subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in
 subprojects/extensions-app/data/org.gnome.Extensions.desktop.in.in
 subprojects/extensions-app/js/main.js

@@ -55,6 +55,7 @@ Gio._promisify(Gio.DBusConnection.prototype, 'call');
 Gio._promisify(Gio.DBusProxy, 'new');
 Gio._promisify(Gio.DBusProxy.prototype, 'init_async');
 Gio._promisify(Gio.DBusProxy.prototype, 'call_with_unix_fd_list');
+Gio._promisify(Gio.File.prototype, 'query_info_async');
 Gio._promisify(Polkit.Permission, 'new');
 
 let _localTimeZone = null;
@@ -464,7 +465,7 @@ function adjustAnimationTime(msecs) {
     let settings = St.Settings.get();
 
     if (!settings.enable_animations)
-        return Math.min(msecs, 1);
+        return 0;
     return settings.slow_down_factor * msecs;
 }
 

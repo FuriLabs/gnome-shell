@@ -525,6 +525,15 @@ on_wm_class_changed (MetaWindow  *window,
 }
 
 static void
+on_title_changed (MetaWindow  *window,
+                  GParamSpec  *pspec,
+                  gpointer     user_data)
+{
+  ShellWindowTracker *self = SHELL_WINDOW_TRACKER (user_data);
+  g_signal_emit (self, signals[TRACKED_WINDOWS_CHANGED], 0);
+}
+
+static void
 on_gtk_application_id_changed (MetaWindow  *window,
                                GParamSpec  *pspec,
                                gpointer     user_data)
@@ -554,6 +563,7 @@ track_window (ShellWindowTracker *self,
   g_hash_table_insert (self->window_to_app, window, app);
 
   g_signal_connect (window, "notify::wm-class", G_CALLBACK (on_wm_class_changed), self);
+  g_signal_connect (window, "notify::title", G_CALLBACK (on_title_changed), self);
   g_signal_connect (window, "notify::gtk-application-id", G_CALLBACK (on_gtk_application_id_changed), self);
   g_signal_connect (window, "unmanaged", G_CALLBACK (on_window_unmanaged), self);
 
@@ -586,6 +596,7 @@ disassociate_window (ShellWindowTracker   *self,
 
   _shell_app_remove_window (app, window);
   g_signal_handlers_disconnect_by_func (window, G_CALLBACK (on_wm_class_changed), self);
+  g_signal_handlers_disconnect_by_func (window, G_CALLBACK (on_title_changed), self);
   g_signal_handlers_disconnect_by_func (window, G_CALLBACK (on_gtk_application_id_changed), self);
   g_signal_handlers_disconnect_by_func (window, G_CALLBACK (on_window_unmanaged), self);
 
@@ -632,6 +643,23 @@ on_startup_sequence_changed (MetaStartupNotification *sn,
 }
 
 static void
+on_shutdown (ShellGlobal        *shell_global,
+             ShellWindowTracker *tracker)
+{
+  g_autoptr (GList) windows;
+  GList *l;
+
+  windows = g_hash_table_get_keys (tracker->window_to_app);
+  for (l = windows; l; l = l->next)
+    {
+      MetaWindow *window = l->data;
+
+      disassociate_window (tracker, window);
+    }
+  g_assert (g_hash_table_size (tracker->window_to_app) == 0);
+}
+
+static void
 shell_window_tracker_init (ShellWindowTracker *self)
 {
   MetaDisplay *display = shell_global_get_display (shell_global_get ());
@@ -646,6 +674,9 @@ shell_window_tracker_init (ShellWindowTracker *self)
 
   load_initial_windows (self);
   init_window_tracking (self);
+
+  g_signal_connect (shell_global_get (),
+                    "shutdown", G_CALLBACK (on_shutdown), self);
 }
 
 static void

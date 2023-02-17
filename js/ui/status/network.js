@@ -305,11 +305,18 @@ class NMConnectionItem extends NMMenuItem {
         this.add_child(this._icon);
 
         this._label = new St.Label({
+            x_expand: true,
             y_expand: true,
             y_align: Clutter.ActorAlign.CENTER,
         });
         this.add_child(this._label);
-        this.label_actor = this._label;
+
+        this._subtitle = new St.Label({
+            style_class: 'device-subtitle',
+            y_expand: true,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        this.add_child(this._subtitle);
 
         this.bind_property('icon-name',
             this._icon, 'icon-name',
@@ -350,7 +357,7 @@ class NMConnectionItem extends NMMenuItem {
             ? PopupMenu.Ornament.DOT : PopupMenu.Ornament.NONE);
     }
 
-    _getRegularLabel() {
+    _getAccessibleName() {
         return this.is_active
             // Translators: %s is a device name like "MyPhone"
             ? _('Disconnect %s').format(this.name)
@@ -358,12 +365,20 @@ class NMConnectionItem extends NMMenuItem {
             : _('Connect to %s').format(this.name);
     }
 
+    _getSubtitleLabel() {
+        return this.is_active ? _('Disconnect') : _('Connect');
+    }
+
     _sync() {
+        this._label.text = this.name;
+
         if (this.radioMode) {
-            this._label.text = this.name;
+            this._subtitle.text = null;
+            this.accessible_name = this.name;
             this.accessible_role = Atk.Role.CHECK_MENU_ITEM;
         } else {
-            this._label.text = this._getRegularLabel();
+            this.accessible_name = this._getAccessibleName();
+            this._subtitle.text = this._getSubtitleLabel();
             this.accessible_role = Atk.Role.MENU_ITEM;
         }
         this._updateOrnament();
@@ -1223,7 +1238,9 @@ const NMWirelessDeviceItem = GObject.registerClass({
             const {network: net} = item;
             item.visible =
                 (hasWindows || net.hasConnections() || net.canAutoconnect()) &&
-                nVisible++ < MAX_VISIBLE_NETWORKS;
+                nVisible < MAX_VISIBLE_NETWORKS;
+            if (item.visible)
+                nVisible++;
         }
     }
 
@@ -1316,9 +1333,13 @@ const NMToggle = GObject.registerClass({
         this._itemBinding = new GObject.BindingGroup();
         this._itemBinding.bind('icon-name',
             this, 'icon-name', GObject.BindingFlags.DEFAULT);
+        this._itemBinding.bind_property_full('source',
+            this, 'title', GObject.BindingFlags.DEFAULT,
+            () => [true, this._getDefaultName()],
+            null);
         this._itemBinding.bind_full('name',
-            this, 'label', GObject.BindingFlags.DEFAULT,
-            (bind, source) => [true, this._transformLabel(source)],
+            this, 'subtitle', GObject.BindingFlags.DEFAULT,
+            (bind, source) => [true, this._transformSubtitle(source)],
             null);
 
         this.connect('clicked', () => this.activate());
@@ -1357,13 +1378,13 @@ const NMToggle = GObject.registerClass({
 
     // transform function for property binding:
     // Ignore the provided label if there are multiple active
-    // items, and replace it with something like "VPN (2)"
-    _transformLabel(source) {
+    // items, and replace it with something like "2 connected"
+    _transformSubtitle(source) {
         const nActive = this.checked
             ? [...this._getActiveItems()].length
             : 0;
         if (nActive > 1)
-            return `${this._getDefaultName()} (${nActive})`;
+            return ngettext('%d connected', '%d connected', nActive).format(nActive);
         return source;
     }
 
@@ -1815,6 +1836,13 @@ class NMWiredToggle extends NMDeviceToggle {
             'gnome-network-panel.desktop');
     }
 
+    _transformSubtitle(source) {
+        const subtitle = super._transformSubtitle(source);
+        if (subtitle === this.title)
+            return null;
+        return subtitle;
+    }
+
     _createDeviceMenuItem(device) {
         return new NMWiredDeviceItem(this._client, device);
     }
@@ -1828,6 +1856,11 @@ class NMBluetoothToggle extends NMDeviceToggle {
         this.menu.setHeader('network-cellular-symbolic', _('Bluetooth Tethers'));
         this.menu.addSettingsAction(_('Bluetooth Settings'),
             'gnome-network-panel.desktop');
+    }
+
+    _getDefaultName() {
+        // Translators: "Tether" from "Bluetooth Tether"
+        return _('Tether');
     }
 
     _createDeviceMenuItem(device) {
@@ -1847,6 +1880,11 @@ class NMModemToggle extends NMDeviceToggle {
             'gnome-wwan-panel.desktop');
         this._legacySettings = this.menu.addSettingsAction(settingsLabel,
             'gnome-network-panel.desktop');
+    }
+
+    _getDefaultName() {
+        // Translators: "Mobile" from "Mobile Broadband"
+        return _('Mobile');
     }
 
     _createDeviceMenuItem(device) {

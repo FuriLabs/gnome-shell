@@ -50,6 +50,9 @@ class ControlsManagerLayout extends Clutter.BoxLayout {
         global.display.connectObject(
             'workareas-changed', () => this._updateWorkAreaBox(),
             this);
+        Main.layoutManager.connectObject(
+            'monitors-changed', () => this._updateWorkAreaBox(),
+            this);
         this._updateWorkAreaBox();
     }
 
@@ -402,7 +405,7 @@ class ControlsManager extends St.Widget {
 
         Main.ctrlAltTabManager.addGroup(
             this.appDisplay,
-            _('Applications'),
+            _('Apps'),
             'view-app-grid-symbolic', {
                 proxy: this,
                 focusCallback: () => {
@@ -503,6 +506,8 @@ class ControlsManager extends St.Widget {
             () => this._shiftState(Meta.MotionDirection.DOWN));
 
         this._update();
+
+        this.connect('destroy', this._onDestroy.bind(this));
     }
 
     _getFitModeForState(state) {
@@ -712,7 +717,16 @@ class ControlsManager extends St.Widget {
 
     vfunc_unmap() {
         super.vfunc_unmap();
-        this._workspacesDisplay.hide();
+        this._workspacesDisplay?.hide();
+    }
+
+    _onDestroy() {
+        delete this._searchEntryBin;
+        delete this._appDisplay;
+        delete this.dash;
+        delete this._searchController;
+        delete this._thumbnailsBox;
+        delete this._workspacesDisplay;
     }
 
     prepareToEnterOverview() {

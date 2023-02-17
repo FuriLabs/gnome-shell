@@ -122,7 +122,9 @@ st_sources = [
   'st-focus-manager.c',
   'st-generic-accessible.c',
   'st-icon.c',
+  'st-icon-cache.c',
   'st-icon-colors.c',
+  'st-icon-theme.c',
   'st-image-content.c',
   'st-label.c',
   'st-password-entry.c',
@@ -202,7 +204,8 @@ if get_option('tests')
   )
 
   test('CSS styling support', test_theme,
-    workdir: meson.current_source_dir()
+    workdir: meson.current_source_dir(),
+    env: ['GSETTINGS_BACKEND=memory']
   )
 endif
 

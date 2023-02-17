@@ -55,6 +55,7 @@ struct _ShellGlobal {
   MetaBackend *backend;
   MetaContext *meta_context;
   MetaDisplay *meta_display;
+  MetaCompositor *compositor;
   MetaWorkspaceManager *workspace_manager;
   Display *xdisplay;
 
@@ -85,6 +86,8 @@ struct _ShellGlobal {
 
   GDBusProxy *switcheroo_control;
   GCancellable *switcheroo_cancellable;
+
+  gboolean force_animations;
 };
 
 enum {
@@ -94,6 +97,7 @@ enum {
   PROP_BACKEND,
   PROP_CONTEXT,
   PROP_DISPLAY,
+  PROP_COMPOSITOR,
   PROP_WORKSPACE_MANAGER,
   PROP_SCREEN_WIDTH,
   PROP_SCREEN_HEIGHT,
@@ -109,6 +113,7 @@ enum {
   PROP_FRAME_TIMESTAMPS,
   PROP_FRAME_FINISH_TIMESTAMP,
   PROP_SWITCHEROO_CONTROL,
+  PROP_FORCE_ANIMATIONS,
 
   N_PROPS
 };
@@ -120,6 +125,7 @@ enum
 {
  NOTIFY_ERROR,
  LOCATE_POINTER,
+ SHUTDOWN,
  LAST_SIGNAL
 };
 
@@ -234,6 +240,9 @@ shell_global_set_property(GObject         *object,
           }
       }
       break;
+    case PROP_FORCE_ANIMATIONS:
+      global->force_animations = g_value_get_boolean (value);
+      break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
       break;
@@ -261,6 +270,9 @@ shell_global_get_property(GObject         *object,
       break;
     case PROP_DISPLAY:
       g_value_set_object (value, global->meta_display);
+      break;
+    case PROP_COMPOSITOR:
+      g_value_set_object (value, global->compositor);
       break;
     case PROP_WORKSPACE_MANAGER:
       g_value_set_object (value, global->workspace_manager);
@@ -316,6 +328,9 @@ shell_global_get_property(GObject         *object,
       break;
     case PROP_SWITCHEROO_CONTROL:
       g_value_set_object (value, global->switcheroo_control);
+      break;
+    case PROP_FORCE_ANIMATIONS:
+      g_value_set_boolean (value, global->force_animations);
       break;
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -507,6 +522,13 @@ shell_global_class_init (ShellGlobalClass *klass)
                     0,
                     NULL, NULL, NULL,
                     G_TYPE_NONE, 0);
+  shell_global_signals[SHUTDOWN] =
+      g_signal_new ("shutdown",
+                    G_TYPE_FROM_CLASS (klass),
+                    G_SIGNAL_RUN_LAST,
+                    0,
+                    NULL, NULL, NULL,
+                    G_TYPE_NONE, 0);
 
   props[PROP_SESSION_MODE] =
     g_param_spec_string ("session-mode",
@@ -548,6 +570,13 @@ shell_global_class_init (ShellGlobalClass *klass)
                          "Display",
                          "Metacity display object for the shell",
                          META_TYPE_DISPLAY,
+                         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_COMPOSITOR] =
+    g_param_spec_object ("compositor",
+                         "Compositor",
+                         "MetaCompositor object",
+                         META_TYPE_COMPOSITOR,
                          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_WORKSPACE_MANAGER] =
@@ -640,6 +669,13 @@ shell_global_class_init (ShellGlobalClass *klass)
                          "D-Bus Proxy for switcheroo-control daemon",
                          G_TYPE_DBUS_PROXY,
                          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+
+  props[PROP_FORCE_ANIMATIONS] =
+    g_param_spec_boolean ("force-animations",
+                          "force-animations",
+                          "Force animations to be enabled",
+                          FALSE,
+                          G_PARAM_READWRITE  | G_PARAM_CONSTRUCT| G_PARAM_STATIC_STRINGS);
 
   g_object_class_install_properties (gobject_class, N_PROPS, props);
 }
@@ -822,6 +858,17 @@ shell_global_set_stage_input_region (ShellGlobal *global,
 }
 
 /**
+ * shell_global_get_context:
+ *
+ * Return value: (transfer none): The #MetaContext
+ */
+MetaContext *
+shell_global_get_context (ShellGlobal *global)
+{
+  return global->meta_context;
+}
+
+/**
  * shell_global_get_stage:
  *
  * Return value: (transfer none): The default #ClutterStage
@@ -924,6 +971,7 @@ load_gl_symbol (const char  *name,
 static void
 global_stage_after_paint (ClutterStage     *stage,
                           ClutterStageView *stage_view,
+                          ClutterFrame     *frame,
                           ShellGlobal      *global)
 {
   /* At this point, we've finished all layout and painting, but haven't
@@ -1011,6 +1059,7 @@ void
 _shell_global_set_plugin (ShellGlobal *global,
                           MetaPlugin  *plugin)
 {
+  MetaContext *context;
   MetaDisplay *display;
   MetaBackend *backend;
   MetaSettings *settings;
@@ -1018,13 +1067,16 @@ _shell_global_set_plugin (ShellGlobal *global,
   g_return_if_fail (SHELL_IS_GLOBAL (global));
   g_return_if_fail (global->plugin == NULL);
 
-  global->backend = meta_get_backend ();
+  display = meta_plugin_get_display (plugin);
+  context = meta_display_get_context (display);
+  backend = meta_context_get_backend (context);
   global->plugin = plugin;
   global->wm = shell_wm_new (plugin);
 
-  display = meta_plugin_get_display (plugin);
   global->meta_display = display;
+  global->compositor = meta_display_get_compositor (display);
   global->meta_context = meta_display_get_context (display);
+  global->backend = meta_context_get_backend (context);
   global->workspace_manager = meta_display_get_workspace_manager (display);
 
   global->stage = CLUTTER_STAGE (meta_get_stage_for_display (display));
@@ -1076,7 +1128,7 @@ _shell_global_set_plugin (ShellGlobal *global,
     g_signal_connect_object (global->meta_display, "x11-display-closing",
                              G_CALLBACK (on_x11_display_closed), global, 0);
 
-  backend = meta_get_backend ();
+  backend = meta_context_get_backend (shell_global_get_context (global));
   settings = meta_backend_get_settings (backend);
   g_signal_connect (settings, "ui-scaling-factor-changed",
                     G_CALLBACK (ui_scaling_factor_changed), global);
@@ -1269,7 +1321,7 @@ shell_global_reexec_self (ShellGlobal *global)
    */
   pre_exec_close_fds ();
 
-  g_object_get (global, "context", &meta_context, NULL);
+  meta_context = shell_global_get_context (global);
   meta_context_restore_rlimit_nofile (meta_context, NULL);
 
   meta_display_close (shell_global_get_display (global),
@@ -1857,4 +1909,10 @@ void
 _shell_global_locate_pointer (ShellGlobal *global)
 {
   g_signal_emit (global, shell_global_signals[LOCATE_POINTER], 0);
+}
+
+void
+_shell_global_notify_shutdown (ShellGlobal *global)
+{
+  g_signal_emit (global, shell_global_signals[SHUTDOWN], 0);
 }

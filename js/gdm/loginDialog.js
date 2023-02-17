@@ -191,7 +191,8 @@ var UserList = GObject.registerClass({
 
         let focusSet = this.navigate_focus(null, St.DirectionType.TAB_FORWARD, false);
         if (!focusSet) {
-            Meta.later_add(Meta.LaterType.BEFORE_REDRAW, () => {
+            const laters = global.compositor.get_laters();
+            laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
                 this._moveFocusToItems();
                 return false;
             });
@@ -309,7 +310,7 @@ var SessionMenuButton = GObject.registerClass({
 }, class SessionMenuButton extends St.Bin {
     _init() {
         let button = new St.Button({
-            style_class: 'modal-dialog-button button login-dialog-session-list-button',
+            style_class: 'login-dialog-button login-dialog-session-list-button',
             icon_name: 'emblem-system-symbolic',
             reactive: true,
             track_hover: true,

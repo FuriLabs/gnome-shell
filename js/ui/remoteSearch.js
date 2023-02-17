@@ -139,12 +139,10 @@ function loadRemoteSearchProviders(searchSettings) {
     if (searchSettings.get_boolean('disable-external'))
         return [];
 
-    FileUtils.collectFromDatadirs('search-providers', false, loadRemoteSearchProvider);
+    for (const {dir} of FileUtils.collectFromDatadirs('search-providers', false))
+        loadRemoteSearchProvider(dir);
 
     let sortOrder = searchSettings.get_strv('sort-order');
-
-    // Special case gnome-control-center to be always active and always first
-    sortOrder.unshift('org.gnome.Settings.desktop');
 
     const disabled = searchSettings.get_strv('disabled');
     const enabled = searchSettings.get_strv('enabled');

@@ -36,8 +36,8 @@ class AccessDialog extends ModalDialog.ModalDialog {
     _buildLayout(title, description, body, options) {
         // No support for non-modal system dialogs, so ignore the option
         // let modal = options['modal'] || true;
-        let denyLabel = options['deny_label'] || _("Deny Access");
-        let grantLabel = options['grant_label'] || _("Grant Access");
+        let denyLabel = options['deny_label'] || _('Deny');
+        let grantLabel = options['grant_label'] || _('Allow');
         let choices = options['choices'] || [];
 
         let content = new Dialog.MessageDialogContent({ title, description });
@@ -58,13 +58,15 @@ class AccessDialog extends ModalDialog.ModalDialog {
             this._choices.set(id, check);
         }
 
-        let bodyLabel = new St.Label({
-            text: body,
-            x_align: Clutter.ActorAlign.CENTER,
-        });
-        bodyLabel.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
-        bodyLabel.clutter_text.line_wrap = true;
-        content.add_child(bodyLabel);
+        if (body) {
+            let bodyLabel = new St.Label({
+                text: body,
+                x_align: Clutter.ActorAlign.CENTER,
+            });
+            bodyLabel.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
+            bodyLabel.clutter_text.line_wrap = true;
+            content.add_child(bodyLabel);
+        }
 
         this.addButton({
             label: denyLabel,

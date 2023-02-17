@@ -790,16 +790,20 @@ var Extensions = GObject.registerClass({
     _stateToString(extensionState) {
         switch (extensionState) {
         case ExtensionState.ENABLED:
-            return _("Enabled");
+            return _('Enabled');
         case ExtensionState.DISABLED:
         case ExtensionState.INITIALIZED:
-            return _("Disabled");
+            return _('Disabled');
         case ExtensionState.ERROR:
-            return _("Error");
+            return _('Error');
         case ExtensionState.OUT_OF_DATE:
-            return _("Out of date");
+            return _('Out of date');
         case ExtensionState.DOWNLOADING:
-            return _("Downloading");
+            return _('Downloading');
+        case ExtensionState.DISABLING:
+            return _('Disabling');
+        case ExtensionState.ENABLING:
+            return _('Enabling');
         }
         return 'Unknown'; // Not translated, shouldn't appear
     }
@@ -1554,7 +1558,8 @@ class LookingGlass extends St.BoxLayout {
     }
 
     _queueResize() {
-        Meta.later_add(Meta.LaterType.BEFORE_REDRAW, () => {
+        const laters = global.compositor.get_laters();
+        laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
             this._resize();
             return GLib.SOURCE_REMOVE;
         });

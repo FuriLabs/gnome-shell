@@ -1,5 +1,5 @@
 /* exported getDefault */
-const { AccountsService, Clutter, Gdm, Gio, GLib, GObject, Meta } = imports.gi;
+const {AccountsService, Clutter, Gdm, Gio, GLib, GObject} = imports.gi;
 
 const GnomeSession = imports.misc.gnomeSession;
 const LoginManager = imports.misc.loginManager;
@@ -84,7 +84,7 @@ const SystemActions = GObject.registerClass({
             name: C_("search-result", "Power Off"),
             iconName: 'system-shutdown-symbolic',
             // Translators: A list of keywords that match the power-off action, separated by semicolons
-            keywords: tokenizeKeywords(_('power off;shutdown;halt;stop')),
+            keywords: tokenizeKeywords(_('power off;poweroff;shutdown;halt;stop')),
             available: false,
         });
         this._actions.set(RESTART_ACTION_ID, {
@@ -149,7 +149,7 @@ const SystemActions = GObject.registerClass({
 
         this._session = new GnomeSession.SessionManager();
         this._loginManager = LoginManager.getLoginManager();
-        this._monitorManager = Meta.MonitorManager.get();
+        this._monitorManager = global.backend.get_monitor_manager();
 
         this._userManager = AccountsService.UserManager.get_default();
 
