@@ -16,10 +16,10 @@ Forwarded: yes
  2 files changed, 73 insertions(+), 6 deletions(-)
 
 diff --git a/js/ui/layout.js b/js/ui/layout.js
-index 9393d04..0b11d24 100644
+index d7f73dc..e53ff9d 100644
 --- a/js/ui/layout.js
 +++ b/js/ui/layout.js
-@@ -951,22 +951,38 @@ var LayoutManager = GObject.registerClass({
+@@ -974,22 +974,38 @@ var LayoutManager = GObject.registerClass({
          return ws.get_work_area_for_monitor(monitorIndex);
      }
  
@@ -61,7 +61,7 @@ index 9393d04..0b11d24 100644
 +
      _queueUpdateRegions() {
          if (!this._updateRegionIdle) {
-             this._updateRegionIdle = Meta.later_add(Meta.LaterType.BEFORE_REDRAW,
+             const laters = global.compositor.get_laters();
 diff --git a/js/ui/magnifier.js b/js/ui/magnifier.js
 index f4012de..f8d235f 100644
 --- a/js/ui/magnifier.js

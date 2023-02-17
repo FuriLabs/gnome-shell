@@ -8,7 +8,7 @@ Support switching to dark mode when using the Yaru theme color accents.
  1 file changed, 41 insertions(+), 2 deletions(-)
 
 diff --git a/js/ui/status/darkMode.js b/js/ui/status/darkMode.js
-index d1ec2bd..ea0dc6a 100644
+index d4620f0..cf6fcf1 100644
 --- a/js/ui/status/darkMode.js
 +++ b/js/ui/status/darkMode.js
 @@ -1,5 +1,5 @@

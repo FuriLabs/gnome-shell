@@ -22,10 +22,10 @@ Forwarded: not-needed
  create mode 100644 data/org.gnome.shell.ubuntu.gschema.xml.in
 
 diff --git a/data/meson.build b/data/meson.build
-index 22d6665..e16d108 100644
+index 771e4ed..3274af2 100644
 --- a/data/meson.build
 +++ b/data/meson.build
-@@ -95,6 +95,12 @@ schema = configure_file(
+@@ -97,6 +97,12 @@ schema = configure_file(
    configuration: schemaconf,
    install_dir: schemadir
  )
@@ -38,14 +38,14 @@ index 22d6665..e16d108 100644
  schema_ubuntu_login = configure_file(
    input: 'com.ubuntu.login-screen.gschema.xml.in',
    output: 'com.ubuntu.login-screen.gschema.xml',
-@@ -138,7 +144,7 @@ endif
+@@ -131,7 +137,7 @@ endif
  
  # for unit tests - gnome.compile_schemas() only looks in srcdir
  custom_target('compile-schemas',
 -  input: [schema, chema_ubuntu_login],
 +  input: [schema, schema_ubuntu, schema_ubuntu_login],
    output: 'gschemas.compiled',
-   command: [find_program('glib-compile-schemas'), meson.current_build_dir()],
+   command: [find_program('glib-compile-schemas'), data_builddir],
    build_by_default: true)
 diff --git a/data/org.gnome.shell.ubuntu.gschema.xml.in b/data/org.gnome.shell.ubuntu.gschema.xml.in
 new file mode 100644
@@ -71,7 +71,7 @@ index 0000000..6f9cc62
 +  </schema>
 +</schemalist>
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 33f62be..60969fd 100644
+index 15bf84b..0658236 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -186,6 +186,9 @@ function start() {
@@ -84,7 +84,7 @@ index 33f62be..60969fd 100644
  
      // Initialize ParentalControlsManager before the UI
      ParentalControlsManager.getDefault();
-@@ -423,6 +426,38 @@ function _getStylesheet(name) {
+@@ -432,6 +435,38 @@ function _getStylesheet(name) {
      return null;
  }
  
@@ -123,7 +123,7 @@ index 33f62be..60969fd 100644
  function _getDefaultStylesheet() {
      let stylesheet = null;
      let name = sessionMode.stylesheetName;
-@@ -431,6 +466,13 @@ function _getDefaultStylesheet() {
+@@ -440,6 +475,13 @@ function _getDefaultStylesheet() {
      if (St.Settings.get().high_contrast)
          stylesheet = _getStylesheet(name.replace('.css', '-high-contrast.css'));
  
@@ -138,17 +138,17 @@ index 33f62be..60969fd 100644
          stylesheet = _getStylesheet(sessionMode.stylesheetName);
  
 diff --git a/src/st/meson.build b/src/st/meson.build
-index 717aa05..03a5978 100644
+index 061c5ad..d6a57bc 100644
 --- a/src/st/meson.build
 +++ b/src/st/meson.build
-@@ -202,6 +202,7 @@ if get_option('tests')
+@@ -204,6 +204,7 @@ if get_option('tests')
    )
  
    test('CSS styling support', test_theme,
 +    env: ['GSETTINGS_SCHEMA_DIR=' + meson.project_build_root() / 'data' ],
-     workdir: meson.current_source_dir()
+     workdir: meson.current_source_dir(),
+     env: ['GSETTINGS_BACKEND=memory']
    )
- endif
 diff --git a/src/st/st-settings.c b/src/st/st-settings.c
 index 04bf68f..a5f584d 100644
 --- a/src/st/st-settings.c

@@ -34,7 +34,7 @@ Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2267
  1 file changed, 101 insertions(+), 27 deletions(-)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 43647e7..7a335c1 100644
+index 78c45cb..e4902f8 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -44,6 +44,7 @@ var DISABLE_USER_LIST_KEY = 'disable-user-list';
@@ -112,7 +112,7 @@ index 43647e7..7a335c1 100644
          this._unavailableServices = new Set();
  
          this._credentialManagers = {};
-@@ -251,6 +286,7 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -265,6 +300,7 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
  
          this._clearUserVerifier();
          this._clearMessageQueue();
@@ -120,7 +120,7 @@ index 43647e7..7a335c1 100644
      }
  
      destroy() {
-@@ -374,27 +410,52 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -385,27 +421,52 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
      }
  
      async _checkForFingerprintReader() {
@@ -189,7 +189,7 @@ index 43647e7..7a335c1 100644
      }
  
      _onCredentialManagerAuthenticated(credentialManager, _token) {
-@@ -495,6 +556,7 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -506,6 +567,7 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
              'problem', this._onProblem.bind(this),
              'info-query', this._onInfoQuery.bind(this),
              'secret-info-query', this._onSecretInfoQuery.bind(this),
@@ -197,7 +197,7 @@ index 43647e7..7a335c1 100644
              'conversation-stopped', this._onConversationStopped.bind(this),
              'service-unavailable', this._onServiceUnavailable.bind(this),
              'reset', this._onReset.bind(this),
-@@ -538,6 +600,10 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -559,6 +621,10 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
              this._defaultService = SMARTCARD_SERVICE_NAME;
          else if (this._fingerprintReaderType !== FingerprintReaderType.NONE)
              this._defaultService = FINGERPRINT_SERVICE_NAME;
@@ -208,7 +208,7 @@ index 43647e7..7a335c1 100644
  
          if (!this._defaultService) {
              log("no authentication service is enabled, using password authentication");
-@@ -576,11 +642,14 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -597,11 +663,14 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
  
      _beginVerification() {
          this._startService(this._getForegroundService());
@@ -224,7 +224,7 @@ index 43647e7..7a335c1 100644
      }
  
      _onChoiceListQuery(client, serviceName, promptMessage, list) {
-@@ -673,8 +742,9 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -694,8 +763,9 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
      _onReset() {
          // Clear previous attempts to authenticate
          this._failCounter = 0;
@@ -235,7 +235,7 @@ index 43647e7..7a335c1 100644
  
          this.emit('reset');
      }
-@@ -755,6 +825,10 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -776,6 +846,10 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
              this._queueMessage(serviceName, errorMessage, MessageType.ERROR);
      }
  

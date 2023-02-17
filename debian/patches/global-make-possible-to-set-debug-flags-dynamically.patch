@@ -15,16 +15,16 @@ https://bugzilla.gnome.org/show_bug.cgi?id=789377
 Bug-GNOME: https://bugzilla.gnome.org/show_bug.cgi?id=789377
 Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
 ---
- src/main.c         | 60 ++++++++++++++++++++++++++++++++++++++++++------------
- src/shell-global.c | 51 ++++++++++++++++++++++++++++++++++++++++++++++
+ src/main.c         | 57 ++++++++++++++++++++++++++++++++++++++++++------------
+ src/shell-global.c | 52 +++++++++++++++++++++++++++++++++++++++++++++++++
  src/shell-global.h |  3 +++
- 3 files changed, 101 insertions(+), 13 deletions(-)
+ 3 files changed, 100 insertions(+), 12 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index ac20be2..726afe9 100644
+index cd8ef47..b7a5675 100644
 --- a/src/main.c
 +++ b/src/main.c
-@@ -276,14 +276,14 @@ shell_a11y_init (void)
+@@ -354,14 +354,14 @@ shell_a11y_init (void)
  }
  
  static void
@@ -41,7 +41,7 @@ index ac20be2..726afe9 100644
                                         G_N_ELEMENTS (keys));
  }
  
-@@ -385,6 +385,42 @@ dump_gjs_stack_on_signal (int signo)
+@@ -463,6 +463,42 @@ dump_gjs_stack_on_signal (int signo)
    _tracked_signals[signo] = TRUE;
  }
  
@@ -84,7 +84,7 @@ index ac20be2..726afe9 100644
  static gboolean
  list_modes (const char  *option_name,
              const char  *value,
-@@ -506,6 +542,7 @@ main (int argc, char **argv)
+@@ -590,6 +626,7 @@ main (int argc, char **argv)
  {
    g_autoptr (MetaContext) context = NULL;
    GError *error = NULL;
@@ -92,7 +92,7 @@ index ac20be2..726afe9 100644
    int ecode = EXIT_SUCCESS;
  
    bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
-@@ -543,7 +580,8 @@ main (int argc, char **argv)
+@@ -627,7 +664,8 @@ main (int argc, char **argv)
    g_setenv ("GJS_DEBUG_OUTPUT", "stderr", TRUE);
    g_setenv ("GJS_DEBUG_TOPICS", "JS ERROR;JS LOG", TRUE);
  
@@ -102,14 +102,12 @@ index ac20be2..726afe9 100644
  
    shell_dbus_init (meta_context_is_replacing (context));
    shell_a11y_init ();
-@@ -557,18 +595,14 @@ main (int argc, char **argv)
-   if (session_mode == NULL)
-     session_mode = is_gdm_mode ? (char *)"gdm" : (char *)"user";
+@@ -643,18 +681,13 @@ main (int argc, char **argv)
  
--  _shell_global_init ("session-mode", session_mode, NULL);
-+  _shell_global_init ("session-mode", session_mode,
+   _shell_global_init ("session-mode", session_mode,
+                       "force-animations", force_animations,
 +                      "debug-flags", debug_flags,
-+                      NULL);
+                       NULL);
  
 -  dump_gjs_stack_on_signal (SIGABRT);
 -  dump_gjs_stack_on_signal (SIGFPE);
@@ -128,10 +126,10 @@ index ac20be2..726afe9 100644
    shell_profiler_init ();
  
 diff --git a/src/shell-global.c b/src/shell-global.c
-index 0ccdb10..1676208 100644
+index 08b8a63..50869aa 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
-@@ -59,6 +59,7 @@ struct _ShellGlobal {
+@@ -60,6 +60,7 @@ struct _ShellGlobal {
    Display *xdisplay;
  
    char *session_mode;
@@ -139,17 +137,17 @@ index 0ccdb10..1676208 100644
  
    XserverRegion input_region;
  
-@@ -109,6 +110,7 @@ enum {
-   PROP_FRAME_TIMESTAMPS,
+@@ -114,6 +115,7 @@ enum {
    PROP_FRAME_FINISH_TIMESTAMP,
    PROP_SWITCHEROO_CONTROL,
+   PROP_FORCE_ANIMATIONS,
 +  PROP_DEBUG_FLAGS,
  
    N_PROPS
  };
-@@ -234,6 +236,9 @@ shell_global_set_property(GObject         *object,
-           }
-       }
+@@ -243,6 +245,9 @@ shell_global_set_property(GObject         *object,
+     case PROP_FORCE_ANIMATIONS:
+       global->force_animations = g_value_get_boolean (value);
        break;
 +    case PROP_DEBUG_FLAGS:
 +      shell_global_set_debug_flags (global, g_value_get_string (value));
@@ -157,18 +155,19 @@ index 0ccdb10..1676208 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -316,6 +321,8 @@ shell_global_get_property(GObject         *object,
+@@ -332,6 +337,9 @@ shell_global_get_property(GObject         *object,
+     case PROP_FORCE_ANIMATIONS:
+       g_value_set_boolean (value, global->force_animations);
        break;
-     case PROP_SWITCHEROO_CONTROL:
-       g_value_set_object (value, global->switcheroo_control);
 +    case PROP_DEBUG_FLAGS:
 +      g_value_set_string (value, global->debug_flags);
-       break;
++      break;
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-@@ -641,6 +648,13 @@ shell_global_class_init (ShellGlobalClass *klass)
-                          G_TYPE_DBUS_PROXY,
-                          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+       break;
+@@ -677,6 +685,13 @@ shell_global_class_init (ShellGlobalClass *klass)
+                           FALSE,
+                           G_PARAM_READWRITE  | G_PARAM_CONSTRUCT| G_PARAM_STATIC_STRINGS);
  
 +  props[PROP_DEBUG_FLAGS] =
 +    g_param_spec_string ("debug-flags",
@@ -180,9 +179,9 @@ index 0ccdb10..1676208 100644
    g_object_class_install_properties (gobject_class, N_PROPS, props);
  }
  
-@@ -1858,3 +1872,40 @@ _shell_global_locate_pointer (ShellGlobal *global)
+@@ -1916,3 +1931,40 @@ _shell_global_notify_shutdown (ShellGlobal *global)
  {
-   g_signal_emit (global, shell_global_signals[LOCATE_POINTER], 0);
+   g_signal_emit (global, shell_global_signals[SHUTDOWN], 0);
  }
 +
 +/**
@@ -222,10 +221,10 @@ index 0ccdb10..1676208 100644
 +    }
 +}
 diff --git a/src/shell-global.h b/src/shell-global.h
-index 8d8238c..04c59d1 100644
+index 87f4e59..a8a738f 100644
 --- a/src/shell-global.h
 +++ b/src/shell-global.h
-@@ -88,6 +88,9 @@ void     shell_global_set_persistent_state      (ShellGlobal  *global,
+@@ -89,6 +89,9 @@ void     shell_global_set_persistent_state      (ShellGlobal  *global,
  GVariant * shell_global_get_persistent_state    (ShellGlobal  *global,
                                                   const char   *property_type,
                                                   const char   *property_name);

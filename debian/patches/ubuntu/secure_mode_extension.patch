@@ -18,7 +18,7 @@ Forwarded: https://bugzilla.gnome.org/show_bug.cgi?id=789852
  2 files changed, 20 insertions(+)
 
 diff --git a/js/ui/extensionDownloader.js b/js/ui/extensionDownloader.js
-index 94ba8fa..54b1105 100644
+index b3cef41..8c0a62c 100644
 --- a/js/ui/extensionDownloader.js
 +++ b/js/ui/extensionDownloader.js
 @@ -4,6 +4,7 @@
@@ -43,7 +43,7 @@ index 94ba8fa..54b1105 100644
      const message = Soup.Message.new_from_encoded_form('GET',
          REPOSITORY_URL_INFO,
          Soup.form_encode_hash(params));
-@@ -161,6 +169,9 @@ async function checkForUpdates() {
+@@ -179,6 +187,9 @@ async function checkForUpdates() {
              return;
          if (extension.hasUpdate)
              return;
@@ -54,7 +54,7 @@ index 94ba8fa..54b1105 100644
              version: extension.metadata.version,
          };
 diff --git a/js/ui/extensionSystem.js b/js/ui/extensionSystem.js
-index c21cc7c..db47088 100644
+index 4cdaa3d..404632d 100644
 --- a/js/ui/extensionSystem.js
 +++ b/js/ui/extensionSystem.js
 @@ -4,6 +4,7 @@
@@ -65,18 +65,18 @@ index c21cc7c..db47088 100644
  const ExtensionDownloader = imports.ui.extensionDownloader;
  const ExtensionUtils = imports.misc.extensionUtils;
  const FileUtils = imports.misc.fileUtils;
-@@ -434,6 +435,10 @@ var ExtensionManager = class extends Signals.EventEmitter {
-         this.loadExtension(newExtension);
+@@ -446,6 +447,10 @@ var ExtensionManager = class extends Signals.EventEmitter {
+         await this.loadExtension(newExtension);
      }
  
 +    isModeExtension(uuid) {
 +        return this._getModeExtensions().indexOf(uuid) !== -1;
 +    }
 +
-     _callExtensionInit(uuid) {
+     async _callExtensionInit(uuid) {
          if (!this._extensionSupportsSessionMode(uuid))
              return false;
-@@ -624,6 +629,10 @@ var ExtensionManager = class extends Signals.EventEmitter {
+@@ -662,6 +667,10 @@ var ExtensionManager = class extends Signals.EventEmitter {
              let type = dir.has_prefix(perUserDir)
                  ? ExtensionType.PER_USER
                  : ExtensionType.SYSTEM;
@@ -86,4 +86,4 @@ index c21cc7c..db47088 100644
 +            }
              try {
                  extension = this.createExtensionObject(uuid, dir, type);
-             } catch (e) {
+             } catch (error) {
