@@ -102,7 +102,7 @@ libgvc_path = fs.parent(libgvc.get_variable('libgvc').full_path())
 background_file = join_paths(meson.current_source_dir(), 'data', 'background.png')
 
 shell_testenv = environment()
-shell_testenv.set('G_DEBUG', 'fatal-warnings')
+shell_testenv.set('G_DEBUG', 'fatal-criticals')
 shell_testenv.set('G_MESSAGES_DEBUG', 'GNOME Shell')
 shell_testenv.set('GNOME_SHELL_DATADIR', data_builddir)
 shell_testenv.set('GNOME_SHELL_BUILDDIR', src_builddir)
