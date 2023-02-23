@@ -42,7 +42,7 @@ index 771e4ed..3274af2 100644
  
  # for unit tests - gnome.compile_schemas() only looks in srcdir
  custom_target('compile-schemas',
--  input: [schema, chema_ubuntu_login],
+-  input: [schema, schema_ubuntu_login],
 +  input: [schema, schema_ubuntu, schema_ubuntu_login],
    output: 'gschemas.compiled',
    command: [find_program('glib-compile-schemas'), data_builddir],
