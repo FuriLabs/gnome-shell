@@ -18,8 +18,8 @@ ubuntu/configure_login_screen.patch
 ubuntu/layout-Try-to-allocate-before-getting-size-of-tracke.patch
 Revert-st-Apply-css-foreground-color-to-text-as-a-PangoAt.patch
 ubuntu/sessionMode-Add-support-for-configuring-an-icons-resource.patch
-ubuntu/main-Support-loading-multiple-Yaru-theme-variants.patch
 ubuntu/Revert-dash-Use-pin-instead-of-favorites.patch
+ubuntu/main-Support-loading-multiple-Yaru-theme-variants.patch
 ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 debian/Revert-build-Port-to-gcr4.patch
