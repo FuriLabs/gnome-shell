@@ -1,4 +1,4 @@
-gnome-shell (44~beta-1ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (44~beta-1ubuntu1) lunar; urgency=medium
 
   [ Jeremy Bicha ]
   * Merge with Debian, containing new upstream release:
@@ -78,7 +78,7 @@ gnome-shell (44~beta-1ubuntu1) UNRELEASED; urgency=medium
   * debian/patches: Ensure GSETTINGS_SCHEMA_DIR is honored in tests
   * debian/patches/ubuntu: Fix description typos to mute lintian
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 24 Feb 2023 06:13:51 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 24 Feb 2023 06:29:15 +0100
 
 gnome-shell (44~beta-1) experimental; urgency=medium
 
