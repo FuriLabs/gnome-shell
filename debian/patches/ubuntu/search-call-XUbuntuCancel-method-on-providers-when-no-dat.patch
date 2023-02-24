@@ -7,7 +7,7 @@ Add XUbuntuCancel method to search providers and call it when a search provider
 is still doing operations.
 Ignore the result when the method does not exist or is cancelled.
 
-This will allow to stop operations on providers.
+This will allow one to stop operations on providers.
 
 Fixes LP: #1756826
 

@@ -4,7 +4,7 @@ Subject: Allow configuring login screen background
 
 Configuring login screen backgound and properties is a recurring request
 especially on corporate environment.
-Allows to override the default embedded style in the theme with specific
+Allows one to override the default embedded style in the theme with specific
 gsettings keys.
 Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/680
 Bug: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/1918613
