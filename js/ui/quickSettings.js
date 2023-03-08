@@ -124,6 +124,11 @@ var QuickToggle = GObject.registerClass({
             null);
     }
 
+    get label() {
+        console.warn('Trying to get label from QuickToggle. Use title instead.');
+        return this.title;
+    }
+
     set label(label) {
         console.warn('Trying to set label on QuickToggle. Use title instead.');
         this.title = label;
@@ -181,9 +186,13 @@ var QuickMenuToggle = GObject.registerClass({
         });
         this._box.add_child(this._menuButton);
 
+        this.bind_property('toggle-mode',
+            contents, 'toggle-mode',
+            GObject.BindingFlags.SYNC_CREATE);
         this.bind_property('checked',
             contents, 'checked',
-            GObject.BindingFlags.SYNC_CREATE);
+            GObject.BindingFlags.SYNC_CREATE |
+            GObject.BindingFlags.BIDIRECTIONAL);
         this.bind_property('title',
             contents, 'title',
             GObject.BindingFlags.SYNC_CREATE);

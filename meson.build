@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '44.beta',
+  version: '44.rc',
   meson_version: '>= 0.58.0',
   license: 'GPLv2+'
 )
@@ -25,12 +25,12 @@ gio_req = '>= 2.56.0'
 gi_req = '>= 1.49.1'
 gjs_req = '>= 1.73.1'
 gtk_req = '>= 3.15.0'
-mutter_req = '>= 44.beta'
+mutter_req = '>= 44.rc'
 polkit_req = '>= 0.100'
 schemas_req = '>= 42.beta'
 startup_req = '>= 0.11'
 ibus_req = '>= 1.5.19'
-gnome_desktop_req = '>= 3.35.90'
+gnome_desktop_req = '>= 40'
 
 nm_req = '>= 1.10.4'
 secret_req = '>= 0.18'
@@ -89,7 +89,7 @@ startup_dep = dependency('libstartup-notification-1.0', version: startup_req)
 ibus_dep = dependency('ibus-1.0', version: ibus_req)
 x11_dep = dependency('x11')
 schemas_dep = dependency('gsettings-desktop-schemas', version: schemas_req)
-gnome_desktop_dep = dependency('gnome-desktop-3.0', version: gnome_desktop_req)
+gnome_desktop_dep = dependency('gnome-desktop-4', version: gnome_desktop_req)
 
 nm_deps = []
 if get_option('networkmanager')

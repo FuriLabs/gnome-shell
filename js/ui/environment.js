@@ -9,21 +9,21 @@ imports.gi.versions.Atspi = '2.0';
 imports.gi.versions.Clutter = Config.LIBMUTTER_API_VERSION;
 imports.gi.versions.Cogl = Config.LIBMUTTER_API_VERSION;
 imports.gi.versions.Gcr = '4';
-imports.gi.versions.Gdk = '3.0';
+imports.gi.versions.Gdk = '4.0';
 imports.gi.versions.Gdm = '1.0';
 imports.gi.versions.Geoclue = '2.0';
 imports.gi.versions.Gio = '2.0';
 imports.gi.versions.GDesktopEnums = '3.0';
 imports.gi.versions.GdkPixbuf = '2.0';
 imports.gi.versions.GnomeBluetooth = '3.0';
-imports.gi.versions.GnomeDesktop = '3.0';
+imports.gi.versions.GnomeBG = '4.0';
+imports.gi.versions.GnomeDesktop = '4.0';
 imports.gi.versions.Graphene = '1.0';
-imports.gi.versions.Gtk = '3.0';
 imports.gi.versions.GWeather = '4.0';
 imports.gi.versions.IBus = '1.0';
 imports.gi.versions.Malcontent = '0';
 imports.gi.versions.NM = '1.0';
-imports.gi.versions.NMA = '1.0';
+imports.gi.versions.NMA4 = '1.0';
 imports.gi.versions.Pango = '1.0';
 imports.gi.versions.Polkit = '1.0';
 imports.gi.versions.PolkitAgent = '1.0';
@@ -43,7 +43,7 @@ try {
     _injectSoup3Compat(Soup);
 }
 
-const { Clutter, Gio, GLib, GObject, Meta, Polkit, Shell, St } = imports.gi;
+const {Clutter, Gdk, Gio, GLib, GObject, Meta, Polkit, Shell, St} = imports.gi;
 const Gettext = imports.gettext;
 const System = imports.system;
 const SignalTracker = imports.misc.signalTracker;
@@ -454,6 +454,9 @@ function init() {
     Math.clamp = function (x, lower, upper) {
         return Math.min(Math.max(x, lower), upper);
     };
+
+    // Prevent extensions from opening a display connection to ourselves
+    Gdk.set_allowed_backends('');
 }
 
 // adjustAnimationTime:

@@ -12,6 +12,7 @@ st_headers = [
   'st-generic-accessible.h',
   'st-icon.h',
   'st-icon-colors.h',
+  'st-icon-theme.h',
   'st-image-content.h',
   'st-label.h',
   'st-password-entry.h',
@@ -179,10 +180,10 @@ st_cflags = [
 ]
 
 # Currently meson requires a shared library for building girs
-libst = shared_library('st-1.0',
+libst = shared_library('st-' + mutter_api_version,
   sources: st_gir_sources + st_nogir_sources + croco_sources,
   c_args: st_cflags,
-  dependencies: [clutter_dep, gtk_dep, mutter_dep, libxml_dep, m_dep],
+  dependencies: [clutter_dep, mutter_dep, libxml_dep, gdk_pixbuf_dep, m_dep],
   build_rpath: mutter_typelibdir,
   install_rpath: mutter_typelibdir,
   install_dir: pkglibdir,
@@ -211,10 +212,14 @@ endif
 
 libst_gir = gnome.generate_gir(libst,
   sources: st_gir_sources,
-  nsversion: '1.0',
+  nsversion: mutter_api_version,
   namespace: 'St',
-  includes: ['Clutter-' + mutter_api_version, 'Cally-' + mutter_api_version, 'Meta-' + mutter_api_version, 'Gtk-3.0'],
-  dependencies: [mutter_dep],
+  includes: [
+    'Clutter-' + mutter_api_version,
+    'Cally-' + mutter_api_version,
+    'GdkPixbuf-2.0',
+    'Meta-' + mutter_api_version],
+  dependencies: [mutter_dep, gdk_pixbuf_dep],
   include_directories: include_directories('..'),
   extra_args: ['-DST_COMPILATION', '--quiet'],
   install_dir_gir: pkgdatadir,

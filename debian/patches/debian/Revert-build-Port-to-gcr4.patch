@@ -14,7 +14,7 @@ Forwarded: not-needed
  5 files changed, 8 insertions(+), 8 deletions(-)
 
 diff --git a/js/ui/environment.js b/js/ui/environment.js
-index c2088c3..936921c 100644
+index 224456d..d4292ca 100644
 --- a/js/ui/environment.js
 +++ b/js/ui/environment.js
 @@ -8,7 +8,7 @@ imports.gi.versions.Atk = '1.0';
@@ -23,11 +23,11 @@ index c2088c3..936921c 100644
  imports.gi.versions.Cogl = Config.LIBMUTTER_API_VERSION;
 -imports.gi.versions.Gcr = '4';
 +imports.gi.versions.Gcr = '3';
- imports.gi.versions.Gdk = '3.0';
+ imports.gi.versions.Gdk = '4.0';
  imports.gi.versions.Gdm = '1.0';
  imports.gi.versions.Geoclue = '2.0';
 diff --git a/meson.build b/meson.build
-index ef211d7..f2ae39e 100644
+index 2c2c585..5b66e06 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -20,7 +20,7 @@ libmutter_test_pc = 'libmutter-test-' + mutter_api_version
@@ -49,18 +49,18 @@ index ef211d7..f2ae39e 100644
  gdk_pixbuf_dep = dependency('gdk-pixbuf-2.0')
  gi_dep = dependency('gobject-introspection-1.0', version: gi_req)
 diff --git a/src/meson.build b/src/meson.build
-index de88a45..64197f9 100644
+index 4f88207..512c213 100644
 --- a/src/meson.build
 +++ b/src/meson.build
-@@ -218,7 +218,7 @@ libshell_dep = declare_dependency(link_with: libshell)
+@@ -213,7 +213,7 @@ libshell_dep = declare_dependency(link_with: libshell)
  libshell_gir_includes = [
    'Clutter-@0@'.format(mutter_api_version),
    'Meta-@0@'.format(mutter_api_version),
 -  'Gcr-4',
 +  'Gcr-3',
-   'PolkitAgent-1.0'
+   'PolkitAgent-1.0',
+   'GdkPixbuf-2.0'
  ]
- 
 diff --git a/src/shell-keyring-prompt.c b/src/shell-keyring-prompt.c
 index bb03279..83c6746 100644
 --- a/src/shell-keyring-prompt.c

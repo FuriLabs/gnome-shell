@@ -1,3 +1,19 @@
+gnome-shell (44~rc-1) experimental; urgency=medium
+
+  [ Jeremy Bicha ]
+  * New upstream release
+  * Refresh patch
+  * debian/control.in: Update dependencies for completion of gtk3->gtk4 switch
+  * debian/control.in: Bump minimum mutter to 44~rc
+  * Temporarily ignore build test failures
+
+  [ Marco Trevisan (Treviño) ]
+  * debian/control: Add breaks on extensions known to be broken by 44.rc
+  * debian/control: Set explicit gnomedesktop-4 dependency version
+  * debian/patch: Add patch to ensure tray icons windows are shown
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 08 Mar 2023 02:59:16 +0100
+
 gnome-shell (44~beta-1ubuntu1) lunar; urgency=medium
 
   [ Jeremy Bicha ]

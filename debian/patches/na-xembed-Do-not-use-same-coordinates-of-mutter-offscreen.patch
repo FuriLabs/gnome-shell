@@ -1,0 +1,31 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 7 Mar 2023 01:12:15 +0100
+Subject: na-xembed: Do not use same coordinates of mutter offscreen windows
+
+We created the socket window using the same coordinates that mutter uses
+for its own off-screen windows created via
+meta_x11_display_create_offscreen_window() and that are filtered out in
+MetaWindowX11's is_our_xwindow().
+
+This caused these windows to be never tracked by mutter and then we
+never received a "::window-created" signal that should lead a ShellTrayIcon
+to associate itself as the clone of the created MetaWindow.
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2684
+---
+ src/tray/na-xembed.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/tray/na-xembed.c b/src/tray/na-xembed.c
+index 5dbb372..7b6f0b7 100644
+--- a/src/tray/na-xembed.c
++++ b/src/tray/na-xembed.c
+@@ -393,7 +393,7 @@ na_xembed_add_window (NaXembed  *xembed,
+       priv->socket_window =
+         XCreateWindow (xdisplay,
+                        meta_x11_display_get_xroot (priv->x11_display),
+-                       -100, -100, 1, 1, 0,
++                       -101, -101, 1, 1, 0,
+                        priv->xvisual_info->depth,
+                        InputOutput,
+                        plug_attrs.visual,

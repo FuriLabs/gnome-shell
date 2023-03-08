@@ -54,10 +54,9 @@ install_rpath = ':'.join([mutter_typelibdir, pkglibdir])
 gnome_shell_deps = [
   gio_unix_dep,
   libxml_dep,
-  gtk_dep,
   atk_bridge_dep,
+  gdk_pixbuf_dep,
   gjs_dep,
-  gdk_x11_dep,
   clutter_dep,
   cogl_pango_dep,
   startup_dep,
@@ -98,9 +97,7 @@ libshell_public_headers = [
   'shell-app-system.h',
   'shell-app-usage.h',
   'shell-blur-effect.h',
-  'shell-embedded-window.h',
   'shell-glsl-effect.h',
-  'shell-gtk-embed.h',
   'shell-global.h',
   'shell-invert-lightness-effect.h',
   'shell-action-modes.h',
@@ -128,6 +125,7 @@ libshell_private_headers = [
   'shell-app-cache-private.h',
   'shell-app-system-private.h',
   'shell-global-private.h',
+  'shell-tray-icon-private.h',
   'shell-window-tracker-private.h',
   'shell-wm-private.h'
 ]
@@ -138,11 +136,8 @@ libshell_sources = [
   'shell-app-system.c',
   'shell-app-usage.c',
   'shell-blur-effect.c',
-  'shell-embedded-window.c',
-  'shell-embedded-window-private.h',
   'shell-global.c',
   'shell-glsl-effect.c',
-  'shell-gtk-embed.c',
   'shell-invert-lightness-effect.c',
   'shell-keyring-prompt.c',
   'shell-keyring-prompt.h',
@@ -201,7 +196,7 @@ dbus_generated += gnome.gdbus_codegen('switcheroo-control',
 
 libshell_no_gir_sources += dbus_generated
 
-libshell = library('gnome-shell',
+libshell = library('shell-' + mutter_api_version,
   sources: libshell_gir_sources + libshell_no_gir_sources,
   dependencies: gnome_shell_deps + [libshell_menu_dep, libst_dep, mutter_dep, gnome_desktop_dep, m_dep],
   include_directories: [conf_inc, st_inc, include_directories('tray')],
@@ -219,7 +214,8 @@ libshell_gir_includes = [
   'Clutter-@0@'.format(mutter_api_version),
   'Meta-@0@'.format(mutter_api_version),
   'Gcr-4',
-  'PolkitAgent-1.0'
+  'PolkitAgent-1.0',
+  'GdkPixbuf-2.0'
 ]
 
 if have_networkmanager
@@ -233,7 +229,7 @@ libshell_gir_includes += [
 
 gnome.generate_gir(libshell,
   sources: libshell_gir_sources,
-  nsversion: '0.1',
+  nsversion: mutter_api_version,
   namespace: 'Shell',
   includes: libshell_gir_includes,
   extra_args: ['--quiet'],
@@ -272,7 +268,7 @@ executable('gnome-shell-perf-helper', 'shell-perf-helper.c',
 )
 
 executable('run-js-test', 'run-js-test.c',
-  dependencies: [mutter_dep, gio_dep, gi_dep, gjs_dep],
+  dependencies: [mutter_dep, gdk_pixbuf_dep, gio_dep, gi_dep, gjs_dep],
   include_directories: [conf_inc],
   link_with: libshell,
   build_rpath: mutter_typelibdir,

@@ -1,7 +1,7 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 /* exported ScreenshotService, ScreenshotUI, showScreenshotUI, captureScreenshot */
 
-const { Clutter, Cogl, Gio, GObject, GLib, Graphene, Gtk, Meta, Shell, St } = imports.gi;
+const {Clutter, Cogl, Gio, GObject, GLib, Graphene, Meta, Shell, St} = imports.gi;
 
 const GrabHelper = imports.ui.grabHelper;
 const Layout = imports.ui.layout;
@@ -1254,6 +1254,13 @@ var ScreenshotUI = GObject.registerClass({
         this._captureButton.set_child(new St.Widget({
             style_class: 'screenshot-ui-capture-button-circle',
         }));
+        this.add_child(new Tooltip(this._captureButton, {
+            /* Translators: since this string refers to an action,
+            it needs to be phrased as a verb. */
+            text: _('Capture'),
+            style_class: 'screenshot-ui-tooltip',
+            visible: false,
+        }));
         this._captureButton.connect('clicked',
             this._onCaptureButtonClicked.bind(this));
         this._bottomRowContainer.add_child(this._captureButton);
@@ -2060,6 +2067,33 @@ function _storeScreenshot(bytes, pixbuf) {
             yield `-${i}`;
     }
 
+    /**
+     * Adds a record of a screenshot file in the recently used files list.
+     *
+     * @param {Gio.File} screenshotFile - The screenshot file.
+     */
+    function saveRecentFile(screenshotFile) {
+        const recentFile =
+            GLib.build_filenamev([GLib.get_user_data_dir(), 'recently-used.xbel']);
+        const uri = screenshotFile.get_uri();
+        const bookmarks = new GLib.BookmarksFile();
+        try {
+            bookmarks.load_from_file(recentFile);
+        } catch (e) {
+            if (!e.matches(GLib.BookmarkFileError.FILE_NOT_FOUND)) {
+                log(`Could not open recent file ${uri}: ${e.message}`);
+                return;
+            }
+        }
+
+        try {
+            bookmarks.add_application(uri, GLib.get_prgname(), 'gio open %u');
+            bookmarks.to_file(recentFile);
+        } catch (e) {
+            log(`Could not save recent file ${uri}: ${e.message}`);
+        }
+    }
+
     const lockdownSettings =
         new Gio.Settings({ schema_id: 'org.gnome.desktop.lockdown' });
     const disableSaveToDisk =
@@ -2102,7 +2136,7 @@ function _storeScreenshot(bytes, pixbuf) {
         }
 
         // Add it to recent files.
-        Gtk.RecentManager.get_default().add_item(file.get_uri());
+        saveRecentFile(file);
     }
 
     // Create a St.ImageContent icon for the notification. We want
