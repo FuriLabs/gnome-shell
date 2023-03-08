@@ -4,7 +4,7 @@ Subject: Add support for GDM theme alternatives
 
 GNOME vanilla and systemd76 derivative ships their own GDM theme.
 
-This allows one to provide alternative gresource file for gdm3 that must contain
+This allows to provide alternative gresource file for gdm3 that must contain
 a `gdm3.css` stylesheet that will be applied.
 
 Bug: https://bugzilla.gnome.org/show_bug.cgi?id=787454

@@ -138,10 +138,10 @@ index 15bf84b..0658236 100644
          stylesheet = _getStylesheet(sessionMode.stylesheetName);
  
 diff --git a/src/st/meson.build b/src/st/meson.build
-index 061c5ad..9f64215 100644
+index 4460257..fd32484 100644
 --- a/src/st/meson.build
 +++ b/src/st/meson.build
-@@ -205,7 +205,10 @@ if get_option('tests')
+@@ -206,7 +206,10 @@ if get_option('tests')
  
    test('CSS styling support', test_theme,
      workdir: meson.current_source_dir(),
