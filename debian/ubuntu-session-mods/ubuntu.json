@@ -7,6 +7,7 @@
     "enabledExtensions": [
         "ubuntu-dock@ubuntu.com",
         "ubuntu-appindicators@ubuntu.com",
-        "ding@rastersoft.com"
+        "ding@rastersoft.com",
+        "tiling-assistant@ubuntu.com"
     ]
 }
