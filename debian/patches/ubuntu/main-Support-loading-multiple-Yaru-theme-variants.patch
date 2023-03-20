@@ -14,11 +14,11 @@ that the shell theme will always be dark or light.
 Forwarded: not-needed
 ---
  data/meson.build                           |   8 +-
- data/org.gnome.shell.ubuntu.gschema.xml.in |  17 +++++
- js/ui/main.js                              |  42 +++++++++++
+ data/org.gnome.shell.ubuntu.gschema.xml.in |  17 ++++
+ js/ui/main.js                              |  42 ++++++++++
  src/st/meson.build                         |   5 +-
- src/st/st-settings.c                       | 114 +++++++++++++++++++++++++++++
- 5 files changed, 184 insertions(+), 2 deletions(-)
+ src/st/st-settings.c                       | 120 +++++++++++++++++++++++++++++
+ 5 files changed, 190 insertions(+), 2 deletions(-)
  create mode 100644 data/org.gnome.shell.ubuntu.gschema.xml.in
 
 diff --git a/data/meson.build b/data/meson.build
@@ -154,18 +154,19 @@ index 4460257..fd32484 100644
  endif
  
 diff --git a/src/st/st-settings.c b/src/st/st-settings.c
-index 04bf68f..a5f584d 100644
+index 04bf68f..cb625b2 100644
 --- a/src/st/st-settings.c
 +++ b/src/st/st-settings.c
-@@ -33,6 +33,7 @@
+@@ -33,6 +33,8 @@
  #define KEY_FONT_NAME             "font-name"
  #define KEY_HIGH_CONTRAST         "high-contrast"
  #define KEY_GTK_ICON_THEME        "icon-theme"
 +#define KEY_GTK_THEME             "gtk-theme"
++#define KEY_COLOR_SCHEME          "color-scheme"
  #define KEY_MAGNIFIER_ACTIVE      "screen-magnifier-enabled"
  #define KEY_DISABLE_SHOW_PASSWORD "disable-show-password"
  
-@@ -43,7 +44,10 @@ enum {
+@@ -43,7 +45,10 @@ enum {
    PROP_DRAG_THRESHOLD,
    PROP_FONT_NAME,
    PROP_HIGH_CONTRAST,
@@ -176,7 +177,7 @@ index 04bf68f..a5f584d 100644
    PROP_MAGNIFIER_ACTIVE,
    PROP_SLOW_DOWN_FACTOR,
    PROP_DISABLE_SHOW_PASSWORD,
-@@ -60,10 +64,13 @@ struct _StSettings
+@@ -60,10 +65,13 @@ struct _StSettings
    GSettings *a11y_applications_settings;
    GSettings *a11y_interface_settings;
    GSettings *lockdown_settings;
@@ -190,7 +191,7 @@ index 04bf68f..a5f584d 100644
    int inhibit_animations_count;
    gboolean enable_animations;
    gboolean primary_paste;
-@@ -133,7 +140,10 @@ st_settings_finalize (GObject *object)
+@@ -133,7 +141,10 @@ st_settings_finalize (GObject *object)
    g_object_unref (settings->a11y_applications_settings);
    g_object_unref (settings->a11y_interface_settings);
    g_object_unref (settings->lockdown_settings);
@@ -201,7 +202,7 @@ index 04bf68f..a5f584d 100644
    g_free (settings->gtk_icon_theme);
  
    G_OBJECT_CLASS (st_settings_parent_class)->finalize (object);
-@@ -185,6 +195,16 @@ st_settings_get_property (GObject    *object,
+@@ -185,6 +196,16 @@ st_settings_get_property (GObject    *object,
      case PROP_GTK_ICON_THEME:
        g_value_set_string (value, settings->gtk_icon_theme);
        break;
@@ -213,12 +214,12 @@ index 04bf68f..a5f584d 100644
 +      break;
 +    case PROP_SHELL_COLOR_SCHEME:
 +      g_value_take_string (value,
-+        g_settings_get_string (settings->ubuntu_settings, "color-scheme"));
++        g_settings_get_string (settings->ubuntu_settings, KEY_COLOR_SCHEME));
 +      break;
      case PROP_MAGNIFIER_ACTIVE:
        g_value_set_boolean (value, settings->magnifier_active);
        break;
-@@ -275,6 +295,39 @@ st_settings_class_init (StSettingsClass *klass)
+@@ -275,6 +296,39 @@ st_settings_class_init (StSettingsClass *klass)
                                                      "",
                                                      ST_PARAM_READABLE);
  
@@ -258,7 +259,7 @@ index 04bf68f..a5f584d 100644
    /**
     * StSettings:magnifier-active:
     *
-@@ -311,6 +364,45 @@ st_settings_class_init (StSettingsClass *klass)
+@@ -311,6 +365,45 @@ st_settings_class_init (StSettingsClass *klass)
    g_object_class_install_properties (object_class, N_PROPS, props);
  }
  
@@ -304,7 +305,7 @@ index 04bf68f..a5f584d 100644
  static void
  on_interface_settings_changed (GSettings   *g_settings,
                                 const gchar *key,
-@@ -332,6 +424,10 @@ on_interface_settings_changed (GSettings   *g_settings,
+@@ -332,6 +425,10 @@ on_interface_settings_changed (GSettings   *g_settings,
        settings->font_name = g_settings_get_string (g_settings, key);
        g_object_notify_by_pspec (G_OBJECT (settings), props[PROP_FONT_NAME]);
      }
@@ -315,26 +316,31 @@ index 04bf68f..a5f584d 100644
    else if (g_str_equal (key, KEY_GTK_ICON_THEME))
      {
        g_free (settings->gtk_icon_theme);
-@@ -341,6 +437,18 @@ on_interface_settings_changed (GSettings   *g_settings,
+@@ -339,6 +436,23 @@ on_interface_settings_changed (GSettings   *g_settings,
+       g_object_notify_by_pspec (G_OBJECT (settings),
+                                 props[PROP_GTK_ICON_THEME]);
      }
- }
- 
-+static void
-+on_ubuntu_settings_changed (GSettings   *g_settings,
-+                            const gchar *key,
-+                            StSettings  *settings)
-+{
-+  if (g_str_equal (key, "color-scheme"))
++  else if (g_str_equal (key, KEY_COLOR_SCHEME))
 +    {
 +      g_object_notify_by_pspec (G_OBJECT (settings),
 +                                props[PROP_SHELL_COLOR_SCHEME]);
 +    }
 +}
 +
++static void
++on_ubuntu_settings_changed (GSettings   *g_settings,
++                            const gchar *key,
++                            StSettings  *settings)
++{
++  if (g_str_equal (key, KEY_COLOR_SCHEME))
++    {
++      g_object_notify_by_pspec (G_OBJECT (settings),
++                                props[PROP_SHELL_COLOR_SCHEME]);
++    }
+ }
+ 
  static void
- on_mouse_settings_changed (GSettings   *g_settings,
-                            const gchar *key,
-@@ -398,6 +506,10 @@ st_settings_init (StSettings *settings)
+@@ -398,6 +512,10 @@ st_settings_init (StSettings *settings)
    g_signal_connect (settings->interface_settings, "changed",
                      G_CALLBACK (on_interface_settings_changed), settings);
  
@@ -345,7 +351,7 @@ index 04bf68f..a5f584d 100644
    settings->mouse_settings = g_settings_new ("org.gnome.desktop.peripherals.mouse");
    g_signal_connect (settings->mouse_settings, "changed",
                      G_CALLBACK (on_mouse_settings_changed), settings);
-@@ -414,6 +526,8 @@ st_settings_init (StSettings *settings)
+@@ -414,6 +532,8 @@ st_settings_init (StSettings *settings)
    g_signal_connect (settings->lockdown_settings, "changed",
                      G_CALLBACK (on_lockdown_settings_changed), settings);
  
