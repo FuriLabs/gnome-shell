@@ -54,7 +54,7 @@ index b3cef41..8c0a62c 100644
              version: extension.metadata.version,
          };
 diff --git a/js/ui/extensionSystem.js b/js/ui/extensionSystem.js
-index 4cdaa3d..404632d 100644
+index d9cdf77..4cc2ca3 100644
 --- a/js/ui/extensionSystem.js
 +++ b/js/ui/extensionSystem.js
 @@ -4,6 +4,7 @@

@@ -16,9 +16,8 @@ Forwarded: not-needed
  data/meson.build                           |   8 +-
  data/org.gnome.shell.ubuntu.gschema.xml.in |  17 ++++
  js/ui/main.js                              |  42 ++++++++++
- src/st/meson.build                         |   5 +-
  src/st/st-settings.c                       | 120 +++++++++++++++++++++++++++++
- 5 files changed, 190 insertions(+), 2 deletions(-)
+ 4 files changed, 186 insertions(+), 1 deletion(-)
  create mode 100644 data/org.gnome.shell.ubuntu.gschema.xml.in
 
 diff --git a/data/meson.build b/data/meson.build
@@ -71,7 +70,7 @@ index 0000000..6f9cc62
 +  </schema>
 +</schemalist>
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 15bf84b..0658236 100644
+index b9e9160..4cfbd08 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -186,6 +186,9 @@ function start() {
@@ -136,22 +135,6 @@ index 15bf84b..0658236 100644
 +
      if (stylesheet == null)
          stylesheet = _getStylesheet(sessionMode.stylesheetName);
- 
-diff --git a/src/st/meson.build b/src/st/meson.build
-index 4460257..fd32484 100644
---- a/src/st/meson.build
-+++ b/src/st/meson.build
-@@ -206,7 +206,10 @@ if get_option('tests')
- 
-   test('CSS styling support', test_theme,
-     workdir: meson.current_source_dir(),
--    env: ['GSETTINGS_BACKEND=memory']
-+    env: [
-+      'GSETTINGS_BACKEND=memory',
-+      'GSETTINGS_SCHEMA_DIR=' + meson.project_build_root() / 'data',
-+    ],
-   )
- endif
  
 diff --git a/src/st/st-settings.c b/src/st/st-settings.c
 index 04bf68f..cb625b2 100644

@@ -15,7 +15,7 @@ Forwarded: Not-needed (upstream doesn't support officially theming)
  1 file changed, 10 insertions(+), 2 deletions(-)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 1f4f06e..b8d101b 100644
+index 7ae831e..715e88b 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -402,6 +402,14 @@ async function _handleLockScreenWarning() {

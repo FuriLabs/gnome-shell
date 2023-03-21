@@ -21,7 +21,7 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  3 files changed, 100 insertions(+), 12 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index 6b4a100..0e9ff42 100644
+index d4988e9..a9ea4e9 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -353,14 +353,14 @@ shell_a11y_init (void)

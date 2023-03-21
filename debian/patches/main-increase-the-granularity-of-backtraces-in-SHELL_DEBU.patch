@@ -15,7 +15,7 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  2 files changed, 65 insertions(+), 21 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index 0e9ff42..be674cb 100644
+index a9ea4e9..0d56b23 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -39,16 +39,26 @@ static gboolean is_gdm_mode = FALSE;
