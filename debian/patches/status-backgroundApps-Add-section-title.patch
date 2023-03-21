@@ -1,0 +1,49 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Fri, 24 Feb 2023 01:41:26 +0100
+Subject: status/backgroundApps: Add section title
+
+At least for the time being, the background portal's app monitor
+only supports flatpak apps, which are the only apps where we can
+reliably match processes to .desktop files and assume that they
+belong to graphical apps.
+
+To indicate that there may well be apps that don't appear in the
+list despite running in the background, add a clarifying section
+title.
+
+https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6400
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2681>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/83e7f94
+---
+ js/ui/status/backgroundApps.js | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/js/ui/status/backgroundApps.js b/js/ui/status/backgroundApps.js
+index 606fa33..49878c1 100644
+--- a/js/ui/status/backgroundApps.js
++++ b/js/ui/status/backgroundApps.js
+@@ -146,6 +146,14 @@ class BackgroundAppsToggle extends QuickToggle {
+             null,
+             Gio.DBusProxyFlags.DO_NOT_AUTO_START);
+ 
++        this._listTitle = new PopupMenu.PopupMenuItem(
++            _('Apps known to be running without a window'),
++            {reactive: false});
++        this._listTitle.label.clutter_text.set({
++            line_wrap: true,
++        });
++        this.menu.addMenuItem(this._listTitle);
++
+         this._appsSection = new PopupMenu.PopupMenuSection();
+         this.menu.addMenuItem(this._appsSection);
+ 
+@@ -183,6 +191,7 @@ class BackgroundAppsToggle extends QuickToggle {
+                 '%d Background App',
+                 '%d Background Apps',
+                 nBackgroundApps).format(nBackgroundApps);
++        this._listTitle.visible = nBackgroundApps > 0;
+ 
+         this._appsSection.removeAll();
+ 

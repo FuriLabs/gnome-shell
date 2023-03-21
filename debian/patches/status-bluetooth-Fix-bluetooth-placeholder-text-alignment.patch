@@ -1,0 +1,43 @@
+From: Sebastian Keller <skeller@gnome.org>
+Date: Tue, 7 Mar 2023 20:02:10 +0100
+Subject: status/bluetooth: Fix bluetooth placeholder text alignment
+
+The padding specified for .bt-menu-placeholder was overridden by the
+more specific.popup-menu-item:ltr/rtl padding. Also the ornament, was
+still taking up space, as well as the spacing between the ornament and
+the text.
+
+Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6434
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2687>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/e258cff
+---
+ data/theme/gnome-shell-sass/widgets/_quick-settings.scss | 2 +-
+ js/ui/status/bluetooth.js                                | 1 +
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/data/theme/gnome-shell-sass/widgets/_quick-settings.scss b/data/theme/gnome-shell-sass/widgets/_quick-settings.scss
+index 03fb778..7c9accb 100644
+--- a/data/theme/gnome-shell-sass/widgets/_quick-settings.scss
++++ b/data/theme/gnome-shell-sass/widgets/_quick-settings.scss
+@@ -144,7 +144,7 @@
+   .popup-menu-icon { -st-icon-style: symbolic; }
+ }
+ 
+-.bt-menu-placeholder {
++.bt-menu-placeholder.popup-menu-item {
+   @extend %title_4;
+   text-align: center;
+ 
+diff --git a/js/ui/status/bluetooth.js b/js/ui/status/bluetooth.js
+index a5d6451..8f1d82a 100644
+--- a/js/ui/status/bluetooth.js
++++ b/js/ui/status/bluetooth.js
+@@ -252,6 +252,7 @@ class BluetoothToggle extends QuickMenuToggle {
+             ellipsize: Pango.EllipsizeMode.NONE,
+             line_wrap: true,
+         });
++        this._placeholderItem.setOrnament(PopupMenu.Ornament.HIDDEN);
+         this.menu.addMenuItem(this._placeholderItem);
+ 
+         this._deviceSection.actor.bind_property('visible',

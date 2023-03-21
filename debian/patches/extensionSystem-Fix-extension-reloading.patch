@@ -1,0 +1,31 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Tue, 14 Mar 2023 12:57:43 +0100
+Subject: extensionSystem: Fix extension reloading
+
+Unloading an extension has become an async operation, but we aren't
+awaiting the result. That means that we recreate the extension
+object *before* we remove the "old" extension object from the map,
+with the effect that the reloaded extension is removed completely.
+
+https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6507
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2694>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/0b8114b
+---
+ js/ui/extensionSystem.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/extensionSystem.js b/js/ui/extensionSystem.js
+index 4cdaa3d..d9cdf77 100644
+--- a/js/ui/extensionSystem.js
++++ b/js/ui/extensionSystem.js
+@@ -432,7 +432,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
+         let { uuid, dir, type } = oldExtension;
+ 
+         // Then unload the old extension.
+-        this.unloadExtension(oldExtension);
++        await this.unloadExtension(oldExtension);
+ 
+         // Now, recreate the extension and load it.
+         let newExtension;

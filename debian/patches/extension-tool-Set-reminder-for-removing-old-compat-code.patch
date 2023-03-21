@@ -1,0 +1,55 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Mon, 13 Feb 2023 00:26:29 +0100
+Subject: extension-tool: Set reminder for removing old compat code
+
+GSettings schemas are now compiled at install time, so it is no
+longer necessary to include the compiled schema in the archive.
+
+However the `gnome-extensions pack` command hasn't been adjusted,
+so that it can still be used to produce valid archives for all
+supported versions.
+
+To not let that code linger forever, error out when building
+a version where GNOME 44 is the oldest supported release.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2639>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/43401b9
+---
+ subprojects/extensions-tool/src/command-pack.c | 4 ++++
+ subprojects/extensions-tool/src/meson.build    | 1 +
+ 2 files changed, 5 insertions(+)
+
+diff --git a/subprojects/extensions-tool/src/command-pack.c b/subprojects/extensions-tool/src/command-pack.c
+index c8d9950..f2cfcd5 100644
+--- a/subprojects/extensions-tool/src/command-pack.c
++++ b/subprojects/extensions-tool/src/command-pack.c
+@@ -163,12 +163,16 @@ extension_pack_add_schemas (ExtensionPack  *pack,
+         return FALSE;
+     }
+ 
++#if MAJOR_VERSION >= 46
++#error "Outdated compatibility code, please remove"
++#else
+   dstpath = g_file_get_path (dstdir);
+   proc = g_subprocess_new (G_SUBPROCESS_FLAGS_STDERR_SILENCE, error,
+                            "glib-compile-schemas", "--strict", dstpath, NULL);
+ 
+   if (!g_subprocess_wait_check (proc, NULL, error))
+     return FALSE;
++#endif
+ 
+   g_hash_table_insert (pack->files,
+                        g_strdup ("schemas"), g_steal_pointer (&dstdir));
+diff --git a/subprojects/extensions-tool/src/meson.build b/subprojects/extensions-tool/src/meson.build
+index a855fef..f7bda8a 100644
+--- a/subprojects/extensions-tool/src/meson.build
++++ b/subprojects/extensions-tool/src/meson.build
+@@ -1,6 +1,7 @@
+ config_h = configuration_data()
+ config_h.set_quoted('GETTEXT_PACKAGE', package_name)
+ config_h.set_quoted('VERSION', meson.project_version())
++config_h.set('MAJOR_VERSION', meson.project_version().split('.')[0])
+ config_h.set_quoted('LOCALEDIR', localedir)
+ config_h.set('HAVE_BIND_TEXTDOMAIN_CODESET', cc.has_function('bind_textdomain_codeset'))
+ configure_file(

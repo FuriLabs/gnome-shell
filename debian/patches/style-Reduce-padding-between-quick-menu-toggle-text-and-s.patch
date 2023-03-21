@@ -1,0 +1,31 @@
+From: Sebastian Keller <skeller@gnome.org>
+Date: Tue, 7 Mar 2023 15:11:22 +0100
+Subject: style: Reduce padding between quick menu toggle text and separator
+
+The padding between the text and the arrow button separator effectively
+was 2 * base_padding, while the spacing between the icon and the text
+was just 1.5 * base_padding. This was a bit uneven and also could result
+in the text getting ellipsized when it wasn't necessary.
+
+Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6432
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2685>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/b9c5733
+---
+ data/theme/gnome-shell-sass/widgets/_quick-settings.scss | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/data/theme/gnome-shell-sass/widgets/_quick-settings.scss b/data/theme/gnome-shell-sass/widgets/_quick-settings.scss
+index 7c9accb..d6b4e5a 100644
+--- a/data/theme/gnome-shell-sass/widgets/_quick-settings.scss
++++ b/data/theme/gnome-shell-sass/widgets/_quick-settings.scss
+@@ -48,7 +48,9 @@
+     max-width: auto;
+ 
+     &:ltr { border-radius: 99px 0 0 99px; }
++    &:ltr > StBoxLayout { padding-right: $base_padding*1.5; }
+     &:rtl { border-radius: 0 99px 99px 0; }
++    &:rtr > StBoxLayout { padding-left: $base_padding*1.5; }
+ 
+     &:ltr:last-child { border-radius: 99px; }
+     &:rtl:last-child { border-radius: 99px; }

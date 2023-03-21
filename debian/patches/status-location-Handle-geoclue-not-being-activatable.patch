@@ -1,0 +1,54 @@
+From: Will Thompson <wjt@endlessos.org>
+Date: Wed, 8 Mar 2023 20:44:36 +0000
+Subject: status/location: Handle geoclue not being activatable
+
+In GNOME OS, due to a misconfiguration, geoclue was configured without
+systemd support. In that configuration, geoclue does not install its
+systemd .service file (geoclue.service) but it (incorrectly) includes
+the following line in its D-Bus service file:
+
+    SystemdService=geoclue.service
+
+As a result, when dbus-daemon tried to activate it at gnome-shell's
+request, it would fail with:
+
+    Unit geoclue.service not found
+
+Then, GeoclueAgent._onGeoclueVanished() would be called, as the
+name_vanished_handler passed to Gio.bus_watch_name(). This is consistent
+with Gio.bus_watch_name()'s documentation:
+
+> You are guaranteed that one of the handlers will be invoked after
+> calling this function.
+
+But that function assumed that this._managerProxy is defined, leading
+to:
+
+    JS ERROR: TypeError: this._managerProxy is undefined
+    _onGeoclueVanished@resource:///org/gnome/shell/ui/status/location.js:163:9
+
+Fix this by checking for nullishness of this._managerProxy. (Strictly
+speaking, it's undefined rather than being null, but other code in this
+file already uses the vaguer '!= null' test, which considers undefined
+to be null.)
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2689>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/ab0c795
+---
+ js/ui/status/location.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/status/location.js b/js/ui/status/location.js
+index a2481f4..45f6b7a 100644
+--- a/js/ui/status/location.js
++++ b/js/ui/status/location.js
+@@ -160,7 +160,7 @@ var GeoclueAgent = GObject.registerClass({
+     }
+ 
+     _onGeoclueVanished() {
+-        this._managerProxy.disconnectObject(this);
++        this._managerProxy?.disconnectObject(this);
+         this._managerProxy = null;
+ 
+         this.notify('in-use');

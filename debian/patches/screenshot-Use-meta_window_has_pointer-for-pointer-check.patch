@@ -1,0 +1,28 @@
+From: Ivan Molodetskikh <yalterz@gmail.com>
+Date: Mon, 20 Mar 2023 11:49:24 -0700
+Subject: screenshot: Use meta_window_has_pointer () for pointer check
+
+https://gitlab.gnome.org/GNOME/mutter/-/commit/909616b20876478bc56932cd18c8e85e982645f6 seems to have wrapped window actors in a container, so the actor.has_pointer check started failing. Instead, switch to meta_window_has_pointer () which doesn't rely on window actor implementation details.
+
+We check for existence of has_pointer first just in case someone attempts to run gnome-shell 44.1 with mutter 44.0 which does not have the function exported publicly yet.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2710>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/4daea0c
+---
+ js/ui/screenshot.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/screenshot.js b/js/ui/screenshot.js
+index fd84a74..59c63c7 100644
+--- a/js/ui/screenshot.js
++++ b/js/ui/screenshot.js
+@@ -787,7 +787,7 @@ class UIWindowSelectorWindow extends St.Button {
+ 
+         this._cursor = null;
+         this._cursorPoint = { x: 0, y: 0 };
+-        this._shouldShowCursor = actor.get_children().some(c => c.has_pointer);
++        this._shouldShowCursor = window.has_pointer && window.has_pointer();
+ 
+         this.connect('destroy', this._onDestroy.bind(this));
+     }

@@ -1,0 +1,28 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Tue, 14 Mar 2023 17:35:34 +0800
+Subject: appDisplay: Avoid using an undefined _swipeTracker
+
+It might have been deleted already during shutdown by `_onDestroy()`.
+
+Fixes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6512
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2693>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/b801370
+---
+ js/ui/appDisplay.js | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
+index 17afb89..75a458f 100644
+--- a/js/ui/appDisplay.js
++++ b/js/ui/appDisplay.js
+@@ -1237,7 +1237,8 @@ var BaseAppView = GObject.registerClass({
+     }
+ 
+     vfunc_unmap() {
+-        this._swipeTracker.enabled = false;
++        if (this._swipeTracker)
++            this._swipeTracker.enabled = false;
+         this._disconnectDnD();
+         super.vfunc_unmap();
+     }

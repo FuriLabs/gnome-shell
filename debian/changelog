@@ -1,9 +1,18 @@
-gnome-shell (44~rc-1ubuntu3) UNRELEASED; urgency=medium
+gnome-shell (44.0-1ubuntu1) UNRELEASED; urgency=medium
 
   * debian/patches: Reload shell theme on color scheme changes
   * debian/patches: Do not crash on st settings updates (LP: #2012021)
 
  -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 21 Mar 2023 04:50:49 +0100
+
+gnome-shell (44.0-1) experimental; urgency=medium
+
+  * New upstream release
+  * debian/patches: Refresh
+  * debian/patches: Cherry-pick upstream fixes
+  * debian/rules: Create a cache home folder for dconf
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 21 Mar 2023 05:20:26 +0100
 
 gnome-shell (44~rc-1ubuntu2) lunar; urgency=medium
 

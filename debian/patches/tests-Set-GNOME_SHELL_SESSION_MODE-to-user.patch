@@ -1,0 +1,26 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 24 Feb 2023 04:32:51 +0100
+Subject: tests: Set GNOME_SHELL_SESSION_MODE to user
+
+This may not be unset in some environments, so let's override it with the
+default value.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2661>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/2709d15
+---
+ tests/meson.build | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/tests/meson.build b/tests/meson.build
+index c0f461f..088a0ce 100644
+--- a/tests/meson.build
++++ b/tests/meson.build
+@@ -55,6 +55,7 @@ perf_testenv.set('G_DEBUG', 'fatal-warnings')
+ perf_testenv.set('G_MESSAGES_DEBUG', 'GNOME Shell')
+ perf_testenv.set('GNOME_SHELL_DATADIR', data_builddir)
+ perf_testenv.set('GNOME_SHELL_BUILDDIR', src_builddir)
++perf_testenv.set('GNOME_SHELL_SESSION_MODE', 'user')
+ perf_testenv.set('SHELL_BACKGROUND_IMAGE', '@0@'.format(background_file))
+ perf_testenv.append('GI_TYPELIB_PATH', gvc_typelib_path, separator: ':')
+ perf_testenv.append('LD_LIBRARY_PATH', libgvc_path, separator: ':')

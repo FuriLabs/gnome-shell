@@ -8,13 +8,13 @@ This reverts commit 207b9bb3c0a582b830218fd1b6e8760684adbc48.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/tests/meson.build b/tests/meson.build
-index 2f96a73..8d06645 100644
+index 088a0ce..c1279fb 100644
 --- a/tests/meson.build
 +++ b/tests/meson.build
-@@ -55,7 +55,7 @@ libgvc_path = fs.parent(libgvc.get_variable('libgvc').full_path())
+@@ -51,7 +51,7 @@ libgvc_path = fs.parent(libgvc.get_variable('libgvc').full_path())
  background_file = files(join_paths('data', 'background.png'))
  
- perf_testenv = testenv
+ perf_testenv = environment()
 -perf_testenv.set('G_DEBUG', 'fatal-warnings')
 +perf_testenv.set('G_DEBUG', 'fatal-criticals')
  perf_testenv.set('G_MESSAGES_DEBUG', 'GNOME Shell')

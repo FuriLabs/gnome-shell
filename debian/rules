@@ -36,5 +36,6 @@ override_dh_shlibdeps:
 
 override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
+	env XDG_CACHE_HOME="$(shell mktemp -d -t cache-XXXXXXXX)" \
 	dbus-run-session xvfb-run -a dh_auto_test
 endif

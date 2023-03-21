@@ -1,0 +1,31 @@
+From: Carlos Garnacho <carlosg@gnome.org>
+Date: Mon, 13 Mar 2023 10:54:33 +0100
+Subject: screenshot: Fix code typo
+
+Even though commit b89d90eb8 talked about the GLib.BookmarkFile
+type, this didn't stop the code from sneaking a silly typo and
+refer to this GLib.BookmarksFile (i.e. extra 's').
+
+Fix the code to refer to the right type name and constructor.
+
+Fixes: b89d90eb8 ("screenshot: Use GLib.BookmarkFile to save recent screenshots")
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2692>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/58af42c
+---
+ js/ui/screenshot.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/screenshot.js b/js/ui/screenshot.js
+index 48ca1ae..fd84a74 100644
+--- a/js/ui/screenshot.js
++++ b/js/ui/screenshot.js
+@@ -2076,7 +2076,7 @@ function _storeScreenshot(bytes, pixbuf) {
+         const recentFile =
+             GLib.build_filenamev([GLib.get_user_data_dir(), 'recently-used.xbel']);
+         const uri = screenshotFile.get_uri();
+-        const bookmarks = new GLib.BookmarksFile();
++        const bookmarks = new GLib.BookmarkFile();
+         try {
+             bookmarks.load_from_file(recentFile);
+         } catch (e) {

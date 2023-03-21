@@ -1,0 +1,30 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Wed, 15 Mar 2023 20:41:48 +0100
+Subject: modalDialog: Fix fading out dialog
+
+The dialog's state property has been read-only since
+commit 2f6323afc, but the callback at the end of the
+fade transition still tries to set the value directly.
+
+https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6506
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2696>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/5766d41
+---
+ js/ui/modalDialog.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/modalDialog.js b/js/ui/modalDialog.js
+index 64800a3..0561b8b 100644
+--- a/js/ui/modalDialog.js
++++ b/js/ui/modalDialog.js
+@@ -282,7 +282,7 @@ var ModalDialog = GObject.registerClass({
+             opacity: 0,
+             duration: FADE_OUT_DIALOG_TIME,
+             mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+-            onComplete: () => (this.state = State.FADED_OUT),
++            onComplete: () => this._setState(State.FADED_OUT),
+         });
+     }
+ });
