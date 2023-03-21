@@ -1,4 +1,4 @@
-gnome-shell (44.0-2ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (44.0-2ubuntu1) lunar; urgency=medium
 
   * Merge with debian, containing a new upstream release
   * debian/patches: Reload shell theme on color scheme changes
@@ -72,7 +72,7 @@ gnome-shell (44.0-2ubuntu1) UNRELEASED; urgency=medium
       + Support loading Yaru theme variants (for accent color)
     - ubuntu/Revert-dash-Use-pin-instead-of-favorites
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 21 Mar 2023 05:31:23 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 21 Mar 2023 05:41:22 +0100
 
 gnome-shell (44.0-2) experimental; urgency=medium
 
