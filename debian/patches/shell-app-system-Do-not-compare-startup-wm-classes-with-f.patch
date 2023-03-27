@@ -1,0 +1,56 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 24 Mar 2023 00:02:16 +0100
+Subject: shell-app-system: Do not compare startup-wm classes with full
+ desktop IDs
+
+When fetching the desktop ids into a map of startup-wm classes we meant
+to give the ones that match the desktop ID more priority, however
+this did not happen because we were always comparing a desktop
+file id, including the `.desktop` suffix, with a wm-class that generally
+does not include that.
+
+This is the case of gnome-system-monitor, that provides two desktop
+files, one of which is OnlyShowIn=KDE but both have the same
+StartupWMClass and thus the first parsed is preferred, even though its
+desktop-id is gnome-system-monitor-kde.
+
+As per this, remove the .desktop suffix when comparing it with the
+startup-wm-class, keeping the old check just in case.
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2721
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2012645
+---
+ src/shell-app-system.c | 20 +++++++++++++++++++-
+ 1 file changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/src/shell-app-system.c b/src/shell-app-system.c
+index a5b7636..69e2239 100644
+--- a/src/shell-app-system.c
++++ b/src/shell-app-system.c
+@@ -116,7 +116,25 @@ scan_startup_wm_class_to_id (ShellAppSystem *self)
+       /* In case multiple .desktop files set the same StartupWMClass, prefer
+        * the one where ID and StartupWMClass match */
+       old_id = g_hash_table_lookup (priv->startup_wm_class_to_id, startup_wm_class);
+-      if (old_id == NULL || strcmp (id, startup_wm_class) == 0)
++      if (old_id)
++        {
++          g_autofree char *base_id = NULL;
++          const char *desktop_id = id;
++
++          if (g_str_has_suffix (id, ".desktop"))
++            {
++              base_id = g_strndup (id, strrchr (id, '.') - id);
++              desktop_id = base_id;
++            }
++
++          if (g_str_equal (desktop_id, startup_wm_class))
++            old_id = NULL;
++
++          if (desktop_id != id && g_str_equal (id, startup_wm_class))
++            old_id = NULL;
++        }
++
++      if (!old_id)
+         g_hash_table_insert (priv->startup_wm_class_to_id,
+                              g_strdup (startup_wm_class), g_strdup (id));
+     }

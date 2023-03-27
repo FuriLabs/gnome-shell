@@ -22,6 +22,7 @@ appFavorite-Rename-simple-scan.desktop.patch
 screenshot-Fix-broken-GLib.Error.matches-call.patch
 quickSettings-Fix-icon-name-construct-property-in-menu-to.patch
 status-network-Fix-a11y-names-for-VPN-connection-menu-ite.patch
+shell-app-system-Do-not-compare-startup-wm-classes-with-f.patch
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 debian/Revert-build-Port-to-gcr4.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
