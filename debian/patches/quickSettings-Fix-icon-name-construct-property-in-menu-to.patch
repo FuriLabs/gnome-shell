@@ -1,0 +1,45 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Sat, 25 Mar 2023 22:55:33 +0100
+Subject: quickSettings: Fix icon-name construct property in menu toggles
+
+Both :icon-name and :gicon are propagated to the internal QuickToggle
+with property bindings. However the bindings are set up in the wrong
+order:
+
+:icon-name is a convenience property to set :gicon to a ThemedIcon
+of the given name. That means binding :icon-name first will correctly
+set the underlying StIcon's :gicon, but then the :gicon binding will
+set it again to null.
+
+Fix this by swapping the order in which the bindings are set up,
+so that it works for both properties.
+
+https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6542
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2726>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/9a81479
+---
+ js/ui/quickSettings.js | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/js/ui/quickSettings.js b/js/ui/quickSettings.js
+index 8ba5ac4..64aa894 100644
+--- a/js/ui/quickSettings.js
++++ b/js/ui/quickSettings.js
+@@ -199,12 +199,12 @@ var QuickMenuToggle = GObject.registerClass({
+         this.bind_property('subtitle',
+             contents, 'subtitle',
+             GObject.BindingFlags.SYNC_CREATE);
+-        this.bind_property('icon-name',
+-            contents, 'icon-name',
+-            GObject.BindingFlags.SYNC_CREATE);
+         this.bind_property('gicon',
+             contents, 'gicon',
+             GObject.BindingFlags.SYNC_CREATE);
++        this.bind_property('icon-name',
++            contents, 'icon-name',
++            GObject.BindingFlags.SYNC_CREATE);
+ 
+         this.bind_property('menu-enabled',
+             this._menuButton, 'visible',

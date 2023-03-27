@@ -1,0 +1,57 @@
+From: Georges Basile Stavracas Neto <georges.stavracas@gmail.com>
+Date: Mon, 6 Mar 2023 16:29:46 -0300
+Subject: status/network: Generalize code to hide subtitle
+
+Commit 9d75d777c72e introduced code to hide the subtitle of the
+quick setting toggle when it matches the title of the toggle.
+That's because NetworkManager tries to make the network names
+more palatable on its own, and reports that the name of single
+wired networks is "Wired" even if it may have another name.
+
+What that commit failed to account for, however, is that there are
+other circumstances where we end up with a subtitle is exactly the
+same of the title. For example, when turning off Wi-Fi or mobile
+broadband connections.
+
+The behaviour of commit 9d75d777c72e is safe enough to be applied
+on other device-backed connections, so do it.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2682>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/9e19f27
+---
+ js/ui/status/network.js | 14 +++++++-------
+ 1 file changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/js/ui/status/network.js b/js/ui/status/network.js
+index 6134888..c9c86a9 100644
+--- a/js/ui/status/network.js
++++ b/js/ui/status/network.js
+@@ -1611,6 +1611,13 @@ class NMDeviceToggle extends NMToggle {
+         return name;
+     }
+ 
++    _transformSubtitle(source) {
++        const subtitle = super._transformSubtitle(source);
++        if (subtitle === this.title)
++            return null;
++        return subtitle;
++    }
++
+     _loadInitialItems() {
+         const devices = this._client.get_devices();
+         for (const  dev of devices)
+@@ -1842,13 +1849,6 @@ class NMWiredToggle extends NMDeviceToggle {
+             'gnome-network-panel.desktop');
+     }
+ 
+-    _transformSubtitle(source) {
+-        const subtitle = super._transformSubtitle(source);
+-        if (subtitle === this.title)
+-            return null;
+-        return subtitle;
+-    }
+-
+     _createDeviceMenuItem(device) {
+         return new NMWiredDeviceItem(this._client, device);
+     }

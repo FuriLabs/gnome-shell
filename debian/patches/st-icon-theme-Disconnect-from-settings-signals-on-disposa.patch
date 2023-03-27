@@ -1,13 +1,15 @@
 From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
 Date: Mon, 20 Mar 2023 21:23:36 +0100
-Subject: st/icon-thene: Disconnect from settings signals on disposal
+Subject: st/icon-theme: Disconnect from settings signals on disposal
 
 Icon themes can be created by extensions and thus are likely destroyed on
 extension unload, so we must disconnect from StSettings signals to avoid
 accessing to invalid memory.
 
-Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2012021
-Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2711
+See: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2012021
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2711>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/69e7b8e
 ---
  src/st/st-icon-theme.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)
