@@ -50,3 +50,4 @@ ubuntu/Revert-dash-Use-pin-instead-of-favorites.patch
 ubuntu/main-Support-loading-multiple-Yaru-theme-variants.patch
 ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch
 ubuntu/shell-global-util-Do-not-move-snap-apps-to-gnome-apps-sco.patch
+extensionDownloader-Check-schemadir-existence-and-type.patch

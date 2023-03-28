@@ -1,0 +1,66 @@
+From: Andy Holmes <andyholmes@gnome.org>
+Date: Mon, 27 Mar 2023 12:41:50 -0700
+Subject: extensionDownloader: Check schemadir existence and type
+
+When checking for an extension schemadir, an error will be thrown if
+`query_info()` is used and the directory is missing.
+
+Catch the case of a missing directory, but throw an error if the
+path exists as a non-directory type.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2727>
+(cherry picked from commit 3cc3a79b7a2b73c2a88833e765993078b2ed5201)
+---
+ js/ui/extensionDownloader.js | 39 ++++++++++++++++++++++++---------------
+ 1 file changed, 24 insertions(+), 15 deletions(-)
+
+diff --git a/js/ui/extensionDownloader.js b/js/ui/extensionDownloader.js
+index 8c0a62c..2c92a6c 100644
+--- a/js/ui/extensionDownloader.js
++++ b/js/ui/extensionDownloader.js
+@@ -123,21 +123,30 @@ async function extractExtensionArchive(bytes, dir) {
+     await unzip.wait_check_async(null);
+ 
+     const schemasPath = dir.get_child('schemas');
+-    const info = await schemasPath.query_info_async(
+-        Gio.FILE_ATTRIBUTE_STANDARD_TYPE,
+-        Gio.FileQueryInfoFlags.NONE,
+-        GLib.PRIORITY_DEFAULT,
+-        null);
+-
+-    if (info.get_file_type() === Gio.FileType.DIRECTORY) {
+-        const compileSchema = Gio.Subprocess.new(
+-            ['glib-compile-schemas', '--strict', schemasPath.get_path()],
+-            Gio.SubprocessFlags.NONE);
+-        try {
+-            await compileSchema.wait_check_async(null);
+-        } catch (e) {
+-            log(`Error while compiling schema for extension ${dir.get_basename()}: (${e.message})`);
+-        }
++
++    try {
++        const info = await schemasPath.query_info_async(
++            Gio.FILE_ATTRIBUTE_STANDARD_TYPE,
++            Gio.FileQueryInfoFlags.NONE,
++            GLib.PRIORITY_DEFAULT,
++            null);
++
++        if (info.get_file_type() !== Gio.FileType.DIRECTORY)
++            throw new Error('schemas is not a directory');
++    } catch (e) {
++        if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND))
++            console.warn(`Error while looking for schema for extension ${dir.get_basename()}: ${e.message}`);
++        return;
++    }
++
++    const compileSchema = Gio.Subprocess.new(
++        ['glib-compile-schemas', '--strict', schemasPath.get_path()],
++        Gio.SubprocessFlags.NONE);
++
++    try {
++        await compileSchema.wait_check_async(null);
++    } catch (e) {
++        log(`Error while compiling schema for extension ${dir.get_basename()}: (${e.message})`);
+     }
+ }
+ 
