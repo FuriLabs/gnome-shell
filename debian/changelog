@@ -1,3 +1,10 @@
+gnome-shell (44.0-2ubuntu3) lunar; urgency=medium
+
+  * Cherry-pick fix for installing extensions (LP: #2013073)
+  * Add proposed patch to fix running gnome-shell on RISC-V (LP: #2012068)
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Fri, 31 Mar 2023 10:18:23 -0400
+
 gnome-shell (44.0-2ubuntu2) lunar; urgency=medium
 
   * debian/patches: Cherry-pick more upstream fixes from stable branch
