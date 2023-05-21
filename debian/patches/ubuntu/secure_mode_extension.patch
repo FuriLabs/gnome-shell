@@ -18,7 +18,7 @@ Forwarded: https://bugzilla.gnome.org/show_bug.cgi?id=789852
  2 files changed, 20 insertions(+)
 
 diff --git a/js/ui/extensionDownloader.js b/js/ui/extensionDownloader.js
-index b3cef41..8c0a62c 100644
+index 197cc1c..2c92a6c 100644
 --- a/js/ui/extensionDownloader.js
 +++ b/js/ui/extensionDownloader.js
 @@ -4,6 +4,7 @@
@@ -43,7 +43,7 @@ index b3cef41..8c0a62c 100644
      const message = Soup.Message.new_from_encoded_form('GET',
          REPOSITORY_URL_INFO,
          Soup.form_encode_hash(params));
-@@ -179,6 +187,9 @@ async function checkForUpdates() {
+@@ -188,6 +196,9 @@ async function checkForUpdates() {
              return;
          if (extension.hasUpdate)
              return;
