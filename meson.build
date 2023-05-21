@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '44.0',
+  version: '44.1',
   meson_version: '>= 0.58.0',
   license: 'GPLv2+'
 )
@@ -276,6 +276,16 @@ if get_option('extensions_app')
   )
 endif
 
+if get_option('tests')
+  common_test_env = environment()
+  common_test_env.set('GSETTINGS_SCHEMA_DIR', meson.project_build_root() / 'data')
+  common_test_env.set('GSETTINGS_BACKEND', 'memory')
+
+  add_test_setup('default',
+    is_default: true,
+    env: common_test_env,
+  )
+endif
 
 po_dir = join_paths(meson.current_source_dir(), 'po')
 

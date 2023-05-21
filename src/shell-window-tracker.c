@@ -622,10 +622,12 @@ init_window_tracking (ShellWindowTracker *self)
 {
   MetaDisplay *display = shell_global_get_display (shell_global_get ());
 
-  g_signal_connect (display, "notify::focus-window",
-                    G_CALLBACK (on_focus_window_changed), self);
-  g_signal_connect(display, "window-created",
-                   G_CALLBACK (on_window_created), self);
+  g_signal_connect_object (display, "notify::focus-window",
+                           G_CALLBACK (on_focus_window_changed), self,
+                           G_CONNECT_DEFAULT);
+  g_signal_connect_object (display, "window-created",
+                           G_CALLBACK (on_window_created), self,
+                           G_CONNECT_DEFAULT);
 }
 
 static void
@@ -822,10 +824,5 @@ shell_startup_sequence_get_app (MetaStartupSequence *sequence)
 ShellWindowTracker *
 shell_window_tracker_get_default (void)
 {
-  static ShellWindowTracker *instance;
-
-  if (instance == NULL)
-    instance = g_object_new (SHELL_TYPE_WINDOW_TRACKER, NULL);
-
-  return instance;
+  return shell_global_get_window_tracker (shell_global_get ());
 }

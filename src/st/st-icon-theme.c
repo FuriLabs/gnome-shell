@@ -478,8 +478,8 @@ st_icon_theme_init (StIconTheme *icon_theme)
   icon_theme->pixbuf_supports_svg = pixbuf_supports_svg ();
 
   settings = st_settings_get ();
-  g_signal_connect (settings, "notify::gtk-icon-theme",
-                    G_CALLBACK (theme_changed), icon_theme);
+  g_signal_connect_object (settings, "notify::gtk-icon-theme",
+                           G_CALLBACK (theme_changed), icon_theme, 0);
   update_current_theme (icon_theme);
 }
 
@@ -1413,7 +1413,6 @@ real_choose_icon (StIconTheme       *icon_theme,
   else
     {
       static gboolean check_for_default_theme = TRUE;
-      g_autofree char *default_theme_path = NULL;
       gboolean found = FALSE;
 
       if (check_for_default_theme)
@@ -1422,6 +1421,8 @@ real_choose_icon (StIconTheme       *icon_theme,
 
           for (i = 0; !found && i < icon_theme->search_path_len; i++)
             {
+              g_autofree char *default_theme_path = NULL;
+
               default_theme_path = g_build_filename (icon_theme->search_path[i],
                                                      FALLBACK_ICON_THEME,
                                                      "index.theme",
@@ -3659,9 +3660,9 @@ static char *
 color_to_string_noalpha (const ClutterColor *color)
 {
   return g_strdup_printf ("rgb(%d,%d,%d)",
-                          CLAMP (color->red, 0, 255),
-                          CLAMP (color->green, 0, 255),
-                          CLAMP (color->blue, 0, 255));
+                          color->red,
+                          color->green,
+                          color->blue);
 }
 
 static void
@@ -3802,7 +3803,7 @@ st_icon_info_load_symbolic_svg (StIconInfo    *icon_info,
   double alpha;
   char alphastr[G_ASCII_DTOSTR_BUF_SIZE];
 
-  alpha = colors->foreground.alpha;
+  alpha = colors->foreground.alpha / 255.;
 
   css_fg = color_to_string_noalpha (&colors->foreground);
 

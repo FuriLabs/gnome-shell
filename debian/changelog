@@ -1,3 +1,16 @@
+gnome-shell (44.1-1) experimental; urgency=medium
+
+  [ Jarred Wilson ]
+  * New upstream release
+  * Drop patches applied in new release
+  * Rebase patches
+
+  [ Jeremy Bicha ]
+  * Drop patch to ensure tray icons windows are shown: applied in new release
+  * debian/control.in: Bump minimum mutter to 44.1
+
+ -- Jarred Wilson <jarred.wilson@canonical.com>  Sun, 21 May 2023 12:50:23 -0400
+
 gnome-shell (44.0-2ubuntu3) lunar; urgency=medium
 
   * Cherry-pick fix for installing extensions (LP: #2013073)

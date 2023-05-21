@@ -241,6 +241,8 @@ function _initializeUI() {
 
     inputMethod = new InputMethod.InputMethod();
     Clutter.get_default_backend().set_input_method(inputMethod);
+    global.connect('shutdown',
+        () => Clutter.get_default_backend().set_input_method(null));
 
     screenshotUI = new Screenshot.ScreenshotUI();
 
@@ -963,6 +965,7 @@ var AnimationsSettings = class {
         const shouldEnableAnimations = this._shouldEnableAnimations();
         if (this._animationsEnabled === shouldEnableAnimations)
             return;
+        this._animationsEnabled = shouldEnableAnimations;
 
         const settings = St.Settings.get();
         if (shouldEnableAnimations)

@@ -787,7 +787,7 @@ class UIWindowSelectorWindow extends St.Button {
 
         this._cursor = null;
         this._cursorPoint = { x: 0, y: 0 };
-        this._shouldShowCursor = actor.get_children().some(c => c.has_pointer);
+        this._shouldShowCursor = window.has_pointer && window.has_pointer();
 
         this.connect('destroy', this._onDestroy.bind(this));
     }
@@ -915,6 +915,10 @@ class UIWindowSelectorWindow extends St.Button {
         this._cursorScale = scale;
 
         this.insert_child_below(this._cursor, this._border);
+    }
+
+    getCursorTexture() {
+        return this._cursor?.content;
     }
 
     setCursorVisible(visible) {
@@ -1812,7 +1816,7 @@ var ScreenshotUI = GObject.registerClass({
 
             const texture = content.get_texture();
 
-            let cursorTexture = this._cursor.content?.get_texture();
+            let cursorTexture = window.getCursorTexture()?.get_texture();
             if (!this._cursor.visible)
                 cursorTexture = null;
 
@@ -2076,11 +2080,11 @@ function _storeScreenshot(bytes, pixbuf) {
         const recentFile =
             GLib.build_filenamev([GLib.get_user_data_dir(), 'recently-used.xbel']);
         const uri = screenshotFile.get_uri();
-        const bookmarks = new GLib.BookmarksFile();
+        const bookmarks = new GLib.BookmarkFile();
         try {
             bookmarks.load_from_file(recentFile);
         } catch (e) {
-            if (!e.matches(GLib.BookmarkFileError.FILE_NOT_FOUND)) {
+            if (!e.matches(GLib.BookmarkFileError, GLib.BookmarkFileError.FILE_NOT_FOUND)) {
                 log(`Could not open recent file ${uri}: ${e.message}`);
                 return;
             }
