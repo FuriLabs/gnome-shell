@@ -73,8 +73,8 @@ Standards-Version: 4.6.2
 Homepage: https://wiki.gnome.org/Projects/GnomeShell
 XS-Debian-Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git
 XS-Debian-Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell
-Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git -b ubuntu/master
-Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell/tree/ubuntu/master
+Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git -b ubuntu/lunar
+Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell/tree/ubuntu/lunar
 
 Package: gnome-shell
 Architecture: linux-any
