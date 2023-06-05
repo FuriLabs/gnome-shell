@@ -1,3 +1,10 @@
+gnome-shell (44.2-1) experimental; urgency=medium
+
+  * New upstream release
+  * debian/control.in: Bump minimum mutter to 44.2
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 05 Jun 2023 12:58:02 -0400
+
 gnome-shell (44.1-1ubuntu1) mantic; urgency=medium
 
   * Merge with Debian (LP: #2020277, LP: #1968383, LP: #1968390, LP: #2016007)
