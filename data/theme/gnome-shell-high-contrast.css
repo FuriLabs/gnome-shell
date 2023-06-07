@@ -781,7 +781,7 @@ StScrollBar {
     .calendar .calendar-day-base.calendar-day-heading {
       color: #8c8c8c;
       padding-top: 6px;
-      height: 16px !important;
+      height: 1.1em !important;
       font-weight: 600; }
   .calendar .calendar-day {
     font-weight: 600;
