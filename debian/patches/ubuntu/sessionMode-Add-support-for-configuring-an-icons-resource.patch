@@ -12,10 +12,10 @@ Forwarded: not-needed
  2 files changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 1b4c9fd..b39bcf4 100644
+index b0c5046..6f2c466 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
-@@ -491,7 +491,7 @@ function reloadThemeResource() {
+@@ -520,7 +520,7 @@ function reloadThemeResource() {
  
  /** @private */
  function _loadIcons() {
@@ -25,12 +25,12 @@ index 1b4c9fd..b39bcf4 100644
  }
  
 diff --git a/js/ui/sessionMode.js b/js/ui/sessionMode.js
-index 5478b2a..863df7c 100644
+index 54cfbc5..04c8337 100644
 --- a/js/ui/sessionMode.js
 +++ b/js/ui/sessionMode.js
-@@ -24,6 +24,7 @@ const _modes = {
-         parentMode: null,
+@@ -25,6 +25,7 @@ const _modes = {
          stylesheetName: 'gnome-shell.css',
+         colorScheme: 'prefer-dark',
          themeResourceName: 'gnome-shell-theme.gresource',
 +        iconsResourceName: 'gnome-shell-icons.gresource',
          hasOverview: false,

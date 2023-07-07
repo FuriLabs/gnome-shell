@@ -34,10 +34,10 @@ Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2267
  1 file changed, 101 insertions(+), 27 deletions(-)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 78c45cb..e4902f8 100644
+index 18a6c09..5359560 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -44,6 +44,7 @@ var DISABLE_USER_LIST_KEY = 'disable-user-list';
+@@ -47,6 +47,7 @@ var DISABLE_USER_LIST_KEY = 'disable-user-list';
  
  // Give user 48ms to read each character of a PAM message
  var USER_READ_TIME = 48;
@@ -45,7 +45,7 @@ index 78c45cb..e4902f8 100644
  const FINGERPRINT_ERROR_TIMEOUT_WAIT = 15;
  
  var MessageType = {
-@@ -148,16 +149,49 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -151,16 +152,49 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
          this._preemptingService = null;
  
          this._settings = new Gio.Settings({ schema_id: LOGIN_SCREEN_SCHEMA });
@@ -104,7 +104,7 @@ index 78c45cb..e4902f8 100644
          this._smartcardManager = SmartcardManager.getSmartcardManager();
  
          // We check for smartcards right away, since an inserted smartcard
-@@ -176,6 +210,7 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -179,6 +213,7 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
          this.reauthenticating = false;
  
          this._failCounter = 0;
@@ -112,7 +112,7 @@ index 78c45cb..e4902f8 100644
          this._unavailableServices = new Set();
  
          this._credentialManagers = {};
-@@ -265,6 +300,7 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -268,6 +303,7 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
  
          this._clearUserVerifier();
          this._clearMessageQueue();
@@ -120,7 +120,7 @@ index 78c45cb..e4902f8 100644
      }
  
      destroy() {
-@@ -385,27 +421,52 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -388,27 +424,52 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
      }
  
      async _checkForFingerprintReader() {
@@ -189,7 +189,7 @@ index 78c45cb..e4902f8 100644
      }
  
      _onCredentialManagerAuthenticated(credentialManager, _token) {
-@@ -506,6 +567,7 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -509,6 +570,7 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
              'problem', this._onProblem.bind(this),
              'info-query', this._onInfoQuery.bind(this),
              'secret-info-query', this._onSecretInfoQuery.bind(this),
@@ -197,7 +197,7 @@ index 78c45cb..e4902f8 100644
              'conversation-stopped', this._onConversationStopped.bind(this),
              'service-unavailable', this._onServiceUnavailable.bind(this),
              'reset', this._onReset.bind(this),
-@@ -559,6 +621,10 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -562,6 +624,10 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
              this._defaultService = SMARTCARD_SERVICE_NAME;
          else if (this._fingerprintReaderType !== FingerprintReaderType.NONE)
              this._defaultService = FINGERPRINT_SERVICE_NAME;
@@ -208,7 +208,7 @@ index 78c45cb..e4902f8 100644
  
          if (!this._defaultService) {
              log("no authentication service is enabled, using password authentication");
-@@ -597,11 +663,14 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -600,11 +666,14 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
  
      _beginVerification() {
          this._startService(this._getForegroundService());
@@ -224,7 +224,7 @@ index 78c45cb..e4902f8 100644
      }
  
      _onChoiceListQuery(client, serviceName, promptMessage, list) {
-@@ -694,8 +763,9 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -697,8 +766,9 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
      _onReset() {
          // Clear previous attempts to authenticate
          this._failCounter = 0;
@@ -235,7 +235,7 @@ index 78c45cb..e4902f8 100644
  
          this.emit('reset');
      }
-@@ -776,6 +846,10 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -779,6 +849,10 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
              this._queueMessage(serviceName, errorMessage, MessageType.ERROR);
      }
  

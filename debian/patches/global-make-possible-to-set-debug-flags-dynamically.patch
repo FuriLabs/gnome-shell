@@ -15,13 +15,13 @@ https://bugzilla.gnome.org/show_bug.cgi?id=789377
 Bug-GNOME: https://bugzilla.gnome.org/show_bug.cgi?id=789377
 Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
 ---
- src/main.c         | 57 ++++++++++++++++++++++++++++++++++++++++++------------
- src/shell-global.c | 52 +++++++++++++++++++++++++++++++++++++++++++++++++
+ src/main.c         | 61 +++++++++++++++++++++++++++++++++++++++++-------------
+ src/shell-global.c | 52 ++++++++++++++++++++++++++++++++++++++++++++++
  src/shell-global.h |  4 ++++
- 3 files changed, 101 insertions(+), 12 deletions(-)
+ 3 files changed, 103 insertions(+), 14 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index d4988e9..a9ea4e9 100644
+index 637ffc8..0adb59c 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -353,14 +353,14 @@ shell_a11y_init (void)
@@ -92,9 +92,41 @@ index d4988e9..a9ea4e9 100644
    int ecode = EXIT_SUCCESS;
  
    bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
-@@ -622,7 +659,8 @@ main (int argc, char **argv)
+@@ -619,25 +656,20 @@ main (int argc, char **argv)
    g_setenv ("GJS_DEBUG_OUTPUT", "stderr", TRUE);
    g_setenv ("GJS_DEBUG_TOPICS", "JS ERROR;JS LOG", TRUE);
+ 
+-  dump_gjs_stack_on_signal (SIGABRT);
+-  dump_gjs_stack_on_signal (SIGFPE);
+-  dump_gjs_stack_on_signal (SIGIOT);
+-  dump_gjs_stack_on_signal (SIGTRAP);
+-
+-  if ((_shell_debug & SHELL_DEBUG_BACKTRACE_SEGFAULTS))
+-    {
+-      dump_gjs_stack_on_signal (SIGBUS);
+-      dump_gjs_stack_on_signal (SIGSEGV);
+-    }
+-
+   /* Initialize the Shell global, including GjsContext
+    * GjsContext will iterate the default main loop to
+    * resolve internal modules.
+    */
+   _shell_global_init ("session-mode", session_mode,
++                      "debug-flags", debug_flags,
+                       "force-animations", force_animations,
+                       NULL);
+ 
++  g_signal_connect (shell_global_get (), "notify::debug-flags",
++                    G_CALLBACK (global_notify_debug_flags), NULL);
++
++  setup_debug_signal_listners ();
++
+   /* Setup Meta _after_ the Shell global to avoid GjsContext
+    * iterating on the main loop once Meta starts adding events
+    */
+@@ -647,7 +679,8 @@ main (int argc, char **argv)
+       return EXIT_FAILURE;
+     }
  
 -  shell_init_debug (g_getenv ("SHELL_DEBUG"));
 +  debug_flags = g_getenv ("SHELL_DEBUG");
@@ -102,29 +134,6 @@ index d4988e9..a9ea4e9 100644
  
    shell_dbus_init (meta_context_is_replacing (context));
    shell_a11y_init ();
-@@ -638,18 +676,13 @@ main (int argc, char **argv)
- 
-   _shell_global_init ("session-mode", session_mode,
-                       "force-animations", force_animations,
-+                      "debug-flags", debug_flags,
-                       NULL);
- 
--  dump_gjs_stack_on_signal (SIGABRT);
--  dump_gjs_stack_on_signal (SIGFPE);
--  dump_gjs_stack_on_signal (SIGIOT);
--  dump_gjs_stack_on_signal (SIGTRAP);
-+  g_signal_connect (shell_global_get (), "notify::debug-flags",
-+                    G_CALLBACK (global_notify_debug_flags), NULL);
- 
--  if ((_shell_debug & SHELL_DEBUG_BACKTRACE_SEGFAULTS))
--    {
--      dump_gjs_stack_on_signal (SIGBUS);
--      dump_gjs_stack_on_signal (SIGSEGV);
--    }
-+  setup_debug_signal_listners ();
- 
-   shell_profiler_init ();
- 
 diff --git a/src/shell-global.c b/src/shell-global.c
 index aae9469..e4565b3 100644
 --- a/src/shell-global.c

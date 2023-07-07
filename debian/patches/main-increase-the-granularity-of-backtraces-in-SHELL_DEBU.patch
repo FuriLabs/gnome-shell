@@ -15,7 +15,7 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  2 files changed, 65 insertions(+), 21 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index a9ea4e9..0d56b23 100644
+index 0adb59c..493dd4b 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -39,16 +39,26 @@ static gboolean is_gdm_mode = FALSE;
@@ -118,9 +118,18 @@ index a9ea4e9..0d56b23 100644
    int ecode = EXIT_SUCCESS;
  
    bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
-@@ -659,8 +693,14 @@ main (int argc, char **argv)
-   g_setenv ("GJS_DEBUG_OUTPUT", "stderr", TRUE);
-   g_setenv ("GJS_DEBUG_TOPICS", "JS ERROR;JS LOG", TRUE);
+@@ -661,7 +695,7 @@ main (int argc, char **argv)
+    * resolve internal modules.
+    */
+   _shell_global_init ("session-mode", session_mode,
+-                      "debug-flags", debug_flags,
++                      "debug-flags", debug_flags_string,
+                       "force-animations", force_animations,
+                       NULL);
+ 
+@@ -679,8 +713,14 @@ main (int argc, char **argv)
+       return EXIT_FAILURE;
+     }
  
 -  debug_flags = g_getenv ("SHELL_DEBUG");
 -  shell_update_debug (debug_flags);
@@ -135,15 +144,6 @@ index a9ea4e9..0d56b23 100644
  
    shell_dbus_init (meta_context_is_replacing (context));
    shell_a11y_init ();
-@@ -676,7 +716,7 @@ main (int argc, char **argv)
- 
-   _shell_global_init ("session-mode", session_mode,
-                       "force-animations", force_animations,
--                      "debug-flags", debug_flags,
-+                      "debug-flags", debug_flags_string,
-                       NULL);
- 
-   g_signal_connect (shell_global_get (), "notify::debug-flags",
 diff --git a/src/shell-global.c b/src/shell-global.c
 index e4565b3..b6e9ef9 100644
 --- a/src/shell-global.c

@@ -57,10 +57,10 @@ index ca65695..93b8e24 100644
              forFeedback: true,
              undoCallback: () => this._addFavorite(appId, pos),
 diff --git a/js/ui/appMenu.js b/js/ui/appMenu.js
-index fec74cf..37f8012 100644
+index 8170475..302eaf5 100644
 --- a/js/ui/appMenu.js
 +++ b/js/ui/appMenu.js
-@@ -153,9 +153,10 @@ var AppMenu = class AppMenu extends PopupMenu.PopupMenu {
+@@ -158,9 +158,10 @@ var AppMenu = class AppMenu extends PopupMenu.PopupMenu {
              return;
  
          const { id } = this._app;
@@ -74,10 +74,10 @@ index fec74cf..37f8012 100644
  
      _updateGpuItem() {
 diff --git a/js/ui/dash.js b/js/ui/dash.js
-index 1883088..e7cbe67 100644
+index 581054b..aec99d8 100644
 --- a/js/ui/dash.js
 +++ b/js/ui/dash.js
-@@ -245,9 +245,8 @@ class ShowAppsIcon extends DashItemContainer {
+@@ -251,9 +251,8 @@ class ShowAppsIcon extends DashItemContainer {
          this.toggleButton.set_hover(canRemove);
          if (this._iconActor)
              this._iconActor.set_hover(canRemove);
