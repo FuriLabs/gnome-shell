@@ -1,3 +1,9 @@
+gnome-shell (44.3-1) experimental; urgency=medium
+
+  * New upstream release
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 07 Jul 2023 09:32:03 -0400
+
 gnome-shell (44.2-1ubuntu1) mantic; urgency=medium
 
   * Merge with Debian (LP: #2022961). Remaining changes:
