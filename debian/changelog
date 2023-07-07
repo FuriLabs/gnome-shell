@@ -1,3 +1,9 @@
+gnome-shell (44.3-0ubuntu1) lunar; urgency=medium
+
+  * New upstream release (LP: #2026586)
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 07 Jul 2023 09:41:10 -0400
+
 gnome-shell (44.2-0ubuntu1) lunar; urgency=medium
 
   * New upstream release (LP: #2022961)
