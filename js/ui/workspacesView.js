@@ -962,7 +962,7 @@ class WorkspacesDisplay extends St.Widget {
         let newWs = workspaceManager.get_workspace_by_index(endProgress);
 
         this._scrollAdjustment.ease(endProgress, {
-            mode: Clutter.AnimationMode.EASE_OUT_CUBIC,
+            mode: Clutter.AnimationMode.EASE_OUT_EXPO,
             duration,
             onComplete: () => {
                 if (!newWs.active)
