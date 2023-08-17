@@ -1,3 +1,8 @@
+lookingGlass-Export-the-Inspector-class.patch
+extensions-shared-Don-t-cache-detected-URL.patch
+util-Export-trySpawn.patch
+init-Include-the-error-stack-in-the-context-termination-e.patch
+layout-Export-PressureBarrier.patch
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 debian/Revert-build-Port-to-gcr4.patch
 debian/Revert-tests-Fail-on-warnings-too.patch

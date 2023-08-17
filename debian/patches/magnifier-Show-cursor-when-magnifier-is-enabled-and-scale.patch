@@ -16,7 +16,7 @@ Forwarded: yes
  2 files changed, 73 insertions(+), 6 deletions(-)
 
 diff --git a/js/ui/layout.js b/js/ui/layout.js
-index 5611dad..784de71 100644
+index d1053df..fa81d2a 100644
 --- a/js/ui/layout.js
 +++ b/js/ui/layout.js
 @@ -980,22 +980,38 @@ export const LayoutManager = GObject.registerClass({

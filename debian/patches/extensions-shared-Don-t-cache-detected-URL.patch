@@ -1,0 +1,35 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Sun, 13 Aug 2023 19:12:27 +0200
+Subject: extensions/shared: Don't cache detected URL
+
+The translation functions we export from extension utils must
+work with all extensions, not only the first that calls one
+of the functions.
+
+That means that we are back to examining a backtrace for every
+function call unless an extension defined its own translation
+functions with `import.meta.url`.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2887>
+(cherry picked from commit af5dd7ddd178f5841e13d4e61f7947ed04ad8331)
+---
+ js/extensions/sharedInternals.js | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/js/extensions/sharedInternals.js b/js/extensions/sharedInternals.js
+index 7fed381..c9cb8e9 100644
+--- a/js/extensions/sharedInternals.js
++++ b/js/extensions/sharedInternals.js
+@@ -218,10 +218,8 @@ export class GettextWrapper {
+     }
+ 
+     #lookupExtension(funcName) {
+-        if (!this.#url)
+-            this.#url = this.#detectUrl();
+-
+-        const extension = this.#extensionClass.lookupByURL(this.#url);
++        const url = this.#url ?? this.#detectUrl();
++        const extension = this.#extensionClass.lookupByURL(url);
+         if (!extension)
+             throw new Error(`${funcName} can only be called from extensions`);
+         return extension;

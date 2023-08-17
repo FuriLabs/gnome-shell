@@ -11,12 +11,12 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2011806
  2 files changed, 25 insertions(+), 2 deletions(-)
 
 diff --git a/js/misc/util.js b/js/misc/util.js
-index 971c630..4b672b6 100644
+index 0201fd1..22d9a5a 100644
 --- a/js/misc/util.js
 +++ b/js/misc/util.js
 @@ -119,6 +119,20 @@ export function spawnApp(argv) {
   */
- function trySpawn(argv) {
+ export function trySpawn(argv) {
      let success_, pid;
 +    let path = argv[0];
 +
@@ -35,7 +35,7 @@ index 971c630..4b672b6 100644
      try {
          [success_, pid] = GLib.spawn_async(
              null, argv, null,
-@@ -150,8 +164,10 @@ function trySpawn(argv) {
+@@ -150,8 +164,10 @@ export function trySpawn(argv) {
          }
      }
  

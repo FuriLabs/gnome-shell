@@ -1,0 +1,28 @@
+From: Simon Schneegans <code@simonschneegans.de>
+Date: Thu, 17 Aug 2023 19:32:42 +0200
+Subject: lookingGlass: Export the Inspector class
+
+Several extensions use this class to let the
+user pick application windows. Exporting this
+class will make it easier for these extensions
+to be ported to GNOME 45.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2898>
+(cherry picked from commit 8d1aa7bed87092c2227b9cbb3def721a4a509878)
+---
+ js/ui/lookingGlass.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/lookingGlass.js b/js/ui/lookingGlass.js
+index d8b74d5..0f840df 100644
+--- a/js/ui/lookingGlass.js
++++ b/js/ui/lookingGlass.js
+@@ -574,7 +574,7 @@ class RedBorderEffect extends Clutter.Effect {
+     }
+ });
+ 
+-const Inspector = GObject.registerClass({
++export const Inspector = GObject.registerClass({
+     Signals: {
+         'closed': {},
+         'target': {param_types: [Clutter.Actor.$gtype, GObject.TYPE_DOUBLE, GObject.TYPE_DOUBLE]},
