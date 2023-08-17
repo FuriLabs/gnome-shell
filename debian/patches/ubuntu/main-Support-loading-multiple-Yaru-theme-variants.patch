@@ -15,9 +15,9 @@ Forwarded: not-needed
 ---
  data/meson.build                           |   8 +-
  data/org.gnome.shell.ubuntu.gschema.xml.in |  17 ++++
- js/ui/main.js                              |  35 +++++++++
+ js/ui/main.js                              |  42 ++++++++++
  src/st/st-settings.c                       | 120 +++++++++++++++++++++++++++++
- 4 files changed, 179 insertions(+), 1 deletion(-)
+ 4 files changed, 186 insertions(+), 1 deletion(-)
  create mode 100644 data/org.gnome.shell.ubuntu.gschema.xml.in
 
 diff --git a/data/meson.build b/data/meson.build
@@ -70,7 +70,7 @@ index 0000000..6f9cc62
 +  </schema>
 +</schemalist>
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 6b67e2d..dde0f0e 100644
+index 6b67e2d..032c5a2 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -162,6 +162,9 @@ export async function start() {
@@ -88,14 +88,14 @@ index 6b67e2d..dde0f0e 100644
  }
  
 +function _getYaruStyleSheet(themeVariant) {
-+    const { shellColorScheme: colorScheme } = St.Settings.get();
++    const styleVariant = getStyleVariant();
 +    const baseThemeName = sessionMode.stylesheetName.split(".css").at(0);
 +    const isDark = themeVariant === 'dark' || themeVariant?.endsWith('-dark');
 +    let colorSchemeVariant;
 +
-+    if (isDark && colorScheme == 'prefer-light') {
++    if (isDark && styleVariant === 'light') {
 +        colorSchemeVariant = themeVariant.split('-').slice(0, -1).join('-');
-+    } else if (!isDark && colorScheme == 'prefer-dark' ) {
++    } else if (!isDark && styleVariant == 'dark' ) {
 +        colorSchemeVariant = themeVariant ? `${themeVariant}-dark` : 'dark';
 +    }
 +
@@ -122,6 +122,20 @@ index 6b67e2d..dde0f0e 100644
  function _getDefaultStylesheet() {
      let stylesheet = null;
      let name = sessionMode.stylesheetName;
+@@ -440,6 +475,13 @@ function _getDefaultStylesheet() {
+     if (St.Settings.get().high_contrast)
+         stylesheet = _getStylesheet(name.replace('.css', '-high-contrast.css'));
+ 
++    if (stylesheet == null) {
++        const settings = St.Settings.get();
++
++        if (settings.gtkTheme === 'Yaru')
++            stylesheet = _getYaruStyleSheet(settings.gtkThemeVariant?.toLowerCase());
++    }
++
+     if (stylesheet === null)
+         stylesheet = _getStylesheet(name.replace('.css', `-${getStyleVariant()}.css`));
+ 
 diff --git a/src/st/st-settings.c b/src/st/st-settings.c
 index 790ec64..de6db1b 100644
 --- a/src/st/st-settings.c
