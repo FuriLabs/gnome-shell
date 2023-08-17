@@ -18,7 +18,7 @@ Forwarded: https://bugzilla.gnome.org/show_bug.cgi?id=789852
  2 files changed, 20 insertions(+)
 
 diff --git a/js/ui/extensionDownloader.js b/js/ui/extensionDownloader.js
-index eb17579..fe5802a 100644
+index eb17579..eb2d12d 100644
 --- a/js/ui/extensionDownloader.js
 +++ b/js/ui/extensionDownloader.js
 @@ -7,6 +7,7 @@ import GObject from 'gi://GObject';
@@ -34,7 +34,7 @@ index eb17579..fe5802a 100644
      };
  
 +    if (Desktop.is('ubuntu') && Main.extensionManager.isModeExtension(uuid)) {
-+        const msg = _("This is an extension enabled by your current mode, you can't install manually any update in that session.");
++        const msg = _("This is an extension enabled by your current mode, you can’t install manually any update in that session.");
 +        Main.notifyError(_("Can't install “%s”:").format(uuid), msg);
 +        invocation.return_dbus_error('org.gnome.Shell.ExtensionError', msg);
 +        return;
@@ -48,13 +48,13 @@ index eb17579..fe5802a 100644
          if (extension.hasUpdate)
              return;
 +        // don't updates out of repository mode extension
-+        if (Desktop.is("ubuntu") && Main.extensionManager.isModeExtension(uuid))
++        if (Desktop.is('ubuntu') && Main.extensionManager.isModeExtension(uuid))
 +            return;
          metadatas[uuid] = {
              version: extension.metadata.version,
          };
 diff --git a/js/ui/extensionSystem.js b/js/ui/extensionSystem.js
-index 21b3b19..f80485a 100644
+index 21b3b19..25260ec 100644
 --- a/js/ui/extensionSystem.js
 +++ b/js/ui/extensionSystem.js
 @@ -8,6 +8,7 @@ import Shell from 'gi://Shell';
@@ -80,7 +80,7 @@ index 21b3b19..f80485a 100644
              let type = dir.has_prefix(perUserDir)
                  ? ExtensionType.PER_USER
                  : ExtensionType.SYSTEM;
-+            if (Desktop.is("ubuntu") && this.isModeExtension(uuid) && type === ExtensionType.PER_USER) {
++            if (Desktop.is('ubuntu') && this.isModeExtension(uuid) && type === ExtensionType.PER_USER) {
 +                log(`Found user extension ${uuid}, but not loading from ${dir.get_path()} directory as part of session mode.`);
 +                return;
 +            }

@@ -63,7 +63,7 @@ index 5611dad..784de71 100644
          if (!this._updateRegionIdle) {
              const laters = global.compositor.get_laters();
 diff --git a/js/ui/magnifier.js b/js/ui/magnifier.js
-index ab8150b..29a30a8 100644
+index ab8150b..4420cef 100644
 --- a/js/ui/magnifier.js
 +++ b/js/ui/magnifier.js
 @@ -51,6 +51,8 @@ const MouseSpriteContent = GObject.registerClass({
@@ -107,7 +107,7 @@ index ab8150b..29a30a8 100644
 +    _recomputeScale() {
 +        let scale = this._textureScale() / this._monitorScale;
 +
-+        if (this._scale != scale) {
++        if (this._scale !== scale) {
 +            this._scale = scale;
 +            return true;
 +        }
