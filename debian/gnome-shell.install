@@ -1,7 +1,7 @@
 usr/bin/gnome-extensions
 usr/bin/gnome-shell
 usr/bin/gnome-shell-extension-tool
-usr/bin/gnome-shell-perf-tool
+usr/bin/gnome-shell-test-tool
 usr/lib/gnome-shell
 usr/libexec
 usr/share/applications/org.gnome.Shell*.desktop
