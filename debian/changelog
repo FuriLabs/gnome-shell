@@ -1,4 +1,4 @@
-gnome-shell (45~beta.1-0ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (45~beta.1-0ubuntu1) mantic; urgency=medium
 
   [ Jeremy Bícha ]
   * New upstream release
@@ -13,7 +13,7 @@ gnome-shell (45~beta.1-0ubuntu1) UNRELEASED; urgency=medium
   * debian/patches: Handle loading of multiple yaru variants again
   * debian/patches: Cherry-pick various upstream fixes
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 18 Aug 2023 01:09:59 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 18 Aug 2023 01:12:53 +0200
 
 gnome-shell (44.3-1ubuntu1) mantic; urgency=medium
 
