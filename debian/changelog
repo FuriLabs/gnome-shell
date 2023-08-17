@@ -1,8 +1,13 @@
-gnome-shell (45~beta.1-1) UNRELEASED; urgency=medium
+gnome-shell (45~beta.1-0ubuntu1) UNRELEASED; urgency=medium
 
   * New upstream release
+  * Build with mutter 45 beta
+  * debian/rules: Drop obsolete configure flag
+  * debian/gnome-shell.install: gnome-shell-perf-tool -> gnome-shell-test-tool
+  * Refresh patches
+  * Drop patch to use "Favorite" instead of "Pin"
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 16 Aug 2023 20:23:24 -0400
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 17 Aug 2023 06:53:07 -0400
 
 gnome-shell (44.3-1ubuntu1) mantic; urgency=medium
 
