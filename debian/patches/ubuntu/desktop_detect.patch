@@ -26,13 +26,13 @@ index ee4b763..a69c004 100644
      <file>misc/dbusUtils.js</file>
 diff --git a/js/misc/desktop.js b/js/misc/desktop.js
 new file mode 100644
-index 0000000..8bdca57
+index 0000000..05044c1
 --- /dev/null
 +++ b/js/misc/desktop.js
 @@ -0,0 +1,33 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
-+const GLib = imports.gi.GLib;
++import GLib from 'gi://GLib';
 +
 +// current desktop doesn't change unless we restart the shell or control
 +// the env variable. It's safe to cache matching result
@@ -46,7 +46,7 @@ index 0000000..8bdca57
 +//
 +// Return value: if the environment isn't set or doesn't match, return False
 +// otherwise, return True.
-+function is(name) {
++export function is(name) {
 +    if (!_currentDesktopsMatches.size) {
 +        const desktopsEnv = GLib.getenv('XDG_CURRENT_DESKTOP');
 +        if (!desktopsEnv) {

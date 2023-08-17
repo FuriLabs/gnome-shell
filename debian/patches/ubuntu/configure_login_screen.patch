@@ -120,16 +120,16 @@ index a31efcc..07d6d4a 100644
    command: [find_program('glib-compile-schemas'), data_builddir],
    build_by_default: true)
 diff --git a/js/ui/background.js b/js/ui/background.js
-index ba521bb..82646e7 100644
+index cef7c87..0da99da 100644
 --- a/js/ui/background.js
 +++ b/js/ui/background.js
-@@ -541,7 +541,11 @@ export const SystemBackground = GObject.registerClass({
+@@ -543,7 +543,11 @@ export const SystemBackground = GObject.registerClass({
  
              let backgroundColor = DEFAULT_BACKGROUND_COLOR;
-             if (imports.misc.desktop.is('ubuntu')) {
+             if (Desktop.is('ubuntu')) {
 +                const loginSettings = new Gio.Settings({schema_id: 'com.ubuntu.login-screen'});
 +                const bgColor = loginSettings.get_string('background-color');
-                 const dummyBgActor = new imports.gi.St.Widget({name: 'lockDialogGroup'});
+                 const dummyBgActor = new St.Widget({name: 'lockDialogGroup'});
 +                if (bgColor)
 +                    dummyBgActor.set_style(`background-color: ${bgColor};`);
                  Main.uiGroup.add_actor(dummyBgActor);

@@ -12,22 +12,33 @@ Author: Marco Trevisan <marco.trevisan@canonical.com>
 Last-Update: 2022-08-30
 Forwarded: not-needed
 ---
- js/ui/background.js | 11 ++++++++++-
- 1 file changed, 10 insertions(+), 1 deletion(-)
+ js/ui/background.js | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
 
 diff --git a/js/ui/background.js b/js/ui/background.js
-index 8301330..ba521bb 100644
+index 8301330..cef7c87 100644
 --- a/js/ui/background.js
 +++ b/js/ui/background.js
-@@ -538,7 +538,16 @@ export const SystemBackground = GObject.registerClass({
+@@ -101,8 +101,10 @@ import GObject from 'gi://GObject';
+ import GnomeBG from 'gi://GnomeBG';
+ import GnomeDesktop from 'gi://GnomeDesktop';
+ import Meta from 'gi://Meta';
++import St from 'gi://St';
+ import * as Signals from '../misc/signals.js';
+ 
++import * as Desktop from '../misc/desktop.js';
+ import * as LoginManager from '../misc/loginManager.js';
+ import * as Main from './main.js';
+ import * as Params from '../misc/params.js';
+@@ -538,7 +540,16 @@ export const SystemBackground = GObject.registerClass({
      _init() {
          if (_systemBackground == null) {
              _systemBackground = new Meta.Background({meta_display: global.display});
 -            _systemBackground.set_color(DEFAULT_BACKGROUND_COLOR);
 +
 +            let backgroundColor = DEFAULT_BACKGROUND_COLOR;
-+            if (imports.misc.desktop.is('ubuntu')) {
-+                const dummyBgActor = new imports.gi.St.Widget({name: 'lockDialogGroup'});
++            if (Desktop.is('ubuntu')) {
++                const dummyBgActor = new St.Widget({name: 'lockDialogGroup'});
 +                Main.uiGroup.add_actor(dummyBgActor);
 +                backgroundColor = dummyBgActor.get_theme_node().get_background_color();
 +                dummyBgActor.destroy();
