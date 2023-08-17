@@ -28,10 +28,10 @@ index 8a4948e..5fbb672 100644
      <file>gnome-shell-light.css</file>
      <file>gnome-shell-high-contrast.css</file>
 diff --git a/js/ui/sessionMode.js b/js/ui/sessionMode.js
-index a78e92d..1bebdba 100644
+index 8e30a66..e27f4fa 100644
 --- a/js/ui/sessionMode.js
 +++ b/js/ui/sessionMode.js
-@@ -51,6 +51,8 @@ const _modes = {
+@@ -53,6 +53,8 @@ const _modes = {
  
      'gdm': {
          hasNotifications: true,
@@ -39,4 +39,4 @@ index a78e92d..1bebdba 100644
 +        themeResourceName: 'gdm-theme.gresource',
          isGreeter: true,
          isPrimary: true,
-         unlockDialog: imports.gdm.loginDialog.LoginDialog,
+         unlockDialog: LoginDialog,

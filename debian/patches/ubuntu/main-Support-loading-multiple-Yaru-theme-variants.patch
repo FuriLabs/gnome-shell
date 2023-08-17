@@ -70,10 +70,10 @@ index 0000000..6f9cc62
 +  </schema>
 +</schemalist>
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 6f2c466..2324174 100644
+index 6b67e2d..dde0f0e 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
-@@ -193,6 +193,9 @@ function start() {
+@@ -162,6 +162,9 @@ export async function start() {
  
      St.Settings.get().connect('notify::high-contrast', _loadDefaultStylesheet);
      St.Settings.get().connect('notify::color-scheme', _loadDefaultStylesheet);
@@ -83,7 +83,7 @@ index 6f2c466..2324174 100644
  
      // Initialize ParentalControlsManager before the UI
      ParentalControlsManager.getDefault();
-@@ -460,6 +463,38 @@ function getStyleVariant() {
+@@ -432,6 +435,38 @@ export function getStyleVariant() {
      }
  }
  

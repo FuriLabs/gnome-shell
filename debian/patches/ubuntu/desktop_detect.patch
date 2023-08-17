@@ -6,7 +6,6 @@ We will differentiate some behavior depending on current desktop. Add an
 helper to centralize the current desktop detection.
 Forwarded: not-needed
 Origin: ubuntu
-===================================================================
 ---
  js/js-resources.gresource.xml |  1 +
  js/misc/desktop.js            | 33 +++++++++++++++++++++++++++++++++
@@ -14,17 +13,17 @@ Origin: ubuntu
  create mode 100644 js/misc/desktop.js
 
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index c6e4791..3fc5302 100644
+index ee4b763..a69c004 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
-@@ -13,6 +13,7 @@
- 
+@@ -17,6 +17,7 @@
+     <file>misc/animationUtils.js</file>
      <file>misc/config.js</file>
      <file>misc/extensionUtils.js</file>
 +    <file>misc/desktop.js</file>
      <file>misc/fileUtils.js</file>
+     <file>misc/dateUtils.js</file>
      <file>misc/dbusUtils.js</file>
-     <file>misc/gnomeSession.js</file>
 diff --git a/js/misc/desktop.js b/js/misc/desktop.js
 new file mode 100644
 index 0000000..8bdca57

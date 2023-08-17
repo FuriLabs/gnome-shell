@@ -28,10 +28,10 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/1878998
  2 files changed, 28 insertions(+), 6 deletions(-)
 
 diff --git a/src/st/st-entry.c b/src/st/st-entry.c
-index 64f85fd..d45ce95 100644
+index 0de195e..ba49101 100644
 --- a/src/st/st-entry.c
 +++ b/src/st/st-entry.c
-@@ -1095,6 +1095,8 @@ st_entry_init (StEntry *entry)
+@@ -1101,6 +1101,8 @@ st_entry_init (StEntry *entry)
    g_signal_connect (priv->entry, "notify::line-alignment",
                      G_CALLBACK (invalidate_shadow_pipeline), entry);
  

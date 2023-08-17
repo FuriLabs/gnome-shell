@@ -6,28 +6,28 @@ This reverts commit 5c935af7d3b3a3c9feb4e0d9ea214b6d25a7a2e7.
 
 Forwarded: not-needed
 ---
- js/ui/environment.js           | 2 +-
+ js/misc/dependencies.js        | 2 +-
  meson.build                    | 4 ++--
  src/meson.build                | 2 +-
  src/shell-keyring-prompt.c     | 6 +++---
  src/shell-secure-text-buffer.c | 2 +-
  5 files changed, 8 insertions(+), 8 deletions(-)
 
-diff --git a/js/ui/environment.js b/js/ui/environment.js
-index 3b8cd82..7814aa4 100644
---- a/js/ui/environment.js
-+++ b/js/ui/environment.js
-@@ -8,7 +8,7 @@ imports.gi.versions.Atk = '1.0';
- imports.gi.versions.Atspi = '2.0';
- imports.gi.versions.Clutter = Config.LIBMUTTER_API_VERSION;
- imports.gi.versions.Cogl = Config.LIBMUTTER_API_VERSION;
--imports.gi.versions.Gcr = '4';
-+imports.gi.versions.Gcr = '3';
- imports.gi.versions.Gdk = '4.0';
- imports.gi.versions.Gdm = '1.0';
- imports.gi.versions.Geoclue = '2.0';
+diff --git a/js/misc/dependencies.js b/js/misc/dependencies.js
+index c61753e..7a827bc 100644
+--- a/js/misc/dependencies.js
++++ b/js/misc/dependencies.js
+@@ -7,7 +7,7 @@ import gi from 'gi';
+ import 'gi://AccountsService?version=1.0';
+ import 'gi://Atk?version=1.0';
+ import 'gi://Atspi?version=2.0';
+-import 'gi://Gcr?version=4';
++import 'gi://Gcr?version=3';
+ import 'gi://Gdk?version=4.0';
+ import 'gi://Gdm?version=1.0';
+ import 'gi://Geoclue?version=2.0';
 diff --git a/meson.build b/meson.build
-index a7eeaf4..66741ef 100644
+index e68f609..efea93d 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -20,7 +20,7 @@ libmutter_test_pc = 'libmutter-test-' + mutter_api_version
@@ -39,7 +39,7 @@ index a7eeaf4..66741ef 100644
  gio_req = '>= 2.56.0'
  gi_req = '>= 1.49.1'
  gjs_req = '>= 1.73.1'
-@@ -72,7 +72,7 @@ endif
+@@ -73,7 +73,7 @@ endif
  atk_bridge_dep = dependency('atk-bridge-2.0')
  ecal_dep = dependency('libecal-2.0', version: ecal_req)
  eds_dep = dependency('libedataserver-1.2', version: eds_req)
@@ -49,10 +49,10 @@ index a7eeaf4..66741ef 100644
  gdk_pixbuf_dep = dependency('gdk-pixbuf-2.0')
  gi_dep = dependency('gobject-introspection-1.0', version: gi_req)
 diff --git a/src/meson.build b/src/meson.build
-index 4f88207..512c213 100644
+index 50d89b1..21901e0 100644
 --- a/src/meson.build
 +++ b/src/meson.build
-@@ -213,7 +213,7 @@ libshell_dep = declare_dependency(link_with: libshell)
+@@ -216,7 +216,7 @@ libshell_dep = declare_dependency(link_with: libshell)
  libshell_gir_includes = [
    'Clutter-@0@'.format(mutter_api_version),
    'Meta-@0@'.format(mutter_api_version),

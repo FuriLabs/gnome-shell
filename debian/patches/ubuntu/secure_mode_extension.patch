@@ -18,18 +18,18 @@ Forwarded: https://bugzilla.gnome.org/show_bug.cgi?id=789852
  2 files changed, 20 insertions(+)
 
 diff --git a/js/ui/extensionDownloader.js b/js/ui/extensionDownloader.js
-index 317a13e..b41a126 100644
+index eb17579..fe5802a 100644
 --- a/js/ui/extensionDownloader.js
 +++ b/js/ui/extensionDownloader.js
-@@ -8,6 +8,7 @@ const GObject = imports.gi.GObject;
- const Soup = imports.gi.Soup;
+@@ -7,6 +7,7 @@ import GObject from 'gi://GObject';
+ import Soup from 'gi://Soup';
  
- const Config = imports.misc.config;
-+const Desktop = imports.misc.desktop;
- const Dialog = imports.ui.dialog;
- const ExtensionUtils = imports.misc.extensionUtils;
- const FileUtils = imports.misc.fileUtils;
-@@ -36,6 +37,13 @@ async function installExtension(uuid, invocation) {
+ import * as Config from '../misc/config.js';
++import * as Desktop from '../misc/desktop.js';
+ import * as Dialog from './dialog.js';
+ import * as ExtensionUtils from '../misc/extensionUtils.js';
+ import * as FileUtils from '../misc/fileUtils.js';
+@@ -35,6 +36,13 @@ export async function installExtension(uuid, invocation) {
          shell_version: Config.PACKAGE_VERSION,
      };
  
@@ -43,7 +43,7 @@ index 317a13e..b41a126 100644
      const message = Soup.Message.new_from_encoded_form('GET',
          REPOSITORY_URL_INFO,
          Soup.form_encode_hash(params));
-@@ -192,6 +200,9 @@ async function checkForUpdates() {
+@@ -194,6 +202,9 @@ export async function checkForUpdates() {
              return;
          if (extension.hasUpdate)
              return;
@@ -54,18 +54,18 @@ index 317a13e..b41a126 100644
              version: extension.metadata.version,
          };
 diff --git a/js/ui/extensionSystem.js b/js/ui/extensionSystem.js
-index 9c36a82..5b4891a 100644
+index 21b3b19..f80485a 100644
 --- a/js/ui/extensionSystem.js
 +++ b/js/ui/extensionSystem.js
-@@ -8,6 +8,7 @@ const Shell = imports.gi.Shell;
- const St = imports.gi.St;
- const Signals = imports.misc.signals;
+@@ -8,6 +8,7 @@ import Shell from 'gi://Shell';
+ import * as Signals from '../misc/signals.js';
  
-+const Desktop = imports.misc.desktop;
- const ExtensionDownloader = imports.ui.extensionDownloader;
- const ExtensionUtils = imports.misc.extensionUtils;
- const FileUtils = imports.misc.fileUtils;
-@@ -494,6 +495,10 @@ var ExtensionManager = class extends Signals.EventEmitter {
+ import * as Config from '../misc/config.js';
++import * as Desktop from '../misc/desktop.js';
+ import * as ExtensionDownloader from './extensionDownloader.js';
+ import {ExtensionState, ExtensionType} from '../misc/extensionUtils.js';
+ import * as FileUtils from '../misc/fileUtils.js';
+@@ -502,6 +503,10 @@ export class ExtensionManager extends Signals.EventEmitter {
          await this.loadExtension(newExtension);
      }
  
@@ -76,7 +76,7 @@ index 9c36a82..5b4891a 100644
      async _callExtensionInit(uuid) {
          if (!this._extensionSupportsSessionMode(uuid))
              return false;
-@@ -710,6 +715,10 @@ var ExtensionManager = class extends Signals.EventEmitter {
+@@ -709,6 +714,10 @@ export class ExtensionManager extends Signals.EventEmitter {
              let type = dir.has_prefix(perUserDir)
                  ? ExtensionType.PER_USER
                  : ExtensionType.SYSTEM;

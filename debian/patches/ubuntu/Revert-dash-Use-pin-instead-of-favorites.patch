@@ -27,10 +27,10 @@ Forwarded: not-needed
  3 files changed, 14 insertions(+), 6 deletions(-)
 
 diff --git a/js/ui/appFavorites.js b/js/ui/appFavorites.js
-index ca65695..93b8e24 100644
+index 576df38..175d49a 100644
 --- a/js/ui/appFavorites.js
 +++ b/js/ui/appFavorites.js
-@@ -164,7 +164,11 @@ class AppFavorites extends Signals.EventEmitter {
+@@ -163,7 +163,11 @@ class AppFavorites extends Signals.EventEmitter {
  
          let app = Shell.AppSystem.get_default().lookup_app(appId);
  
@@ -43,7 +43,7 @@ index ca65695..93b8e24 100644
          Main.overview.setMessage(msg, {
              forFeedback: true,
              undoCallback: () => this._removeFavorite(appId),
-@@ -197,7 +201,11 @@ class AppFavorites extends Signals.EventEmitter {
+@@ -196,7 +200,11 @@ class AppFavorites extends Signals.EventEmitter {
          if (!this._removeFavorite(appId))
              return;
  
@@ -57,13 +57,13 @@ index ca65695..93b8e24 100644
              forFeedback: true,
              undoCallback: () => this._addFavorite(appId, pos),
 diff --git a/js/ui/appMenu.js b/js/ui/appMenu.js
-index 8170475..302eaf5 100644
+index e3825a8..ed09d3d 100644
 --- a/js/ui/appMenu.js
 +++ b/js/ui/appMenu.js
-@@ -158,9 +158,10 @@ var AppMenu = class AppMenu extends PopupMenu.PopupMenu {
+@@ -158,9 +158,10 @@ export class AppMenu extends PopupMenu.PopupMenu {
              return;
  
-         const { id } = this._app;
+         const {id} = this._app;
 +        const isUbuntu = imports.misc.desktop.is('ubuntu');
          this._toggleFavoriteItem.label.text = this._appFavorites.isFavorite(id)
 -            ? _('Unpin')
@@ -74,10 +74,10 @@ index 8170475..302eaf5 100644
  
      _updateGpuItem() {
 diff --git a/js/ui/dash.js b/js/ui/dash.js
-index 581054b..aec99d8 100644
+index 7f09e65..7c97490 100644
 --- a/js/ui/dash.js
 +++ b/js/ui/dash.js
-@@ -251,9 +251,8 @@ class ShowAppsIcon extends DashItemContainer {
+@@ -255,9 +255,8 @@ class ShowAppsIcon extends DashItemContainer {
          this.toggleButton.set_hover(canRemove);
          if (this._iconActor)
              this._iconActor.set_hover(canRemove);

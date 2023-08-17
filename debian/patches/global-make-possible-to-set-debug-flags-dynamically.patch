@@ -21,10 +21,10 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  3 files changed, 103 insertions(+), 14 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index 637ffc8..0adb59c 100644
+index dca5f64..aa2f4dc 100644
 --- a/src/main.c
 +++ b/src/main.c
-@@ -353,14 +353,14 @@ shell_a11y_init (void)
+@@ -374,14 +374,14 @@ shell_a11y_init (void)
  }
  
  static void
@@ -41,7 +41,7 @@ index 637ffc8..0adb59c 100644
                                         G_N_ELEMENTS (keys));
  }
  
-@@ -462,6 +462,42 @@ dump_gjs_stack_on_signal (int signo)
+@@ -483,6 +483,42 @@ dump_gjs_stack_on_signal (int signo)
    _tracked_signals[signo] = TRUE;
  }
  
@@ -84,15 +84,15 @@ index 637ffc8..0adb59c 100644
  static gboolean
  list_modes (const char  *option_name,
              const char  *value,
-@@ -585,6 +621,7 @@ main (int argc, char **argv)
- {
-   g_autoptr (MetaContext) context = NULL;
+@@ -614,6 +650,7 @@ main (int argc, char **argv)
+   g_autoptr (GFile) automation_script = NULL;
+   g_autofree char *cwd = NULL;
    GError *error = NULL;
 +  const char *debug_flags;
    int ecode = EXIT_SUCCESS;
  
    bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
-@@ -619,25 +656,20 @@ main (int argc, char **argv)
+@@ -649,17 +686,6 @@ main (int argc, char **argv)
    g_setenv ("GJS_DEBUG_OUTPUT", "stderr", TRUE);
    g_setenv ("GJS_DEBUG_TOPICS", "JS ERROR;JS LOG", TRUE);
  
@@ -107,13 +107,16 @@ index 637ffc8..0adb59c 100644
 -      dump_gjs_stack_on_signal (SIGSEGV);
 -    }
 -
-   /* Initialize the Shell global, including GjsContext
-    * GjsContext will iterate the default main loop to
+   if (script_path)
+     automation_script = g_file_new_for_commandline_arg_and_cwd (script_path, cwd);
+ 
+@@ -668,10 +694,16 @@ main (int argc, char **argv)
     * resolve internal modules.
     */
    _shell_global_init ("session-mode", session_mode,
 +                      "debug-flags", debug_flags,
                        "force-animations", force_animations,
+                       "automation-script", automation_script,
                        NULL);
  
 +  g_signal_connect (shell_global_get (), "notify::debug-flags",
@@ -124,7 +127,7 @@ index 637ffc8..0adb59c 100644
    /* Setup Meta _after_ the Shell global to avoid GjsContext
     * iterating on the main loop once Meta starts adding events
     */
-@@ -647,7 +679,8 @@ main (int argc, char **argv)
+@@ -681,7 +713,8 @@ main (int argc, char **argv)
        return EXIT_FAILURE;
      }
  
@@ -135,7 +138,7 @@ index 637ffc8..0adb59c 100644
    shell_dbus_init (meta_context_is_replacing (context));
    shell_a11y_init ();
 diff --git a/src/shell-global.c b/src/shell-global.c
-index aae9469..e4565b3 100644
+index 761ba33..b574a6a 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
 @@ -61,6 +61,7 @@ struct _ShellGlobal {
@@ -146,17 +149,17 @@ index aae9469..e4565b3 100644
  
    XserverRegion input_region;
  
-@@ -120,6 +121,7 @@ enum {
-   PROP_FRAME_FINISH_TIMESTAMP,
+@@ -122,6 +123,7 @@ enum {
    PROP_SWITCHEROO_CONTROL,
    PROP_FORCE_ANIMATIONS,
+   PROP_AUTOMATION_SCRIPT,
 +  PROP_DEBUG_FLAGS,
  
    N_PROPS
  };
-@@ -249,6 +251,9 @@ shell_global_set_property(GObject         *object,
-     case PROP_FORCE_ANIMATIONS:
-       global->force_animations = g_value_get_boolean (value);
+@@ -254,6 +256,9 @@ shell_global_set_property(GObject         *object,
+     case PROP_AUTOMATION_SCRIPT:
+       g_set_object (&global->automation_script, g_value_get_object (value));
        break;
 +    case PROP_DEBUG_FLAGS:
 +      shell_global_set_debug_flags (global, g_value_get_string (value));
@@ -164,9 +167,9 @@ index aae9469..e4565b3 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -338,6 +343,9 @@ shell_global_get_property(GObject         *object,
-     case PROP_FORCE_ANIMATIONS:
-       g_value_set_boolean (value, global->force_animations);
+@@ -346,6 +351,9 @@ shell_global_get_property(GObject         *object,
+     case PROP_AUTOMATION_SCRIPT:
+       g_value_set_object (value, global->automation_script);
        break;
 +    case PROP_DEBUG_FLAGS:
 +      g_value_set_string (value, global->debug_flags);
@@ -174,9 +177,9 @@ index aae9469..e4565b3 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -688,6 +696,13 @@ shell_global_class_init (ShellGlobalClass *klass)
-                           FALSE,
-                           G_PARAM_READWRITE  | G_PARAM_CONSTRUCT| G_PARAM_STATIC_STRINGS);
+@@ -703,6 +711,13 @@ shell_global_class_init (ShellGlobalClass *klass)
+                          G_TYPE_FILE,
+                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
  
 +  props[PROP_DEBUG_FLAGS] =
 +    g_param_spec_string ("debug-flags",
@@ -188,7 +191,7 @@ index aae9469..e4565b3 100644
    g_object_class_install_properties (gobject_class, N_PROPS, props);
  }
  
-@@ -1988,3 +2003,40 @@ shell_global_get_app_usage (ShellGlobal *global)
+@@ -2003,3 +2018,40 @@ shell_global_get_app_usage (ShellGlobal *global)
      global->app_usage = g_object_new (SHELL_TYPE_APP_USAGE, NULL);
    return global->app_usage;
  }

@@ -16,18 +16,18 @@ Forwarded: not-needed
  1 file changed, 10 insertions(+), 1 deletion(-)
 
 diff --git a/js/ui/background.js b/js/ui/background.js
-index 9630508..018723a 100644
+index 8301330..bb30b37 100644
 --- a/js/ui/background.js
 +++ b/js/ui/background.js
-@@ -535,7 +535,16 @@ var SystemBackground = GObject.registerClass({
+@@ -538,7 +538,16 @@ export const SystemBackground = GObject.registerClass({
      _init() {
          if (_systemBackground == null) {
-             _systemBackground = new Meta.Background({ meta_display: global.display });
+             _systemBackground = new Meta.Background({meta_display: global.display});
 -            _systemBackground.set_color(DEFAULT_BACKGROUND_COLOR);
 +
 +            let backgroundColor = DEFAULT_BACKGROUND_COLOR;
 +            if (imports.misc.desktop.is("ubuntu")) {
-+                const dummyBgActor = new imports.gi.St.Widget({ name: 'lockDialogGroup' });
++                const dummyBgActor = new imports.gi.St.Widget({name: 'lockDialogGroup'});
 +                Main.uiGroup.add_actor(dummyBgActor);
 +                backgroundColor = dummyBgActor.get_theme_node().get_background_color();
 +                dummyBgActor.destroy();

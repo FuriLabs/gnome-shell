@@ -1,6 +1,6 @@
 From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
 Date: Tue, 1 Mar 2022 11:57:20 +0100
-Subject: gmd/util: Only start fingerprint service synchronously when it's
+Subject: gdm/util: Only start fingerprint service synchronously when it's
  default
 
 On ShellUserVerifier construction we used to start fprintd in a sync
@@ -30,28 +30,35 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/1962566
 Bug-GNOME: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/5168
 Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2267
 ---
- js/gdm/util.js | 128 +++++++++++++++++++++++++++++++++++++++++++++------------
- 1 file changed, 101 insertions(+), 27 deletions(-)
+ js/gdm/util.js | 129 +++++++++++++++++++++++++++++++++++++++++++++------------
+ 1 file changed, 102 insertions(+), 27 deletions(-)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 18a6c09..5359560 100644
+index 89ad544..3697ecd 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -47,6 +47,7 @@ var DISABLE_USER_LIST_KEY = 'disable-user-list';
+@@ -43,6 +43,7 @@ export const DISABLE_USER_LIST_KEY = 'disable-user-list';
  
  // Give user 48ms to read each character of a PAM message
- var USER_READ_TIME = 48;
+ const USER_READ_TIME = 48;
 +const FINGERPRINT_SERVICE_PROXY_TIMEOUT = 5000;
  const FINGERPRINT_ERROR_TIMEOUT_WAIT = 15;
  
- var MessageType = {
-@@ -151,16 +152,49 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+ /**
+@@ -108,16 +109,50 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._preemptingService = null;
  
-         this._settings = new Gio.Settings({ schema_id: LOGIN_SCREEN_SCHEMA });
+         this._settings = new Gio.Settings({schema_id: LOGIN_SCREEN_SCHEMA});
 -        this._settings.connect('changed',
--                               this._updateDefaultService.bind(this));
+-            this._updateDefaultService.bind(this));
 -        this._updateDefaultService();
+ 
+-        this._fprintManager = new FprintManagerProxy(Gio.DBus.system,
+-            'net.reactivated.Fprint',
+-            '/net/reactivated/Fprint/Manager',
+-            null,
+-            null,
+-            Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
 +        this._settings.connect('changed', () => this._updateDefaultServiceWithFallback());
 +
 +        this._fingerprintReaderType = FingerprintReaderType.NONE;
@@ -68,13 +75,7 @@ index 18a6c09..5359560 100644
 +            // Do not wait too much for fprintd to reply, as in case it hangs
 +            // we should fail early without having the shell to misbehave because
 +            fprintManager.set_default_timeout(FINGERPRINT_SERVICE_PROXY_TIMEOUT);
- 
--        this._fprintManager = new FprintManagerProxy(Gio.DBus.system,
--            'net.reactivated.Fprint',
--            '/net/reactivated/Fprint/Manager',
--            null,
--            null,
--            Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
++
 +            this._updateDefaultService();
 +
 +            if (!this._defaultService) {
@@ -104,7 +105,7 @@ index 18a6c09..5359560 100644
          this._smartcardManager = SmartcardManager.getSmartcardManager();
  
          // We check for smartcards right away, since an inserted smartcard
-@@ -179,6 +213,7 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -136,6 +171,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this.reauthenticating = false;
  
          this._failCounter = 0;
@@ -112,7 +113,7 @@ index 18a6c09..5359560 100644
          this._unavailableServices = new Set();
  
          this._credentialManagers = {};
-@@ -268,6 +303,7 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -225,6 +261,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
          this._clearUserVerifier();
          this._clearMessageQueue();
@@ -120,7 +121,7 @@ index 18a6c09..5359560 100644
      }
  
      destroy() {
-@@ -388,27 +424,52 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -345,27 +382,52 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      async _checkForFingerprintReader() {
@@ -189,7 +190,7 @@ index 18a6c09..5359560 100644
      }
  
      _onCredentialManagerAuthenticated(credentialManager, _token) {
-@@ -509,6 +570,7 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -466,6 +528,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              'problem', this._onProblem.bind(this),
              'info-query', this._onInfoQuery.bind(this),
              'secret-info-query', this._onSecretInfoQuery.bind(this),
@@ -197,7 +198,7 @@ index 18a6c09..5359560 100644
              'conversation-stopped', this._onConversationStopped.bind(this),
              'service-unavailable', this._onServiceUnavailable.bind(this),
              'reset', this._onReset.bind(this),
-@@ -562,6 +624,10 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -519,6 +582,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              this._defaultService = SMARTCARD_SERVICE_NAME;
          else if (this._fingerprintReaderType !== FingerprintReaderType.NONE)
              this._defaultService = FINGERPRINT_SERVICE_NAME;
@@ -207,8 +208,8 @@ index 18a6c09..5359560 100644
 +        this._updateDefaultService();
  
          if (!this._defaultService) {
-             log("no authentication service is enabled, using password authentication");
-@@ -600,11 +666,14 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+             log('no authentication service is enabled, using password authentication');
+@@ -557,11 +624,14 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      _beginVerification() {
          this._startService(this._getForegroundService());
@@ -224,7 +225,7 @@ index 18a6c09..5359560 100644
      }
  
      _onChoiceListQuery(client, serviceName, promptMessage, list) {
-@@ -697,8 +766,9 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -654,8 +724,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      _onReset() {
          // Clear previous attempts to authenticate
          this._failCounter = 0;
@@ -235,7 +236,7 @@ index 18a6c09..5359560 100644
  
          this.emit('reset');
      }
-@@ -779,6 +849,10 @@ var ShellUserVerifier = class extends Signals.EventEmitter {
+@@ -736,6 +807,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              this._queueMessage(serviceName, errorMessage, MessageType.ERROR);
      }
  

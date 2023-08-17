@@ -10,11 +10,11 @@ Last-Update: 2020-03-18
  1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 5f8a32c..8d389e2 100644
+index a3e4372..104fb93 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -1268,7 +1268,11 @@ var LoginDialog = GObject.registerClass({
-                                         { sortGroup: CtrlAltTab.SortGroup.MIDDLE });
+@@ -1272,7 +1272,11 @@ export const LoginDialog = GObject.registerClass({
+             {sortGroup: CtrlAltTab.SortGroup.MIDDLE});
          this.activate();
  
 -        this.opacity = 0;
@@ -24,9 +24,9 @@ index 5f8a32c..8d389e2 100644
 +        this.opacity = 1;
 +        this._logoBin.set_opacity_override(255);
  
-         this._grab = Main.pushModal(global.stage, { actionMode: Shell.ActionMode.LOGIN_SCREEN });
+         this._grab = Main.pushModal(global.stage, {actionMode: Shell.ActionMode.LOGIN_SCREEN});
  
-@@ -1276,6 +1280,7 @@ var LoginDialog = GObject.registerClass({
+@@ -1280,6 +1284,7 @@ export const LoginDialog = GObject.registerClass({
              opacity: 255,
              duration: 1000,
              mode: Clutter.AnimationMode.EASE_IN_QUAD,

@@ -11,13 +11,13 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2011806
  2 files changed, 25 insertions(+), 2 deletions(-)
 
 diff --git a/js/misc/util.js b/js/misc/util.js
-index d1c43d2..f882467 100644
+index 971c630..4b672b6 100644
 --- a/js/misc/util.js
 +++ b/js/misc/util.js
-@@ -115,6 +115,20 @@ function spawnApp(argv) {
- // this will throw an error.
+@@ -119,6 +119,20 @@ export function spawnApp(argv) {
+  */
  function trySpawn(argv) {
-     var success_, pid;
+     let success_, pid;
 +    let path = argv[0];
 +
 +    if (!path?.includes('/')) {
@@ -35,7 +35,7 @@ index d1c43d2..f882467 100644
      try {
          [success_, pid] = GLib.spawn_async(
              null, argv, null,
-@@ -146,8 +160,10 @@ function trySpawn(argv) {
+@@ -150,8 +164,10 @@ function trySpawn(argv) {
          }
      }
  
@@ -49,10 +49,10 @@ index d1c43d2..f882467 100644
      // Dummy child watch; we don't want to double-fork internally
      // because then we lose the parent-child relationship, which
 diff --git a/src/shell-global.c b/src/shell-global.c
-index f34dc3b..fc475cd 100644
+index 586abde..b4d7532 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
-@@ -1485,6 +1485,7 @@ shell_global_app_launched_cb (GAppLaunchContext *context,
+@@ -1500,6 +1500,7 @@ shell_global_app_launched_cb (GAppLaunchContext *context,
  {
    gint32 pid;
    const gchar *app_name;
@@ -60,7 +60,7 @@ index f34dc3b..fc475cd 100644
  
    if (!g_variant_lookup (platform_data, "pid", "i", &pid))
      return;
-@@ -1498,6 +1499,12 @@ shell_global_app_launched_cb (GAppLaunchContext *context,
+@@ -1513,6 +1514,12 @@ shell_global_app_launched_cb (GAppLaunchContext *context,
    if (app_name == NULL)
      app_name = g_app_info_get_executable (info);
  
