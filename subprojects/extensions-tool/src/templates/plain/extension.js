@@ -15,20 +15,12 @@
  *
  * SPDX-License-Identifier: GPL-2.0-or-later
  */
+import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
-/* exported init */
-
-class Extension {
-    constructor() {
-    }
-
+export default class PlainExampleExtension extends Extension {
     enable() {
     }
 
     disable() {
     }
-}
-
-function init() {
-    return new Extension();
 }

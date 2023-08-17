@@ -18,8 +18,9 @@ dbus_runner = configure_file(
   configuration: dbusrunnerconf,
 )
 
-tests = [
+unit_tests = [
     'highlighter',
+    'injectionManager',
     'insertSorted',
     'jsParse',
     'markup',
@@ -29,13 +30,14 @@ tests = [
     'versionCompare',
 ]
 
-foreach test : tests
+foreach test : unit_tests
   test(test, run_test,
     args: 'unit/@0@.js'.format(test),
+    suite: 'unit',
     workdir: meson.current_source_dir())
 endforeach
 
-perf_tests = [
+shell_tests = [
   {
     'name': 'basic',
   },
@@ -53,28 +55,29 @@ libgvc_path = fs.parent(libgvc.get_variable('libgvc').full_path())
 
 background_file = files(join_paths('data', 'background.png'))
 
-perf_testenv = environment()
-perf_testenv.set('G_DEBUG', 'fatal-warnings')
-perf_testenv.set('G_MESSAGES_DEBUG', 'GNOME Shell')
-perf_testenv.set('GNOME_SHELL_DATADIR', data_builddir)
-perf_testenv.set('GNOME_SHELL_BUILDDIR', src_builddir)
-perf_testenv.set('GNOME_SHELL_SESSION_MODE', 'user')
-perf_testenv.set('SHELL_BACKGROUND_IMAGE', '@0@'.format(background_file))
-perf_testenv.append('GI_TYPELIB_PATH', gvc_typelib_path, separator: ':')
-perf_testenv.append('LD_LIBRARY_PATH', libgvc_path, separator: ':')
+shell_testenv = environment()
+shell_testenv.set('G_DEBUG', 'fatal-warnings')
+shell_testenv.set('G_MESSAGES_DEBUG', 'GNOME Shell')
+shell_testenv.set('GNOME_SHELL_DATADIR', data_builddir)
+shell_testenv.set('GNOME_SHELL_BUILDDIR', src_builddir)
+shell_testenv.set('GNOME_SHELL_SESSION_MODE', 'user')
+shell_testenv.set('SHELL_BACKGROUND_IMAGE', '@0@'.format(background_file))
+shell_testenv.append('GI_TYPELIB_PATH', gvc_typelib_path, separator: ':')
+shell_testenv.append('LD_LIBRARY_PATH', libgvc_path, separator: ':')
 
-foreach perf_test : perf_tests
-  test_name = perf_test['name']
-  options = perf_test.get('options', [])
+foreach shell_test : shell_tests
+  test_name = shell_test['name']
+  options = shell_test.get('options', [])
 
-  test('perf-' + test_name, dbus_runner,
+  test(test_name, dbus_runner,
+    suite: 'shell',
     args: [
-      perf_tool,
+      test_tool,
       '--headless',
-      '--perf=@0@'.format(test_name),
       options,
+      '@0@/shell/@1@.js'.format(meson.current_source_dir(), test_name),
     ],
     is_parallel: false,
-    env: perf_testenv,
+    env: shell_testenv,
   )
 endforeach

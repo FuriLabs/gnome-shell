@@ -13,7 +13,7 @@ stages:
   - deploy
 
 default:
-  image: registry.gitlab.gnome.org/gnome/mutter/fedora/37:x86_64-2023-02-22.0
+  image: $MUTTER_CI_IMAGE
   # Cancel jobs if newer commits are pushed to the branch
   interruptible: true
   # Auto-retry jobs in case of infra failures
@@ -26,6 +26,7 @@ default:
       - 'api_failure'
 
 variables:
+  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/38:x86_64-2023-08-01.0
   FDO_UPSTREAM_REPO: GNOME/gnome-shell
   BUNDLE: "extensions-git.flatpak"
   LINT_LOG: "eslint-report.xml"
@@ -48,7 +49,7 @@ workflow:
 .gnome-shell.fedora:
   variables:
     FDO_DISTRIBUTION_VERSION: 38
-    FDO_DISTRIBUTION_TAG: '2023-04-21.1'
+    FDO_DISTRIBUTION_TAG: '2023-06-07.1'
     FDO_DISTRIBUTION_PACKAGES:
       gjs
       nodejs
@@ -61,7 +62,7 @@ workflow:
       pkgconfig(json-glib-1.0)
     FDO_DISTRIBUTION_EXEC: |
       # For static analysis with eslint
-      npm install -g eslint eslint-plugin-jsdoc &&
+      npm install -g eslint@^8.0.0 eslint-plugin-jsdoc@^46.0.0 &&
 
       dnf group install -y 'Development Tools' \
                  'C Development Tools and Libraries' &&
@@ -141,27 +142,10 @@ eslint:
   stage: review
   script:
     - export NODE_PATH=$(npm root -g)
-    - ./.gitlab-ci/run-eslint --output-file ${LINT_LOG} --format junit
+    - ./.gitlab-ci/run-eslint --output-file ${LINT_LOG} --format junit --stdout
   artifacts:
     reports:
       junit: ${LINT_LOG}
-    when: always
-
-eslint_mr:
-  extends:
-    - .fdo.distribution-image@fedora
-    - .gnome-shell.fedora
-  stage: review
-  script:
-    - export NODE_PATH=$(npm root -g)
-    - ./.gitlab-ci/run-eslint --output-file ${LINT_MR_LOG} --format junit
-      --remote ${CI_MERGE_REQUEST_PROJECT_URL}.git
-      --branch ${CI_MERGE_REQUEST_TARGET_BRANCH_NAME}
-  only:
-    - merge_requests
-  artifacts:
-    reports:
-      junit: ${LINT_MR_LOG}
     when: always
 
 potfile_c_check:
@@ -193,7 +177,7 @@ build:
     - meson mutter mutter/build --prefix=/usr
     - meson install -C mutter/build
   script:
-    - meson . build -Dbuildtype=debugoptimized -Dman=false --werror
+    - meson setup . build -Dbuildtype=debugoptimized -Dman=false --werror --fatal-meson-warnings
     - meson compile -C build
     - meson install -C build
   artifacts:
@@ -290,3 +274,13 @@ dist-tarball:
       - build/meson-dist/$CI_PROJECT_NAME-$CI_COMMIT_TAG.tar.xz
   rules:
     - if: '$CI_COMMIT_TAG'
+
+build-toolbox:
+  image: quay.io/freedesktop.org/ci-templates:container-build-base-2021-07-29.0
+  stage: deploy
+  needs: []
+  script:
+    - .gitlab-ci/build-toolbox-image.sh $MUTTER_CI_IMAGE
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH && $CI_PROJECT_NAMESPACE == "GNOME"'
+    - if: '$CI_COMMIT_BRANCH =~ /^gnome-[0-9-]+$/ && $CI_PROJECT_NAMESPACE == "GNOME"'

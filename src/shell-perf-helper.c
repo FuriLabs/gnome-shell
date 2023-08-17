@@ -15,10 +15,6 @@
 
 #define BUS_NAME "org.gnome.Shell.PerfHelper"
 
-static void destroy_windows           (void);
-static void finish_wait_windows       (void);
-static void check_finish_wait_windows (void);
-
 static const gchar introspection_xml[] =
 	  "<node>"
 	  "  <interface name='org.gnome.Shell.PerfHelper'>"
@@ -36,21 +32,10 @@ static const gchar introspection_xml[] =
 	  "  </interface>"
 	"</node>";
 
-typedef struct {
-  GtkWidget *window;
-  int width;
-  int height;
-
-  guint alpha : 1;
-  guint maximized : 1;
-  guint redraws : 1;
-  guint mapped : 1;
-  guint exposed : 1;
-  guint pending : 1;
-
-  gint64 start_time;
-  gint64 time;
-} WindowInfo;
+static const char application_css[] =
+  ".solid { background: rgb(255,255,255); }"
+  ".alpha { background: rgba(255,255,255,0.5); }"
+  "";
 
 static int opt_idle_timeout = 30;
 
@@ -60,103 +45,149 @@ static GOptionEntry opt_entries[] =
     { NULL }
   };
 
-static guint timeout_id;
-static GList *our_windows;
-static GList *wait_windows_invocations;
+#define PERF_HELPER_TYPE_APP (perf_helper_app_get_type ())
+G_DECLARE_FINAL_TYPE (PerfHelperApp, perf_helper_app, PERF_HELPER, APP, GtkApplication)
+
+struct _PerfHelperApp {
+  GtkApplication parent;
+
+  guint timeout_id;
+  GList *wait_windows_invocations;
+};
+
+G_DEFINE_TYPE (PerfHelperApp, perf_helper_app, GTK_TYPE_APPLICATION);
+
+#define PERF_HELPER_TYPE_WINDOW (perf_helper_window_get_type ())
+G_DECLARE_FINAL_TYPE (PerfHelperWindow, perf_helper_window, PERF_HELPER, WINDOW, GtkApplicationWindow)
+
+struct _PerfHelperWindow {
+  GtkApplicationWindow parent;
+
+  guint mapped : 1;
+  guint exposed : 1;
+  guint pending : 1;
+};
+
+G_DEFINE_TYPE (PerfHelperWindow, perf_helper_window, GTK_TYPE_APPLICATION_WINDOW);
+
+#define PERF_HELPER_TYPE_WINDOW_CONTENT (perf_helper_window_content_get_type ())
+G_DECLARE_FINAL_TYPE (PerfHelperWindowContent, perf_helper_window_content, PERF_HELPER, WINDOW_CONTENT, GtkWidget)
+
+struct _PerfHelperWindowContent {
+  GtkWidget parent;
+
+  guint redraws : 1;
+
+  gint64 start_time;
+  gint64 time;
+};
+
+G_DEFINE_TYPE (PerfHelperWindowContent, perf_helper_window_content, GTK_TYPE_WIDGET);
+
+static void destroy_windows           (PerfHelperApp *app);
+static void finish_wait_windows       (PerfHelperApp *app);
+static void check_finish_wait_windows (PerfHelperApp *app);
 
 static gboolean
 on_timeout (gpointer data)
 {
-  timeout_id = 0;
+  PerfHelperApp *app = data;
+  app->timeout_id = 0;
 
-  destroy_windows ();
-  gtk_main_quit ();
+  destroy_windows (app);
+  g_application_quit (G_APPLICATION (app));
 
   return FALSE;
 }
 
 static void
-establish_timeout (void)
+establish_timeout (PerfHelperApp *app)
 {
-  g_clear_handle_id (&timeout_id, g_source_remove);
+  g_clear_handle_id (&app->timeout_id, g_source_remove);
 
-  timeout_id = g_timeout_add (opt_idle_timeout * 1000, on_timeout, NULL);
-  g_source_set_name_by_id (timeout_id, "[gnome-shell] on_timeout");
+  app->timeout_id = g_timeout_add (opt_idle_timeout * 1000, on_timeout, app);
+  g_source_set_name_by_id (app->timeout_id, "[gnome-shell] on_timeout");
 }
 
 static void
-destroy_windows (void)
+destroy_windows (PerfHelperApp *app)
 {
-  GList *l;
+  GtkApplication *gtk_app = GTK_APPLICATION (app);
+  GtkWindow *window;
 
-  for (l = our_windows; l; l = l->next)
+  while ((window = gtk_application_get_active_window (gtk_app)))
+    gtk_window_destroy (window);
+
+  check_finish_wait_windows (app);
+}
+
+static void
+on_surface_mapped (GObject    *object,
+                   GParamSpec *pspec,
+                   gpointer    user_data)
+{
+  PerfHelperWindow *window = user_data;
+
+  window->mapped = TRUE;
+}
+
+static void
+perf_helper_window_realize (GtkWidget *widget)
+{
+  GdkSurface *surface;
+
+  GTK_WIDGET_CLASS (perf_helper_window_parent_class)->realize (widget);
+
+  surface = gtk_native_get_surface (gtk_widget_get_native (widget));
+  g_signal_connect_object (surface,
+                           "notify::mapped", G_CALLBACK (on_surface_mapped),
+                           widget, G_CONNECT_DEFAULT);
+}
+
+static void
+perf_helper_window_snapshot (GtkWidget   *widget,
+                             GtkSnapshot *snapshot)
+{
+  PerfHelperWindow *window = PERF_HELPER_WINDOW (widget);
+
+  GTK_WIDGET_CLASS (perf_helper_window_parent_class)->snapshot (widget, snapshot);
+
+  window->exposed = TRUE;
+
+  if (window->exposed && window->mapped && window->pending)
     {
-      WindowInfo *info = l->data;
-      gtk_widget_destroy (info->window);
-      g_free (info);
+      window->pending = FALSE;
+      check_finish_wait_windows (PERF_HELPER_APP (g_application_get_default ()));
     }
-
-  g_list_free (our_windows);
-  our_windows = NULL;
-
-  check_finish_wait_windows ();
 }
 
-static gboolean
-on_window_map_event (GtkWidget   *window,
-                     GdkEventAny *event,
-                     WindowInfo  *info)
+#define LINE_WIDTH 10
+#define MARGIN 40
+
+static void
+perf_helper_window_content_snapshot (GtkWidget   *widget,
+                                     GtkSnapshot *snapshot)
 {
-  info->mapped = TRUE;
-
-  return FALSE;
-}
-
-static gboolean
-on_window_draw (GtkWidget  *window,
-                cairo_t    *cr,
-                WindowInfo *info)
-{
-  info->exposed = TRUE;
-
-  if (info->exposed && info->mapped && info->pending)
-    {
-      info->pending = FALSE;
-      check_finish_wait_windows ();
-    }
-
-  return FALSE;
-}
-
-static gboolean
-on_child_draw (GtkWidget  *window,
-               cairo_t    *cr,
-               WindowInfo *info)
-{
-  cairo_rectangle_int_t allocation;
+  PerfHelperWindowContent *content = PERF_HELPER_WINDOW_CONTENT (widget);
+  GdkRGBA line_color;
+  graphene_rect_t bounds;
+  int width, height;
   double x_offset, y_offset;
 
-  gtk_widget_get_allocation (window, &allocation);
+  GTK_WIDGET_CLASS (perf_helper_window_content_parent_class)->snapshot (widget, snapshot);
+
+  gdk_rgba_parse (&line_color, "red");
+  width = gtk_widget_get_width (widget);
+  height = gtk_widget_get_height (widget);
 
   /* We draw an arbitrary pattern of red lines near the border of the
    * window to make it more clear than empty windows if something
    * is drastrically wrong.
    */
 
-  cairo_save (cr);
-  cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
-
-  if (info->alpha)
-    cairo_set_source_rgba (cr, 1, 1, 1, 0.5);
-  else
-    cairo_set_source_rgb (cr, 1, 1, 1);
-
-  cairo_paint (cr);
-  cairo_restore (cr);
-
-  if (info->redraws)
+  if (content->redraws)
     {
-      double position = (info->time - info->start_time) / 1000000.;
+      double position = (content->time - content->start_time) / 1000000.;
       x_offset = 20 * cos (2 * M_PI * position);
       y_offset = 20 * sin (2 * M_PI * position);
     }
@@ -165,19 +196,17 @@ on_child_draw (GtkWidget  *window,
       x_offset = y_offset = 0;
     }
 
-  cairo_set_source_rgb (cr, 1, 0, 0);
-  cairo_set_line_width (cr, 10);
-  cairo_move_to (cr, 0, 40 + y_offset);
-  cairo_line_to (cr, allocation.width, 40 + y_offset);
-  cairo_move_to (cr, 0, allocation.height - 40 + y_offset);
-  cairo_line_to (cr, allocation.width, allocation.height - 40 + y_offset);
-  cairo_move_to (cr, 40 + x_offset, 0);
-  cairo_line_to (cr, 40 + x_offset, allocation.height);
-  cairo_move_to (cr, allocation.width - 40 + x_offset, 0);
-  cairo_line_to (cr, allocation.width - 40 + x_offset, allocation.height);
-  cairo_stroke (cr);
+  graphene_rect_init (&bounds, MARGIN + x_offset, 0, LINE_WIDTH, height);
+  gtk_snapshot_append_color (snapshot, &line_color, &bounds);
 
-  return FALSE;
+  graphene_rect_init (&bounds, width - MARGIN - LINE_WIDTH + x_offset, 0, LINE_WIDTH, height);
+  gtk_snapshot_append_color (snapshot, &line_color, &bounds);
+
+  graphene_rect_init (&bounds, 0, MARGIN + y_offset, width, LINE_WIDTH);
+  gtk_snapshot_append_color (snapshot, &line_color, &bounds);
+
+  graphene_rect_init (&bounds, 0, height - MARGIN - LINE_WIDTH + y_offset, width, LINE_WIDTH);
+  gtk_snapshot_append_color (snapshot, &line_color, &bounds);
 }
 
 static gboolean
@@ -185,97 +214,96 @@ tick_callback (GtkWidget     *widget,
                GdkFrameClock *frame_clock,
                gpointer       user_data)
 {
-  WindowInfo *info = user_data;
+  PerfHelperWindowContent *content = user_data;
 
-  if (info->start_time < 0)
-    info->start_time = info->time = gdk_frame_clock_get_frame_time (frame_clock);
+  if (content->start_time < 0)
+    content->start_time = content->time = gdk_frame_clock_get_frame_time (frame_clock);
   else
-    info->time = gdk_frame_clock_get_frame_time (frame_clock);
+    content->time = gdk_frame_clock_get_frame_time (frame_clock);
 
   gtk_widget_queue_draw (widget);
 
   return TRUE;
 }
 
+static GtkWidget *
+perf_helper_window_content_new (gboolean redraws) {
+  PerfHelperWindowContent *content;
+  GtkWidget *widget;
+
+  content = g_object_new (PERF_HELPER_TYPE_WINDOW_CONTENT, NULL);
+
+  content->redraws = redraws;
+
+  widget = GTK_WIDGET (content);
+
+  if (redraws)
+    gtk_widget_add_tick_callback (widget, tick_callback, content, NULL);
+
+  return widget;
+}
+
 static void
-create_window (int      width,
-	       int      height,
-               gboolean alpha,
-               gboolean maximized,
-               gboolean redraws,
-               gboolean text_input)
+create_window (PerfHelperApp *app,
+               int            width,
+               int            height,
+               gboolean       alpha,
+               gboolean       maximized,
+               gboolean       redraws,
+               gboolean       text_input)
 {
-  WindowInfo *info;
+  PerfHelperWindow *window;
   GtkWidget *child;
 
-  info = g_new0 (WindowInfo, 1);
-  info->width = width;
-  info->height = height;
-  info->alpha = alpha;
-  info->maximized = maximized;
-  info->redraws = redraws;
-  info->window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
-  if (alpha)
-    gtk_widget_set_visual (info->window, gdk_screen_get_rgba_visual (gdk_screen_get_default ()));
+  window = g_object_new (PERF_HELPER_TYPE_WINDOW,
+                         "application", app,
+                         NULL);
+
   if (maximized)
-    gtk_window_maximize (GTK_WINDOW (info->window));
-  info->pending = TRUE;
-  info->start_time = -1;
+    gtk_window_maximize (GTK_WINDOW (window));
 
   if (text_input)
     {
       child = gtk_entry_new ();
-      gtk_widget_show (child);
     }
   else
     {
-      child = g_object_new (GTK_TYPE_BOX, "visible", TRUE, "app-paintable", TRUE, NULL);
-      gtk_widget_set_app_paintable (info->window, TRUE);
-      g_signal_connect (child, "draw", G_CALLBACK (on_child_draw), info);
+      gtk_widget_add_css_class(GTK_WIDGET (window), alpha ? "alpha" : "solid");
+      child = perf_helper_window_content_new (redraws);
     }
 
-  gtk_container_add (GTK_CONTAINER (info->window), child);
+  gtk_window_set_child (GTK_WINDOW (window), child);
 
-  g_signal_connect (info->window, "draw", G_CALLBACK (on_window_draw), info);
-  g_signal_connect (info->window, "map-event", G_CALLBACK (on_window_map_event), info);
-
-  gtk_widget_set_size_request (info->window, width, height);
-  gtk_widget_show (info->window);
-
-  if (info->redraws)
-    gtk_widget_add_tick_callback (info->window, tick_callback,
-                                  info, NULL);
-
-  our_windows = g_list_prepend (our_windows, info);
+  gtk_widget_set_size_request (GTK_WIDGET (window), width, height);
+  gtk_window_present (GTK_WINDOW (window));
 }
 
 static void
-finish_wait_windows (void)
+finish_wait_windows (PerfHelperApp *app)
 {
   GList *l;
 
-  for (l = wait_windows_invocations; l; l = l->next)
+  for (l = app->wait_windows_invocations; l; l = l->next)
     g_dbus_method_invocation_return_value (l->data, NULL);
 
-  g_list_free (wait_windows_invocations);
-  wait_windows_invocations = NULL;
+  g_clear_list (&app->wait_windows_invocations, NULL);
 }
 
 static void
-check_finish_wait_windows (void)
+check_finish_wait_windows (PerfHelperApp *app)
 {
   GList *l;
   gboolean have_pending = FALSE;
 
-  for (l = our_windows; l; l = l->next)
+  for (l = gtk_application_get_windows (GTK_APPLICATION (app)); l; l = l->next)
     {
-      WindowInfo *info = l->data;
-      if (info->pending)
+      PerfHelperWindow *window = l->data;
+      if (window->pending)
         have_pending = TRUE;
     }
 
   if (!have_pending)
-    finish_wait_windows ();
+    finish_wait_windows (app);
 }
 
 static void
@@ -288,17 +316,19 @@ handle_method_call (GDBusConnection       *connection,
 		    GDBusMethodInvocation *invocation,
 		    gpointer               user_data)
 {
+  PerfHelperApp *app = user_data;
+
   /* Push off the idle timeout */
-  establish_timeout ();
+  establish_timeout (app);
 
   if (g_strcmp0 (method_name, "Exit") == 0)
     {
-      destroy_windows ();
+      destroy_windows (app);
 
       g_dbus_method_invocation_return_value (invocation, NULL);
       g_dbus_connection_flush_sync (connection, NULL, NULL);
 
-      gtk_main_quit ();
+      g_application_quit (G_APPLICATION (app));
     }
   else if (g_strcmp0 (method_name, "CreateWindow") == 0)
     {
@@ -309,17 +339,17 @@ handle_method_call (GDBusConnection       *connection,
                      &width, &height,
                      &alpha, &maximized, &redraws, &text_input);
 
-      create_window (width, height, alpha, maximized, redraws, text_input);
+      create_window (app, width, height, alpha, maximized, redraws, text_input);
       g_dbus_method_invocation_return_value (invocation, NULL);
     }
   else if (g_strcmp0 (method_name, "WaitWindows") == 0)
     {
-      wait_windows_invocations = g_list_prepend (wait_windows_invocations, invocation);
-      check_finish_wait_windows ();
+      app->wait_windows_invocations = g_list_prepend (app->wait_windows_invocations, invocation);
+      check_finish_wait_windows (app);
     }
   else if (g_strcmp0 (method_name, "DestroyWindows") == 0)
     {
-      destroy_windows ();
+      destroy_windows (app);
       g_dbus_method_invocation_return_value (invocation, NULL);
     }
 }
@@ -332,68 +362,118 @@ static const GDBusInterfaceVTable interface_vtable =
 };
 
 static void
-on_bus_acquired (GDBusConnection *connection,
-		 const gchar     *name,
-		 gpointer         user_data)
+perf_helper_app_activate (GApplication *app)
+{
+}
+
+static void
+perf_helper_app_startup (GApplication *app)
+{
+  GtkCssProvider *css_provider;
+
+  G_APPLICATION_CLASS (perf_helper_app_parent_class)->startup (app);
+
+  css_provider = gtk_css_provider_new ();
+#if GTK_CHECK_VERSION (4,11,3)
+  gtk_css_provider_load_from_string (css_provider, application_css);
+#else
+  gtk_css_provider_load_from_data (css_provider, application_css, -1);
+#endif
+
+  gtk_style_context_add_provider_for_display (gdk_display_get_default (),
+                                              GTK_STYLE_PROVIDER (css_provider),
+                                              GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+}
+
+static gboolean
+perf_helper_app_dbus_register (GApplication     *app,
+                               GDBusConnection  *connection,
+                               const char       *object_path,
+                               GError          **error)
 {
   GDBusNodeInfo *introspection_data = g_dbus_node_info_new_for_xml (introspection_xml, NULL);
 
   g_dbus_connection_register_object (connection,
-				     "/org/gnome/Shell/PerfHelper",
+				     object_path,
 				     introspection_data->interfaces[0],
 				     &interface_vtable,
-				     NULL,  /* user_data */
+				     app,   /* user_data */
 				     NULL,  /* user_data_free_func */
-				     NULL); /* GError** */
+				     error);
+  return TRUE;
 }
 
 static void
-on_name_acquired (GDBusConnection *connection,
-		  const gchar     *name,
-		  gpointer         user_data)
+perf_helper_app_init (PerfHelperApp *app)
 {
 }
 
 static void
-on_name_lost  (GDBusConnection *connection,
-	       const gchar     *name,
-	       gpointer         user_data)
+perf_helper_app_class_init (PerfHelperAppClass *klass)
 {
-  destroy_windows ();
-  gtk_main_quit ();
+  GApplicationClass *gapp_class = G_APPLICATION_CLASS (klass);
+
+  gapp_class->activate = perf_helper_app_activate;
+  gapp_class->startup = perf_helper_app_startup;
+  gapp_class->dbus_register = perf_helper_app_dbus_register;
+}
+
+static void
+perf_helper_window_content_init (PerfHelperWindowContent *content)
+{
+  content->start_time = -1;
+}
+
+static void
+perf_helper_window_content_class_init (PerfHelperWindowContentClass *klass) {
+  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+
+  widget_class->snapshot = perf_helper_window_content_snapshot;
+}
+
+static PerfHelperApp *
+perf_helper_app_new (void) {
+  GApplicationFlags flags = G_APPLICATION_IS_SERVICE |
+                            G_APPLICATION_ALLOW_REPLACEMENT |
+                            G_APPLICATION_REPLACE;
+
+  return g_object_new (PERF_HELPER_TYPE_APP,
+                       "application-id", "org.gnome.Shell.PerfHelper",
+                       "flags", flags,
+                       NULL);
+}
+
+static void
+perf_helper_window_init (PerfHelperWindow *window)
+{
+  window->pending = TRUE;
+}
+
+static void
+perf_helper_window_class_init (PerfHelperWindowClass *klass)
+{
+  GtkWidgetClass *widget_class = GTK_WIDGET_CLASS (klass);
+
+  widget_class->realize = perf_helper_window_realize;
+  widget_class->snapshot = perf_helper_window_snapshot;
 }
 
 int
 main (int argc, char **argv)
 {
-  GOptionContext *context;
-  GError *error = NULL;
+  PerfHelperApp *app = NULL;
 
   /* Since we depend on this, avoid the possibility of lt-gnome-shell-perf-helper */
   g_set_prgname ("gnome-shell-perf-helper");
 
-  context = g_option_context_new (" - server to create windows for performance testing");
-  g_option_context_add_main_entries (context, opt_entries, NULL);
-  g_option_context_add_group (context, gtk_get_option_group (TRUE));
-  if (!g_option_context_parse (context, &argc, &argv, &error))
-    {
-      g_print ("option parsing failed: %s\n", error->message);
-      return 1;
-    }
+  app = perf_helper_app_new ();
 
-  g_bus_own_name (G_BUS_TYPE_SESSION,
-                  BUS_NAME,
-                  G_BUS_NAME_OWNER_FLAGS_ALLOW_REPLACEMENT |
-                  G_BUS_NAME_OWNER_FLAGS_REPLACE,
-                  on_bus_acquired,
-                  on_name_acquired,
-                  on_name_lost,
-                  NULL,
-                  NULL);
+  g_application_set_option_context_summary (G_APPLICATION (app),
+                                            "Server to create windows for performance testing");
+  g_application_add_main_option_entries (G_APPLICATION (app), opt_entries);
 
-  establish_timeout ();
+  g_application_hold (G_APPLICATION (app));
+  establish_timeout (app);
 
-  gtk_main ();
-
-  return 0;
+  return g_application_run (G_APPLICATION (app), argc, argv);
 }

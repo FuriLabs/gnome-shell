@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '44.3',
+  version: '45.beta.1',
   meson_version: '>= 0.58.0',
   license: 'GPLv2+'
 )
@@ -10,7 +10,7 @@ split_version = meson.project_version().split('.')
 # the Cogl and Clutter libraries also use this API version.
 # The API version is increased each development cycle,
 # starting with 0 in 3.23.x
-mutter_api_version = '12'
+mutter_api_version = '13'
 
 clutter_pc = 'mutter-clutter-' + mutter_api_version
 cogl_pc = 'mutter-cogl-' + mutter_api_version
@@ -24,13 +24,15 @@ gcr_req = '>= 3.90.0'
 gio_req = '>= 2.56.0'
 gi_req = '>= 1.49.1'
 gjs_req = '>= 1.73.1'
-gtk_req = '>= 3.15.0'
-mutter_req = '>= 44.0'
+gtk_req = '>= 4.0'
+mutter_req = '>= 45.beta.1'
 polkit_req = '>= 0.100'
 schemas_req = '>= 42.beta'
 startup_req = '>= 0.11'
+systemd_req = '>= 246'
 ibus_req = '>= 1.5.19'
 gnome_desktop_req = '>= 40'
+pipewire_req = '>= 0.3.49'
 
 nm_req = '>= 1.10.4'
 secret_req = '>= 0.18'
@@ -78,7 +80,7 @@ gi_dep = dependency('gobject-introspection-1.0', version: gi_req)
 gio_dep = dependency('gio-2.0', version: gio_req)
 gio_unix_dep = dependency('gio-unix-2.0', version: gio_req)
 gjs_dep = dependency('gjs-1.0', version: gjs_req)
-gtk_dep = dependency('gtk+-3.0', version: gtk_req)
+gtk_dep = dependency('gtk4', version: gtk_req)
 libxml_dep = dependency('libxml-2.0')
 clutter_dep = dependency(clutter_pc, version: mutter_req)
 cogl_dep = dependency(cogl_pc, version: mutter_req)
@@ -101,9 +103,17 @@ else
   have_networkmanager = false
 endif
 
+if get_option('camera_monitor')
+  libpipewire_dep = dependency('libpipewire-0.3', version: pipewire_req)
+  have_pipewire = true
+else
+  libpipewire_dep = []
+  have_pipewire = false
+endif
+
 if get_option('systemd')
-  libsystemd_dep = dependency('libsystemd')
-  systemd_dep = dependency('systemd')
+  libsystemd_dep = dependency('libsystemd', version: systemd_req)
+  systemd_dep = dependency('systemd', version: systemd_req)
   systemduserunitdir = systemd_dep.get_variable('systemduserunitdir',
     pkgconfig_define: ['prefix', prefix])
   have_systemd = true
@@ -111,8 +121,6 @@ else
   libsystemd_dep = []
   have_systemd = false
 endif
-
-have_soup2 = get_option('soup2')
 
 if get_option('man')
   if fs.exists('man/gnome-shell.1')
@@ -137,6 +145,7 @@ cdata.set_quoted('VERSION', meson.project_version())
 cdata.set_quoted('PACKAGE_VERSION', meson.project_version())
 
 cdata.set('HAVE_NETWORKMANAGER', have_networkmanager)
+cdata.set('HAVE_PIPEWIRE', have_pipewire)
 cdata.set('HAVE_SYSTEMD', have_systemd)
 
 # New API added in glib-2.57.2
@@ -312,6 +321,7 @@ meson.add_dist_script('meson/generate-stylesheets.py')
 meson.add_dist_script('meson/check-version.py', meson.project_version(), 'NEWS')
 
 summary_options = {
+  'camera_monitor': get_option('camera_monitor'),
   'networkmanager': get_option('networkmanager'),
   'systemd': get_option('systemd'),
   'extensions_app': get_option('extensions_app'),

@@ -1,29 +1,33 @@
-/* exported Indicator */
-const {Clutter, Gio, GLib, GObject, Shell, St} = imports.gi;
+import Clutter from 'gi://Clutter';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Shell from 'gi://Shell';
+import St from 'gi://St';
 
-const Main = imports.ui.main;
-const PopupMenu = imports.ui.popupMenu;
-const Util = imports.misc.util;
+import * as Main from '../main.js';
+import * as PopupMenu from '../popupMenu.js';
+import * as Util from '../../misc/util.js';
 
-const {QuickToggle, SystemIndicator} = imports.ui.quickSettings;
-const {loadInterfaceXML} = imports.misc.dbusUtils;
+import {Spinner} from '../animation.js';
+import {QuickToggle, SystemIndicator} from '../quickSettings.js';
+import {loadInterfaceXML} from '../../misc/dbusUtils.js';
 
 const DBUS_NAME = 'org.freedesktop.background.Monitor';
 const DBUS_OBJECT_PATH = '/org/freedesktop/background/monitor';
+
+const SPINNER_TIMEOUT = 5; // seconds
 
 const BackgroundMonitorIface = loadInterfaceXML('org.freedesktop.background.Monitor');
 const BackgroundMonitorProxy = Gio.DBusProxy.makeProxyWrapper(BackgroundMonitorIface);
 
 Gio._promisify(Gio.DBusConnection.prototype, 'call');
 
-var BackgroundAppMenuItem = GObject.registerClass({
+const BackgroundAppMenuItem = GObject.registerClass({
     Properties: {
         'app': GObject.ParamSpec.object('app', '', '',
             GObject.ParamFlags.READWRITE,
             Shell.App),
-        'instance': GObject.ParamSpec.int64('instance', '', '',
-            GObject.ParamFlags.READWRITE,
-            -1, GLib.MAXINT64_BIGINT, -1),
         'message': GObject.ParamSpec.string('message', '', '',
             GObject.ParamFlags.READWRITE,
             null),
@@ -33,16 +37,11 @@ var BackgroundAppMenuItem = GObject.registerClass({
         const message = params.message;
         delete params.message;
 
-        const instance = params.instance;
-        delete params.instance;
-
         super._init(app.get_name(), app.get_icon(), {
-            activate: false,
-            reactive: false,
             ...params,
         });
 
-        this.set({message, instance});
+        this.set({message});
 
         this.add_style_class_name('background-app-item');
         this.label.add_style_class_name('title');
@@ -74,7 +73,11 @@ var BackgroundAppMenuItem = GObject.registerClass({
             (bind, source) => [true, source !== null],
             null);
 
-        this.set_child_above_sibling(this._ornamentLabel, null);
+        this.set_child_above_sibling(this._ornamentIcon, null);
+
+        this._spinner = new Spinner(16, {hideOnStop: true});
+        this._spinner.add_style_class_name('spinner');
+        this.add_child(this._spinner);
 
         const closeButton = new St.Button({
             iconName: 'window-close-symbolic',
@@ -86,11 +89,35 @@ var BackgroundAppMenuItem = GObject.registerClass({
         });
         this.add_child(closeButton);
 
+        this._spinner.bind_property('visible',
+            closeButton, 'visible',
+            GObject.BindingFlags.INVERT_BOOLEAN);
+
         closeButton.connect('clicked', () => this._quitApp().catch(logError));
+
+        this.connect('activate', () => this.app.activate());
+
+        this.connect('destroy', () => this._onDestroy());
+    }
+
+    _onDestroy() {
+        if (this._spinnerTimeoutId)
+            GLib.source_remove(this._spinnerTimeoutId);
+        delete this._spinnerTimeoutId;
     }
 
     async _quitApp() {
         const appId = this.app.get_id().replace(/\.desktop$/, '');
+
+        this._spinner.play();
+        this._spinnerTimeoutId =
+            GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, SPINNER_TIMEOUT,
+                () => {
+                    // Assume the quit request has failed, stop the spinner
+                    this._spinner.stop();
+                    delete this._spinnerTimeoutId;
+                    return GLib.SOURCE_REMOVE;
+                });
 
         try {
             await Gio.DBus.session.call(
@@ -105,7 +132,7 @@ var BackgroundAppMenuItem = GObject.registerClass({
                 null);
         } catch (_error) {
             try {
-                Util.trySpawn(['flatpak', 'kill', this.instance]);
+                Util.trySpawn(['flatpak', 'kill', appId]);
             } catch (pidError) {
                 logError(pidError, 'Failed to kill application');
             }
@@ -184,7 +211,35 @@ class BackgroundAppsToggle extends QuickToggle {
 
         const {BackgroundApps: backgroundApps} = this._proxy;
 
-        const nBackgroundApps = backgroundApps?.length ?? 0;
+        this._appsSection.removeAll();
+
+        const items = new Map();
+        (backgroundApps ?? [])
+            .map(backgroundApp => {
+                const appId = backgroundApp.app_id.deepUnpack();
+                const app = this._appSystem.lookup_app(`${appId}.desktop`);
+                const message = backgroundApp.message?.deepUnpack();
+
+                return {app, message};
+            })
+            .sort((a, b) => {
+                return a.app.get_name().localeCompare(b.app.get_name());
+            })
+            .forEach(backgroundApp => {
+                const {app, message} = backgroundApp;
+
+                let item = items.get(app);
+                if (!item) {
+                    item = new BackgroundAppMenuItem(app);
+                    items.set(app, item);
+                    this._appsSection.addMenuItem(item);
+                }
+
+                if (message)
+                    item.set({message});
+            });
+
+        const nBackgroundApps = items.size;
         this.title = nBackgroundApps === 0
             ? _('No Background Apps')
             : ngettext(
@@ -192,31 +247,6 @@ class BackgroundAppsToggle extends QuickToggle {
                 '%d Background Apps',
                 nBackgroundApps).format(nBackgroundApps);
         this._listTitle.visible = nBackgroundApps > 0;
-
-        this._appsSection.removeAll();
-
-        if (!backgroundApps)
-            return;
-
-        backgroundApps
-            .map(backgroundApp => {
-                const appId = backgroundApp.app_id.deepUnpack();
-                const app = this._appSystem.lookup_app(`${appId}.desktop`);
-                const message = backgroundApp.message?.deepUnpack();
-                const instance = backgroundApp.instance.deepUnpack();
-
-                return {app, message, instance};
-            })
-            .sort((a, b) => {
-                return a.app.get_name().localeCompare(b.app.get_name());
-            })
-            .forEach(backgroundApp => {
-                const {app, message, instance} = backgroundApp;
-
-                const item = new BackgroundAppMenuItem(app,
-                    {instance, message});
-                this._appsSection.addMenuItem(item);
-            });
     }
 
     vfunc_clicked() {
@@ -224,7 +254,7 @@ class BackgroundAppsToggle extends QuickToggle {
     }
 });
 
-var Indicator = GObject.registerClass(
+export const Indicator = GObject.registerClass(
 class Indicator extends SystemIndicator {
     _init() {
         super._init();

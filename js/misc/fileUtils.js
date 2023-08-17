@@ -1,10 +1,9 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported collectFromDatadirs, recursivelyDeleteDir,
-            recursivelyMoveDir, loadInterfaceXML, loadSubInterfaceXML */
 
-const { Gio, GLib } = imports.gi;
+import GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
 
-var { loadInterfaceXML } = imports.misc.dbusUtils;
+export {loadInterfaceXML} from './dbusUtils.js';
 
 /**
  * @typedef {object} SubdirInfo
@@ -19,7 +18,7 @@ var { loadInterfaceXML } = imports.misc.dbusUtils;
  * @returns {Generator<SubdirInfo, void, void>} a generator which yields file info for subdirectories named
  *                                              `subdir` within data directories
  */
-function* collectFromDatadirs(subdir, includeUserDir) {
+export function* collectFromDatadirs(subdir, includeUserDir) {
     let dataDirs = GLib.get_system_data_dirs();
     if (includeUserDir)
         dataDirs.unshift(GLib.get_user_data_dir());
@@ -43,7 +42,11 @@ function* collectFromDatadirs(subdir, includeUserDir) {
     }
 }
 
-function recursivelyDeleteDir(dir, deleteParent) {
+/**
+ * @param {Gio.File} dir
+ * @param {boolean} deleteParent
+ */
+export function recursivelyDeleteDir(dir, deleteParent) {
     let children = dir.enumerate_children('standard::name,standard::type',
         Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS, null);
 
@@ -51,9 +54,9 @@ function recursivelyDeleteDir(dir, deleteParent) {
     while ((info = children.next_file(null)) != null) {
         let type = info.get_file_type();
         let child = dir.get_child(info.get_name());
-        if (type == Gio.FileType.REGULAR)
+        if (type === Gio.FileType.REGULAR)
             child.delete(null);
-        else if (type == Gio.FileType.DIRECTORY)
+        else if (type === Gio.FileType.DIRECTORY)
             recursivelyDeleteDir(child, true);
     }
 
@@ -61,7 +64,11 @@ function recursivelyDeleteDir(dir, deleteParent) {
         dir.delete(null);
 }
 
-function recursivelyMoveDir(srcDir, destDir) {
+/**
+ * @param {Gio.File} srcDir
+ * @param {Gio.File} destDir
+ */
+export function recursivelyMoveDir(srcDir, destDir) {
     let children = srcDir.enumerate_children('standard::name,standard::type',
         Gio.FileQueryInfoFlags.NOFOLLOW_SYMLINKS, null);
 
@@ -73,9 +80,9 @@ function recursivelyMoveDir(srcDir, destDir) {
         let type = info.get_file_type();
         let srcChild = srcDir.get_child(info.get_name());
         let destChild = destDir.get_child(info.get_name());
-        if (type == Gio.FileType.REGULAR)
+        if (type === Gio.FileType.REGULAR)
             srcChild.move(destChild, Gio.FileCopyFlags.NONE, null, null);
-        else if (type == Gio.FileType.DIRECTORY)
+        else if (type === Gio.FileType.DIRECTORY)
             recursivelyMoveDir(srcChild, destChild);
     }
 }

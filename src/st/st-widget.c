@@ -687,8 +687,8 @@ st_widget_peek_theme_node (StWidget *widget)
 }
 
 static gboolean
-st_widget_enter (ClutterActor         *actor,
-                 ClutterCrossingEvent *event)
+st_widget_enter (ClutterActor *actor,
+                 ClutterEvent *event)
 {
   StWidgetPrivate *priv = st_widget_get_instance_private (ST_WIDGET (actor));
 
@@ -697,8 +697,8 @@ st_widget_enter (ClutterActor         *actor,
       ClutterStage *stage;
       ClutterActor *target;
 
-      stage = clutter_event_get_stage ((ClutterEvent *) event);
-      target = clutter_stage_get_event_actor (stage, (ClutterEvent *) event);
+      stage = CLUTTER_STAGE (clutter_actor_get_stage (actor));
+      target = clutter_stage_get_event_actor (stage, event);
 
       if (clutter_actor_contains (actor, target))
         st_widget_set_hover (ST_WIDGET (actor), TRUE);
@@ -719,14 +719,18 @@ st_widget_enter (ClutterActor         *actor,
 }
 
 static gboolean
-st_widget_leave (ClutterActor         *actor,
-                 ClutterCrossingEvent *event)
+st_widget_leave (ClutterActor *actor,
+                 ClutterEvent *event)
 {
   StWidgetPrivate *priv = st_widget_get_instance_private (ST_WIDGET (actor));
 
   if (priv->track_hover)
     {
-      if (!event->related || !clutter_actor_contains (actor, event->related))
+      ClutterActor *related;
+
+      related = clutter_event_get_related (event);
+
+      if (!related || !clutter_actor_contains (actor, related))
         st_widget_set_hover (ST_WIDGET (actor), FALSE);
     }
 
@@ -753,12 +757,18 @@ st_widget_key_focus_out (ClutterActor *actor)
 }
 
 static gboolean
-st_widget_key_press_event (ClutterActor    *actor,
-                           ClutterKeyEvent *event)
+st_widget_key_press_event (ClutterActor *actor,
+                           ClutterEvent *event)
 {
-  if (event->keyval == CLUTTER_KEY_Menu ||
-      (event->keyval == CLUTTER_KEY_F10 &&
-       (event->modifier_state & CLUTTER_SHIFT_MASK)))
+  ClutterModifierType state;
+  uint32_t keyval;
+
+  state = clutter_event_get_state (event);
+  keyval = clutter_event_get_key_symbol (event);
+
+  if (keyval == CLUTTER_KEY_Menu ||
+      (keyval == CLUTTER_KEY_F10 &&
+       (state & CLUTTER_SHIFT_MASK)))
     {
       st_widget_popup_menu (ST_WIDGET (actor));
       return TRUE;

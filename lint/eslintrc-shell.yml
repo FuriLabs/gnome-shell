@@ -13,12 +13,20 @@ rules:
       beforeColon: false
       afterColon: true
   prefer-arrow-callback: error
+  jsdoc/require-param-description: off
+  jsdoc/require-jsdoc:
+    - error
+    - exemptEmptyFunctions: true
+      publicOnly:
+        esm: true
 
 overrides:
-  - files: js/**
+  - files:
+      - js/**
+      - tests/shell/**
     excludedFiles:
       - js/portalHelper/*
-      - js/misc/extensionUtils.js
+      - js/extensions/*
     globals:
       global: readonly
       _: readonly

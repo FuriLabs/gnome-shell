@@ -1,13 +1,15 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported Button, SystemIndicator */
 
-const { Atk, Clutter, GObject, St } = imports.gi;
+import Atk from 'gi://Atk';
+import Clutter from 'gi://Clutter';
+import GObject from 'gi://GObject';
+import St from 'gi://St';
 
-const Main = imports.ui.main;
-const Params = imports.misc.params;
-const PopupMenu = imports.ui.popupMenu;
+import * as Main from './main.js';
+import * as Params from '../misc/params.js';
+import * as PopupMenu from './popupMenu.js';
 
-var ButtonBox = GObject.registerClass(
+export const ButtonBox = GObject.registerClass(
 class ButtonBox extends St.Widget {
     _init(params) {
         params = Params.parse(params, {
@@ -20,7 +22,7 @@ class ButtonBox extends St.Widget {
 
         this._delegate = this;
 
-        this.container = new St.Bin({ child: this });
+        this.container = new St.Bin({child: this});
 
         this.connect('style-changed', this._onStyleChanged.bind(this));
         this.connect('destroy', this._onDestroy.bind(this));
@@ -92,8 +94,8 @@ class ButtonBox extends St.Widget {
     }
 });
 
-var Button = GObject.registerClass({
-    Signals: { 'menu-set': {} },
+export const Button = GObject.registerClass({
+    Signals: {'menu-set': {}},
 }, class PanelMenuButton extends ButtonBox {
     _init(menuAlignment, nameText, dontCreateMenu) {
         super._init({
@@ -137,8 +139,8 @@ var Button = GObject.registerClass({
 
     vfunc_event(event) {
         if (this.menu &&
-            (event.type() == Clutter.EventType.TOUCH_BEGIN ||
-             event.type() == Clutter.EventType.BUTTON_PRESS))
+            (event.type() === Clutter.EventType.TOUCH_BEGIN ||
+             event.type() === Clutter.EventType.BUTTON_PRESS))
             this.menu.toggle();
 
         return Clutter.EVENT_PROPAGATE;
@@ -156,10 +158,10 @@ var Button = GObject.registerClass({
             return Clutter.EVENT_STOP;
 
         let symbol = event.get_key_symbol();
-        if (symbol == Clutter.KEY_Left || symbol == Clutter.KEY_Right) {
+        if (symbol === Clutter.KEY_Left || symbol === Clutter.KEY_Right) {
             let group = global.focus_manager.get_group(this);
             if (group) {
-                let direction = symbol == Clutter.KEY_Left ? St.DirectionType.LEFT : St.DirectionType.RIGHT;
+                let direction = symbol === Clutter.KEY_Left ? St.DirectionType.LEFT : St.DirectionType.RIGHT;
                 group.navigate_focus(this, direction, false);
                 return Clutter.EVENT_STOP;
             }
@@ -201,7 +203,7 @@ var Button = GObject.registerClass({
  * of an icon and a menu section, which will be composed into the
  * aggregate menu.
  */
-var SystemIndicator = GObject.registerClass(
+export const SystemIndicator = GObject.registerClass(
 class SystemIndicator extends St.BoxLayout {
     _init() {
         super._init({
@@ -214,7 +216,7 @@ class SystemIndicator extends St.BoxLayout {
 
     get indicators() {
         let klass = this.constructor.name;
-        let { stack } = new Error();
+        let {stack} = new Error();
         log(`Usage of indicator.indicators is deprecated for ${klass}\n${stack}`);
         return this;
     }
@@ -224,7 +226,7 @@ class SystemIndicator extends St.BoxLayout {
     }
 
     _addIndicator() {
-        let icon = new St.Icon({ style_class: 'system-status-icon' });
+        let icon = new St.Icon({style_class: 'system-status-icon'});
         this.add_actor(icon);
         icon.connect('notify::visible', this._syncIndicatorsVisible.bind(this));
         this._syncIndicatorsVisible();

@@ -1,23 +1,26 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported init, installExtension, uninstallExtension, checkForUpdates */
 
-const { Clutter, Gio, GLib, GObject, Soup } = imports.gi;
+import Clutter from 'gi://Clutter';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Soup from 'gi://Soup';
 
-const Config = imports.misc.config;
-const Dialog = imports.ui.dialog;
-const ExtensionUtils = imports.misc.extensionUtils;
-const FileUtils = imports.misc.fileUtils;
-const Main = imports.ui.main;
-const ModalDialog = imports.ui.modalDialog;
+import * as Config from '../misc/config.js';
+import * as Dialog from './dialog.js';
+import * as ExtensionUtils from '../misc/extensionUtils.js';
+import * as FileUtils from '../misc/fileUtils.js';
+import * as Main from './main.js';
+import * as ModalDialog from './modalDialog.js';
 
 Gio._promisify(Soup.Session.prototype, 'send_and_read_async');
 Gio._promisify(Gio.OutputStream.prototype, 'write_bytes_async');
 Gio._promisify(Gio.IOStream.prototype, 'close_async');
 Gio._promisify(Gio.Subprocess.prototype, 'wait_check_async');
 
-var REPOSITORY_URL_DOWNLOAD = 'https://extensions.gnome.org/download-extension/%s.shell-extension.zip';
-var REPOSITORY_URL_INFO     = 'https://extensions.gnome.org/extension-info/';
-var REPOSITORY_URL_UPDATE   = 'https://extensions.gnome.org/update-info/';
+const REPOSITORY_URL_DOWNLOAD = 'https://extensions.gnome.org/download-extension/%s.shell-extension.zip';
+const REPOSITORY_URL_INFO     = 'https://extensions.gnome.org/extension-info/';
+const REPOSITORY_URL_UPDATE   = 'https://extensions.gnome.org/update-info/';
 
 let _httpSession;
 
@@ -26,7 +29,7 @@ let _httpSession;
  * @param {Gio.DBusMethodInvocation} invocation - the caller
  * @returns {void}
  */
-async function installExtension(uuid, invocation) {
+export async function installExtension(uuid, invocation) {
     const params = {
         uuid,
         shell_version: Config.PACKAGE_VERSION,
@@ -56,7 +59,10 @@ async function installExtension(uuid, invocation) {
     dialog.open(global.get_current_time());
 }
 
-function uninstallExtension(uuid) {
+/**
+ * @param {string} uuid
+ */
+export function uninstallExtension(uuid) {
     let extension = Main.extensionManager.lookup(uuid);
     if (!extension)
         return false;
@@ -89,7 +95,7 @@ function uninstallExtension(uuid) {
  * @throws
  */
 function checkResponse(message) {
-    const { statusCode } = message;
+    const {statusCode} = message;
     const phrase = Soup.Status.get_phrase(statusCode);
     if (statusCode !== Soup.Status.OK)
         throw new Error(`Unexpected response: ${phrase}`);
@@ -146,14 +152,14 @@ async function extractExtensionArchive(bytes, dir) {
  * @param {string} uuid - extension uuid
  * @returns {void}
  */
-async function downloadExtensionUpdate(uuid) {
+export async function downloadExtensionUpdate(uuid) {
     if (!Main.extensionManager.updatesSupported)
         return;
 
     const dir = Gio.File.new_for_path(
         GLib.build_filenamev([global.userdatadir, 'extension-updates', uuid]));
 
-    const params = { shell_version: Config.PACKAGE_VERSION };
+    const params = {shell_version: Config.PACKAGE_VERSION};
     const message = Soup.Message.new_from_encoded_form('GET',
         REPOSITORY_URL_DOWNLOAD.format(uuid),
         Soup.form_encode_hash(params));
@@ -177,7 +183,7 @@ async function downloadExtensionUpdate(uuid) {
  *
  * @returns {void}
  */
-async function checkForUpdates() {
+export async function checkForUpdates() {
     if (!Main.extensionManager.updatesSupported)
         return;
 
@@ -237,10 +243,10 @@ async function checkForUpdates() {
     }
 }
 
-var InstallExtensionDialog = GObject.registerClass(
+const InstallExtensionDialog = GObject.registerClass(
 class InstallExtensionDialog extends ModalDialog.ModalDialog {
     _init(uuid, info, invocation) {
-        super._init({ styleClass: 'extension-dialog' });
+        super._init({styleClass: 'extension-dialog'});
 
         this._uuid = uuid;
         this._info = info;
@@ -272,7 +278,7 @@ class InstallExtensionDialog extends ModalDialog.ModalDialog {
     async _onInstallButtonPressed() {
         this.close();
 
-        const params = { shell_version: Config.PACKAGE_VERSION };
+        const params = {shell_version: Config.PACKAGE_VERSION};
         const message = Soup.Message.new_from_encoded_form('GET',
             REPOSITORY_URL_DOWNLOAD.format(this._uuid),
             Soup.form_encode_hash(params));
@@ -304,6 +310,6 @@ class InstallExtensionDialog extends ModalDialog.ModalDialog {
     }
 });
 
-function init() {
+export function init() {
     _httpSession = new Soup.Session();
 }

@@ -2,23 +2,21 @@
 
 // Test cases for version comparison
 
-const { GObject } = imports.gi;
+import 'resource:///org/gnome/shell/ui/environment.js';
+import GObject from 'gi://GObject';
 
 const JsUnit = imports.jsUnit;
-const Signals = imports.misc.signals;
+import * as Signals from 'resource:///org/gnome/shell/misc/signals.js';
 
-const Environment = imports.ui.environment;
-const { TransientSignalHolder, registerDestroyableType } = imports.misc.signalTracker;
-
-Environment.init();
+import {TransientSignalHolder, registerDestroyableType} from 'resource:///org/gnome/shell/misc/signalTracker.js';
 
 const Destroyable = GObject.registerClass({
-    Signals: { 'destroy': {} },
+    Signals: {'destroy': {}},
 }, class Destroyable extends GObject.Object {});
 registerDestroyableType(Destroyable);
 
 const GObjectEmitter = GObject.registerClass({
-    Signals: { 'signal': {} },
+    Signals: {'signal': {}},
 }, class GObjectEmitter extends Destroyable {});
 
 const emitter1 = new Signals.EventEmitter();
@@ -27,6 +25,7 @@ const emitter2 = new GObjectEmitter();
 const tracked1 = new Destroyable();
 const tracked2 = {};
 
+let transientHolder;
 let count = 0;
 const handler = () => count++;
 

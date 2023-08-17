@@ -1,28 +1,33 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported Overview, ANIMATION_TIME */
 
-const { Clutter, Gio, GLib, GObject, Meta, Shell, St } = imports.gi;
-const Signals = imports.misc.signals;
+import Clutter from 'gi://Clutter';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
+import St from 'gi://St';
+import * as Signals from '../misc/signals.js';
 
 // Time for initial animation going into Overview mode;
 // this is defined here to make it available in imports.
-var ANIMATION_TIME = 250;
+export const ANIMATION_TIME = 250;
 
-const DND = imports.ui.dnd;
-const LayoutManager = imports.ui.layout;
-const Main = imports.ui.main;
-const MessageTray = imports.ui.messageTray;
-const OverviewControls = imports.ui.overviewControls;
-const Params = imports.misc.params;
-const SwipeTracker = imports.ui.swipeTracker;
-const WindowManager = imports.ui.windowManager;
-const WorkspaceThumbnail = imports.ui.workspaceThumbnail;
+import * as DND from './dnd.js';
+import * as LayoutManager from './layout.js';
+import * as Main from './main.js';
+import * as MessageTray from './messageTray.js';
+import * as OverviewControls from './overviewControls.js';
+import * as Params from '../misc/params.js';
+import * as SwipeTracker from './swipeTracker.js';
+import * as WindowManager from './windowManager.js';
+import * as WorkspaceThumbnail from './workspaceThumbnail.js';
 
-var DND_WINDOW_SWITCH_TIMEOUT = 750;
+const DND_WINDOW_SWITCH_TIMEOUT = 750;
 
-var OVERVIEW_ACTIVATION_TIMEOUT = 0.5;
+const OVERVIEW_ACTIVATION_TIMEOUT = 0.5;
 
-var ShellInfo = class {
+class ShellInfo {
     constructor() {
         this._source = null;
     }
@@ -45,13 +50,13 @@ var ShellInfo = class {
         }
 
         let notification = null;
-        if (this._source.notifications.length == 0) {
+        if (this._source.notifications.length === 0) {
             notification = new MessageTray.Notification(this._source, text, null);
             notification.setTransient(true);
             notification.setForFeedback(forFeedback);
         } else {
             notification = this._source.notifications[0];
-            notification.update(text, null, { clear: true });
+            notification.update(text, null, {clear: true});
         }
 
         if (undoCallback)
@@ -59,20 +64,20 @@ var ShellInfo = class {
 
         this._source.showNotification(notification);
     }
-};
+}
 
-var OverviewActor = GObject.registerClass(
+const OverviewActor = GObject.registerClass(
 class OverviewActor extends St.BoxLayout {
     _init() {
         super._init({
             name: 'overview',
             /* Translators: This is the main view to select
                 activities. See also note for "Activities" string. */
-            accessible_name: _("Overview"),
+            accessible_name: _('Overview'),
             vertical: true,
         });
 
-        this.add_constraint(new LayoutManager.MonitorConstraint({ primary: true }));
+        this.add_constraint(new LayoutManager.MonitorConstraint({primary: true}));
 
         this._controls = new OverviewControls.ControlsManager();
         this.add_child(this._controls);
@@ -100,6 +105,10 @@ class OverviewActor extends St.BoxLayout {
 
     get dash() {
         return this._controls.dash;
+    }
+
+    get searchController() {
+        return this._controls.searchController;
     }
 
     get searchEntry() {
@@ -139,7 +148,7 @@ const OVERVIEW_SHOWN_TRANSITIONS = {
     },
 };
 
-var Overview = class extends Signals.EventEmitter {
+export class Overview extends Signals.EventEmitter {
     constructor() {
         super();
 
@@ -214,7 +223,7 @@ var Overview = class extends Signals.EventEmitter {
 
 
         Main.layoutManager.overviewGroup.connect('scroll-event',
-                                                 this._onScrollEvent.bind(this));
+            this._onScrollEvent.bind(this));
         Main.xdndHandler.connect('drag-begin', this._onDragBegin.bind(this));
         Main.xdndHandler.connect('drag-end', this._onDragEnd.bind(this));
 
@@ -230,7 +239,7 @@ var Overview = class extends Signals.EventEmitter {
     }
 
     _sessionUpdated() {
-        const { hasOverview } = Main.sessionMode;
+        const {hasOverview} = Main.sessionMode;
         if (!hasOverview)
             this.hide();
 
@@ -259,7 +268,7 @@ var Overview = class extends Signals.EventEmitter {
 
         Main.wm.addKeybinding(
             'toggle-overview',
-            new Gio.Settings({ schema_id: WindowManager.SHELL_KEYBINDINGS_SCHEMA }),
+            new Gio.Settings({schema_id: WindowManager.SHELL_KEYBINDINGS_SCHEMA}),
             Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
             Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
             this.toggle.bind(this));
@@ -267,7 +276,7 @@ var Overview = class extends Signals.EventEmitter {
         const swipeTracker = new SwipeTracker.SwipeTracker(global.stage,
             Clutter.Orientation.VERTICAL,
             Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
-            { allowDrag: false, allowScroll: false });
+            {allowDrag: false, allowScroll: false});
         swipeTracker.orientation = Clutter.Orientation.VERTICAL;
         swipeTracker.connect('begin', this._gestureBegin.bind(this));
         swipeTracker.connect('update', this._gestureUpdate.bind(this));
@@ -328,7 +337,7 @@ var Overview = class extends Signals.EventEmitter {
     }
 
     _resetWindowSwitchTimeout() {
-        if (this._windowSwitchTimeoutId != 0) {
+        if (this._windowSwitchTimeoutId !== 0) {
             GLib.source_remove(this._windowSwitchTimeoutId);
             this._windowSwitchTimeoutId = 0;
         }
@@ -343,7 +352,7 @@ var Overview = class extends Signals.EventEmitter {
         this._windowSwitchTimestamp = global.get_current_time();
 
         if (targetIsWindow &&
-            dragEvent.targetActor._delegate.metaWindow == this._lastHoveredWindow)
+            dragEvent.targetActor._delegate.metaWindow === this._lastHoveredWindow)
             return DND.DragMotionResult.CONTINUE;
 
         this._lastHoveredWindow = null;
@@ -358,7 +367,7 @@ var Overview = class extends Signals.EventEmitter {
                 () => {
                     this._windowSwitchTimeoutId = 0;
                     Main.activateWindow(dragEvent.targetActor._delegate.metaWindow,
-                                        this._windowSwitchTimestamp);
+                        this._windowSwitchTimestamp);
                     this.hide();
                     this._lastHoveredWindow = null;
                     return GLib.SOURCE_REMOVE;
@@ -596,9 +605,10 @@ var Overview = class extends Signals.EventEmitter {
         let event = Clutter.get_current_event();
         if (event) {
             let type = event.type();
-            let button = type == Clutter.EventType.BUTTON_PRESS ||
-                          type == Clutter.EventType.BUTTON_RELEASE;
-            let ctrl = (event.get_state() & Clutter.ModifierType.CONTROL_MASK) != 0;
+            const button =
+                type === Clutter.EventType.BUTTON_PRESS ||
+                type === Clutter.EventType.BUTTON_RELEASE;
+            let ctrl = (event.get_state() & Clutter.ModifierType.CONTROL_MASK) !== 0;
             if (button && ctrl)
                 return;
         }
@@ -708,7 +718,11 @@ var Overview = class extends Signals.EventEmitter {
         return this.dash.showAppsButton;
     }
 
+    get searchController() {
+        return this._overview.searchController;
+    }
+
     get searchEntry() {
         return this._overview.searchEntry;
     }
-};
+}

@@ -1,20 +1,28 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported Dash */
 
-const { Clutter, GLib, GObject, Graphene, Meta, Shell, St } = imports.gi;
+import Clutter from 'gi://Clutter';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Graphene from 'gi://Graphene';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
+import St from 'gi://St';
 
-const AppDisplay = imports.ui.appDisplay;
-const AppFavorites = imports.ui.appFavorites;
-const DND = imports.ui.dnd;
-const IconGrid = imports.ui.iconGrid;
-const Main = imports.ui.main;
-const Overview = imports.ui.overview;
+import * as AppDisplay from './appDisplay.js';
+import * as AppFavorites from './appFavorites.js';
+import * as DND from './dnd.js';
+import * as IconGrid from './iconGrid.js';
+import * as Main from './main.js';
+import * as Overview from './overview.js';
 
-var DASH_ANIMATION_TIME = 200;
-var DASH_ITEM_LABEL_SHOW_TIME = 150;
-var DASH_ITEM_LABEL_HIDE_TIME = 100;
-var DASH_ITEM_HOVER_TIMEOUT = 300;
+const DASH_ANIMATION_TIME = 200;
+const DASH_ITEM_LABEL_SHOW_TIME = 150;
+const DASH_ITEM_LABEL_HIDE_TIME = 100;
+const DASH_ITEM_HOVER_TIMEOUT = 300;
 
+/**
+ * @param {AppDisplay.AppIcon} source
+ */
 function getAppFromSource(source) {
     if (source instanceof AppDisplay.AppIcon)
         return source.app;
@@ -22,7 +30,7 @@ function getAppFromSource(source) {
         return null;
 }
 
-var DashIcon = GObject.registerClass(
+export const DashIcon = GObject.registerClass(
 class DashIcon extends AppDisplay.AppIcon {
     _init(app) {
         super._init(app, {
@@ -53,12 +61,12 @@ class DashIcon extends AppDisplay.AppIcon {
 
 // A container like StBin, but taking the child's scale into account
 // when requesting a size
-var DashItemContainer = GObject.registerClass(
+export const DashItemContainer = GObject.registerClass(
 class DashItemContainer extends St.Widget {
     _init() {
         super._init({
             style_class: 'dash-item-container',
-            pivot_point: new Graphene.Point({ x: .5, y: .5 }),
+            pivot_point: new Graphene.Point({x: .5, y: .5}),
             layout_manager: new Clutter.BinLayout(),
             scale_x: 0,
             scale_y: 0,
@@ -67,8 +75,8 @@ class DashItemContainer extends St.Widget {
             x_align: Clutter.ActorAlign.CENTER,
         });
 
-        this._labelText = "";
-        this.label = new St.Label({ style_class: 'dash-label' });
+        this._labelText = '';
+        this.label = new St.Label({style_class: 'dash-label'});
         this.label.hide();
         Main.layoutManager.addChrome(this.label);
         this.label.connectObject('destroy', () => (this.label = null), this);
@@ -91,16 +99,18 @@ class DashItemContainer extends St.Widget {
         let themeNode = this.get_theme_node();
         forWidth = themeNode.adjust_for_width(forWidth);
         let [minHeight, natHeight] = super.vfunc_get_preferred_height(forWidth);
-        return themeNode.adjust_preferred_height(minHeight * this.scale_y,
-                                                 natHeight * this.scale_y);
+        return themeNode.adjust_preferred_height(
+            minHeight * this.scale_y,
+            natHeight * this.scale_y);
     }
 
     vfunc_get_preferred_width(forHeight) {
         let themeNode = this.get_theme_node();
         forHeight = themeNode.adjust_for_height(forHeight);
         let [minWidth, natWidth] = super.vfunc_get_preferred_width(forHeight);
-        return themeNode.adjust_preferred_width(minWidth * this.scale_x,
-                                                natWidth * this.scale_x);
+        return themeNode.adjust_preferred_width(
+            minWidth * this.scale_x,
+            natWidth * this.scale_x);
     }
 
     showLabel() {
@@ -147,7 +157,7 @@ class DashItemContainer extends St.Widget {
     }
 
     setChild(actor) {
-        if (this.child == actor)
+        if (this.child === actor)
             return;
 
         this.destroy_all_children();
@@ -191,7 +201,7 @@ class DashItemContainer extends St.Widget {
     }
 });
 
-var ShowAppsIcon = GObject.registerClass(
+export const ShowAppsIcon = GObject.registerClass(
 class ShowAppsIcon extends DashItemContainer {
     _init() {
         super._init();
@@ -276,19 +286,19 @@ class ShowAppsIcon extends DashItemContainer {
     }
 });
 
-var DragPlaceholderItem = GObject.registerClass(
+const DragPlaceholderItem = GObject.registerClass(
 class DragPlaceholderItem extends DashItemContainer {
     _init() {
         super._init();
-        this.setChild(new St.Bin({ style_class: 'placeholder' }));
+        this.setChild(new St.Bin({style_class: 'placeholder'}));
     }
 });
 
-var EmptyDropTargetItem = GObject.registerClass(
+const EmptyDropTargetItem = GObject.registerClass(
 class EmptyDropTargetItem extends DashItemContainer {
     _init() {
         super._init();
-        this.setChild(new St.Bin({ style_class: 'empty-dash-drop-target' }));
+        this.setChild(new St.Bin({style_class: 'empty-dash-drop-target'}));
     }
 });
 
@@ -308,8 +318,8 @@ class DashIconsLayout extends Clutter.BoxLayout {
 
 const baseIconSizes = [16, 22, 24, 32, 48, 64];
 
-var Dash = GObject.registerClass({
-    Signals: { 'icon-size-changed': {} },
+export const Dash = GObject.registerClass({
+    Signals: {'icon-size-changed': {}},
 }, class Dash extends St.Widget {
     _init() {
         this._maxWidth = -1;
@@ -397,7 +407,7 @@ var Dash = GObject.registerClass({
 
         // Translators: this is the name of the dock/favorites area on
         // the left of the overview
-        Main.ctrlAltTabManager.addGroup(this, _("Dash"), 'user-bookmarks-symbolic');
+        Main.ctrlAltTabManager.addGroup(this, _('Dash'), 'user-bookmarks-symbolic');
     }
 
     _onItemDragBegin() {
@@ -407,7 +417,7 @@ var Dash = GObject.registerClass({
         };
         DND.addDragMonitor(this._dragMonitor);
 
-        if (this._box.get_n_children() == 0) {
+        if (this._box.get_n_children() === 0) {
             this._emptyDropTarget = new EmptyDropTargetItem();
             this._box.insert_child_at_index(this._emptyDropTarget, 0);
             this._emptyDropTarget.show(true);
@@ -504,10 +514,9 @@ var Dash = GObject.registerClass({
     _createAppItem(app) {
         let appIcon = new DashIcon(app);
 
-        appIcon.connect('menu-state-changed',
-                        (o, opened) => {
-                            this._itemMenuStateChanged(item, opened);
-                        });
+        appIcon.connect('menu-state-changed', (o, opened) => {
+            this._itemMenuStateChanged(item, opened);
+        });
 
         let item = new DashItemContainer();
         item.setChild(appIcon);
@@ -540,7 +549,7 @@ var Dash = GObject.registerClass({
         let shouldShow = appIcon ? appIcon.shouldShowTooltip() : item.child.get_hover();
 
         if (shouldShow) {
-            if (this._showLabelTimeoutId == 0) {
+            if (this._showLabelTimeoutId === 0) {
                 let timeout = this._labelShowing ? 0 : DASH_ITEM_HOVER_TIMEOUT;
                 this._showLabelTimeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, timeout,
                     () => {
@@ -629,7 +638,7 @@ var Dash = GObject.registerClass({
                 newIconSize = baseIconSizes[i];
         }
 
-        if (newIconSize == this.iconSize)
+        if (newIconSize === this.iconSize)
             return;
 
         let oldIconSize = this.iconSize;
@@ -655,8 +664,9 @@ var Dash = GObject.registerClass({
 
             // Scale the icon's texture to the previous size and
             // tween to the new size
-            icon.icon.set_size(icon.icon.width * scale,
-                               icon.icon.height * scale);
+            icon.icon.set_size(
+                icon.icon.width * scale,
+                icon.icon.height * scale);
 
             icon.icon.ease({
                 width: targetWidth,
@@ -726,7 +736,7 @@ var Dash = GObject.registerClass({
             let newApp = newApps.length > newIndex ? newApps[newIndex] : null;
 
             // No change at oldIndex/newIndex
-            if (oldApp == newApp) {
+            if (oldApp === newApp) {
                 oldIndex++;
                 newIndex++;
                 continue;
@@ -753,10 +763,10 @@ var Dash = GObject.registerClass({
             // App moved
             let nextApp = newApps.length > newIndex + 1
                 ? newApps[newIndex + 1] : null;
-            let insertHere = nextApp && nextApp == oldApp;
+            let insertHere = nextApp && nextApp === oldApp;
             let alreadyRemoved = removedActors.reduce((result, actor) => {
                 let removedApp = actor.child._delegate.app;
-                return result || removedApp == newApp;
+                return result || removedApp === newApp;
             }, false);
 
             if (insertHere || alreadyRemoved) {
@@ -774,8 +784,9 @@ var Dash = GObject.registerClass({
         }
 
         for (let i = 0; i < addedItems.length; i++) {
-            this._box.insert_child_at_index(addedItems[i].item,
-                                            addedItems[i].pos);
+            this._box.insert_child_at_index(
+                addedItems[i].item,
+                addedItems[i].pos);
         }
 
         for (let i = 0; i < removedActors.length; i++) {
@@ -898,7 +909,7 @@ var Dash = GObject.registerClass({
             this._dragPlaceholderPos = pos;
 
             // Don't allow positioning before or after self
-            if (favPos != -1 && (pos == favPos || pos == favPos + 1)) {
+            if (favPos !== -1 && (pos === favPos || pos === favPos + 1)) {
                 this._clearDragPlaceholder();
                 return DND.DragMotionResult.CONTINUE;
             }
@@ -917,15 +928,16 @@ var Dash = GObject.registerClass({
             this._dragPlaceholder = new DragPlaceholderItem();
             this._dragPlaceholder.child.set_width(this.iconSize);
             this._dragPlaceholder.child.set_height(this.iconSize / 2);
-            this._box.insert_child_at_index(this._dragPlaceholder,
-                                            this._dragPlaceholderPos);
+            this._box.insert_child_at_index(
+                this._dragPlaceholder,
+                this._dragPlaceholderPos);
             this._dragPlaceholder.show(fadeIn);
         }
 
         if (!this._dragPlaceholder)
             return DND.DragMotionResult.NO_DROP;
 
-        let srcIsFavorite = favPos != -1;
+        let srcIsFavorite = favPos !== -1;
 
         if (srcIsFavorite)
             return DND.DragMotionResult.MOVE_DROP;
@@ -954,11 +966,11 @@ var Dash = GObject.registerClass({
         let children = this._box.get_children();
         for (let i = 0; i < this._dragPlaceholderPos; i++) {
             if (this._dragPlaceholder &&
-                children[i] == this._dragPlaceholder)
+                children[i] === this._dragPlaceholder)
                 continue;
 
             let childId = children[i].child._delegate.app.get_id();
-            if (childId == id)
+            if (childId === id)
                 continue;
             if (childId in favorites)
                 favPos++;

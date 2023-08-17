@@ -1,9 +1,13 @@
-/* exported InhibitShortcutsDialog */
-const {Clutter, GObject, Meta, Pango, Shell, St} = imports.gi;
+import Clutter from 'gi://Clutter';
+import GObject from 'gi://GObject';
+import Meta from 'gi://Meta';
+import Pango from 'gi://Pango';
+import Shell from 'gi://Shell';
+import St from 'gi://St';
 
-const Dialog = imports.ui.dialog;
-const ModalDialog = imports.ui.modalDialog;
-const PermissionStore = imports.misc.permissionStore;
+import * as Dialog from './dialog.js';
+import * as ModalDialog from './modalDialog.js';
+import * as PermissionStore from '../misc/permissionStore.js';
 
 const APP_ALLOWLIST = ['org.gnome.Settings.desktop'];
 const APP_PERMISSIONS_TABLE = 'gnome';
@@ -11,9 +15,9 @@ const APP_PERMISSIONS_ID = 'shortcuts-inhibitor';
 const GRANTED = 'GRANTED';
 const DENIED = 'DENIED';
 
-var DialogResponse = Meta.InhibitShortcutsDialogResponse;
+const DialogResponse = Meta.InhibitShortcutsDialogResponse;
 
-var InhibitShortcutsDialog = GObject.registerClass({
+export const InhibitShortcutsDialog = GObject.registerClass({
     Implements: [Meta.InhibitShortcutsDialog],
     Properties: {
         'window': GObject.ParamSpec.override('window', Meta.InhibitShortcutsDialog),

@@ -1,14 +1,21 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported ScreenshotService, ScreenshotUI, showScreenshotUI, captureScreenshot */
 
-const {Clutter, Cogl, Gio, GObject, GLib, Graphene, Meta, Shell, St} = imports.gi;
+import Clutter from 'gi://Clutter';
+import Cogl from 'gi://Cogl';
+import Gio from 'gi://Gio';
+import GObject from 'gi://GObject';
+import GLib from 'gi://GLib';
+import Graphene from 'gi://Graphene';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
+import St from 'gi://St';
 
-const GrabHelper = imports.ui.grabHelper;
-const Layout = imports.ui.layout;
-const Lightbox = imports.ui.lightbox;
-const Main = imports.ui.main;
-const MessageTray = imports.ui.messageTray;
-const Workspace = imports.ui.workspace;
+import * as GrabHelper from './grabHelper.js';
+import * as Layout from './layout.js';
+import * as Lightbox from './lightbox.js';
+import * as Main from './main.js';
+import * as MessageTray from './messageTray.js';
+import * as Workspace from './workspace.js';
 
 Gio._promisify(Shell.Screenshot.prototype, 'pick_color');
 Gio._promisify(Shell.Screenshot.prototype, 'screenshot');
@@ -17,15 +24,15 @@ Gio._promisify(Shell.Screenshot.prototype, 'screenshot_area');
 Gio._promisify(Shell.Screenshot.prototype, 'screenshot_stage_to_content');
 Gio._promisify(Shell.Screenshot, 'composite_to_stream');
 
-const { loadInterfaceXML } = imports.misc.fileUtils;
-const { DBusSenderChecker } = imports.misc.util;
+import {loadInterfaceXML} from '../misc/fileUtils.js';
+import {DBusSenderChecker} from '../misc/util.js';
 
 const ScreenshotIface = loadInterfaceXML('org.gnome.Shell.Screenshot');
 
 const ScreencastIface = loadInterfaceXML('org.gnome.Shell.Screencast');
 const ScreencastProxy = Gio.DBusProxy.makeProxyWrapper(ScreencastIface);
 
-var IconLabelButton = GObject.registerClass(
+const IconLabelButton = GObject.registerClass(
 class IconLabelButton extends St.Button {
     _init(iconName, label, params) {
         super._init(params);
@@ -36,7 +43,7 @@ class IconLabelButton extends St.Button {
         });
         this.set_child(this._container);
 
-        this._container.add_child(new St.Icon({ icon_name: iconName }));
+        this._container.add_child(new St.Icon({icon_name: iconName}));
         this._container.add_child(new St.Label({
             text: label,
             x_align: Clutter.ActorAlign.CENTER,
@@ -44,7 +51,7 @@ class IconLabelButton extends St.Button {
     }
 });
 
-var Tooltip = GObject.registerClass(
+export const Tooltip = GObject.registerClass(
 class Tooltip extends St.Label {
     _init(widget, params) {
         super._init(params);
@@ -112,12 +119,12 @@ class Tooltip extends St.Label {
     }
 });
 
-var UIAreaIndicator = GObject.registerClass(
+const UIAreaIndicator = GObject.registerClass(
 class UIAreaIndicator extends St.Widget {
     _init(params) {
         super._init(params);
 
-        this._topRect = new St.Widget({ style_class: 'screenshot-ui-area-indicator-shade' });
+        this._topRect = new St.Widget({style_class: 'screenshot-ui-area-indicator-shade'});
         this._topRect.add_constraint(new Clutter.BindConstraint({
             source: this,
             coordinate: Clutter.BindCoordinate.WIDTH,
@@ -134,7 +141,7 @@ class UIAreaIndicator extends St.Widget {
         }));
         this.add_child(this._topRect);
 
-        this._bottomRect = new St.Widget({ style_class: 'screenshot-ui-area-indicator-shade' });
+        this._bottomRect = new St.Widget({style_class: 'screenshot-ui-area-indicator-shade'});
         this._bottomRect.add_constraint(new Clutter.BindConstraint({
             source: this,
             coordinate: Clutter.BindCoordinate.WIDTH,
@@ -151,7 +158,7 @@ class UIAreaIndicator extends St.Widget {
         }));
         this.add_child(this._bottomRect);
 
-        this._leftRect = new St.Widget({ style_class: 'screenshot-ui-area-indicator-shade' });
+        this._leftRect = new St.Widget({style_class: 'screenshot-ui-area-indicator-shade'});
         this._leftRect.add_constraint(new Clutter.SnapConstraint({
             source: this,
             from_edge: Clutter.SnapEdge.LEFT,
@@ -169,7 +176,7 @@ class UIAreaIndicator extends St.Widget {
         }));
         this.add_child(this._leftRect);
 
-        this._rightRect = new St.Widget({ style_class: 'screenshot-ui-area-indicator-shade' });
+        this._rightRect = new St.Widget({style_class: 'screenshot-ui-area-indicator-shade'});
         this._rightRect.add_constraint(new Clutter.SnapConstraint({
             source: this,
             from_edge: Clutter.SnapEdge.RIGHT,
@@ -187,7 +194,7 @@ class UIAreaIndicator extends St.Widget {
         }));
         this.add_child(this._rightRect);
 
-        this._selectionRect = new St.Widget({ style_class: 'screenshot-ui-area-indicator-selection' });
+        this._selectionRect = new St.Widget({style_class: 'screenshot-ui-area-indicator-selection'});
         this.add_child(this._selectionRect);
 
         this._topRect.add_constraint(new Clutter.SnapConstraint({
@@ -221,8 +228,8 @@ class UIAreaIndicator extends St.Widget {
     }
 });
 
-var UIAreaSelector = GObject.registerClass({
-    Signals: { 'drag-started': {}, 'drag-ended': {} },
+const UIAreaSelector = GObject.registerClass({
+    Signals: {'drag-started': {}, 'drag-ended': {}},
 }, class UIAreaSelector extends St.Widget {
     _init(params) {
         super._init(params);
@@ -240,13 +247,13 @@ var UIAreaSelector = GObject.registerClass({
         }));
         this.add_child(this._areaIndicator);
 
-        this._topLeftHandle = new St.Widget({ style_class: 'screenshot-ui-area-selector-handle' });
+        this._topLeftHandle = new St.Widget({style_class: 'screenshot-ui-area-selector-handle'});
         this.add_child(this._topLeftHandle);
-        this._topRightHandle = new St.Widget({ style_class: 'screenshot-ui-area-selector-handle' });
+        this._topRightHandle = new St.Widget({style_class: 'screenshot-ui-area-selector-handle'});
         this.add_child(this._topRightHandle);
-        this._bottomLeftHandle = new St.Widget({ style_class: 'screenshot-ui-area-selector-handle' });
+        this._bottomLeftHandle = new St.Widget({style_class: 'screenshot-ui-area-selector-handle'});
         this.add_child(this._bottomLeftHandle);
-        this._bottomRightHandle = new St.Widget({ style_class: 'screenshot-ui-area-selector-handle' });
+        this._bottomRightHandle = new St.Widget({style_class: 'screenshot-ui-area-selector-handle'});
         this.add_child(this._bottomRightHandle);
 
         // This will be updated before the first drawn frame.
@@ -423,19 +430,20 @@ var UIAreaSelector = GObject.registerClass({
         if (this._dragButton)
             return Clutter.EVENT_PROPAGATE;
 
-        const cursor = this._computeCursorType(event.x, event.y);
+        const [x, y] = event.get_coords();
+        const cursor = this._computeCursorType(x, y);
 
         // Clicking outside of the selection, or using the right mouse button,
         // or with Ctrl results in dragging a new selection from scratch.
         if (cursor === Meta.Cursor.CROSSHAIR ||
             button === Clutter.BUTTON_SECONDARY ||
-            (event.modifier_state & Clutter.ModifierType.CONTROL_MASK)) {
+            (event.get_state() & Clutter.ModifierType.CONTROL_MASK)) {
             this._dragButton = button;
 
             this._dragCursor = Meta.Cursor.CROSSHAIR;
             global.display.set_cursor(Meta.Cursor.CROSSHAIR);
 
-            [this._startX, this._startY] = [event.x, event.y];
+            [this._startX, this._startY] = event.get_coords();
             this._lastX = this._startX = Math.floor(this._startX);
             this._lastY = this._startY = Math.floor(this._startY);
 
@@ -445,8 +453,7 @@ var UIAreaSelector = GObject.registerClass({
             this._dragButton = button;
 
             this._dragCursor = cursor;
-            this._dragStartX = event.x;
-            this._dragStartY = event.y;
+            [this._dragStartX, this._dragStartY] = event.get_coords();
 
             const [leftX, topY, width, height] = this.getGeometry();
             const rightX = leftX + width - 1;
@@ -510,14 +517,16 @@ var UIAreaSelector = GObject.registerClass({
 
         // We might have finished creating a new selection, so we need to
         // update the cursor.
-        this._updateCursor(event.x, event.y);
+        const [x, y] = event.get_coords();
+        this._updateCursor(x, y);
 
         return Clutter.EVENT_STOP;
     }
 
     _onMotion(event, sequence) {
         if (!this._dragButton) {
-            this._updateCursor(event.x, event.y);
+            const [x, y] = event.get_coords();
+            this._updateCursor(x, y);
             return Clutter.EVENT_PROPAGATE;
         }
 
@@ -525,12 +534,13 @@ var UIAreaSelector = GObject.registerClass({
             return Clutter.EVENT_PROPAGATE;
 
         if (this._dragCursor === Meta.Cursor.CROSSHAIR) {
-            [this._lastX, this._lastY] = [event.x, event.y];
+            [this._lastX, this._lastY] = event.get_coords();
             this._lastX = Math.floor(this._lastX);
             this._lastY = Math.floor(this._lastY);
         } else {
-            let dx = Math.round(event.x - this._dragStartX);
-            let dy = Math.round(event.y - this._dragStartY);
+            const [x, y] = event.get_coords();
+            let dx = Math.round(x - this._dragStartX);
+            let dy = Math.round(y - this._dragStartY);
 
             if (this._dragCursor === Meta.Cursor.MOVE_OR_RESIZE_WINDOW) {
                 const [,, selectionWidth, selectionHeight] = this.getGeometry();
@@ -651,17 +661,19 @@ var UIAreaSelector = GObject.registerClass({
     }
 
     vfunc_button_press_event(event) {
-        if (event.button === Clutter.BUTTON_PRIMARY ||
-            event.button === Clutter.BUTTON_SECONDARY)
-            return this._onPress(event, event.button, null);
+        const button = event.get_button();
+        if (button === Clutter.BUTTON_PRIMARY ||
+            button === Clutter.BUTTON_SECONDARY)
+            return this._onPress(event, button, null);
 
         return Clutter.EVENT_PROPAGATE;
     }
 
     vfunc_button_release_event(event) {
-        if (event.button === Clutter.BUTTON_PRIMARY ||
-            event.button === Clutter.BUTTON_SECONDARY)
-            return this._onRelease(event, event.button, null);
+        const button = event.get_button();
+        if (button === Clutter.BUTTON_PRIMARY ||
+            button === Clutter.BUTTON_SECONDARY)
+            return this._onRelease(event, button, null);
 
         return Clutter.EVENT_PROPAGATE;
     }
@@ -671,12 +683,13 @@ var UIAreaSelector = GObject.registerClass({
     }
 
     vfunc_touch_event(event) {
-        if (event.type === Clutter.EventType.TOUCH_BEGIN)
-            return this._onPress(event, 'touch', event.sequence);
-        else if (event.type === Clutter.EventType.TOUCH_END)
-            return this._onRelease(event, 'touch', event.sequence);
-        else if (event.type === Clutter.EventType.TOUCH_UPDATE)
-            return this._onMotion(event, event.sequence);
+        const eventType = event.type();
+        if (eventType === Clutter.EventType.TOUCH_BEGIN)
+            return this._onPress(event, 'touch', event.get_event_sequence());
+        else if (eventType === Clutter.EventType.TOUCH_END)
+            return this._onRelease(event, 'touch', event.get_event_sequence());
+        else if (eventType === Clutter.EventType.TOUCH_UPDATE)
+            return this._onMotion(event, event.get_event_sequence());
 
         return Clutter.EVENT_PROPAGATE;
     }
@@ -692,7 +705,7 @@ var UIAreaSelector = GObject.registerClass({
     }
 });
 
-var UIWindowSelectorLayout = GObject.registerClass(
+const UIWindowSelectorLayout = GObject.registerClass(
 class UIWindowSelectorLayout extends Workspace.WorkspaceLayout {
     _init(monitorIndex) {
         super._init(null, monitorIndex, null);
@@ -757,7 +770,7 @@ class UIWindowSelectorLayout extends Workspace.WorkspaceLayout {
     }
 });
 
-var UIWindowSelectorWindow = GObject.registerClass(
+const UIWindowSelectorWindow = GObject.registerClass(
 class UIWindowSelectorWindow extends St.Button {
     _init(actor, params) {
         super._init(params);
@@ -771,7 +784,7 @@ class UIWindowSelectorWindow extends St.Button {
         });
         this.add_child(this._actor);
 
-        this._border = new St.Bin({ style_class: 'screenshot-ui-window-selector-window-border' });
+        this._border = new St.Bin({style_class: 'screenshot-ui-window-selector-window-border'});
         this._border.connect('style-changed', () => {
             this._borderSize =
                 this._border.get_theme_node().get_border_width(St.Side.TOP);
@@ -786,7 +799,7 @@ class UIWindowSelectorWindow extends St.Button {
         });
 
         this._cursor = null;
-        this._cursorPoint = { x: 0, y: 0 };
+        this._cursorPoint = {x: 0, y: 0};
         this._shouldShowCursor = window.has_pointer && window.has_pointer();
 
         this.connect('destroy', this._onDestroy.bind(this));
@@ -929,7 +942,7 @@ class UIWindowSelectorWindow extends St.Button {
     }
 });
 
-var UIWindowSelector = GObject.registerClass(
+const UIWindowSelector = GObject.registerClass(
 class UIWindowSelector extends St.Widget {
     _init(monitorIndex, params) {
         super._init(params);
@@ -997,7 +1010,7 @@ const UIMode = {
     SCREENCAST: 1,
 };
 
-var ScreenshotUI = GObject.registerClass({
+export const ScreenshotUI = GObject.registerClass({
     Properties: {
         'screencast-in-progress': GObject.ParamSpec.boolean(
             'screencast-in-progress',
@@ -1050,11 +1063,11 @@ var ScreenshotUI = GObject.registerClass({
             this._screencastFailed();
         });
 
-        this._lockdownSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.lockdown' });
+        this._lockdownSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.lockdown'});
 
         // The full-screen screenshot has a separate container so that we can
         // show it without the screenshot UI fade-in for a nicer animation.
-        this._stageScreenshotContainer = new St.Widget({ visible: false });
+        this._stageScreenshotContainer = new St.Widget({visible: false});
         this._stageScreenshotContainer.add_constraint(new Clutter.BindConstraint({
             source: global.stage,
             coordinate: Clutter.BindCoordinate.ALL,
@@ -1081,7 +1094,7 @@ var ScreenshotUI = GObject.registerClass({
 
         Main.layoutManager.screenshotUIGroup.add_child(this);
 
-        this._stageScreenshot = new St.Widget({ style_class: 'screenshot-ui-screen-screenshot' });
+        this._stageScreenshot = new St.Widget({style_class: 'screenshot-ui-screen-screenshot'});
         this._stageScreenshot.add_constraint(new Clutter.BindConstraint({
             source: global.stage,
             coordinate: Clutter.BindCoordinate.ALL,
@@ -1104,9 +1117,9 @@ var ScreenshotUI = GObject.registerClass({
         });
         this.add_child(this._areaSelector);
 
-        this._primaryMonitorBin = new St.Widget({ layout_manager: new Clutter.BinLayout() });
+        this._primaryMonitorBin = new St.Widget({layout_manager: new Clutter.BinLayout()});
         this._primaryMonitorBin.add_constraint(
-            new Layout.MonitorConstraint({ 'primary': true }));
+            new Layout.MonitorConstraint({'primary': true}));
         this.add_child(this._primaryMonitorBin);
 
         this._panel = new St.BoxLayout({
@@ -1129,13 +1142,13 @@ var ScreenshotUI = GObject.registerClass({
         this._closeButton.add_constraint(new Clutter.AlignConstraint({
             source: this._panel,
             align_axis: Clutter.AlignAxis.Y_AXIS,
-            pivot_point: new Graphene.Point({ x: -1, y: 0.5 }),
+            pivot_point: new Graphene.Point({x: -1, y: 0.5}),
             factor: 0,
         }));
         this._closeButtonXAlignConstraint = new Clutter.AlignConstraint({
             source: this._panel,
             align_axis: Clutter.AlignAxis.X_AXIS,
-            pivot_point: new Graphene.Point({ x: 0.5, y: -1 }),
+            pivot_point: new Graphene.Point({x: 0.5, y: -1}),
         });
         this._closeButton.add_constraint(this._closeButtonXAlignConstraint);
         this._closeButton.connect('clicked', () => this.close());
@@ -1220,7 +1233,7 @@ var ScreenshotUI = GObject.registerClass({
             visible: false,
         }));
 
-        this._bottomRowContainer = new St.Widget({ layout_manager: new Clutter.BinLayout() });
+        this._bottomRowContainer = new St.Widget({layout_manager: new Clutter.BinLayout()});
         this._panel.add_child(this._bottomRowContainer);
 
         this._shotCastContainer = new St.BoxLayout({
@@ -1239,6 +1252,12 @@ var ScreenshotUI = GObject.registerClass({
             this._onShotButtonToggled.bind(this));
         this._shotCastContainer.add_child(this._shotButton);
 
+        this.add_child(new Tooltip(this._shotButton, {
+            text: _('Take Screenshot'),
+            style_class: 'screenshot-ui-tooltip',
+            visible: false,
+        }));
+
         this._castButton = new St.Button({
             style_class: 'screenshot-ui-shot-cast-button',
             icon_name: 'camera-web-symbolic',
@@ -1249,25 +1268,16 @@ var ScreenshotUI = GObject.registerClass({
             this._onCastButtonToggled.bind(this));
         this._shotCastContainer.add_child(this._castButton);
 
+        this.add_child(new Tooltip(this._castButton, {
+            text: _('Record Screen'),
+            style_class: 'screenshot-ui-tooltip',
+            visible: false,
+        }));
+
         this._shotButton.bind_property('checked', this._castButton, 'checked',
             GObject.BindingFlags.BIDIRECTIONAL | GObject.BindingFlags.INVERT_BOOLEAN);
 
-        this._shotCastTooltip = new Tooltip(this._shotCastContainer, {
-            text: _('Screenshot / Screencast'),
-            style_class: 'screenshot-ui-tooltip',
-            visible: false,
-        });
-        const shotCastCallback = () => {
-            if (this._shotButton.hover || this._castButton.hover)
-                this._shotCastTooltip.open();
-            else
-                this._shotCastTooltip.close();
-        };
-        this._shotButton.connect('notify::hover', shotCastCallback);
-        this._castButton.connect('notify::hover', shotCastCallback);
-        this.add_child(this._shotCastTooltip);
-
-        this._captureButton = new St.Button({ style_class: 'screenshot-ui-capture-button' });
+        this._captureButton = new St.Button({style_class: 'screenshot-ui-capture-button'});
         this._captureButton.set_child(new St.Widget({
             style_class: 'screenshot-ui-capture-button-circle',
         }));
@@ -1330,7 +1340,7 @@ var ScreenshotUI = GObject.registerClass({
 
         Main.wm.addKeybinding(
             'show-screenshot-ui',
-            new Gio.Settings({ schema_id: 'org.gnome.shell.keybindings' }),
+            new Gio.Settings({schema_id: 'org.gnome.shell.keybindings'}),
             Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
             uiModes,
             showScreenshotUI
@@ -1338,7 +1348,7 @@ var ScreenshotUI = GObject.registerClass({
 
         Main.wm.addKeybinding(
             'show-screen-recording-ui',
-            new Gio.Settings({ schema_id: 'org.gnome.shell.keybindings' }),
+            new Gio.Settings({schema_id: 'org.gnome.shell.keybindings'}),
             Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
             restrictedModes,
             showScreenRecordingUI
@@ -1346,7 +1356,7 @@ var ScreenshotUI = GObject.registerClass({
 
         Main.wm.addKeybinding(
             'screenshot-window',
-            new Gio.Settings({ schema_id: 'org.gnome.shell.keybindings' }),
+            new Gio.Settings({schema_id: 'org.gnome.shell.keybindings'}),
             Meta.KeyBindingFlags.IGNORE_AUTOREPEAT | Meta.KeyBindingFlags.PER_WINDOW,
             restrictedModes,
             async (_display, window, _binding) => {
@@ -1364,7 +1374,7 @@ var ScreenshotUI = GObject.registerClass({
 
         Main.wm.addKeybinding(
             'screenshot',
-            new Gio.Settings({ schema_id: 'org.gnome.shell.keybindings' }),
+            new Gio.Settings({schema_id: 'org.gnome.shell.keybindings'}),
             Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
             uiModes,
             async () => {
@@ -1417,7 +1427,7 @@ var ScreenshotUI = GObject.registerClass({
             const bin = new St.Widget({
                 layout_manager: new Clutter.BinLayout(),
             });
-            bin.add_constraint(new Layout.MonitorConstraint({ 'index': i }));
+            bin.add_constraint(new Layout.MonitorConstraint({'index': i}));
             this.insert_child_below(bin, this._primaryMonitorBin);
             this._monitorBins.push(bin);
 
@@ -1553,7 +1563,7 @@ var ScreenshotUI = GObject.registerClass({
         // pop their grabs.
         Main.layoutManager.emit('system-modal-opened');
 
-        const { screenshotUIGroup } = Main.layoutManager;
+        const {screenshotUIGroup} = Main.layoutManager;
         screenshotUIGroup.get_parent().set_child_above_sibling(
             screenshotUIGroup, null);
 
@@ -1937,7 +1947,7 @@ var ScreenshotUI = GObject.registerClass({
         this._setScreencastInProgress(false);
 
         // Translators: notification title.
-        this._showNotification(_('Error'));
+        this._showNotification(_('Screencast ended unexpectedly'));
     }
 
     _showNotification(title) {
@@ -1995,9 +2005,9 @@ var ScreenshotUI = GObject.registerClass({
     }
 
     vfunc_key_press_event(event) {
-        const symbol = event.keyval;
+        const symbol = event.get_key_symbol();
         if (symbol === Clutter.KEY_Return || symbol === Clutter.KEY_space ||
-            ((event.modifier_state & Clutter.ModifierType.CONTROL_MASK) &&
+            ((event.get_state() & Clutter.ModifierType.CONTROL_MASK) &&
              (symbol === Clutter.KEY_c || symbol === Clutter.KEY_C))) {
             this._onCaptureButtonClicked();
             return Clutter.EVENT_STOP;
@@ -2120,7 +2130,7 @@ function _storeScreenshot(bytes, pixbuf) {
     }
 
     const lockdownSettings =
-        new Gio.Settings({ schema_id: 'org.gnome.desktop.lockdown' });
+        new Gio.Settings({schema_id: 'org.gnome.desktop.lockdown'});
     const disableSaveToDisk =
         lockdownSettings.get_boolean('disable-save-to-disk');
 
@@ -2190,7 +2200,7 @@ function _storeScreenshot(bytes, pixbuf) {
         _('Screenshot captured'),
         // Translators: notification body when a screenshot was captured.
         _('You can paste the image from the clipboard.'),
-        { datetime: time, gicon: content }
+        {datetime: time, gicon: content}
     );
 
     if (!disableSaveToDisk) {
@@ -2229,7 +2239,7 @@ function _storeScreenshot(bytes, pixbuf) {
  * @param {Cogl.Texture} texture - The texture to take the screenshot from.
  * @param {number[4]} [geometry] - The region to use: x, y, width and height.
  * @param {number} scale - The texture scale.
- * @param {Object} [cursor] - Cursor data to include in the screenshot.
+ * @param {object} [cursor] - Cursor data to include in the screenshot.
  * @param {Cogl.Texture} cursor.texture - The cursor texture.
  * @param {number} cursor.x - The cursor x coordinate.
  * @param {number} cursor.y - The cursor y coordinate.
@@ -2239,7 +2249,7 @@ async function captureScreenshot(texture, geometry, scale, cursor) {
     const stream = Gio.MemoryOutputStream.new_resizable();
     const [x, y, w, h] = geometry ?? [0, 0, -1, -1];
     if (cursor === null)
-        cursor = { texture: null, x: 0, y: 0, scale: 1 };
+        cursor = {texture: null, x: 0, y: 0, scale: 1};
 
     global.display.get_sound_player().play_from_theme(
         'screen-capture', _('Screenshot taken'), null);
@@ -2259,7 +2269,7 @@ async function captureScreenshot(texture, geometry, scale, cursor) {
 /**
  * Shows the screenshot UI.
  */
-function showScreenshotUI() {
+export function showScreenshotUI() {
     Main.screenshotUI.open().catch(err => {
         logError(err, 'Error opening the screenshot UI');
     });
@@ -2268,13 +2278,13 @@ function showScreenshotUI() {
 /**
  * Shows the screen recording UI.
  */
-function showScreenRecordingUI() {
+export function showScreenRecordingUI() {
     Main.screenshotUI.open(UIMode.SCREENCAST).catch(err => {
         logError(err, 'Error opening the screenshot UI');
     });
 }
 
-var ScreenshotService = class {
+export class ScreenshotService {
     constructor() {
         this._dbusImpl = Gio.DBusExportedObject.wrapJSObject(ScreenshotIface, this);
         this._dbusImpl.export(Gio.DBus.session, '/org/gnome/Shell/Screenshot');
@@ -2287,7 +2297,7 @@ var ScreenshotService = class {
             'org.gnome.Screenshot',
         ]);
 
-        this._lockdownSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.lockdown' });
+        this._lockdownSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.lockdown'});
 
         Gio.DBus.session.own_name('org.gnome.Shell.Screenshot', Gio.BusNameOwnerFlags.REPLACE, null, null);
     }
@@ -2318,9 +2328,8 @@ var ScreenshotService = class {
         }
 
         let shooter = new Shell.Screenshot();
-        shooter._watchNameId =
-                        Gio.bus_watch_name(Gio.BusType.SESSION, sender, 0, null,
-                                           this._onNameVanished.bind(this));
+        shooter._watchNameId = Gio.bus_watch_name(Gio.BusType.SESSION,
+            sender, 0, null, this._onNameVanished.bind(this));
 
         this._screenShooter.set(sender, shooter);
 
@@ -2368,7 +2377,7 @@ var ScreenshotService = class {
     }
 
     _createStream(filename, invocation) {
-        if (filename == '')
+        if (filename === '')
             return [Gio.MemoryOutputStream.new_resizable(), null];
 
         if (GLib.path_is_absolute(filename)) {
@@ -2450,9 +2459,10 @@ var ScreenshotService = class {
         let [x, y, width, height, flash, filename] = params;
         [x, y, width, height] = this._scaleArea(x, y, width, height);
         if (!this._checkArea(x, y, width, height)) {
-            invocation.return_error_literal(Gio.IOErrorEnum,
-                                            Gio.IOErrorEnum.CANCELLED,
-                                            "Invalid params");
+            invocation.return_error_literal(
+                Gio.IOErrorEnum,
+                Gio.IOErrorEnum.CANCELLED,
+                'Invalid params');
             return;
         }
         let screenshot = await this._createScreenshot(invocation);
@@ -2555,12 +2565,13 @@ var ScreenshotService = class {
         let [x, y, width, height] = params;
         [x, y, width, height] = this._scaleArea(x, y, width, height);
         if (!this._checkArea(x, y, width, height)) {
-            invocation.return_error_literal(Gio.IOErrorEnum,
-                                            Gio.IOErrorEnum.CANCELLED,
-                                            "Invalid params");
+            invocation.return_error_literal(
+                Gio.IOErrorEnum,
+                Gio.IOErrorEnum.CANCELLED,
+                'Invalid params');
             return;
         }
-        let flashspot = new Flashspot({ x, y, width, height });
+        let flashspot = new Flashspot({x, y, width, height});
         flashspot.fire();
         invocation.return_value(null);
     }
@@ -2573,7 +2584,7 @@ var ScreenshotService = class {
         const pickPixel = new PickPixel(screenshot);
         try {
             const color = await pickPixel.pickAsync();
-            const { red, green, blue } = color;
+            const {red, green, blue} = color;
             const retval = GLib.Variant.new('(a{sv})', [{
                 color: GLib.Variant.new('(ddd)', [
                     red / 255.0,
@@ -2590,9 +2601,9 @@ var ScreenshotService = class {
             this._removeShooterForSender(invocation.get_sender());
         }
     }
-};
+}
 
-var SelectArea = GObject.registerClass(
+export const SelectArea = GObject.registerClass(
 class SelectArea extends St.Widget {
     _init() {
         this._startX = -1;
@@ -2630,7 +2641,7 @@ class SelectArea extends St.Widget {
         this.show();
 
         try {
-            await this._grabHelper.grabAsync({ actor: this });
+            await this._grabHelper.grabAsync({actor: this});
         } finally {
             global.display.set_cursor(Meta.Cursor.DEFAULT);
 
@@ -2652,11 +2663,11 @@ class SelectArea extends St.Widget {
         });
     }
 
-    vfunc_motion_event(motionEvent) {
-        if (this._startX == -1 || this._startY == -1 || this._result)
+    vfunc_motion_event(event) {
+        if (this._startX === -1 || this._startY === -1 || this._result)
             return Clutter.EVENT_PROPAGATE;
 
-        [this._lastX, this._lastY] = [motionEvent.x, motionEvent.y];
+        [this._lastX, this._lastY] = event.get_coords();
         this._lastX = Math.floor(this._lastX);
         this._lastY = Math.floor(this._lastY);
         let geometry = this._getGeometry();
@@ -2668,11 +2679,11 @@ class SelectArea extends St.Widget {
         return Clutter.EVENT_PROPAGATE;
     }
 
-    vfunc_button_press_event(buttonEvent) {
+    vfunc_button_press_event(event) {
         if (this._result)
             return Clutter.EVENT_PROPAGATE;
 
-        [this._startX, this._startY] = [buttonEvent.x, buttonEvent.y];
+        [this._startX, this._startY] = event.get_coords();
         this._startX = Math.floor(this._startX);
         this._startY = Math.floor(this._startY);
         this._rubberband.set_position(this._startX, this._startY);
@@ -2695,7 +2706,7 @@ class SelectArea extends St.Widget {
     }
 });
 
-var RecolorEffect = GObject.registerClass({
+const RecolorEffect = GObject.registerClass({
     Properties: {
         color: GObject.ParamSpec.boxed(
             'color', 'color', 'replacement color',
@@ -2824,10 +2835,10 @@ var RecolorEffect = GObject.registerClass({
     }
 });
 
-var PickPixel = GObject.registerClass(
+export const PickPixel = GObject.registerClass(
 class PickPixel extends St.Widget {
     _init(screenshot) {
-        super._init({ visible: false, reactive: true });
+        super._init({visible: false, reactive: true});
 
         this._screenshot = screenshot;
 
@@ -2879,7 +2890,7 @@ class PickPixel extends St.Widget {
         this._pickColor(...global.get_pointer());
 
         try {
-            await this._grabHelper.grabAsync({ actor: this });
+            await this._grabHelper.grabAsync({actor: this});
         } finally {
             global.display.set_cursor(Meta.Cursor.DEFAULT);
             this._previewCursor.destroy();
@@ -2909,16 +2920,16 @@ class PickPixel extends St.Widget {
         this._previewCursor.show();
     }
 
-    vfunc_motion_event(motionEvent) {
-        const { x, y } = motionEvent;
+    vfunc_motion_event(event) {
+        const [x, y] = event.get_coords();
         this._pickColor(x, y);
         return Clutter.EVENT_PROPAGATE;
     }
 });
 
-var FLASHSPOT_ANIMATION_OUT_TIME = 500; // milliseconds
+const FLASHSPOT_ANIMATION_OUT_TIME = 500; // milliseconds
 
-var Flashspot = GObject.registerClass(
+export const Flashspot = GObject.registerClass(
 class Flashspot extends Lightbox.Lightbox {
     _init(area) {
         super._init(Main.uiGroup, {
@@ -2931,7 +2942,7 @@ class Flashspot extends Lightbox.Lightbox {
     }
 
     fire(doneCallback) {
-        this.set({ visible: true, opacity: 255 });
+        this.set({visible: true, opacity: 255});
         this.ease({
             opacity: 0,
             duration: FLASHSPOT_ANIMATION_OUT_TIME,

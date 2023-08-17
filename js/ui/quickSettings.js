@@ -1,18 +1,24 @@
-/* exported QuickToggle, QuickMenuToggle, QuickSlider, QuickSettingsMenu, SystemIndicator */
-const {Atk, Clutter, Gio, GLib, GObject, Graphene, Meta, Pango, St} = imports.gi;
+import Atk from 'gi://Atk';
+import Clutter from 'gi://Clutter';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import GObject from 'gi://GObject';
+import Graphene from 'gi://Graphene';
+import Meta from 'gi://Meta';
+import Pango from 'gi://Pango';
+import St from 'gi://St';
 
-const Main = imports.ui.main;
-const PopupMenu = imports.ui.popupMenu;
-const {Slider} = imports.ui.slider;
+import * as Main from './main.js';
+import * as PopupMenu from './popupMenu.js';
+import {Slider} from './slider.js';
 
-const {PopupAnimation} = imports.ui.boxpointer;
+import {PopupAnimation} from './boxpointer.js';
 
 const DIM_BRIGHTNESS = -0.4;
 const POPUP_ANIMATION_TIME = 400;
-
 const MENU_BUTTON_BRIGHTNESS = 0.1;
 
-var QuickSettingsItem = GObject.registerClass({
+export const QuickSettingsItem = GObject.registerClass({
     Properties: {
         'has-menu': GObject.ParamSpec.boolean(
             'has-menu', 'has-menu', 'has-menu',
@@ -34,7 +40,7 @@ var QuickSettingsItem = GObject.registerClass({
     }
 });
 
-var QuickToggle = GObject.registerClass({
+export const QuickToggle = GObject.registerClass({
     Properties: {
         'title': GObject.ParamSpec.string('title', '', '',
             GObject.ParamFlags.READWRITE,
@@ -135,7 +141,7 @@ var QuickToggle = GObject.registerClass({
     }
 });
 
-var QuickMenuToggle = GObject.registerClass({
+export const QuickMenuToggle = GObject.registerClass({
     Properties: {
         'title': GObject.ParamSpec.string('title', '', '',
             GObject.ParamFlags.READWRITE,
@@ -226,7 +232,7 @@ var QuickMenuToggle = GObject.registerClass({
     }
 });
 
-var QuickSlider = GObject.registerClass({
+export const QuickSlider = GObject.registerClass({
     Properties: {
         'icon-name': GObject.ParamSpec.override('icon-name', St.Button),
         'gicon': GObject.ParamSpec.object('gicon', '', '',
@@ -315,7 +321,10 @@ var QuickSlider = GObject.registerClass({
         });
         box.add_child(sliderBin);
 
-        sliderBin.set_accessible(this.slider.get_accessible());
+        // Make the slider bin transparent for a11y
+        const sliderAccessible = this.slider.get_accessible();
+        sliderAccessible.set_parent(sliderBin.get_parent().get_accessible());
+        sliderBin.set_accessible(sliderAccessible);
         sliderBin.connect('event', (bin, event) => this.slider.event(event, false));
 
         this._menuButton = new St.Button({
@@ -696,7 +705,7 @@ const QuickSettingsLayout = GObject.registerClass({
     }
 });
 
-var QuickSettingsMenu = class extends PopupMenu.PopupMenu {
+export const QuickSettingsMenu = class extends PopupMenu.PopupMenu {
     constructor(sourceActor, nColumns = 1) {
         super(sourceActor, 0, St.Side.TOP);
 
@@ -807,7 +816,7 @@ var QuickSettingsMenu = class extends PopupMenu.PopupMenu {
     }
 };
 
-var SystemIndicator = GObject.registerClass(
+export const SystemIndicator = GObject.registerClass(
 class SystemIndicator extends St.BoxLayout {
     _init() {
         super._init({

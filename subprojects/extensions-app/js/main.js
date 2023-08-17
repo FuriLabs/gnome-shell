@@ -1,16 +1,19 @@
-/* exported main */
-imports.gi.versions.Adw = '1';
-imports.gi.versions.Gtk = '4.0';
+import Adw from 'gi://Adw?version=1';
+import GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
+import GObject from 'gi://GObject';
+import Gtk from 'gi://Gtk?version=4.0';
+import Shew from 'gi://Shew';
 
-const Gettext = imports.gettext;
+import * as Gettext from 'gettext';
 const Package = imports.package;
-const { Adw, GLib, Gio, GObject, Gtk, Shew } = imports.gi;
 
 Package.initFormat();
 
-const ExtensionUtils = imports.misc.extensionUtils;
+import * as Config from './misc/config.js';
+import * as ExtensionUtils from './misc/extensionUtils.js';
 
-const { ExtensionState, ExtensionType } = ExtensionUtils;
+import {ExtensionState, ExtensionType}  from './misc/extensionUtils.js';
 
 const GnomeShellIface = loadInterfaceXML('org.gnome.Shell.Extensions');
 const GnomeShellProxy = Gio.DBusProxy.makeProxyWrapper(GnomeShellIface);
@@ -41,7 +44,7 @@ var Application = GObject.registerClass(
 class Application extends Adw.Application {
     _init() {
         GLib.set_prgname('gnome-extensions-app');
-        super._init({ application_id: Package.name });
+        super._init({application_id: Package.name});
 
         this.connect('window-removed', (a, window) => window.run_dispose());
     }
@@ -69,7 +72,7 @@ class Application extends Adw.Application {
         this._shellProxy = new GnomeShellProxy(Gio.DBus.session,
             'org.gnome.Shell.Extensions', '/org/gnome/Shell/Extensions');
 
-        this._window = new ExtensionsWindow({ application: this });
+        this._window = new ExtensionsWindow({application: this});
     }
 });
 
@@ -88,13 +91,16 @@ var ExtensionsWindow = GObject.registerClass({
         'updatesBar',
         'updatesLabel',
     ],
-}, class ExtensionsWindow extends Gtk.ApplicationWindow {
+}, class ExtensionsWindow extends Adw.ApplicationWindow {
     _init(params) {
         super._init(params);
 
+        if (Config.PROFILE === 'development')
+            this.add_css_class('devel');
+
         this._updatesCheckId = 0;
 
-        this._exporter = new Shew.WindowExporter({ window: this });
+        this._exporter = new Shew.WindowExporter({window: this});
         this._exportedHandle = '';
 
         this.add_action_entries(
@@ -114,7 +120,7 @@ var ExtensionsWindow = GObject.registerClass({
 
         this._searchTerms = [];
         this._searchEntry.connect('search-changed', () => {
-            const { text } = this._searchEntry;
+            const {text} = this._searchEntry;
             if (text === '')
                 this._searchTerms = [];
             else
@@ -452,7 +458,7 @@ var ExtensionRow = GObject.registerClass({
     }
 
     get hasError() {
-        const { state } = this._extension;
+        const {state} = this._extension;
         return state === ExtensionState.OUT_OF_DATE ||
                state === ExtensionState.ERROR;
     }
@@ -540,9 +546,15 @@ function initEnvironment() {
     };
 }
 
-function main(argv) {
+/**
+ * Main entrypoint for the app
+ *
+ * @param {string[]} argv - command line arguments
+ * @returns {void}
+ */
+export async function main(argv) {
     initEnvironment();
     Package.initGettext();
 
-    new Application().run(argv);
+    await new Application().runAsync(argv);
 }

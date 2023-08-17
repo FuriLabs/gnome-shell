@@ -25,8 +25,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-shell master fr\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-shell/issues\n"
-"POT-Creation-Date: 2023-04-25 15:21+0000\n"
-"PO-Revision-Date: 2023-05-12 14:44+0200\n"
+"POT-Creation-Date: 2023-04-10 19:43+0000\n"
+"PO-Revision-Date: 2023-04-11 20:57+0200\n"
 "Last-Translator: Guillaume Bernard <associations@guillaume-bernard.fr>\n"
 "Language-Team: French - France <gnomefr@traduc.org>\n"
 "Language: fr\n"
@@ -848,7 +848,7 @@ msgstr "Détails de l’application"
 msgid "Quit"
 msgstr "Quitter"
 
-#: js/ui/appMenu.js:157 js/ui/dash.js:250
+#: js/ui/appMenu.js:157 js/ui/dash.js:249
 msgid "Unpin"
 msgstr "Désépingler"
 
@@ -1155,13 +1155,13 @@ msgstr "%s est maintenant connu sous le nom de %s"
 msgid "Windows"
 msgstr "Fenêtres"
 
-#: js/ui/dash.js:206 js/ui/dash.js:252
+#: js/ui/dash.js:205 js/ui/dash.js:251
 msgid "Show Apps"
 msgstr "Afficher les applications"
 
 #. Translators: this is the name of the dock/favorites area on
 #. the left of the overview
-#: js/ui/dash.js:400
+#: js/ui/dash.js:399
 msgid "Dash"
 msgstr "Dash"
 
@@ -1605,23 +1605,23 @@ msgstr "Afficher la source"
 msgid "Web Page"
 msgstr "Page web"
 
-#: js/ui/main.js:288
+#: js/ui/main.js:286
 msgid "System was put in unsafe mode"
 msgstr "Le système a été mis en mode non sécurisé"
 
-#: js/ui/main.js:289
+#: js/ui/main.js:287
 msgid "Apps now have unrestricted access"
 msgstr "Les applications ont maintenant un accès illimité"
 
-#: js/ui/main.js:290 js/ui/overview.js:58
+#: js/ui/main.js:288 js/ui/overview.js:58
 msgid "Undo"
 msgstr "Annuler"
 
-#: js/ui/main.js:346
+#: js/ui/main.js:344
 msgid "Logged in as a privileged user"
 msgstr "Connecté en tant qu’utilisateur privilégié"
 
-#: js/ui/main.js:347
+#: js/ui/main.js:345
 msgid ""
 "Running a session as a privileged user should be avoided for security "
 "reasons. If possible, you should log in as a normal user."
@@ -1630,16 +1630,16 @@ msgstr ""
 "des raisons de sécurité. Si possible, connectez-vous comme utilisateur "
 "normal."
 
-#: js/ui/main.js:395
+#: js/ui/main.js:393
 msgid "Screen Lock disabled"
 msgstr "Verrouillage d’écran désactivé"
 
-#: js/ui/main.js:396
+#: js/ui/main.js:394
 msgid "Screen Locking requires the GNOME display manager."
 msgstr ""
 "Le verrouillage de l’écran nécessite le gestionnaire d’affichage GNOME."
 
-#: js/ui/messageTray.js:1417
+#: js/ui/messageTray.js:1418
 msgid "System Information"
 msgstr "Informations du système"
 
@@ -1717,12 +1717,12 @@ msgstr "Appuyez sur une touche pour quitter"
 msgid "Activities"
 msgstr "Activités"
 
-#: js/ui/panel.js:329
+#: js/ui/panel.js:338
 msgctxt "System menu in the top bar"
 msgid "System"
 msgstr "Système"
 
-#: js/ui/panel.js:451
+#: js/ui/panel.js:460
 msgid "Top Bar"
 msgstr "Barre supérieure"
 
@@ -1852,15 +1852,15 @@ msgstr "Vous pouvez coller l’image depuis le presse-papiers."
 msgid "Screenshot taken"
 msgstr "Capture d’écran effectuée"
 
-#: js/ui/search.js:812
+#: js/ui/search.js:807
 msgid "Searching…"
 msgstr "Recherche…"
 
-#: js/ui/search.js:814
+#: js/ui/search.js:809
 msgid "No results."
 msgstr "Aucun résultat."
 
-#: js/ui/search.js:945
+#: js/ui/search.js:940
 #, javascript-format
 msgid "%d more"
 msgid_plural "%d more"
@@ -2557,12 +2557,12 @@ msgstr "Le mot de passe ne peut pas être vide"
 msgid "Authentication dialog was dismissed by the user"
 msgstr "La fenêtre d’authentification a été écartée par l’utilisateur"
 
-#: src/st/st-icon-theme.c:1884
+#: src/st/st-icon-theme.c:1883
 #, c-format
 msgid "Icon '%s' not present in theme %s"
 msgstr "L’icône « %s » n’est pas incluse dans le thème %s"
 
-#: src/st/st-icon-theme.c:3473 src/st/st-icon-theme.c:3776
+#: src/st/st-icon-theme.c:3472 src/st/st-icon-theme.c:3775
 msgid "Failed to load icon"
 msgstr "Impossible de charger l’icône"
 

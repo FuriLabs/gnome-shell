@@ -1,13 +1,14 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* exported Slider */
 
-const { Atk, Clutter, GObject } = imports.gi;
+import Atk from 'gi://Atk';
+import Clutter from 'gi://Clutter';
+import GObject from 'gi://GObject';
 
-const BarLevel = imports.ui.barLevel;
+import * as BarLevel from './barLevel.js';
 
-var SLIDER_SCROLL_STEP = 0.02; /* Slider scrolling step in % */
+const SLIDER_SCROLL_STEP = 0.02; /* Slider scrolling step in % */
 
-var Slider = GObject.registerClass({
+export const Slider = GObject.registerClass({
     Signals: {
         'drag-begin': {},
         'drag-end': {},
@@ -60,8 +61,8 @@ var Slider = GObject.registerClass({
         cr.$dispose();
     }
 
-    vfunc_button_press_event() {
-        return this.startDragging(Clutter.get_current_event());
+    vfunc_button_press_event(event) {
+        return this.startDragging(event);
     }
 
     startDragging(event) {
@@ -116,19 +117,18 @@ var Slider = GObject.registerClass({
         return Clutter.EVENT_PROPAGATE;
     }
 
-    vfunc_touch_event() {
-        let event = Clutter.get_current_event();
+    vfunc_touch_event(event) {
         let sequence = event.get_event_sequence();
 
         if (!this._dragging &&
-            event.type() == Clutter.EventType.TOUCH_BEGIN) {
+            event.type() === Clutter.EventType.TOUCH_BEGIN) {
             this.startDragging(event);
             return Clutter.EVENT_STOP;
         } else if (this._grabbedSequence &&
                    sequence.get_slot() === this._grabbedSequence.get_slot()) {
-            if (event.type() == Clutter.EventType.TOUCH_UPDATE)
+            if (event.type() === Clutter.EventType.TOUCH_UPDATE)
                 return this._motionEvent(this, event);
-            else if (event.type() == Clutter.EventType.TOUCH_END)
+            else if (event.type() === Clutter.EventType.TOUCH_END)
                 return this._endDragging();
         }
 
@@ -139,14 +139,14 @@ var Slider = GObject.registerClass({
         let direction = event.get_scroll_direction();
         let delta;
 
-        if (event.is_pointer_emulated())
+        if (event.get_flags() & Clutter.EventFlags.POINTER_EMULATED)
             return Clutter.EVENT_PROPAGATE;
 
-        if (direction == Clutter.ScrollDirection.DOWN) {
+        if (direction === Clutter.ScrollDirection.DOWN) {
             delta = -SLIDER_SCROLL_STEP;
-        } else if (direction == Clutter.ScrollDirection.UP) {
+        } else if (direction === Clutter.ScrollDirection.UP) {
             delta = SLIDER_SCROLL_STEP;
-        } else if (direction == Clutter.ScrollDirection.SMOOTH) {
+        } else if (direction === Clutter.ScrollDirection.SMOOTH) {
             let [, dy] = event.get_scroll_delta();
             // Even though the slider is horizontal, use dy to match
             // the UP/DOWN above.
@@ -158,13 +158,13 @@ var Slider = GObject.registerClass({
         return Clutter.EVENT_STOP;
     }
 
-    vfunc_scroll_event() {
-        return this.scroll(Clutter.get_current_event());
+    vfunc_scroll_event(event) {
+        return this.scroll(event);
     }
 
-    vfunc_motion_event() {
+    vfunc_motion_event(event) {
         if (this._dragging && !this._grabbedSequence)
-            return this._motionEvent(this, Clutter.get_current_event());
+            return this._motionEvent(this, event);
 
         return Clutter.EVENT_PROPAGATE;
     }
@@ -176,14 +176,14 @@ var Slider = GObject.registerClass({
         return Clutter.EVENT_STOP;
     }
 
-    vfunc_key_press_event(keyPressEvent) {
-        let key = keyPressEvent.keyval;
-        if (key == Clutter.KEY_Right || key == Clutter.KEY_Left) {
-            let delta = key == Clutter.KEY_Right ? 0.1 : -0.1;
+    vfunc_key_press_event(event) {
+        let key = event.get_key_symbol();
+        if (key === Clutter.KEY_Right || key === Clutter.KEY_Left) {
+            let delta = key === Clutter.KEY_Right ? 0.1 : -0.1;
             this.value = Math.max(0, Math.min(this._value + delta, this._maxValue));
             return Clutter.EVENT_STOP;
         }
-        return super.vfunc_key_press_event(keyPressEvent);
+        return super.vfunc_key_press_event(event);
     }
 
     _moveHandle(absX, _absY) {

@@ -147,13 +147,6 @@
 
   <schema id="org.gnome.shell.keybindings" path="/org/gnome/shell/keybindings/"
           gettext-domain="@GETTEXT_PACKAGE@">
-    <key name="open-application-menu" type="as">
-      <default>["&lt;Super&gt;F10"]</default>
-      <summary>Keybinding to open the application menu</summary>
-      <description>
-        Keybinding to open the application menu.
-      </description>
-    </key>
     <key name="shift-overview-up" type="as">
       <default>["&lt;Super&gt;&lt;Alt&gt;Up"]</default>
       <summary>Keybinding to shift between overview states</summary>
@@ -177,7 +170,7 @@
       </description>
     </key>
     <key name="toggle-overview" type="as">
-      <default>["&lt;Super&gt;s"]</default>
+      <default>[]</default>
       <summary>Keybinding to open the overview</summary>
       <description>
         Keybinding to open the Activities Overview.
@@ -188,6 +181,13 @@
       <summary>Keybinding to toggle the visibility of the notification list</summary>
       <description>
         Keybinding to toggle the visibility of the notification list.
+      </description>
+    </key>
+    <key name="toggle-quick-settings" type="as">
+      <default>["&lt;Super&gt;s"]</default>
+      <summary>Keybinding to toggle the quick settings menu</summary>
+      <description>
+        Keybinding to toggle the quick settings menu.
       </description>
     </key>
     <key name="focus-active-notification" type="as">

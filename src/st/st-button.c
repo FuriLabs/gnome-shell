@@ -181,13 +181,14 @@ st_button_release (StButton             *button,
 }
 
 static gboolean
-st_button_button_press (ClutterActor       *actor,
-                        ClutterButtonEvent *event)
+st_button_button_press (ClutterActor *actor,
+                        ClutterEvent *event)
 {
   StButton *button = ST_BUTTON (actor);
   StButtonPrivate *priv = st_button_get_instance_private (button);
-  StButtonMask mask = ST_BUTTON_MASK_FROM_BUTTON (event->button);
-  ClutterInputDevice *device = clutter_event_get_device ((ClutterEvent*) event);
+  int button_nr = clutter_event_get_button (event);
+  StButtonMask mask = ST_BUTTON_MASK_FROM_BUTTON (button_nr);
+  ClutterInputDevice *device = clutter_event_get_device (event);
 
   if (priv->press_sequence)
     return CLUTTER_EVENT_PROPAGATE;
@@ -211,13 +212,14 @@ st_button_button_press (ClutterActor       *actor,
 }
 
 static gboolean
-st_button_button_release (ClutterActor       *actor,
-                          ClutterButtonEvent *event)
+st_button_button_release (ClutterActor *actor,
+                          ClutterEvent *event)
 {
   StButton *button = ST_BUTTON (actor);
   StButtonPrivate *priv = st_button_get_instance_private (button);
-  StButtonMask mask = ST_BUTTON_MASK_FROM_BUTTON (event->button);
-  ClutterInputDevice *device = clutter_event_get_device ((ClutterEvent*) event);
+  int button_nr = clutter_event_get_button (event);
+  StButtonMask mask = ST_BUTTON_MASK_FROM_BUTTON (button_nr);
+  ClutterInputDevice *device = clutter_event_get_device (event);
 
   if (priv->button_mask & mask)
     {
@@ -225,11 +227,11 @@ st_button_button_release (ClutterActor       *actor,
       ClutterActor *target;
       gboolean is_click;
 
-      stage = clutter_event_get_stage ((ClutterEvent *) event);
-      target = clutter_stage_get_event_actor (stage, (ClutterEvent *) event);
+      stage = CLUTTER_STAGE (clutter_actor_get_stage (actor));
+      target = clutter_stage_get_event_actor (stage, event);
 
       is_click = priv->grabbed && clutter_actor_contains (actor, target);
-      st_button_release (button, device, mask, is_click ? event->button : 0, NULL);
+      st_button_release (button, device, mask, is_click ? button_nr : 0, NULL);
 
       priv->grabbed &= ~mask;
       if (priv->grab && priv->grabbed == 0)
@@ -245,36 +247,38 @@ st_button_button_release (ClutterActor       *actor,
 }
 
 static gboolean
-st_button_touch_event (ClutterActor      *actor,
-                       ClutterTouchEvent *event)
+st_button_touch_event (ClutterActor *actor,
+                       ClutterEvent *event)
 {
   StButton *button = ST_BUTTON (actor);
   StButtonPrivate *priv = st_button_get_instance_private (button);
   StButtonMask mask = ST_BUTTON_MASK_FROM_BUTTON (1);
   ClutterEventSequence *sequence;
   ClutterInputDevice *device;
+  ClutterEventType event_type;
 
   if (priv->pressed != 0)
     return CLUTTER_EVENT_PROPAGATE;
   if ((priv->button_mask & mask) == 0)
     return CLUTTER_EVENT_PROPAGATE;
 
-  device = clutter_event_get_device ((ClutterEvent*) event);
-  sequence = clutter_event_get_event_sequence ((ClutterEvent*) event);
+  device = clutter_event_get_device (event);
+  sequence = clutter_event_get_event_sequence (event);
+  event_type = clutter_event_type (event);
 
-  if (event->type == CLUTTER_TOUCH_BEGIN && !priv->grab && !priv->press_sequence)
+  if (event_type == CLUTTER_TOUCH_BEGIN && !priv->grab && !priv->press_sequence)
     {
       st_button_press (button, device, 0, sequence);
       return CLUTTER_EVENT_STOP;
     }
-  else if (event->type == CLUTTER_TOUCH_END &&
+  else if (event_type == CLUTTER_TOUCH_END &&
            priv->device == device &&
            priv->press_sequence == sequence)
     {
       st_button_release (button, device, mask, 0, sequence);
       return CLUTTER_EVENT_STOP;
     }
-  else if (event->type == CLUTTER_TOUCH_CANCEL)
+  else if (event_type == CLUTTER_TOUCH_CANCEL)
     {
       st_button_fake_release (button);
     }
@@ -283,18 +287,21 @@ st_button_touch_event (ClutterActor      *actor,
 }
 
 static gboolean
-st_button_key_press (ClutterActor    *actor,
-                     ClutterKeyEvent *event)
+st_button_key_press (ClutterActor *actor,
+                     ClutterEvent *event)
 {
   StButton *button = ST_BUTTON (actor);
   StButtonPrivate *priv = st_button_get_instance_private (button);
+  uint32_t keyval;
 
   if (priv->button_mask & ST_BUTTON_ONE)
     {
-      if (event->keyval == CLUTTER_KEY_space ||
-          event->keyval == CLUTTER_KEY_Return ||
-          event->keyval == CLUTTER_KEY_KP_Enter ||
-          event->keyval == CLUTTER_KEY_ISO_Enter)
+      keyval = clutter_event_get_key_symbol (event);
+
+      if (keyval == CLUTTER_KEY_space ||
+          keyval == CLUTTER_KEY_Return ||
+          keyval == CLUTTER_KEY_KP_Enter ||
+          keyval == CLUTTER_KEY_ISO_Enter)
         {
           st_button_press (button, NULL, ST_BUTTON_ONE, NULL);
           return TRUE;
@@ -305,18 +312,21 @@ st_button_key_press (ClutterActor    *actor,
 }
 
 static gboolean
-st_button_key_release (ClutterActor    *actor,
-                       ClutterKeyEvent *event)
+st_button_key_release (ClutterActor *actor,
+                       ClutterEvent *event)
 {
   StButton *button = ST_BUTTON (actor);
   StButtonPrivate *priv = st_button_get_instance_private (button);
+  uint32_t keyval;
 
   if (priv->button_mask & ST_BUTTON_ONE)
     {
-      if (event->keyval == CLUTTER_KEY_space ||
-          event->keyval == CLUTTER_KEY_Return ||
-          event->keyval == CLUTTER_KEY_KP_Enter ||
-          event->keyval == CLUTTER_KEY_ISO_Enter)
+      keyval = clutter_event_get_key_symbol (event);
+
+      if (keyval == CLUTTER_KEY_space ||
+          keyval == CLUTTER_KEY_Return ||
+          keyval == CLUTTER_KEY_KP_Enter ||
+          keyval == CLUTTER_KEY_ISO_Enter)
         {
           gboolean is_click;
 
@@ -344,8 +354,8 @@ st_button_key_focus_out (ClutterActor *actor)
 }
 
 static gboolean
-st_button_enter (ClutterActor         *actor,
-                 ClutterCrossingEvent *event)
+st_button_enter (ClutterActor *actor,
+                 ClutterEvent *event)
 {
   StButton *button = ST_BUTTON (actor);
   StButtonPrivate *priv = st_button_get_instance_private (button);
@@ -367,8 +377,8 @@ st_button_enter (ClutterActor         *actor,
 }
 
 static gboolean
-st_button_leave (ClutterActor         *actor,
-                 ClutterCrossingEvent *event)
+st_button_leave (ClutterActor *actor,
+                 ClutterEvent *event)
 {
   StButton *button = ST_BUTTON (actor);
   StButtonPrivate *priv = st_button_get_instance_private (button);

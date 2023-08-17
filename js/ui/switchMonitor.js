@@ -1,13 +1,15 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported SwitchMonitorPopup */
 
-const { Clutter, GObject, Meta, St } = imports.gi;
+import Clutter from 'gi://Clutter';
+import GObject from 'gi://GObject';
+import Meta from 'gi://Meta';
+import St from 'gi://St';
 
-const SwitcherPopup = imports.ui.switcherPopup;
+import * as SwitcherPopup from './switcherPopup.js';
 
-var APP_ICON_SIZE = 96;
+const APP_ICON_SIZE = 96;
 
-var SwitchMonitorPopup = GObject.registerClass(
+export const SwitchMonitorPopup = GObject.registerClass(
 class SwitchMonitorPopup extends SwitcherPopup.SwitcherPopup {
     _init() {
         let items = [];
@@ -68,11 +70,11 @@ class SwitchMonitorPopup extends SwitcherPopup.SwitcherPopup {
     }
 
     _keyPressHandler(keysym, action) {
-        if (action == Meta.KeyBindingAction.SWITCH_MONITOR)
+        if (action === Meta.KeyBindingAction.SWITCH_MONITOR)
             this._select(this._next());
-        else if (keysym == Clutter.KEY_Left)
+        else if (keysym === Clutter.KEY_Left)
             this._select(this._previous());
-        else if (keysym == Clutter.KEY_Right)
+        else if (keysym === Clutter.KEY_Right)
             this._select(this._next());
         else
             return Clutter.EVENT_PROPAGATE;
@@ -90,7 +92,7 @@ class SwitchMonitorPopup extends SwitcherPopup.SwitcherPopup {
     }
 });
 
-var SwitchMonitorSwitcher = GObject.registerClass(
+const SwitchMonitorSwitcher = GObject.registerClass(
 class SwitchMonitorSwitcher extends SwitcherPopup.SwitcherList {
     _init(items) {
         super._init(true);

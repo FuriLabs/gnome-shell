@@ -18,9 +18,9 @@ script_data.set('pkglibdir', pkglibdir)
 script_data.set('PYTHON', python.full_path())
 script_data.set('VERSION', meson.project_version())
 
-perf_tool = configure_file(
-  input: 'gnome-shell-perf-tool.in',
-  output: 'gnome-shell-perf-tool',
+test_tool = configure_file(
+  input: 'gnome-shell-test-tool.in',
+  output: 'gnome-shell-test-tool',
   configuration: script_data,
   install_dir: bindir
 )
@@ -63,7 +63,8 @@ gnome_shell_deps = [
   gi_dep,
   polkit_dep,
   gcr_dep,
-  libsystemd_dep
+  libsystemd_dep,
+  libpipewire_dep,
 ]
 
 gnome_shell_deps += nm_deps
@@ -97,6 +98,7 @@ libshell_public_headers = [
   'shell-app-system.h',
   'shell-app-usage.h',
   'shell-blur-effect.h',
+  'shell-camera-monitor.h',
   'shell-glsl-effect.h',
   'shell-global.h',
   'shell-invert-lightness-effect.h',
@@ -136,6 +138,7 @@ libshell_sources = [
   'shell-app-system.c',
   'shell-app-usage.c',
   'shell-blur-effect.c',
+  'shell-camera-monitor.c',
   'shell-global.c',
   'shell-glsl-effect.c',
   'shell-invert-lightness-effect.c',
@@ -260,7 +263,7 @@ if have_networkmanager
   )
 endif
 
-executable('gnome-shell-perf-helper', 'shell-perf-helper.c',
+executable('gnome-shell-perf-helper', 'shell-perf-helper.c', js_resources,
   dependencies: [gtk_dep, gio_dep, m_dep],
   include_directories: [conf_inc],
   install_dir: libexecdir,

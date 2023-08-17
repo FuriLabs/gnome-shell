@@ -1,13 +1,14 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported Indicator */
 
-const {Gio, GObject} = imports.gi;
+import Gio from 'gi://Gio';
+import GObject from 'gi://GObject';
 
-const {QuickMenuToggle, SystemIndicator} = imports.ui.quickSettings;
 
-const PopupMenu = imports.ui.popupMenu;
+import {QuickMenuToggle, SystemIndicator} from '../quickSettings.js';
 
-const {loadInterfaceXML} = imports.misc.fileUtils;
+import * as PopupMenu from '../popupMenu.js';
+
+import {loadInterfaceXML} from '../../misc/fileUtils.js';
 
 const BUS_NAME = 'net.hadess.PowerProfiles';
 const OBJECT_PATH = '/net/hadess/PowerProfiles';
@@ -121,7 +122,7 @@ class PowerProfilesToggle extends QuickMenuToggle {
     }
 });
 
-var Indicator = GObject.registerClass(
+export const Indicator = GObject.registerClass(
 class Indicator extends SystemIndicator {
     _init() {
         super._init();

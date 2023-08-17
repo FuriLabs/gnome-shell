@@ -1,16 +1,18 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-/* exported init connect disconnect ExtensionManager */
 
-const { GLib, Gio, GObject, Shell, St } = imports.gi;
-const Signals = imports.misc.signals;
+import GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
+import GObject from 'gi://GObject';
+import St from 'gi://St';
+import Shell from 'gi://Shell';
+import * as Signals from '../misc/signals.js';
 
-const ExtensionDownloader = imports.ui.extensionDownloader;
-const ExtensionUtils = imports.misc.extensionUtils;
-const FileUtils = imports.misc.fileUtils;
-const Main = imports.ui.main;
-const MessageTray = imports.ui.messageTray;
-
-const { ExtensionState, ExtensionType } = ExtensionUtils;
+import * as Config from '../misc/config.js';
+import * as ExtensionDownloader from './extensionDownloader.js';
+import {ExtensionState, ExtensionType} from '../misc/extensionUtils.js';
+import * as FileUtils from '../misc/fileUtils.js';
+import * as Main from './main.js';
+import * as MessageTray from './messageTray.js';
 
 const ENABLED_EXTENSIONS_KEY = 'enabled-extensions';
 const DISABLED_EXTENSIONS_KEY = 'disabled-extensions';
@@ -19,7 +21,7 @@ const EXTENSION_DISABLE_VERSION_CHECK_KEY = 'disable-extension-version-validatio
 
 const UPDATE_CHECK_TIMEOUT = 24 * 60 * 60; // 1 day in seconds
 
-var ExtensionManager = class extends Signals.EventEmitter {
+export class ExtensionManager extends Signals.EventEmitter {
     constructor() {
         super();
 
@@ -31,6 +33,9 @@ var ExtensionManager = class extends Signals.EventEmitter {
         this._enabledExtensions = [];
         this._extensionOrder = [];
         this._checkVersion = false;
+
+        St.Settings.get().connect('notify::color-scheme',
+            () => this._reloadExtensionStylesheets());
 
         Main.sessionMode.connect('updated', () => {
             this._sessionUpdated();
@@ -50,7 +55,12 @@ var ExtensionManager = class extends Signals.EventEmitter {
             log(`Failed to create file ${disableFilename}: ${e.message}`);
         }
 
+        const shutdownId = global.connect('shutdown',
+            () => disableFile.delete(null));
+
         GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 60, () => {
+            global.disconnect(shutdownId);
+
             disableFile.delete(null);
             return GLib.SOURCE_REMOVE;
         });
@@ -79,6 +89,63 @@ var ExtensionManager = class extends Signals.EventEmitter {
 
     getUuids() {
         return [...this._extensions.keys()];
+    }
+
+    _reloadExtensionStylesheets() {
+        for (const ext of this._extensions.values()) {
+            // No stylesheet, nothing to reload
+            if (!ext.stylesheet)
+                continue;
+
+            // No variants, so skip reloading
+            const path = ext.stylesheet.get_path();
+            if (!path.endsWith('-dark.css') && !path.endsWith('-light.css'))
+                continue;
+
+            try {
+                this._unloadExtensionStylesheet(ext);
+                this._loadExtensionStylesheet(ext);
+            } catch (e) {
+                this._callExtensionDisable(ext.uuid);
+                this.logExtensionError(ext.uuid, e);
+            }
+        }
+    }
+
+    _loadExtensionStylesheet(extension) {
+        if (extension.state !== ExtensionState.ENABLED &&
+            extension.state !== ExtensionState.ENABLING)
+            return;
+
+        const variant = Main.getStyleVariant();
+        const stylesheetNames = [
+            `${global.sessionMode}-${variant}.css`,
+            `stylesheet-${variant}.css`,
+            `${global.sessionMode}.css`,
+            'stylesheet.css',
+        ];
+        const theme = St.ThemeContext.get_for_stage(global.stage).get_theme();
+        for (const name of stylesheetNames) {
+            try {
+                const stylesheetFile = extension.dir.get_child(name);
+                theme.load_stylesheet(stylesheetFile);
+                extension.stylesheet = stylesheetFile;
+                break;
+            } catch (e) {
+                if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND))
+                    continue; // not an error
+                throw e;
+            }
+        }
+    }
+
+    _unloadExtensionStylesheet(extension) {
+        if (!extension.stylesheet)
+            return;
+
+        const theme = St.ThemeContext.get_for_stage(global.stage).get_theme();
+        theme.unload_stylesheet(extension.stylesheet);
+        delete extension.stylesheet;
     }
 
     _extensionSupportsSessionMode(uuid) {
@@ -134,11 +201,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
             this.logExtensionError(uuid, e);
         }
 
-        if (extension.stylesheet) {
-            let theme = St.ThemeContext.get_for_stage(global.stage).get_theme();
-            theme.unload_stylesheet(extension.stylesheet);
-            delete extension.stylesheet;
-        }
+        this._unloadExtensionStylesheet(extension);
 
         for (let i = 0; i < order.length; i++) {
             let otherUuid = order[i];
@@ -176,20 +239,11 @@ var ExtensionManager = class extends Signals.EventEmitter {
         extension.state = ExtensionState.ENABLING;
         this.emit('extension-state-changed', extension);
 
-        let stylesheetNames = [`${global.session_mode}.css`, 'stylesheet.css'];
-        let theme = St.ThemeContext.get_for_stage(global.stage).get_theme();
-        for (let i = 0; i < stylesheetNames.length; i++) {
-            try {
-                let stylesheetFile = extension.dir.get_child(stylesheetNames[i]);
-                theme.load_stylesheet(stylesheetFile);
-                extension.stylesheet = stylesheetFile;
-                break;
-            } catch (e) {
-                if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND))
-                    continue; // not an error
-                this.logExtensionError(uuid, e);
-                return;
-            }
+        try {
+            this._loadExtensionStylesheet(extension);
+        } catch (e) {
+            this.logExtensionError(uuid, e);
+            return;
         }
 
         try {
@@ -198,10 +252,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
             this._extensionOrder.push(uuid);
             this.emit('extension-state-changed', extension);
         } catch (e) {
-            if (extension.stylesheet) {
-                theme.unload_stylesheet(extension.stylesheet);
-                delete extension.stylesheet;
-            }
+            this._unloadExtensionStylesheet(extension);
             this.logExtensionError(uuid, e);
         }
     }
@@ -350,7 +401,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
                 throw new Error(`property "${prop}" is not of type ${typeName}`);
         }
 
-        if (uuid != meta.uuid)
+        if (uuid !== meta.uuid)
             throw new Error(`uuid "${meta.uuid}" from metadata.json does not match directory name "${uuid}"`);
 
         let extension = {
@@ -378,11 +429,16 @@ var ExtensionManager = class extends Signals.EventEmitter {
         return extension.metadata.version === version;
     }
 
+    _isOutOfDate(extension) {
+        const [major] = Config.PACKAGE_VERSION.split('.');
+        return !extension.metadata['shell-version'].some(v => v.startsWith(major));
+    }
+
     async loadExtension(extension) {
         // Default to error, we set success as the last step
         extension.state = ExtensionState.ERROR;
 
-        if (this._checkVersion && ExtensionUtils.isOutOfDate(extension)) {
+        if (this._checkVersion && this._isOutOfDate(extension)) {
             extension.state = ExtensionState.OUT_OF_DATE;
         } else if (!this._canLoad(extension)) {
             this.logExtensionError(extension.uuid, new Error(
@@ -408,7 +464,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
     }
 
     async unloadExtension(extension) {
-        const { uuid, type } = extension;
+        const {uuid, type} = extension;
 
         // Try to disable it -- if it's ERROR'd, we can't guarantee that,
         // but it will be removed on next reboot, and hopefully nothing
@@ -429,7 +485,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
     async reloadExtension(oldExtension) {
         // Grab the things we'll need to pass to createExtensionObject
         // to reload it.
-        let { uuid, dir, type } = oldExtension;
+        let {uuid, dir, type} = oldExtension;
 
         // Then unload the old extension.
         await this.unloadExtension(oldExtension);
@@ -452,7 +508,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
 
         let extension = this.lookup(uuid);
         if (!extension)
-            throw new Error("Extension was not properly created. Call createExtensionObject first");
+            throw new Error('Extension was not properly created. Call createExtensionObject first');
 
         let dir = extension.dir;
         let extensionJs = dir.get_child('extension.js');
@@ -464,36 +520,27 @@ var ExtensionManager = class extends Signals.EventEmitter {
         let extensionModule;
         let extensionState = null;
 
-        // TODO: This function does not have an async operation but when ESM is
-        // merged there will be a dynamic import here instead of `installImporter`.
-        await 0;
-
-        ExtensionUtils.installImporter(extension);
-
-        // Extensions can only be imported once, so add a property to avoid
-        // attempting to re-import an extension.
-        extension.isImported = true;
-
         try {
-            extensionModule = extension.imports.extension;
+            extensionModule = await import(extensionJs.get_uri());
+
+            // Extensions can only be imported once, so add a property to avoid
+            // attempting to re-import an extension.
+            extension.isImported = true;
         } catch (e) {
             this.logExtensionError(uuid, e);
             return false;
         }
 
-        if (extensionModule.init) {
-            try {
-                extensionState = await extensionModule.init(extension);
-            } catch (e) {
-                this.logExtensionError(uuid, e);
-                return false;
-            }
+        try {
+            const {metadata, path} = extension;
+            extensionState =
+                new extensionModule.default({...metadata, dir, path});
+        } catch (e) {
+            this.logExtensionError(uuid, e);
+            return false;
         }
 
-        if (!extensionState)
-            extensionState = extensionModule;
         extension.stateObj = extensionState;
-
         extension.state = ExtensionState.DISABLED;
         this.emit('extension-loaded', uuid);
         return true;
@@ -717,7 +764,7 @@ var ExtensionManager = class extends Signals.EventEmitter {
         await this._onEnabledExtensionsChanged();
         await this._enableAllExtensions();
     }
-};
+}
 
 const ExtensionUpdateSource = GObject.registerClass(
 class ExtensionUpdateSource extends MessageTray.Source {

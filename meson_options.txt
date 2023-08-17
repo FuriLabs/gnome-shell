@@ -1,3 +1,9 @@
+option('camera_monitor',
+  type: 'boolean',
+  value: true,
+  description: 'Enable the camera monitor'
+)
+
 option('extensions_tool',
   type: 'boolean',
   value: true,
@@ -38,10 +44,4 @@ option('systemd',
   type: 'boolean',
   value: true,
   description: 'Enable systemd integration'
-)
-
-option('soup2',
-  type: 'boolean',
-  value: false,
-  description: 'Use Soup 2.4 instead of Soup 3. Must be in sync with libgweather'
 )
