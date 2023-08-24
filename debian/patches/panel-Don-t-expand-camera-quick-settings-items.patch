@@ -1,0 +1,31 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Mon, 14 Aug 2023 20:39:34 +0200
+Subject: panel: Don't expand camera quick settings items
+
+The camera indicator currently doesn't have any items, but if
+we were to add one, it would almost certainly be a regular
+toggle rather than a slider that needs expanding.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2891>
+(cherry picked from commit 8619b7637de69389f3ae770c2e787fc55d81eff5)
+---
+ js/ui/panel.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/panel.js b/js/ui/panel.js
+index 6fb90ac..5900786 100644
+--- a/js/ui/panel.js
++++ b/js/ui/panel.js
+@@ -422,11 +422,11 @@ class QuickSettings extends PanelMenu.Button {
+         this._indicators.add_child(this._system);
+ 
+         this._addItems(this._system.quickSettingsItems, N_QUICK_SETTINGS_COLUMNS);
+-        this._addItems(this._camera.quickSettingsItems, N_QUICK_SETTINGS_COLUMNS);
+         this._addItems(this._volumeOutput.quickSettingsItems, N_QUICK_SETTINGS_COLUMNS);
+         this._addItems(this._volumeInput.quickSettingsItems, N_QUICK_SETTINGS_COLUMNS);
+         this._addItems(this._brightness.quickSettingsItems, N_QUICK_SETTINGS_COLUMNS);
+ 
++        this._addItems(this._camera.quickSettingsItems);
+         this._addItems(this._remoteAccess.quickSettingsItems);
+         this._addItems(this._thunderbolt.quickSettingsItems);
+         this._addItems(this._location.quickSettingsItems);

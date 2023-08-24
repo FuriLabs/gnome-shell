@@ -1,0 +1,57 @@
+From: Georges Basile Stavracas Neto <georges.stavracas@gmail.com>
+Date: Thu, 10 Aug 2023 16:59:00 -0300
+Subject: workspaceAnimation: Sync progress with main adjustment
+
+Create a derived workspaces adjustment using the new API, and
+bind it to the 'progress' property. This is only done by the
+MonitorGroup representing the primary monitor.
+
+The progress value that WorkspaceAnimation operates on
+represents the percentage within the workspaceIndices array
+we are, so make sure to transform the percentage to the
+correct workspace index.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2881>
+(cherry picked from commit f497e863fd5d117af70ad9f45a46c5e48c0f3e7e)
+---
+ js/ui/workspaceAnimation.js | 20 ++++++++++++++++++++
+ 1 file changed, 20 insertions(+)
+
+diff --git a/js/ui/workspaceAnimation.js b/js/ui/workspaceAnimation.js
+index 93be07e..5a4fe3b 100644
+--- a/js/ui/workspaceAnimation.js
++++ b/js/ui/workspaceAnimation.js
+@@ -9,6 +9,7 @@ import St from 'gi://St';
+ import * as Background from './background.js';
+ import * as Layout from './layout.js';
+ import * as SwipeTracker from './swipeTracker.js';
++import * as Util from '../misc/util.js';
+ 
+ import * as Main from './main.js';
+ 
+@@ -187,6 +188,25 @@ const MonitorGroup = GObject.registerClass({
+         }
+ 
+         this.progress = this.getWorkspaceProgress(activeWorkspace);
++
++        if (monitor.index === Main.layoutManager.primaryIndex) {
++            this._workspacesAdjustment = Main.createWorkspacesAdjustment(this);
++            this.bind_property_full('progress',
++                this._workspacesAdjustment, 'value',
++                GObject.BindingFlags.SYNC_CREATE,
++                (bind, source) => {
++                    const indices = [
++                        workspaceIndices[Math.floor(source)],
++                        workspaceIndices[Math.ceil(source)],
++                    ];
++                    return [true, Util.lerp(...indices, source % 1.0)];
++                },
++                null);
++
++            this.connect('destroy', () => {
++                delete this._workspacesAdjustment;
++            });
++        }
+     }
+ 
+     get baseDistance() {

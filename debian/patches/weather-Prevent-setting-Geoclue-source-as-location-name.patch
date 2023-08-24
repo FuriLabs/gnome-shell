@@ -1,0 +1,32 @@
+From: Brendan William <brendan.william@outlook.com>
+Date: Wed, 9 Aug 2023 10:40:35 -0700
+Subject: weather: Prevent setting Geoclue source as location name
+
+Prior to Geoclue v2.7, the location description did not seem to ever be
+set. Now, the source used to determine the location is set as the
+description. This can result in the location name in dateMenu to be set
+as "WiFi", "GeoIP", etc., since we relay the description as the location
+name to GWeather. Instead, pass an empty string so GWeather continues
+to set the location name itself.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2729>
+(cherry picked from commit ae86b58d59bb80e6d104debae7c34a890563c321)
+---
+ js/misc/weather.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/js/misc/weather.js b/js/misc/weather.js
+index aba5fd5..11fcdff 100644
+--- a/js/misc/weather.js
++++ b/js/misc/weather.js
+@@ -270,8 +270,8 @@ export class WeatherClient extends Signals.EventEmitter {
+ 
+     _onGClueLocationChanged() {
+         let geoLocation = this._gclueService.location;
+-        let location = GWeather.Location.new_detached(
+-            geoLocation.description,
++        // Provide empty name so GWeather sets location name
++        const location = GWeather.Location.new_detached('',
+             null,
+             geoLocation.latitude,
+             geoLocation.longitude);

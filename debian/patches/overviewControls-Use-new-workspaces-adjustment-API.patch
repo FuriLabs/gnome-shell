@@ -1,0 +1,65 @@
+From: Georges Basile Stavracas Neto <georges.stavracas@gmail.com>
+Date: Thu, 10 Aug 2023 16:56:01 -0300
+Subject: overviewControls: Use new workspaces adjustment API
+
+Derive the workspaces adjustment used by OverviewControls (and
+shared with WorkspacesView) from the main workspaces adjustment
+using the new Main.createWorkspacesAdjustment() method.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2881>
+(cherry picked from commit 13f4c781d53e8affdb6bc06e0af1150372e5f53a)
+---
+ js/ui/overviewControls.js | 29 +----------------------------
+ 1 file changed, 1 insertion(+), 28 deletions(-)
+
+diff --git a/js/ui/overviewControls.js b/js/ui/overviewControls.js
+index ac59794..f5ef433 100644
+--- a/js/ui/overviewControls.js
++++ b/js/ui/overviewControls.js
+@@ -345,25 +345,11 @@ class ControlsManager extends St.Widget {
+ 
+         this.dash = new Dash.Dash();
+ 
+-        let workspaceManager = global.workspace_manager;
+-        let activeWorkspaceIndex = workspaceManager.get_active_workspace_index();
+-
+-        this._workspaceAdjustment = new St.Adjustment({
+-            actor: this,
+-            value: activeWorkspaceIndex,
+-            lower: 0,
+-            page_increment: 1,
+-            page_size: 1,
+-            step_increment: 0,
+-            upper: workspaceManager.n_workspaces,
+-        });
++        this._workspaceAdjustment = Main.createWorkspacesAdjustment(this);
+ 
+         this._stateAdjustment = new OverviewAdjustment(this);
+         this._stateAdjustment.connect('notify::value', this._update.bind(this));
+ 
+-        workspaceManager.connectObject(
+-            'notify::n-workspaces', () => this._updateAdjustment(), this);
+-
+         this._searchController = new SearchController.SearchController(
+             this._searchEntry,
+             this.dash.showAppsButton);
+@@ -708,19 +694,6 @@ class ControlsManager extends St.Widget {
+         }
+     }
+ 
+-    _updateAdjustment() {
+-        let workspaceManager = global.workspace_manager;
+-        let newNumWorkspaces = workspaceManager.n_workspaces;
+-        let activeIndex = workspaceManager.get_active_workspace_index();
+-
+-        this._workspaceAdjustment.upper = newNumWorkspaces;
+-
+-        // A workspace might have been inserted or removed before the active
+-        // one, causing the adjustment to go out of sync, so update the value
+-        this._workspaceAdjustment.remove_transition('value');
+-        this._workspaceAdjustment.value = activeIndex;
+-    }
+-
+     vfunc_unmap() {
+         super.vfunc_unmap();
+         this._workspacesDisplay?.hide();

@@ -1,0 +1,26 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Tue, 15 Aug 2023 02:06:28 +0200
+Subject: ci: Bump mutter image
+
+The mutter image has been rebased to F39, start using it here
+as well.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2892>
+(cherry picked from commit 7823216524eca3ce7c9a5da2e1f0df58ad1b6eac)
+---
+ .gitlab-ci.yml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/.gitlab-ci.yml b/.gitlab-ci.yml
+index b00ad77..ab71c46 100644
+--- a/.gitlab-ci.yml
++++ b/.gitlab-ci.yml
+@@ -26,7 +26,7 @@ default:
+       - 'api_failure'
+ 
+ variables:
+-  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/38:x86_64-2023-08-01.0
++  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/39:x86_64-2023-08-14.1
+   FDO_UPSTREAM_REPO: GNOME/gnome-shell
+   BUNDLE: "extensions-git.flatpak"
+   LINT_LOG: "eslint-report.xml"

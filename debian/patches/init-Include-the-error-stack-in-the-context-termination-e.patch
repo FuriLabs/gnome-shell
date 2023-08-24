@@ -12,7 +12,8 @@ Since this information is provided, pass it as the error message.
 Do not log this directly from JS so that we just use one termination
 path.
 
-Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2899
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2899>
+(cherry picked from commit 49464e3c7ab88f07d12d8f544251acd21ecf6551)
 ---
  js/ui/init.js | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)

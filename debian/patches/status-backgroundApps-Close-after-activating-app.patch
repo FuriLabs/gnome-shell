@@ -1,0 +1,32 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Fri, 11 Aug 2023 11:59:43 +0200
+Subject: status/backgroundApps: Close after activating app
+
+We should leave the overview and close quick settings, like we
+do elsewhere when launching something.
+
+https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6895
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2884>
+(cherry picked from commit 05f5532c7deac890dc7bdfaa80e4bc8d83a28457)
+---
+ js/ui/status/backgroundApps.js | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/js/ui/status/backgroundApps.js b/js/ui/status/backgroundApps.js
+index ad7ea7d..d6f2e49 100644
+--- a/js/ui/status/backgroundApps.js
++++ b/js/ui/status/backgroundApps.js
+@@ -95,7 +95,11 @@ const BackgroundAppMenuItem = GObject.registerClass({
+ 
+         closeButton.connect('clicked', () => this._quitApp().catch(logError));
+ 
+-        this.connect('activate', () => this.app.activate());
++        this.connect('activate', () => {
++            Main.overview.hide();
++            Main.panel.closeQuickSettings();
++            this.app.activate();
++        });
+ 
+         this.connect('destroy', () => this._onDestroy());
+     }

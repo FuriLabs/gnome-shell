@@ -1,0 +1,156 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Mon, 14 Aug 2023 17:51:35 +0200
+Subject: extensions-tool: Add quick settings template
+
+Extending quick settings has become popular enough to justify a
+template.
+
+Add a small indicator+quick-item example that exercises the
+previously added API.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2894>
+(cherry picked from commit aaa9cb88b92bd2db1f361b3311aa24719b1dbe74)
+---
+ po/POTFILES.in                                     |  1 +
+ po/POTFILES.skip                                   |  1 +
+ .../src/gnome-extensions-tool.gresource.xml        |  3 ++
+ .../extensions-tool/src/templates/meson.build      |  1 +
+ .../src/templates/quick-settings.desktop.in        |  5 ++
+ .../src/templates/quick-settings/extension.js      | 62 ++++++++++++++++++++++
+ .../src/templates/quick-settings/stylesheet.css    |  1 +
+ 7 files changed, 74 insertions(+)
+ create mode 100644 subprojects/extensions-tool/src/templates/quick-settings.desktop.in
+ create mode 100644 subprojects/extensions-tool/src/templates/quick-settings/extension.js
+ create mode 100644 subprojects/extensions-tool/src/templates/quick-settings/stylesheet.css
+
+diff --git a/po/POTFILES.in b/po/POTFILES.in
+index 74a5212..93ad531 100644
+--- a/po/POTFILES.in
++++ b/po/POTFILES.in
+@@ -107,5 +107,6 @@ subprojects/extensions-tool/src/command-uninstall.c
+ subprojects/extensions-tool/src/main.c
+ subprojects/extensions-tool/src/templates/00-plain.desktop.in
+ subprojects/extensions-tool/src/templates/indicator.desktop.in
++subprojects/extensions-tool/src/templates/quick-settings.desktop.in
+ # Please do not remove this file from POTFILES.in. Run "git submodule init && git submodule update" to get it.
+ subprojects/gvc/gvc-mixer-control.c
+diff --git a/po/POTFILES.skip b/po/POTFILES.skip
+index 0c8451d..36fe39b 100644
+--- a/po/POTFILES.skip
++++ b/po/POTFILES.skip
+@@ -2,3 +2,4 @@ data/org.gnome.Shell@wayland.service.in
+ data/org.gnome.Shell@x11.service.in
+ js/ui/init.js
+ subprojects/extensions-tool/src/templates/indicator/extension.js
++subprojects/extensions-tool/src/templates/quick-settings/extension.js
+diff --git a/subprojects/extensions-tool/src/gnome-extensions-tool.gresource.xml b/subprojects/extensions-tool/src/gnome-extensions-tool.gresource.xml
+index 0db87c3..4a64c61 100644
+--- a/subprojects/extensions-tool/src/gnome-extensions-tool.gresource.xml
++++ b/subprojects/extensions-tool/src/gnome-extensions-tool.gresource.xml
+@@ -7,5 +7,8 @@
+     <file>templates/indicator/stylesheet.css</file>
+     <file>templates/plain/extension.js</file>
+     <file>templates/plain/stylesheet.css</file>
++    <file>templates/quick-settings.desktop</file>
++    <file>templates/quick-settings/extension.js</file>
++    <file>templates/quick-settings/stylesheet.css</file>
+   </gresource>
+ </gresources>
+diff --git a/subprojects/extensions-tool/src/templates/meson.build b/subprojects/extensions-tool/src/templates/meson.build
+index d693bfa..8c0079e 100644
+--- a/subprojects/extensions-tool/src/templates/meson.build
++++ b/subprojects/extensions-tool/src/templates/meson.build
+@@ -1,6 +1,7 @@
+ template_metas = [
+   '00-plain.desktop',
+   'indicator.desktop',
++  'quick-settings.desktop',
+ ]
+ template_deps = []
+ foreach template : template_metas
+diff --git a/subprojects/extensions-tool/src/templates/quick-settings.desktop.in b/subprojects/extensions-tool/src/templates/quick-settings.desktop.in
+new file mode 100644
+index 0000000..e2fc3d8
+--- /dev/null
++++ b/subprojects/extensions-tool/src/templates/quick-settings.desktop.in
+@@ -0,0 +1,5 @@
++[Desktop Entry]
++Type=Application
++Name=Quick Settings Item
++Comment=Add an item to quick settings
++Path=quick-settings
+diff --git a/subprojects/extensions-tool/src/templates/quick-settings/extension.js b/subprojects/extensions-tool/src/templates/quick-settings/extension.js
+new file mode 100644
+index 0000000..a3faf65
+--- /dev/null
++++ b/subprojects/extensions-tool/src/templates/quick-settings/extension.js
+@@ -0,0 +1,62 @@
++/* extension.js
++ *
++ * This program is free software: you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation, either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
++ *
++ * SPDX-License-Identifier: GPL-2.0-or-later
++ */
++import GObject from 'gi://GObject';
++
++import * as Main from 'resource:///org/gnome/shell/ui/main.js';
++
++import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
++import {QuickToggle, SystemIndicator} from 'resource:///org/gnome/shell/ui/quickSettings.js';
++
++const ExampleToggle = GObject.registerClass(
++class ExampleToggle extends QuickToggle {
++    constructor() {
++        super({
++            title: _('Smile'),
++            iconName: 'face-smile-symbolic',
++            toggleMode: true,
++        });
++    }
++});
++
++const ExampleIndicator = GObject.registerClass(
++class ExampleIndicator extends SystemIndicator {
++    constructor() {
++        super();
++
++        this._indicator = this._addIndicator();
++        this._indicator.iconName = 'face-smile-symbolic';
++
++        const toggle = new ExampleToggle();
++        toggle.bind_property('checked',
++            this._indicator, 'visible',
++            GObject.BindingFlags.SYNC_CREATE);
++        this.quickSettingsItems.push(toggle);
++    }
++});
++
++export default class QuickSettingsExampleExtension extends Extension {
++    enable() {
++        this._indicator = new ExampleIndicator();
++        Main.panel.statusArea.quickSettings.addExternalIndicator(this._indicator);
++    }
++
++    disable() {
++        this._indicator.quickSettingsItems.forEach(item => item.destroy());
++        this._indicator.destroy();
++    }
++}
+diff --git a/subprojects/extensions-tool/src/templates/quick-settings/stylesheet.css b/subprojects/extensions-tool/src/templates/quick-settings/stylesheet.css
+new file mode 100644
+index 0000000..37b93f2
+--- /dev/null
++++ b/subprojects/extensions-tool/src/templates/quick-settings/stylesheet.css
+@@ -0,0 +1 @@
++/* Add your custom extension styling here */

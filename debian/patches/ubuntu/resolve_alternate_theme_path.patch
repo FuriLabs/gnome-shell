@@ -15,10 +15,10 @@ Forwarded: Not-needed (upstream doesn't support officially theming)
  1 file changed, 10 insertions(+), 2 deletions(-)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 2be6f4f..6eb5565 100644
+index b3fff22..8c0664a 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
-@@ -383,6 +383,14 @@ async function _handleLockScreenWarning() {
+@@ -385,6 +385,14 @@ async function _handleLockScreenWarning() {
      }
  }
  
@@ -33,7 +33,7 @@ index 2be6f4f..6eb5565 100644
  function _getStylesheet(name) {
      let stylesheet;
  
-@@ -393,12 +401,12 @@ function _getStylesheet(name) {
+@@ -395,12 +403,12 @@ function _getStylesheet(name) {
      let dataDirs = GLib.get_system_data_dirs();
      for (let i = 0; i < dataDirs.length; i++) {
          let path = GLib.build_filenamev([dataDirs[i], 'gnome-shell', 'theme', name]);
