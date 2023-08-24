@@ -88,7 +88,7 @@ index 6b67e2d..032c5a2 100644
  }
  
 +function _getYaruStyleSheet(themeVariant) {
-+    const styleVariant = getStyleVariant();
++    const styleVariant = getStyleVariant() || 'light';
 +    const baseThemeName = sessionMode.stylesheetName.split(".css").at(0);
 +    const isDark = themeVariant === 'dark' || themeVariant?.endsWith('-dark');
 +    let colorSchemeVariant;
