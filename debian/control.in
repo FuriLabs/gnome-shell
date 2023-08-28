@@ -157,7 +157,7 @@ Description: graphical shell for the GNOME desktop
 Package: gnome-shell-common
 Architecture: all
 Depends: ${misc:Depends}
-Recommends: yaru-theme-gnome-shell (>= 22.10.1~)
+Recommends: yaru-theme-gnome-shell (>= 23.10.0~)
 Breaks: gnome-shell (<< 3.36.1-6~)
 Replaces: gnome-shell (<< 3.36.1-6~)
 Description: common files for the GNOME graphical shell
