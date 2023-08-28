@@ -1,3 +1,16 @@
+gnome-shell (45~beta.1-0ubuntu2) UNRELEASED; urgency=medium
+
+  [ Jeremy Bícha ]
+  * Don't Build-Depend on gtk3
+  * debian/control.in: Depend on gir1.2-webkit-6.0 instead of 4.1
+
+  [ Marco Trevisan (Treviño) ]
+  * debian/ubuntu.json: Prefer light color scheme
+  * debian/patches: Cherry-pick patches from upstream main branch
+  * debian/control: Recommends more recent version of yaru theme
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 28 Aug 2023 23:39:51 +0200
+
 gnome-shell (45~beta.1-0ubuntu1) mantic; urgency=medium
 
   [ Jeremy Bícha ]
