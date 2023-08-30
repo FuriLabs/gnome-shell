@@ -13,8 +13,8 @@ Origin: ubuntu
  data/com.ubuntu.login-screen.gschema.xml.in | 70 +++++++++++++++++++++++++++++
  data/meson.build                            |  8 +++-
  js/ui/background.js                         |  4 ++
- js/ui/screenShield.js                       | 37 +++++++++++++++
- 4 files changed, 118 insertions(+), 1 deletion(-)
+ js/ui/screenShield.js                       | 42 +++++++++++++++++
+ 4 files changed, 123 insertions(+), 1 deletion(-)
  create mode 100644 data/com.ubuntu.login-screen.gschema.xml.in
 
 diff --git a/data/com.ubuntu.login-screen.gschema.xml.in b/data/com.ubuntu.login-screen.gschema.xml.in
@@ -136,7 +136,7 @@ index cef7c87..0da99da 100644
                  backgroundColor = dummyBgActor.get_theme_node().get_background_color();
                  dummyBgActor.destroy();
 diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js
-index 993e436..d77da0d 100644
+index 993e436..c27f44b 100644
 --- a/js/ui/screenShield.js
 +++ b/js/ui/screenShield.js
 @@ -33,6 +33,12 @@ const DISABLE_LOCK_KEY = 'disable-lock-screen';
@@ -156,7 +156,7 @@ index 993e436..d77da0d 100644
          this._lockSettings = new Gio.Settings({schema_id: LOCKDOWN_SCHEMA});
          this._lockSettings.connect(`changed::${DISABLE_LOCK_KEY}`, this._syncInhibitor.bind(this));
  
-+        this._loginScreenSettings = new Gio.Settings({ schema_id: LOGIN_SCREEN_SCHEMA });
++        this._loginScreenSettings = new Gio.Settings({schema_id: LOGIN_SCREEN_SCHEMA});
 +        [
 +            LOGIN_SCREEN_BACKGROUND_COLOR_KEY,
 +            LOGIN_SCREEN_BACKGROUND_PICTURE_URI_KEY,
@@ -169,7 +169,7 @@ index 993e436..d77da0d 100644
          this._isModal = false;
          this._isGreeter = false;
          this._isActive = false;
-@@ -216,6 +232,27 @@ export class ScreenShield extends Signals.EventEmitter {
+@@ -216,6 +232,31 @@ export class ScreenShield extends Signals.EventEmitter {
          return this._isModal;
      }
  
@@ -182,7 +182,7 @@ index 993e436..d77da0d 100644
 +        const backgroundRepeat = getSetting(LOGIN_SCREEN_BACKGROUND_REPEAT_KEY);
 +        const backgroundSize = getSetting(LOGIN_SCREEN_BACKGROUND_SIZE_KEY);
 +
-+        if (backgroundColor)
++        if (backgroundColor && !backgroundColor.includes('rgba'))
 +            inlineStyle.push(`background-color: ${backgroundColor}`);
 +        if (backgroundPictureUri)
 +            inlineStyle.push(`background-image: url("${backgroundPictureUri}")`);
@@ -191,9 +191,21 @@ index 993e436..d77da0d 100644
 +        if (backgroundSize !== 'default')
 +            inlineStyle.push(`background-size: ${backgroundSize}`);
 +
-+        this._lockDialogGroup.set_style(inlineStyle.join('; '));
++        const lockDialogGroupStyle = inlineStyle.join('; ') || null;
++        this._lockDialogGroup.set_style(lockDialogGroupStyle);
++        this._dialog?.set_style(lockDialogGroupStyle ? `
++            background-image: none;
++            background-color: transparent;` : null);
 +    }
 +
      async _syncInhibitor() {
          const lockEnabled = this._settings.get_boolean(LOCK_ENABLED_KEY) ||
                              this._settings.get_boolean(SUSPEND_LOCK_ENABLED_KEY);
+@@ -433,6 +474,7 @@ export class ScreenShield extends Signals.EventEmitter {
+             }
+ 
+             this._dialog = new constructor(this._lockDialogGroup);
++            this._refreshBackground();
+ 
+             let time = global.get_current_time();
+             if (!this._dialog.open(time)) {
