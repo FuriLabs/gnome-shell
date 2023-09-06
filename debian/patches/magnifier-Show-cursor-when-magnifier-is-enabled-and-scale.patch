@@ -24,7 +24,7 @@ index 5611dad..784de71 100644
      }
  
 +    _findIndexForRect(x, y, width, height) {
-+        let rect = new Meta.Rectangle({
++        const rect = new Meta.Rectangle({
 +            x: Math.floor(x),
 +            y: Math.floor(y),
 +            width: Math.ceil(x + width) - Math.floor(x),
@@ -38,7 +38,7 @@ index 5611dad..784de71 100644
      findIndexForActor(actor) {
          let [x, y] = actor.get_transformed_position();
          let [w, h] = actor.get_transformed_size();
--        let rect = new Meta.Rectangle({x, y, width: w, height: h});
+-        const rect = new Mtk.Rectangle({x, y, width: w, height: h});
 -        return global.display.get_monitor_index_for_rect(rect);
 +        return this._findIndexForRect(x, y, w, h);
      }

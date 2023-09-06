@@ -16,7 +16,7 @@ index 971c630..4b672b6 100644
 +++ b/js/misc/util.js
 @@ -119,6 +119,20 @@ export function spawnApp(argv) {
   */
- function trySpawn(argv) {
+ export function trySpawn(argv) {
      let success_, pid;
 +    let path = argv[0];
 +
