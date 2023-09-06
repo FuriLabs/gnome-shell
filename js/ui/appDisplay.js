@@ -71,10 +71,10 @@ const DEFAULT_FOLDERS = {
             'org.gnome.DejaDup.desktop',
             'org.gnome.Dictionary.desktop',
             'org.gnome.DiskUtility.desktop',
-            'org.gnome.eog.desktop',
             'org.gnome.Evince.desktop',
             'org.gnome.FileRoller.desktop',
             'org.gnome.fonts.desktop',
+            'org.gnome.Loupe.desktop',
             'org.gnome.seahorse.Application.desktop',
             'org.gnome.tweaks.desktop',
             'org.gnome.Usage.desktop',
@@ -84,6 +84,10 @@ const DEFAULT_FOLDERS = {
     'YaST': {
         name: 'suse-yast.directory',
         categories: ['X-SuSE-YaST'],
+    },
+    'Pardus': {
+        name: 'X-Pardus-Apps.directory',
+        categories: ['X-Pardus-Apps'],
     },
 };
 

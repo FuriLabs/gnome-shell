@@ -135,6 +135,8 @@ create_metadata (GFile       *target_dir,
                  const char  *uuid,
                  const char  *name,
                  const char  *description,
+                 const char  *gettext_domain,
+                 const char  *settings_schema,
                  GError     **error)
 {
   g_autofree char *uuid_escaped = NULL;
@@ -157,6 +159,13 @@ create_metadata (GFile       *target_dir,
   g_string_append_printf (json, "  \"name\": \"%s\",\n", name_escaped);
   g_string_append_printf (json, "  \"description\": \"%s\",\n", desc_escaped);
   g_string_append_printf (json, "  \"uuid\": \"%s\",\n", uuid_escaped);
+
+  if (gettext_domain)
+    g_string_append_printf (json, "  \"gettext-domain\": \"%s\",\n", gettext_domain);
+
+  if (settings_schema)
+    g_string_append_printf (json, "  \"settings-schema\": \"%s\",\n", settings_schema);
+
   g_string_append_printf (json, "  \"shell-version\": [\n");
   g_string_append_printf (json, "    \"%s\"\n", version);
   g_string_append_printf (json, "  ]\n}\n");
@@ -173,6 +182,42 @@ create_metadata (GFile       *target_dir,
                                   error);
 }
 
+static gboolean
+create_settings_schema (GFile       *target_dir,
+                        const char  *settings_schema,
+                        GError     **error)
+{
+  g_autoptr (GFile) schema_dir = NULL;
+  g_autoptr (GFile) schema = NULL;
+  g_autofree char *schema_filename = NULL;
+  g_autofree char *schema_path = NULL;
+  g_autofree char *xml = NULL;
+
+  schema_dir = g_file_get_child (target_dir, "schemas");
+  if (!g_file_make_directory (schema_dir, NULL, error))
+    return FALSE;
+
+  schema_filename = g_strdup_printf ("%s.gschema.xml", settings_schema);
+  schema = g_file_get_child (schema_dir, schema_filename);
+
+  schema_path = g_strconcat ("/", settings_schema, "/", NULL);
+  g_strdelimit (schema_path, ".", '/');
+
+  xml = g_strdup_printf ("<schemalist>\n"
+                         "  <schema id=\"%s\" path=\"%s\">\n"
+                         "  </schema>\n"
+                         "</schemalist>\n", settings_schema, schema_path);
+
+  return g_file_replace_contents (schema,
+                                  xml,
+                                  strlen (xml),
+                                  NULL,
+                                  FALSE,
+                                  0,
+                                  NULL,
+                                  NULL,
+                                  error);
+}
 
 static gboolean
 copy_extension_template (const char *template, GFile *target_dir, GError **error)
@@ -209,6 +254,23 @@ copy_extension_template (const char *template, GFile *target_dir, GError **error
 }
 
 static gboolean
+copy_prefs_template (GFile *target_dir, GError **error)
+{
+  g_autoptr (GFile) target = NULL;
+  g_autoptr (GFile) source = NULL;
+  g_autofree char *uri = NULL;
+
+  uri = g_strdup ("resource://" TEMPLATES_PATH "/prefs.js");
+  source = g_file_new_for_uri (uri);
+  target = g_file_get_child (target_dir, "prefs.js");
+
+  if (!g_file_copy (source, target, G_FILE_COPY_TARGET_DEFAULT_PERMS, NULL, NULL, NULL, error))
+    return FALSE;
+
+  return TRUE;
+}
+
+static gboolean
 launch_extension_source (GFile *dir, GError **error)
 {
   g_autoptr (GFile) main_source = NULL;
@@ -232,7 +294,13 @@ launch_extension_source (GFile *dir, GError **error)
 }
 
 static gboolean
-create_extension (const char *uuid, const char *name, const char *description, const char *template)
+create_extension (const char *uuid,
+                  const char *name,
+                  const char *description,
+                  const char *gettext_domain,
+                  const char *settings_schema,
+                  const char *template,
+                  gboolean    prefs)
 {
   g_autoptr (GFile) dir = NULL;
   g_autoptr (GError) error = NULL;
@@ -252,13 +320,25 @@ create_extension (const char *uuid, const char *name, const char *description, c
       return FALSE;
     }
 
-  if (!create_metadata (dir, uuid, name, description, &error))
+  if (!create_metadata (dir, uuid, name, description, gettext_domain, settings_schema, &error))
+    {
+      g_printerr ("%s\n", error->message);
+      return FALSE;
+    }
+
+  if (settings_schema && !create_settings_schema (dir, settings_schema, &error))
     {
       g_printerr ("%s\n", error->message);
       return FALSE;
     }
 
   if (!copy_extension_template (template, dir, &error))
+    {
+      g_printerr ("%s\n", error->message);
+      return FALSE;
+    }
+
+  if (prefs && !copy_prefs_template (dir, &error))
     {
       g_printerr ("%s\n", error->message);
       return FALSE;
@@ -422,7 +502,10 @@ handle_create (int argc, char *argv[], gboolean do_help)
   g_autofree char *name = NULL;
   g_autofree char *description = NULL;
   g_autofree char *uuid = NULL;
+  g_autofree char *gettext_domain = NULL;
+  g_autofree char *settings_schema = NULL;
   g_autofree char *template = NULL;
+  gboolean prefs = FALSE;
   gboolean interactive = FALSE;
   gboolean list_templates = FALSE;
   GOptionEntry entries[] = {
@@ -438,10 +521,21 @@ handle_create (int argc, char *argv[], gboolean do_help)
       .arg_description = _("DESCRIPTION"),
       .arg = G_OPTION_ARG_STRING, .arg_data = &description,
       .description = _("A short description of what the extension does") },
+    { .long_name = "gettext-domain",
+      .arg_description = _("DOMAIN"),
+      .arg = G_OPTION_ARG_STRING, .arg_data = &gettext_domain,
+      .description = _("The gettext domain used by the extension") },
+    { .long_name = "settings-schema",
+      .arg_description = _("SCHEMA"),
+      .arg = G_OPTION_ARG_STRING, .arg_data = &settings_schema,
+      .description = _("The GSettings schema used by the extension") },
     { .long_name = "template",
       .arg = G_OPTION_ARG_STRING, .arg_data = &template,
       .arg_description = _("TEMPLATE"),
       .description = _("The template to use for the new extension") },
+    { .long_name = "prefs",
+      .arg = G_OPTION_ARG_NONE, .arg_data = &prefs,
+      .description = _("Include prefs.js template") },
     { .long_name = "list-templates",
       .arg = G_OPTION_ARG_NONE, .arg_data = &list_templates,
       .flags = G_OPTION_FLAG_HIDDEN },
@@ -502,5 +596,5 @@ handle_create (int argc, char *argv[], gboolean do_help)
       return 1;
     }
 
-  return create_extension (uuid, name, description, template) ? 0 : 2;
+  return create_extension (uuid, name, description, gettext_domain, settings_schema, template, prefs) ? 0 : 2;
 }

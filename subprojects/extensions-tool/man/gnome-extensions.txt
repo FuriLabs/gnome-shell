@@ -128,8 +128,17 @@ Creates a new extension from a template.
   *--uuid*='UUID':::
     Set the unique extension ID in the metadata to 'UUID'
 
+  *--gettext-domain*='DOMAIN':::
+    Set the gettext domain used by the extension
+
+  *--settings-schema*='SCHEMA':::
+    Set the GSettings schema used by the extension
+
   *--template*='TEMPLATE':::
     Use 'TEMPLATE' as base for the new extension
+
+  *--prefs*:::
+    Include a prefs.js template
 
   *-i*:::
   *--interactive*:::

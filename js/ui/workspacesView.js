@@ -4,6 +4,7 @@ import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GObject from 'gi://GObject';
 import Meta from 'gi://Meta';
+import Mtk from 'gi://Mtk';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 
@@ -14,7 +15,7 @@ import * as OverviewControls from './overviewControls.js';
 import * as SwipeTracker from './swipeTracker.js';
 import * as Util from '../misc/util.js';
 import * as Workspace from './workspace.js';
-import {ThumbnailsBox, MAX_THUMBNAIL_SCALE} from './workspaceThumbnail.js';
+import {ThumbnailsBox} from './workspaceThumbnail.js';
 
 const WORKSPACE_SWITCH_TIME = 250;
 
@@ -331,7 +332,7 @@ class WorkspacesView extends WorkspacesViewBase {
     vfunc_allocate(box) {
         this.set_allocation(box);
 
-        if (this.get_n_children() === 0)
+        if (this._workspaces.length === 0)
             return;
 
         const vertical = global.workspaceManager.layout_rows === -1;
@@ -650,7 +651,7 @@ class SecondaryMonitorDisplay extends St.Widget {
         const [thumbnailsHeight] = this._thumbnails.get_preferred_height(width);
         return Math.min(
             thumbnailsHeight * expandFraction,
-            height * MAX_THUMBNAIL_SCALE);
+            height * this._thumbnails.maxThumbnailScale);
     }
 
     _getWorkspacesBoxForState(state, box, padding, thumbnailsHeight, spacing) {
@@ -1052,7 +1053,7 @@ class WorkspacesDisplay extends St.Widget {
 
     _getMonitorIndexForEvent(event) {
         let [x, y] = event.get_coords();
-        let rect = new Meta.Rectangle({x, y, width: 1, height: 1});
+        const rect = new Mtk.Rectangle({x, y, width: 1, height: 1});
         return global.display.get_monitor_index_for_rect(rect);
     }
 

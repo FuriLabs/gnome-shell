@@ -95,7 +95,11 @@ const BackgroundAppMenuItem = GObject.registerClass({
 
         closeButton.connect('clicked', () => this._quitApp().catch(logError));
 
-        this.connect('activate', () => this.app.activate());
+        this.connect('activate', () => {
+            Main.overview.hide();
+            Main.panel.closeQuickSettings();
+            this.app.activate();
+        });
 
         this.connect('destroy', () => this._onDestroy());
     }
@@ -222,6 +226,7 @@ class BackgroundAppsToggle extends QuickToggle {
 
                 return {app, message};
             })
+            .filter(item => !!item.app)
             .sort((a, b) => {
                 return a.app.get_name().localeCompare(b.app.get_name());
             })

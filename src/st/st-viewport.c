@@ -370,10 +370,10 @@ st_viewport_apply_transform (ClutterActor      *actor,
   graphene_point3d_t p = GRAPHENE_POINT3D_INIT_ZERO;
 
   if (priv->hadjustment)
-    p.x = -get_hadjustment_value (viewport);
+    p.x = -(int)get_hadjustment_value (viewport);
 
   if (priv->vadjustment)
-    p.y = -st_adjustment_get_value (priv->vadjustment);
+    p.y = -(int)st_adjustment_get_value (priv->vadjustment);
 
   graphene_matrix_translate (matrix, &p);
 
@@ -384,8 +384,8 @@ st_viewport_apply_transform (ClutterActor      *actor,
  * up or the background and borders will be drawn in the wrong place */
 static void
 get_border_paint_offsets (StViewport *viewport,
-                          double     *x,
-                          double     *y)
+                          int        *x,
+                          int        *y)
 {
   StViewportPrivate *priv = st_viewport_get_instance_private (viewport);
 
@@ -408,7 +408,7 @@ st_viewport_paint (ClutterActor        *actor,
   StViewport *viewport = ST_VIEWPORT (actor);
   StViewportPrivate *priv = st_viewport_get_instance_private (viewport);
   StThemeNode *theme_node = st_widget_get_theme_node (ST_WIDGET (actor));
-  double x, y;
+  int x, y;
   ClutterActorBox allocation_box;
   ClutterActorBox content_box;
   ClutterActor *child;
@@ -418,7 +418,7 @@ st_viewport_paint (ClutterActor        *actor,
   if (x != 0 || y != 0)
     {
       cogl_framebuffer_push_matrix (fb);
-      cogl_framebuffer_translate (fb, (int)x, (int)y, 0);
+      cogl_framebuffer_translate (fb, x, y, 0);
     }
 
   st_widget_paint_background (ST_WIDGET (actor), paint_context);
@@ -465,7 +465,7 @@ st_viewport_pick (ClutterActor       *actor,
   StViewport *viewport = ST_VIEWPORT (actor);
   StViewportPrivate *priv = st_viewport_get_instance_private (viewport);
   StThemeNode *theme_node = st_widget_get_theme_node (ST_WIDGET (actor));
-  double x, y;
+  int x, y;
   g_autoptr (ClutterActorBox) allocation_box = NULL;
   ClutterActorBox content_box;
   ClutterActor *child;
@@ -506,8 +506,7 @@ st_viewport_get_paint_volume (ClutterActor       *actor,
   StThemeNode *theme_node = st_widget_get_theme_node (ST_WIDGET (actor));
   ClutterActorBox allocation_box;
   ClutterActorBox content_box;
-  graphene_point3d_t origin;
-  double x, y, lower, upper;
+  int x, y;
 
   /* Setting the paint volume does not make sense when we don't have any allocation */
   if (!clutter_actor_has_allocation (actor))
@@ -524,35 +523,9 @@ st_viewport_get_paint_volume (ClutterActor       *actor,
 
       clutter_actor_get_allocation_box (actor, &allocation_box);
       st_theme_node_get_content_box (theme_node, &allocation_box, &content_box);
-      origin.x = content_box.x1 - allocation_box.x1;
-      origin.y = content_box.y1 - allocation_box.y2;
-      origin.z = 0.f;
 
-      if (priv->hadjustment)
-        {
-          g_object_get (priv->hadjustment,
-                        "lower", &lower,
-                        "upper", &upper,
-                        NULL);
-          width = upper - lower;
-        }
-      else
-        {
-          width = content_box.x2 - content_box.x1;
-        }
-
-      if (priv->vadjustment)
-        {
-          g_object_get (priv->vadjustment,
-                        "lower", &lower,
-                        "upper", &upper,
-                        NULL);
-          height = upper - lower;
-        }
-      else
-        {
-          height = content_box.y2 - content_box.y1;
-        }
+      width = content_box.x2 - content_box.x1;
+      height = content_box.y2 - content_box.y1;
 
       clutter_paint_volume_set_width (volume, width);
       clutter_paint_volume_set_height (volume, height);
@@ -570,6 +543,8 @@ st_viewport_get_paint_volume (ClutterActor       *actor,
   get_border_paint_offsets (viewport, &x, &y);
   if (x != 0 || y != 0)
     {
+      graphene_point3d_t origin;
+
       clutter_paint_volume_get_origin (volume, &origin);
       origin.x += x;
       origin.y += y;

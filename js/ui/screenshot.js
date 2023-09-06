@@ -7,6 +7,7 @@ import GObject from 'gi://GObject';
 import GLib from 'gi://GLib';
 import Graphene from 'gi://Graphene';
 import Meta from 'gi://Meta';
+import Mtk from 'gi://Mtk';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 
@@ -2245,7 +2246,7 @@ function _storeScreenshot(bytes, pixbuf) {
  * @param {number} cursor.y - The cursor y coordinate.
  * @param {number} cursor.scale - The cursor texture scale.
  */
-async function captureScreenshot(texture, geometry, scale, cursor) {
+export async function captureScreenshot(texture, geometry, scale, cursor) {
     const stream = Gio.MemoryOutputStream.new_resizable();
     const [x, y, w, h] = geometry ?? [0, 0, -1, -1];
     if (cursor === null)
@@ -2655,7 +2656,7 @@ class SelectArea extends St.Widget {
     }
 
     _getGeometry() {
-        return new Meta.Rectangle({
+        return new Mtk.Rectangle({
             x: Math.min(this._startX, this._lastX),
             y: Math.min(this._startY, this._lastY),
             width: Math.abs(this._startX - this._lastX) + 1,

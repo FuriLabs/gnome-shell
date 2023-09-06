@@ -780,6 +780,7 @@ const WirelessNetwork = GObject.registerClass({
 
         this._device.connectObject(
             'notify::active-access-point', () => this.notify('is-active'),
+            'notify::active-connection', () => this.notify('is-active'),
             this);
 
         this._accessPoints = new Set();
@@ -810,11 +811,21 @@ const WirelessNetwork = GObject.registerClass({
     }
 
     get secure() {
-        return this._securityType !== NM.UtilsSecurityType.NONE;
+        return this._securityType !== NM.UtilsSecurityType.NONE &&
+            this._securityType !== NM.UtilsSecurityType.UNKOWN &&
+            this._securityType !== NM.UtilsSecurityType.OWE &&
+            this._securityType !== NM.UtilsSecurityType.OWE_TM;
     }
 
     get is_active() {
-        return this._accessPoints.has(this._device.activeAccessPoint);
+        if (this._accessPoints.has(this._device.activeAccessPoint))
+            return true;
+
+        const {activeConnection} = this._device;
+        if (activeConnection)
+            return this._connections.includes(activeConnection.connection);
+
+        return false;
     }
 
     hasAccessPoint(ap) {
@@ -1157,6 +1168,11 @@ const NMWirelessDeviceItem = GObject.registerClass({
         const {ssid} = this._activeAccessPoint ?? {};
         if (ssid)
             return ssidToLabel(ssid);
+
+        // Use connection name when connected to hidden AP
+        const {activeConnection} = this._device;
+        if (activeConnection)
+            return activeConnection.connection.get_id();
 
         return this._deviceName;
     }
