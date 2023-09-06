@@ -1,8 +1,12 @@
-gnome-shell (45~rc-0ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (45~rc-0ubuntu1) mantic; urgency=medium
 
   * New upstream release
+  * debian/control.in: Bump minimum mutter to 45~rc
+  * Drop cherry-picked patches applied in new release
+  * Refresh patches
+  * Add patch to avoid using Tecla because it isn't ready here yet
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 06 Sep 2023 14:10:15 -0400
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 06 Sep 2023 15:34:13 -0400
 
 gnome-shell (45~beta.1-0ubuntu2) mantic; urgency=medium
 
