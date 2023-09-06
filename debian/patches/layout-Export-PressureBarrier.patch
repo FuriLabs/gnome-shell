@@ -5,8 +5,7 @@ Subject: layout: Export PressureBarrier
 It's an utility function that extensions can use to create pointer barriers,
 so export it to allow wider usage
 
-Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2900>
-(cherry picked from commit b5960af2fc9a6f329f23c8bc3626d52182f9a455)
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2900
 ---
  js/ui/layout.js | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
