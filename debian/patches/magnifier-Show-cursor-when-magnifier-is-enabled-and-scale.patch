@@ -16,19 +16,19 @@ Forwarded: yes
  2 files changed, 73 insertions(+), 6 deletions(-)
 
 diff --git a/js/ui/layout.js b/js/ui/layout.js
-index 5611dad..784de71 100644
+index 3ba9b96..4d5cd5a 100644
 --- a/js/ui/layout.js
 +++ b/js/ui/layout.js
-@@ -980,22 +980,38 @@ export const LayoutManager = GObject.registerClass({
+@@ -981,22 +981,38 @@ export const LayoutManager = GObject.registerClass({
          return ws.get_work_area_for_monitor(monitorIndex);
      }
  
 +    _findIndexForRect(x, y, width, height) {
-+        const rect = new Meta.Rectangle({
++        const rect = new Mtk.Rectangle({
 +            x: Math.floor(x),
 +            y: Math.floor(y),
 +            width: Math.ceil(x + width) - Math.floor(x),
-+            height: Math.ceil(y + height) - Math.floor(y)
++            height: Math.ceil(y + height) - Math.floor(y),
 +        });
 +        return global.display.get_monitor_index_for_rect(rect);
 +    }
@@ -63,7 +63,7 @@ index 5611dad..784de71 100644
          if (!this._updateRegionIdle) {
              const laters = global.compositor.get_laters();
 diff --git a/js/ui/magnifier.js b/js/ui/magnifier.js
-index ab8150b..4420cef 100644
+index ab8150b..13da38f 100644
 --- a/js/ui/magnifier.js
 +++ b/js/ui/magnifier.js
 @@ -51,6 +51,8 @@ const MouseSpriteContent = GObject.registerClass({
@@ -101,7 +101,7 @@ index ab8150b..4420cef 100644
 +         * to know the real spirte texture scaling in order to adapt it to the
 +         * wanted one. */
 +        let avgSize = (this._texture.get_width() + this._texture.get_height()) / 2;
-+        return Math.max (1, Math.floor (avgSize / Meta.prefs_get_cursor_size() + .1));
++        return Math.max(1, Math.floor(avgSize / Meta.prefs_get_cursor_size() + .1));
 +    }
 +
 +    _recomputeScale() {
@@ -153,9 +153,9 @@ index ab8150b..4420cef 100644
  
 +    _updateContentScale() {
 +        let monitor = Main.layoutManager.findMonitorForPoint(this.xMouse,
-+                                                             this.yMouse);
-+        this._mouseSprite.content.monitorScale = monitor ?
-+                                                 monitor.geometry_scale : 1;
++            this.yMouse);
++        this._mouseSprite.content.monitorScale = monitor
++            ? monitor.geometry_scale : 1;
 +    }
 +
      /**
