@@ -1,3 +1,9 @@
+gnome-shell (45~rc-0ubuntu2) mantic; urgency=medium
+
+  * Update magnizier sprite scaling patch with latest version proposed upstream
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sat, 09 Sep 2023 11:17:39 -0400
+
 gnome-shell (45~rc-0ubuntu1) mantic; urgency=medium
 
   * New upstream release
