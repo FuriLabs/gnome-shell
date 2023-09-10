@@ -138,10 +138,10 @@ index dca5f64..aa2f4dc 100644
    shell_dbus_init (meta_context_is_replacing (context));
    shell_a11y_init ();
 diff --git a/src/shell-global.c b/src/shell-global.c
-index 761ba33..b574a6a 100644
+index 66b2f57..2a6e7fd 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
-@@ -61,6 +61,7 @@ struct _ShellGlobal {
+@@ -62,6 +62,7 @@ struct _ShellGlobal {
    Display *xdisplay;
  
    char *session_mode;
@@ -149,7 +149,7 @@ index 761ba33..b574a6a 100644
  
    XserverRegion input_region;
  
-@@ -122,6 +123,7 @@ enum {
+@@ -123,6 +124,7 @@ enum {
    PROP_SWITCHEROO_CONTROL,
    PROP_FORCE_ANIMATIONS,
    PROP_AUTOMATION_SCRIPT,
@@ -157,7 +157,7 @@ index 761ba33..b574a6a 100644
  
    N_PROPS
  };
-@@ -254,6 +256,9 @@ shell_global_set_property(GObject         *object,
+@@ -255,6 +257,9 @@ shell_global_set_property(GObject         *object,
      case PROP_AUTOMATION_SCRIPT:
        g_set_object (&global->automation_script, g_value_get_object (value));
        break;
@@ -167,7 +167,7 @@ index 761ba33..b574a6a 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -346,6 +351,9 @@ shell_global_get_property(GObject         *object,
+@@ -347,6 +352,9 @@ shell_global_get_property(GObject         *object,
      case PROP_AUTOMATION_SCRIPT:
        g_value_set_object (value, global->automation_script);
        break;
@@ -177,7 +177,7 @@ index 761ba33..b574a6a 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -703,6 +711,13 @@ shell_global_class_init (ShellGlobalClass *klass)
+@@ -704,6 +712,13 @@ shell_global_class_init (ShellGlobalClass *klass)
                           G_TYPE_FILE,
                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
  
@@ -191,7 +191,7 @@ index 761ba33..b574a6a 100644
    g_object_class_install_properties (gobject_class, N_PROPS, props);
  }
  
-@@ -2003,3 +2018,40 @@ shell_global_get_app_usage (ShellGlobal *global)
+@@ -2004,3 +2019,40 @@ shell_global_get_app_usage (ShellGlobal *global)
      global->app_usage = g_object_new (SHELL_TYPE_APP_USAGE, NULL);
    return global->app_usage;
  }
