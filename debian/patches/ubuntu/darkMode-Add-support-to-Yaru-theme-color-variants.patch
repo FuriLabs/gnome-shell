@@ -4,21 +4,21 @@ Subject: darkMode: Add support to Yaru theme color variants
 
 Support switching to dark mode when using the Yaru theme color accents.
 ---
- js/ui/status/darkMode.js | 43 +++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 41 insertions(+), 2 deletions(-)
+ js/ui/status/darkMode.js | 42 +++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 41 insertions(+), 1 deletion(-)
 
 diff --git a/js/ui/status/darkMode.js b/js/ui/status/darkMode.js
-index d4620f0..cf6fcf1 100644
+index 4e68a74..321a88b 100644
 --- a/js/ui/status/darkMode.js
 +++ b/js/ui/status/darkMode.js
-@@ -1,5 +1,5 @@
- /* exported Indicator */
--const {Gio, GObject} = imports.gi;
-+const {Gio, GObject, St} = imports.gi;
+@@ -1,5 +1,6 @@
+ import Gio from 'gi://Gio';
+ import GObject from 'gi://GObject';
++import St from 'gi://St';
  
- const Main = imports.ui.main;
- const {QuickToggle, SystemIndicator} = imports.ui.quickSettings;
-@@ -18,6 +18,9 @@ class DarkModeToggle extends QuickToggle {
+ import * as Main from '../main.js';
+ 
+@@ -19,6 +20,9 @@ class DarkModeToggle extends QuickToggle {
          this._changedId = this._settings.connect('changed::color-scheme',
              () => this._sync());
  
@@ -28,7 +28,7 @@ index d4620f0..cf6fcf1 100644
          this.connectObject(
              'destroy', () => this._settings.run_dispose(),
              'clicked', () => this._toggleMode(),
-@@ -27,13 +30,49 @@ class DarkModeToggle extends QuickToggle {
+@@ -28,13 +32,49 @@ class DarkModeToggle extends QuickToggle {
  
      _toggleMode() {
          Main.layoutManager.screenTransition.run();
