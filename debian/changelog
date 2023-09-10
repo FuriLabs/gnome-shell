@@ -1,3 +1,11 @@
+gnome-shell (45~rc-0ubuntu3) mantic; urgency=medium
+
+  * Restore dark mode patch accidentally dropped when packaging 45
+    (LP: #2035036)
+  * Refresh patches
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sun, 10 Sep 2023 15:59:19 -0400
+
 gnome-shell (45~rc-0ubuntu2) mantic; urgency=medium
 
   * Update magnifier sprite scaling patch with latest version proposed upstream
