@@ -1,4 +1,4 @@
-gnome-shell (44.3-0ubuntu2) lunar-security; urgency=medium
+gnome-shell (44.3-0ubuntu1.1) lunar-security; urgency=medium
 
   * SECURITY UPDATE: Avoid exposing window previews on lock screen
     via keyboard shortcuts (CVE-2023-43090, LP: #2036746, gnome-shell#6990)
