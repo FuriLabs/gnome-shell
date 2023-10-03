@@ -1,3 +1,11 @@
+gnome-shell (45.0-1ubuntu2) mantic; urgency=medium
+
+  * Cherry-pick 2 commits from future 45.1:
+    - Fix crash at shutdown (LP: #2036889)
+    - Fix indefinite inhibition of direct scanout when closing the Overview
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 03 Oct 2023 14:16:54 -0400
+
 gnome-shell (45.0-1ubuntu1) mantic; urgency=medium
 
   * Merge with Debian. Remaining changes:
