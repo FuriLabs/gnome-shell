@@ -1,8 +1,9 @@
-gnome-shell (45.1-0ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (45.1-0ubuntu1) mantic; urgency=medium
 
   * New upstream release (LP: #2043015)
+  * Drop 2 patches applied in new release
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 08 Nov 2023 18:32:36 +0200
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 08 Nov 2023 18:33:02 +0200
 
 gnome-shell (45.0-1ubuntu2) mantic; urgency=medium
 
