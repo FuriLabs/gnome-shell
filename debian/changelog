@@ -1,3 +1,14 @@
+gnome-shell (45.1-1) experimental; urgency=medium
+
+  [ Jeremy Bícha ]
+  * New upstream release (LP: #2043015)
+  * Stop using debian/control.in and dh_gnome_clean
+
+  [ Simon McVittie ]
+  * Merge with version 44.5-2 from unstable
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 08 Nov 2023 15:31:57 +0200
+
 gnome-shell (45.0-1ubuntu2) mantic; urgency=medium
 
   * Cherry-pick 2 commits from future 45.1:
@@ -154,6 +165,16 @@ gnome-shell (45~beta.1-0ubuntu1) mantic; urgency=medium
   * debian/patches: Cherry-pick various upstream fixes
 
  -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 18 Aug 2023 01:12:53 +0200
+
+gnome-shell (44.5-2) unstable; urgency=medium
+
+  * Team upload
+  * d/patches: Update to upstream gnome-44 branch commit 44.5-1-g958616fd1
+    - d/p/overview-Handle-unredirection-in-OverviewShown-state-mach.patch:
+      Improve performance for most full-screen applications by ensuring
+      that a fast-path for them stays enabled (mutter#2994)
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 27 Sep 2023 14:11:21 +0100
 
 gnome-shell (44.5-1) unstable; urgency=high
 
