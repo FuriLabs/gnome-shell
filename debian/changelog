@@ -1,3 +1,9 @@
+gnome-shell (45.1-0ubuntu1) UNRELEASED; urgency=medium
+
+  * New upstream release (LP: #2043015)
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 08 Nov 2023 18:32:36 +0200
+
 gnome-shell (45.0-1ubuntu2) mantic; urgency=medium
 
   * Cherry-pick 2 commits from future 45.1:
