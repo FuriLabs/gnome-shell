@@ -1,0 +1,30 @@
+From: Carlos Garnacho <carlosg@gnome.org>
+Date: Wed, 25 May 2022 20:54:39 +0200
+Subject: edgeDragAction: Change edge trigger threshold to AFTER
+
+For all instances of this gesture, we want this gesture to
+activate after some distance, not to eat button presses/releases
+right away.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2304>
+
+Origin: Upstream commit 1fa5c63307e03d806eacdcf14d31e63afc27af20
+Bug-Ubuntu: https://launchpad.net/bugs/2042796
+Forwarded: not-needed
+Last-Update: 2023-12-01
+---
+ js/ui/edgeDragAction.js | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/js/ui/edgeDragAction.js b/js/ui/edgeDragAction.js
+index 8502170..befe152 100644
+--- a/js/ui/edgeDragAction.js
++++ b/js/ui/edgeDragAction.js
+@@ -16,6 +16,7 @@ var EdgeDragAction = GObject.registerClass({
+         this._side = side;
+         this._allowedModes = allowedModes;
+         this.set_n_touch_points(1);
++        this.set_threshold_trigger_edge(Clutter.GestureTriggerEdge.AFTER);
+ 
+         global.display.connect('grab-op-begin', () => this.cancel());
+     }
