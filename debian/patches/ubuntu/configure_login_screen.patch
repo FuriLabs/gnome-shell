@@ -136,7 +136,7 @@ index cef7c87..0da99da 100644
                  backgroundColor = dummyBgActor.get_theme_node().get_background_color();
                  dummyBgActor.destroy();
 diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js
-index 993e436..c27f44b 100644
+index 6d42868..525a400 100644
 --- a/js/ui/screenShield.js
 +++ b/js/ui/screenShield.js
 @@ -33,6 +33,12 @@ const DISABLE_LOCK_KEY = 'disable-lock-screen';
@@ -201,7 +201,7 @@ index 993e436..c27f44b 100644
      async _syncInhibitor() {
          const lockEnabled = this._settings.get_boolean(LOCK_ENABLED_KEY) ||
                              this._settings.get_boolean(SUSPEND_LOCK_ENABLED_KEY);
-@@ -433,6 +474,7 @@ export class ScreenShield extends Signals.EventEmitter {
+@@ -429,6 +470,7 @@ export class ScreenShield extends Signals.EventEmitter {
              }
  
              this._dialog = new constructor(this._lockDialogGroup);

@@ -15,7 +15,7 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  2 files changed, 9 insertions(+)
 
 diff --git a/src/main.c b/src/main.c
-index 619136a..0aa224b 100644
+index c9894d3..ca963da 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -59,6 +59,13 @@ static const GDebugKey SHELL_DEBUG_KEYS[] = {

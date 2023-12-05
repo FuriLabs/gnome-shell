@@ -15,7 +15,7 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  2 files changed, 65 insertions(+), 21 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index aa2f4dc..619136a 100644
+index 78481b6..c9894d3 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -43,16 +43,26 @@ static char *session_mode = NULL;

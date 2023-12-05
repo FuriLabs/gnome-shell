@@ -54,7 +54,7 @@ index eb17579..eb2d12d 100644
              version: extension.metadata.version,
          };
 diff --git a/js/ui/extensionSystem.js b/js/ui/extensionSystem.js
-index 21b3b19..25260ec 100644
+index 3592e5b..111afaa 100644
 --- a/js/ui/extensionSystem.js
 +++ b/js/ui/extensionSystem.js
 @@ -8,6 +8,7 @@ import Shell from 'gi://Shell';
@@ -65,7 +65,7 @@ index 21b3b19..25260ec 100644
  import * as ExtensionDownloader from './extensionDownloader.js';
  import {ExtensionState, ExtensionType} from '../misc/extensionUtils.js';
  import * as FileUtils from '../misc/fileUtils.js';
-@@ -502,6 +503,10 @@ export class ExtensionManager extends Signals.EventEmitter {
+@@ -509,6 +510,10 @@ export class ExtensionManager extends Signals.EventEmitter {
          await this.loadExtension(newExtension);
      }
  
@@ -76,7 +76,7 @@ index 21b3b19..25260ec 100644
      async _callExtensionInit(uuid) {
          if (!this._extensionSupportsSessionMode(uuid))
              return false;
-@@ -709,6 +714,10 @@ export class ExtensionManager extends Signals.EventEmitter {
+@@ -740,6 +745,10 @@ export class ExtensionManager extends Signals.EventEmitter {
              let type = dir.has_prefix(perUserDir)
                  ? ExtensionType.PER_USER
                  : ExtensionType.SYSTEM;

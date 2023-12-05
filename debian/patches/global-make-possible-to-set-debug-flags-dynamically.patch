@@ -21,7 +21,7 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  3 files changed, 103 insertions(+), 14 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index dca5f64..aa2f4dc 100644
+index 4dd5d87..78481b6 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -374,14 +374,14 @@ shell_a11y_init (void)
@@ -93,8 +93,8 @@ index dca5f64..aa2f4dc 100644
  
    bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 @@ -649,17 +686,6 @@ main (int argc, char **argv)
-   g_setenv ("GJS_DEBUG_OUTPUT", "stderr", TRUE);
-   g_setenv ("GJS_DEBUG_TOPICS", "JS ERROR;JS LOG", TRUE);
+   if (session_mode == NULL)
+     session_mode = is_gdm_mode ? (char *)"gdm" : (char *)"user";
  
 -  dump_gjs_stack_on_signal (SIGABRT);
 -  dump_gjs_stack_on_signal (SIGFPE);
