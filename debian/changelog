@@ -67,6 +67,7 @@ gnome-shell (45.1-1ubuntu1) noble; urgency=medium
     - ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch:
       + Support loading Yaru theme variants (for accent color)
     - ubuntu/shell-global-util-Do-not-move-snap-apps-to-gnome-apps-sco.patch
+  * Drop 2 patches applied in new release
 
  -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 08 Nov 2023 15:34:45 +0200
 
