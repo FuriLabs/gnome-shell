@@ -1,3 +1,16 @@
+gnome-shell (3.36.9-0ubuntu0.20.04.3) UNRELEASED; urgency=medium
+
+  [ Marco Trevisan (Treviño) ]
+  * debian/patches: Cherry-pick upstream calendar-server crash fix
+    (LP: #1915929)
+  * debian/patches: Refresh indexes
+
+  [ Daniel van Vugt ]
+  * Add edgeDragAction-Change-edge-trigger-threshold-to-AFTER.patch
+    (LP: #2042796)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 11 Dec 2023 19:59:58 +0100
+
 gnome-shell (3.36.9-0ubuntu0.20.04.2) focal; urgency=medium
 
   [ Didier Roche ]
