@@ -9,10 +9,18 @@ gsettings keys.
 Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/680
 Bug: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/1918613
 Origin: ubuntu
-Index: gnome-shell/data/com.ubuntu.login-screen.gschema.xml.in
-===================================================================
+---
+ data/com.ubuntu.login-screen.gschema.xml.in | 70 +++++++++++++++++++++++++++++
+ data/meson.build                            |  8 +++-
+ js/ui/screenShield.js                       | 33 ++++++++++++++
+ 3 files changed, 110 insertions(+), 1 deletion(-)
+ create mode 100644 data/com.ubuntu.login-screen.gschema.xml.in
+
+diff --git a/data/com.ubuntu.login-screen.gschema.xml.in b/data/com.ubuntu.login-screen.gschema.xml.in
+new file mode 100644
+index 0000000..ee8b3a2
 --- /dev/null
-+++ gnome-shell/data/com.ubuntu.login-screen.gschema.xml.in
++++ b/data/com.ubuntu.login-screen.gschema.xml.in
 @@ -0,0 +1,70 @@
 +<?xml version="1.0" encoding="UTF-8"?>
 +<schemalist gettext-domain="@GETTEXT_PACKAGE@">
@@ -84,10 +92,10 @@ Index: gnome-shell/data/com.ubuntu.login-screen.gschema.xml.in
 +    </key>
 +  </schema>
 +</schemalist>
-Index: gnome-shell/data/meson.build
-===================================================================
---- gnome-shell.orig/data/meson.build
-+++ gnome-shell/data/meson.build
+diff --git a/data/meson.build b/data/meson.build
+index 803e682..8ba713d 100644
+--- a/data/meson.build
++++ b/data/meson.build
 @@ -85,6 +85,12 @@ schema = configure_file(
    configuration: schemaconf,
    install_dir: schemadir
@@ -110,11 +118,11 @@ Index: gnome-shell/data/meson.build
    output: 'gschemas.compiled',
    command: [find_program('glib-compile-schemas'), meson.current_build_dir()],
    build_by_default: true)
-Index: gnome-shell/js/ui/screenShield.js
-===================================================================
---- gnome-shell.orig/js/ui/screenShield.js
-+++ gnome-shell/js/ui/screenShield.js
-@@ -26,6 +26,12 @@ const DISABLE_LOCK_KEY = 'disable-lock-s
+diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js
+index 2f0ec8e..1f89812 100644
+--- a/js/ui/screenShield.js
++++ b/js/ui/screenShield.js
+@@ -26,6 +26,12 @@ const DISABLE_LOCK_KEY = 'disable-lock-screen';
  
  const LOCKED_STATE_STR = 'screenShield.locked';
  
