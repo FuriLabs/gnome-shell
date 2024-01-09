@@ -54,7 +54,7 @@ index eb17579..eb2d12d 100644
              version: extension.metadata.version,
          };
 diff --git a/js/ui/extensionSystem.js b/js/ui/extensionSystem.js
-index 3592e5b..111afaa 100644
+index 773c40e..6144426 100644
 --- a/js/ui/extensionSystem.js
 +++ b/js/ui/extensionSystem.js
 @@ -8,6 +8,7 @@ import Shell from 'gi://Shell';
@@ -63,8 +63,8 @@ index 3592e5b..111afaa 100644
  import * as Config from '../misc/config.js';
 +import * as Desktop from '../misc/desktop.js';
  import * as ExtensionDownloader from './extensionDownloader.js';
+ import {formatError} from '../misc/errorUtils.js';
  import {ExtensionState, ExtensionType} from '../misc/extensionUtils.js';
- import * as FileUtils from '../misc/fileUtils.js';
 @@ -509,6 +510,10 @@ export class ExtensionManager extends Signals.EventEmitter {
          await this.loadExtension(newExtension);
      }

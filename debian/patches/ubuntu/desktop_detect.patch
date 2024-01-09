@@ -13,17 +13,17 @@ Origin: ubuntu
  create mode 100644 js/misc/desktop.js
 
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index ee4b763..a69c004 100644
+index f6b8b7e..8e7de51 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
-@@ -17,6 +17,7 @@
-     <file>misc/animationUtils.js</file>
-     <file>misc/config.js</file>
-     <file>misc/extensionUtils.js</file>
-+    <file>misc/desktop.js</file>
-     <file>misc/fileUtils.js</file>
+@@ -19,6 +19,7 @@
      <file>misc/dateUtils.js</file>
      <file>misc/dbusUtils.js</file>
+     <file>misc/dependencies.js</file>
++    <file>misc/desktop.js</file>
+     <file>misc/errorUtils.js</file>
+     <file>misc/extensionUtils.js</file>
+     <file>misc/fileUtils.js</file>
 diff --git a/js/misc/desktop.js b/js/misc/desktop.js
 new file mode 100644
 index 0000000..05044c1
