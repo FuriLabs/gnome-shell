@@ -45,6 +45,7 @@ import * as XdndHandler from './xdndHandler.js';
 import * as KbdA11yDialog from './kbdA11yDialog.js';
 import * as LocatePointer from './locatePointer.js';
 import * as PointerA11yTimeout from './pointerA11yTimeout.js';
+import {formatError} from '../misc/errorUtils.js';
 import * as ParentalControlsManager from '../misc/parentalControlsManager.js';
 import * as Util from '../misc/util.js';
 
@@ -143,6 +144,16 @@ function _sessionUpdated() {
 /** @returns {void} */
 export async function start() {
     globalThis.log = console.log;
+    globalThis.logError = function (err, msg) {
+        const args = [formatError(err)];
+        try {
+            // toString() can throw
+            if (msg)
+                args.unshift(`${msg}:`);
+        } catch (e) {}
+
+        console.error(...args);
+    };
 
     // Chain up async errors reported from C
     global.connect('notify-error', (global, msg, detail) => {

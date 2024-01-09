@@ -39,6 +39,7 @@
   </description>
 
   <releases>
+    <release version="45.3" date="2024-01-06"/>
     <release version="45.2" date="2023-12-01">
       <p>Support version-name field</p>
     </release>
@@ -50,13 +51,13 @@
 
   <screenshots>
     <screenshot type="default">
-      <image>https://gitlab.gnome.org/GNOME/gnome-shell/raw/HEAD/subprojects/extensions-app/data/metainfo/extensions-main.png</image>
+      <image>https://gitlab.gnome.org/GNOME/gnome-shell/raw/gnome-45/subprojects/extensions-app/data/metainfo/extensions-main.png</image>
     </screenshot>
     <screenshot>
-      <image>https://gitlab.gnome.org/GNOME/gnome-shell/raw/HEAD/subprojects/extensions-app/data/metainfo/extensions-update.png</image>
+      <image>https://gitlab.gnome.org/GNOME/gnome-shell/raw/gnome-45/subprojects/extensions-app/data/metainfo/extensions-update.png</image>
     </screenshot>
     <screenshot>
-      <image>https://gitlab.gnome.org/GNOME/gnome-shell/raw/HEAD/subprojects/extensions-app/data/metainfo/extensions-remove.png</image>
+      <image>https://gitlab.gnome.org/GNOME/gnome-shell/raw/gnome-45/subprojects/extensions-app/data/metainfo/extensions-remove.png</image>
     </screenshot>
   </screenshots>
 </component>
