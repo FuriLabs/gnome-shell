@@ -1,3 +1,76 @@
+gnome-shell (45.3-1ubuntu1) noble; urgency=medium
+
+  * Merge with Debian. Remaining changes:
+    - Add some Recommends:
+      + ubuntu-session (| gnome-session) to have the ubuntu session available
+      + ubuntu-wallpapers
+      + xserver-xorg-legacy
+      + yaru-theme-gnome-shell for the default ubuntu theming
+    - Move some Recommends to Suggests:
+      + chrome-gnome-shell
+      + gnome-backgrounds
+    - Update debian/gbp.conf with Ubuntu settings
+    - Add debian/ubuntu-session-mods/ubuntu.json
+    - debian/patches: Do not hang & crash if fingerprint service fails to start
+      (LP: #1962566)
+    - ubuntu/desktop_detect.patch:
+      + add caching for desktop detection to avoid querying the current
+        desktop env variable as iterate through the list each time. For the
+        time of the Shell process, we can expect this env variable to stay
+        stable.
+    - ubuntu/lightdm-user-switching.patch:
+      + Allow user switching when using LightDM.
+    - ubuntu/lock_on_suspend.patch
+      + Respect Ubuntu's lock-on-suspend setting.
+    - ubuntu/background_login.patch
+      + Change default background color as we modified the default GDM color
+        for our ubuntu session.
+    - ubuntu/gdm_alternatives.patch
+      + Add support for GDM3 theme alternatives
+    - main-show-an-error-message-on-gnome-shell-crash.patch,
+      global-make-possible-to-set-debug-flags-dynamically.patch,
+      main-increase-the-granularity-of-backtraces-in-SHELL_DEBU.patch,
+      main-add-backtrace-crashes-all-and-backtrace-all.patch,
+      sessionMode-add-support-for-debugFlags-parameter.patch:
+      + Improve debug JS tracing for crash reports
+    - ubuntu/smarter_alt_tab.patch:
+      + quick alt-tab (without showing up the switcher) switch only between
+        the last window of the last 2 applications to be focused instead of
+        raising all windows of those apps.
+    - magnifier-Show-cursor-when-magnifier-is-enabled-and-scale.patch:
+      + Show monitor scaled cursor when magnifier is enabled
+    - ubuntu/search-call-XUbuntuCancel-method-on-providers-when-no-dat.patch:
+      + stop searches when requested from UI
+    - magnifier-Show-cursor-when-magnifier-is-enabled-and-scale.patch
+    - u/search-call-XUbuntuCancel-method-on-providers-when-no-dat.patch
+    - ubuntu/resolve_alternate_theme_path.patch
+    - ubuntu/secure_mode_extension.patch
+    - ubuntu/keep-ubuntu-logo-bright-lp1867133-v1.patch
+    - ubuntu/configure_login_screen.patch
+    - ubuntu/layout-Make-starting-in-the-overview-optional.patch:
+      + Makes dock replace overview easier
+    - ubuntu/layout-Try-to-allocate-before-getting-size-of-tracke.patch:
+      + Ensure windows don't get maximized under the panels / dock
+    - debian/patches: Compute system background color from theme (LP: #1965727)
+    - ubuntu/configure-login-screen.patch: Use bg color for initial system bg
+      (LP: #1965727)
+    - debian/patches: Ensure St.Entry's `selected-color` CSS property is
+      honored (LP: #1878998)
+    - ubuntu/support-loading-Yaru-variants: Handle dark/light variants better
+    - d/p/use-favorites-strings: Only apply this to ubuntu session
+    - debian/patches: Support configuring icons resource to use for mode
+    - Revert-st-Apply-css-foreground-color-to-text-as-a-PangoAt.patch:
+      + Ensure selected-text foreground color is preserved
+    - ubuntu/sessionMode-Add-support-for-configuring-an-icons-resource.patch:
+      + Support loading iconsResourceName from session file
+    - ubuntu/main-Support-loading-multiple-Yaru-theme-variants.patch,
+    - ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch:
+      + Support loading Yaru theme variants (for accent color)
+    - ubuntu/shell-global-util-Do-not-move-snap-apps-to-gnome-apps-sco.patch
+  * Refresh patches
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 09 Jan 2024 15:28:52 -0500
+
 gnome-shell (45.3-1) experimental; urgency=medium
 
   * New upstream release
@@ -83,6 +156,12 @@ gnome-shell (45.2-1ubuntu1) noble; urgency=medium
 
  -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 05 Dec 2023 10:20:07 -0500
 
+gnome-shell (45.2-1) experimental; urgency=medium
+
+  * New upstream release (LP: #2045667)
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 05 Dec 2023 10:15:19 -0500
+
 gnome-shell (44.7-1) unstable; urgency=medium
 
   * Team upload
@@ -91,12 +170,6 @@ gnome-shell (44.7-1) unstable; urgency=medium
     Drop a patch that was included in the upstream release
 
  -- Simon McVittie <smcv@debian.org>  Tue, 12 Dec 2023 13:30:06 +0000
-
-gnome-shell (45.2-1) experimental; urgency=medium
-
-  * New upstream release (LP: #2045667)
-
- -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 05 Dec 2023 10:15:19 -0500
 
 gnome-shell (45.1-1ubuntu1) noble; urgency=medium
 
