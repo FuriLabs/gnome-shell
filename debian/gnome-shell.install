@@ -8,4 +8,3 @@ usr/share/applications/org.gnome.Shell*.desktop
 usr/share/bash-completion/completions/gnome-extensions
 usr/share/dbus-1/services
 usr/share/man
-usr/share/xdg-desktop-portal
