@@ -34,15 +34,15 @@ index ebb6c06..89eca4d 100644
 +  configuration: schemaconf,
 +  install_dir: schemadir
 +)
- schema_ubuntu_login = configure_file(
-   input: 'com.ubuntu.login-screen.gschema.xml.in',
-   output: 'com.ubuntu.login-screen.gschema.xml',
+ install_data('00_org.gnome.shell.gschema.override', install_dir: schemadir)
+ 
+ if have_systemd
 @@ -130,7 +136,7 @@ endif
  
  # for unit tests - gnome.compile_schemas() only looks in srcdir
  custom_target('compile-schemas',
--  input: [schema, schema_ubuntu_login],
-+  input: [schema, schema_ubuntu, schema_ubuntu_login],
+-  input: schema,
++  input: [schema, schema_ubuntu],
    output: 'gschemas.compiled',
    command: [find_program('glib-compile-schemas'), data_builddir],
    build_by_default: true)
