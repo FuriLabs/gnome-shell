@@ -11,7 +11,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2011806
  2 files changed, 25 insertions(+), 2 deletions(-)
 
 diff --git a/js/misc/util.js b/js/misc/util.js
-index de5e6d8..0909172 100644
+index 508c87d..38d0bed 100644
 --- a/js/misc/util.js
 +++ b/js/misc/util.js
 @@ -119,6 +119,20 @@ export function spawnApp(argv) {
@@ -49,10 +49,10 @@ index de5e6d8..0909172 100644
      // Dummy child watch; we don't want to double-fork internally
      // because then we lose the parent-child relationship, which
 diff --git a/src/shell-global.c b/src/shell-global.c
-index e60b574..a0c3d5c 100644
+index a82221b..6388ffd 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
-@@ -1501,6 +1501,7 @@ shell_global_app_launched_cb (GAppLaunchContext *context,
+@@ -1429,6 +1429,7 @@ shell_global_app_launched_cb (GAppLaunchContext *context,
  {
    gint32 pid;
    const gchar *app_name;
@@ -60,7 +60,7 @@ index e60b574..a0c3d5c 100644
  
    if (!g_variant_lookup (platform_data, "pid", "i", &pid))
      return;
-@@ -1514,6 +1515,12 @@ shell_global_app_launched_cb (GAppLaunchContext *context,
+@@ -1442,6 +1443,12 @@ shell_global_app_launched_cb (GAppLaunchContext *context,
    if (app_name == NULL)
      app_name = g_app_info_get_executable (info);
  

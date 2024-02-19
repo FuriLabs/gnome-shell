@@ -28,7 +28,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/1878998
  2 files changed, 28 insertions(+), 6 deletions(-)
 
 diff --git a/src/st/st-entry.c b/src/st/st-entry.c
-index 0de195e..ba49101 100644
+index 52fbdb7..ea48bce 100644
 --- a/src/st/st-entry.c
 +++ b/src/st/st-entry.c
 @@ -1101,6 +1101,8 @@ st_entry_init (StEntry *entry)
@@ -41,7 +41,7 @@ index 0de195e..ba49101 100644
    priv->spacing = 6.0f;
  
 diff --git a/src/st/st-private.c b/src/st/st-private.c
-index bb98151..1b70c5e 100644
+index f7ea118..c484e2d 100644
 --- a/src/st/st-private.c
 +++ b/src/st/st-private.c
 @@ -115,22 +115,42 @@ _st_set_text_from_style (ClutterText *text,

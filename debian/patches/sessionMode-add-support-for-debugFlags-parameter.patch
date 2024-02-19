@@ -15,7 +15,7 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  2 files changed, 8 insertions(+)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 4ba3faa..88bd18d 100644
+index 5e991aa..641060f 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -139,6 +139,13 @@ function _sessionUpdated() {

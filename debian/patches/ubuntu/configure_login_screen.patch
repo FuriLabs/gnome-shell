@@ -94,10 +94,10 @@ index 0000000..ee8b3a2
 +  </schema>
 +</schemalist>
 diff --git a/data/meson.build b/data/meson.build
-index a31efcc..07d6d4a 100644
+index 254c460..ebb6c06 100644
 --- a/data/meson.build
 +++ b/data/meson.build
-@@ -97,6 +97,12 @@ schema = configure_file(
+@@ -96,6 +96,12 @@ schema = configure_file(
    configuration: schemaconf,
    install_dir: schemadir
  )
@@ -110,7 +110,7 @@ index a31efcc..07d6d4a 100644
  install_data('00_org.gnome.shell.gschema.override', install_dir: schemadir)
  
  if have_systemd
-@@ -125,7 +131,7 @@ endif
+@@ -124,7 +130,7 @@ endif
  
  # for unit tests - gnome.compile_schemas() only looks in srcdir
  custom_target('compile-schemas',
@@ -136,7 +136,7 @@ index cef7c87..0da99da 100644
                  backgroundColor = dummyBgActor.get_theme_node().get_background_color();
                  dummyBgActor.destroy();
 diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js
-index 6d42868..525a400 100644
+index df49bb4..528622b 100644
 --- a/js/ui/screenShield.js
 +++ b/js/ui/screenShield.js
 @@ -33,6 +33,12 @@ const DISABLE_LOCK_KEY = 'disable-lock-screen';

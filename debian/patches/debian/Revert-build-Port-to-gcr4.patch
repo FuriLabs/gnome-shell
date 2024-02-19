@@ -27,7 +27,7 @@ index c61753e..7a827bc 100644
  import 'gi://Gdm?version=1.0';
  import 'gi://Geoclue?version=2.0';
 diff --git a/meson.build b/meson.build
-index 43a6ee2..7d6ae8c 100644
+index f348a1e..5bf4b48 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -21,7 +21,7 @@ libmutter_test_pc = 'libmutter-test-' + mutter_api_version
@@ -39,7 +39,7 @@ index 43a6ee2..7d6ae8c 100644
  gio_req = '>= 2.56.0'
  gi_req = '>= 1.49.1'
  gjs_req = '>= 1.73.1'
-@@ -74,7 +74,7 @@ endif
+@@ -73,7 +73,7 @@ endif
  atk_bridge_dep = dependency('atk-bridge-2.0')
  ecal_dep = dependency('libecal-2.0', version: ecal_req)
  eds_dep = dependency('libedataserver-1.2', version: eds_req)
@@ -49,10 +49,10 @@ index 43a6ee2..7d6ae8c 100644
  gdk_pixbuf_dep = dependency('gdk-pixbuf-2.0')
  gi_dep = dependency('gobject-introspection-1.0', version: gi_req)
 diff --git a/src/meson.build b/src/meson.build
-index 070312b..6a9b266 100644
+index 422a68d..d1e8023 100644
 --- a/src/meson.build
 +++ b/src/meson.build
-@@ -217,7 +217,7 @@ libshell_dep = declare_dependency(link_with: libshell)
+@@ -224,7 +224,7 @@ libshell_dep = declare_dependency(link_with: libshell)
  libshell_gir_includes = [
    'Clutter-@0@'.format(mutter_api_version),
    'Meta-@0@'.format(mutter_api_version),

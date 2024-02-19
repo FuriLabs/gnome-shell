@@ -16,7 +16,7 @@ Forwarded: yes
  2 files changed, 73 insertions(+), 6 deletions(-)
 
 diff --git a/js/ui/layout.js b/js/ui/layout.js
-index ff1626e..f80211f 100644
+index 3b54960..3b73639 100644
 --- a/js/ui/layout.js
 +++ b/js/ui/layout.js
 @@ -986,22 +986,38 @@ export const LayoutManager = GObject.registerClass({
@@ -63,7 +63,7 @@ index ff1626e..f80211f 100644
          if (!this._updateRegionIdle) {
              const laters = global.compositor.get_laters();
 diff --git a/js/ui/magnifier.js b/js/ui/magnifier.js
-index ab8150b..13da38f 100644
+index 60971e9..cfc2770 100644
 --- a/js/ui/magnifier.js
 +++ b/js/ui/magnifier.js
 @@ -51,6 +51,8 @@ const MouseSpriteContent = GObject.registerClass({

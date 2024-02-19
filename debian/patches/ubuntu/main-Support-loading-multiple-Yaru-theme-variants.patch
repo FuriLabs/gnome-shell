@@ -21,10 +21,10 @@ Forwarded: not-needed
  create mode 100644 data/org.gnome.shell.ubuntu.gschema.xml.in
 
 diff --git a/data/meson.build b/data/meson.build
-index 07d6d4a..3274af2 100644
+index ebb6c06..89eca4d 100644
 --- a/data/meson.build
 +++ b/data/meson.build
-@@ -97,6 +97,12 @@ schema = configure_file(
+@@ -96,6 +96,12 @@ schema = configure_file(
    configuration: schemaconf,
    install_dir: schemadir
  )
@@ -37,7 +37,7 @@ index 07d6d4a..3274af2 100644
  schema_ubuntu_login = configure_file(
    input: 'com.ubuntu.login-screen.gschema.xml.in',
    output: 'com.ubuntu.login-screen.gschema.xml',
-@@ -131,7 +137,7 @@ endif
+@@ -130,7 +136,7 @@ endif
  
  # for unit tests - gnome.compile_schemas() only looks in srcdir
  custom_target('compile-schemas',
@@ -70,7 +70,7 @@ index 0000000..6f9cc62
 +  </schema>
 +</schemalist>
 diff --git a/js/ui/main.js b/js/ui/main.js
-index c9b3fce..598cc80 100644
+index 723aeb9..01d8daf 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -176,6 +176,9 @@ export async function start() {
@@ -83,7 +83,7 @@ index c9b3fce..598cc80 100644
  
      // Initialize ParentalControlsManager before the UI
      ParentalControlsManager.getDefault();
-@@ -447,6 +450,38 @@ export function getStyleVariant() {
+@@ -446,6 +449,38 @@ export function getStyleVariant() {
      }
  }
  
@@ -122,7 +122,7 @@ index c9b3fce..598cc80 100644
  function _getDefaultStylesheet() {
      let stylesheet = null;
      let name = sessionMode.stylesheetName;
-@@ -455,6 +490,13 @@ function _getDefaultStylesheet() {
+@@ -454,6 +489,13 @@ function _getDefaultStylesheet() {
      if (St.Settings.get().high_contrast)
          stylesheet = _getStylesheet(name.replace('.css', '-high-contrast.css'));
  
@@ -137,7 +137,7 @@ index c9b3fce..598cc80 100644
          stylesheet = _getStylesheet(name.replace('.css', `-${getStyleVariant()}.css`));
  
 diff --git a/src/st/st-settings.c b/src/st/st-settings.c
-index 790ec64..de6db1b 100644
+index 07e60ab..8bd8334 100644
 --- a/src/st/st-settings.c
 +++ b/src/st/st-settings.c
 @@ -35,6 +35,8 @@
@@ -323,7 +323,7 @@ index 790ec64..de6db1b 100644
  }
  
  static void
-@@ -423,6 +537,10 @@ st_settings_init (StSettings *settings)
+@@ -421,6 +535,10 @@ st_settings_init (StSettings *settings)
    g_signal_connect (settings->interface_settings, "changed",
                      G_CALLBACK (on_interface_settings_changed), settings);
  
@@ -334,7 +334,7 @@ index 790ec64..de6db1b 100644
    settings->mouse_settings = g_settings_new ("org.gnome.desktop.peripherals.mouse");
    g_signal_connect (settings->mouse_settings, "changed",
                      G_CALLBACK (on_mouse_settings_changed), settings);
-@@ -439,6 +557,8 @@ st_settings_init (StSettings *settings)
+@@ -437,6 +555,8 @@ st_settings_init (StSettings *settings)
    g_signal_connect (settings->lockdown_settings, "changed",
                      G_CALLBACK (on_lockdown_settings_changed), settings);
  
