@@ -177,11 +177,15 @@ class KeyboardBrightnessToggle extends QuickMenuToggle {
             this._discreteItem, 'value',
             GObject.BindingFlags.SYNC_CREATE);
 
-        this._sliderItem.connect('notify::value',
-            () => (this._proxy.Brightness = this._sliderItem.value));
+        this._sliderItemChangedId = this._sliderItem.connect('notify::value', () => {
+            if (this._sliderItem.visible)
+                this._proxy.Brightness = this._sliderItem.value;
+        });
 
-        this._discreteItem.connect('notify::value',
-            () => (this._proxy.Brightness = this._discreteItem.value));
+        this._discreteItemChangedId = this._discreteItem.connect('notify::value', () => {
+            if (this._discreteItem.visible)
+                this._proxy.Brightness = this._discreteItem.value;
+        });
     }
 
     _sync() {
@@ -194,6 +198,9 @@ class KeyboardBrightnessToggle extends QuickMenuToggle {
         this.checked = brightness > 0;
         const useSlider = this._proxy.Steps >= 4;
 
+        this._sliderItem.block_signal_handler(this._sliderItemChangedId);
+        this._discreteItem.block_signal_handler(this._discreteItemChangedId);
+
         this._sliderItem.set({
             visible: useSlider,
             value: brightness,
@@ -201,6 +208,9 @@ class KeyboardBrightnessToggle extends QuickMenuToggle {
 
         if (!useSlider)
             this._discreteItem.nLevels = this._proxy.Steps;
+
+        this._sliderItem.unblock_signal_handler(this._sliderItemChangedId);
+        this._discreteItem.unblock_signal_handler(this._discreteItemChangedId);
     }
 });
 

@@ -32,8 +32,10 @@ typedef enum {
   LIST_FLAGS_SYSTEM   = 1 << 1,
   LIST_FLAGS_ENABLED  = 1 << 2,
   LIST_FLAGS_DISABLED = 1 << 3,
-  LIST_FLAGS_NO_PREFS = 1 << 4,
-  LIST_FLAGS_NO_UPDATES = 1 << 5,
+  LIST_FLAGS_ACTIVE   = 1 << 4,
+  LIST_FLAGS_INACTIVE = 1 << 5,
+  LIST_FLAGS_NO_PREFS = 1 << 6,
+  LIST_FLAGS_NO_UPDATES = 1 << 7,
 } ListFilterFlags;
 
 static gboolean
@@ -74,10 +76,12 @@ list_extensions (ListFilterFlags filter, DisplayFormat format)
       double type, state;
       gboolean has_prefs;
       gboolean has_update;
+      gboolean enabled;
 
       info = g_variant_dict_new (value);
       g_variant_dict_lookup (info, "type", "d", &type);
       g_variant_dict_lookup (info, "state", "d", &state);
+      g_variant_dict_lookup (info, "enabled", "b", &enabled);
       g_variant_dict_lookup (info, "hasPrefs", "b", &has_prefs);
       g_variant_dict_lookup (info, "hasUpdate", "b", &has_update);
 
@@ -87,10 +91,16 @@ list_extensions (ListFilterFlags filter, DisplayFormat format)
       if (type == TYPE_SYSTEM && (filter & LIST_FLAGS_SYSTEM) == 0)
         continue;
 
-      if (state == STATE_ENABLED && (filter & LIST_FLAGS_ENABLED) == 0)
+      if (enabled && (filter & LIST_FLAGS_ENABLED) == 0)
         continue;
 
-      if (state != STATE_ENABLED && (filter & LIST_FLAGS_DISABLED) == 0)
+      if (!enabled && (filter & LIST_FLAGS_DISABLED) == 0)
+        continue;
+
+      if (state == STATE_ACTIVE && (filter & LIST_FLAGS_ACTIVE) == 0)
+        continue;
+
+      if (state != STATE_ACTIVE && (filter & LIST_FLAGS_INACTIVE) == 0)
         continue;
 
       if (!has_prefs && (filter & LIST_FLAGS_NO_PREFS) == 0)
@@ -120,6 +130,8 @@ handle_list (int argc, char *argv[], gboolean do_help)
   gboolean system = FALSE;
   gboolean enabled = FALSE;
   gboolean disabled = FALSE;
+  gboolean active = FALSE;
+  gboolean inactive = FALSE;
   gboolean has_prefs = FALSE;
   gboolean has_updates = FALSE;
   GOptionEntry entries[] = {
@@ -135,6 +147,12 @@ handle_list (int argc, char *argv[], gboolean do_help)
     { .long_name = "disabled",
       .arg = G_OPTION_ARG_NONE, .arg_data = &disabled,
       .description = _("Show disabled extensions") },
+    { .long_name = "active",
+      .arg = G_OPTION_ARG_NONE, .arg_data = &active,
+      .description = _("Show extensions in active state") },
+    { .long_name = "inactive",
+      .arg = G_OPTION_ARG_NONE, .arg_data = &inactive,
+      .description = _("Show extensions in inactive state") },
     { .long_name = "prefs",
       .arg = G_OPTION_ARG_NONE, .arg_data = &has_prefs,
       .description = _("Show extensions with preferences") },
@@ -184,6 +202,12 @@ handle_list (int argc, char *argv[], gboolean do_help)
 
   if (disabled || !enabled)
     flags |= LIST_FLAGS_DISABLED;
+
+  if (active || !inactive)
+    flags |= LIST_FLAGS_ACTIVE;
+
+  if (inactive || !active)
+    flags |= LIST_FLAGS_INACTIVE;
 
   if (!has_prefs)
     flags |= LIST_FLAGS_NO_PREFS;

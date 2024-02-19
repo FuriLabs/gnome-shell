@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '45.3',
+  version: '46.beta',
   meson_version: '>= 0.58.0',
   license: 'GPLv2+'
 )
@@ -10,7 +10,7 @@ split_version = meson.project_version().split('.')
 # the Cogl and Clutter libraries also use this API version.
 # The API version is increased each development cycle,
 # starting with 0 in 3.23.x
-mutter_api_version = '13'
+mutter_api_version = '14'
 
 clutter_pc = 'mutter-clutter-' + mutter_api_version
 cogl_pc = 'mutter-cogl-' + mutter_api_version
@@ -26,7 +26,7 @@ gio_req = '>= 2.56.0'
 gi_req = '>= 1.49.1'
 gjs_req = '>= 1.73.1'
 gtk_req = '>= 4.0'
-mutter_req = '>= 45.0'
+mutter_req = '>= 46.beta'
 polkit_req = '>= 0.100'
 schemas_req = '>= 42.beta'
 startup_req = '>= 0.11'
@@ -60,7 +60,6 @@ icondir = join_paths(datadir, 'icons')
 ifacedir = join_paths(datadir, 'dbus-1', 'interfaces')
 localedir = join_paths(datadir, 'locale')
 metainfodir = join_paths(datadir, 'metainfo')
-portaldir = join_paths(datadir, 'xdg-desktop-portal', 'portals')
 schemadir = join_paths(datadir, 'glib-2.0', 'schemas')
 servicedir = join_paths(datadir, 'dbus-1', 'services')
 
@@ -180,7 +179,9 @@ cdata.set('HAVE_POLKIT_AUTOCLEANUP', polkit_has_autocleanup)
 
 buildtype = get_option('buildtype')
 if buildtype != 'plain'
-  all_warnings = [
+  gs_c_args = [
+    '-fno-omit-frame-pointer',
+    '-mno-omit-leaf-frame-pointer',
     '-fno-strict-aliasing',
     '-Wpointer-arith',
     '-Wmissing-declarations',
@@ -217,17 +218,16 @@ if buildtype != 'plain'
     '-Werror=empty-body',
     '-Werror=write-strings',
   ]
-  supported_warnings = cc.get_supported_arguments(all_warnings)
-  add_project_arguments(supported_warnings, language: 'c')
-endif
 
-if get_option('debug')
-  debug_c_args = [
-    '-DG_ENABLE_DEBUG',
-    '-fno-omit-frame-pointer'
-  ]
-  supported_debug_c_args = cc.get_supported_arguments(debug_c_args)
-  add_project_arguments(supported_debug_c_args, language: 'c')
+
+  if get_option('debug')
+    gs_c_args += [
+      '-DG_ENABLE_DEBUG',
+    ]
+  endif
+
+  supported_gs_c_args = cc.get_supported_arguments(gs_c_args)
+  add_project_arguments(supported_gs_c_args, language: 'c')
 endif
 
 config_h = configure_file(

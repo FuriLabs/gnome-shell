@@ -379,7 +379,7 @@ class NMConnectionItem extends NMMenuItem {
             this.accessible_name = this.name;
             this.accessible_role = Atk.Role.CHECK_MENU_ITEM;
             this.setOrnament(this.is_active
-                ? PopupMenu.Ornament.DOT : PopupMenu.Ornament.NONE);
+                ? PopupMenu.Ornament.DOT : PopupMenu.Ornament.NO_DOT);
         } else {
             this.accessible_name = this._getAccessibleName();
             this._subtitle.text = this._getSubtitleLabel();
@@ -1014,7 +1014,7 @@ class NMWirelessNetworkItem extends PopupMenu.PopupBaseMenuItem {
             style_class: 'wireless-secure-icon',
             y_align: Clutter.ActorAlign.END,
         });
-        icons.add_actor(this._secureIcon);
+        icons.add_child(this._secureIcon);
 
         this._label = new St.Label();
         this.add_child(this._label);
@@ -1023,7 +1023,7 @@ class NMWirelessNetworkItem extends PopupMenu.PopupBaseMenuItem {
             style_class: 'popup-menu-icon',
             icon_name: 'object-select-symbolic',
         });
-        this.add(this._selectedIcon);
+        this.add_child(this._selectedIcon);
 
         this._network.bind_property('icon-name',
             this._signalIcon, 'icon-name',
@@ -2036,14 +2036,11 @@ class Indicator extends SystemIndicator {
     _onActivationFailed() {
         this._notification?.destroy();
 
-        const source = new MessageTray.Source(
-            _('Network Manager'), 'network-error-symbolic');
-        source.policy =
-            new MessageTray.NotificationApplicationPolicy('gnome-network-panel');
-
+        const source = MessageTray.getSystemSource();
         this._notification = new MessageTray.Notification(source,
             _('Connection failed'),
             _('Activation of network connection failed'));
+        this._notification.iconName = 'network-error-symbolic';
         this._notification.setUrgency(MessageTray.Urgency.HIGH);
         this._notification.setTransient(true);
         this._notification.connect('destroy',

@@ -5,7 +5,6 @@ import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Shell from 'gi://Shell';
-import St from 'gi://St';
 
 import * as Config from '../misc/config.js';
 import * as Main from './main.js';
@@ -13,6 +12,7 @@ import * as MessageTray from './messageTray.js';
 import * as Params from '../misc/params.js';
 
 import {loadInterfaceXML} from '../misc/fileUtils.js';
+import {NotificationErrors, NotificationError} from '../misc/dbusErrors.js';
 
 const FdoNotificationsIface = loadInterfaceXML('org.freedesktop.Notifications');
 
@@ -61,20 +61,6 @@ class FdoNotificationDaemon {
         return null;
     }
 
-    _fallbackIconForNotificationData(hints) {
-        let stockIcon;
-        switch (hints.urgency) {
-        case Urgency.LOW:
-        case Urgency.NORMAL:
-            stockIcon = 'dialog-information';
-            break;
-        case Urgency.CRITICAL:
-            stockIcon = 'dialog-error';
-            break;
-        }
-        return new Gio.ThemedIcon({name: stockIcon});
-    }
-
     _iconForNotificationData(icon) {
         if (icon) {
             if (icon.substr(0, 7) === 'file://')
@@ -116,10 +102,8 @@ class FdoNotificationDaemon {
             return ndata.notification.source;
 
         let source = this._lookupSource(title, pid);
-        if (source) {
-            source.setTitle(title);
+        if (source)
             return source;
-        }
 
         const appId = ndata?.hints['desktop-entry'];
         source = new FdoNotificationDaemonSource(title, pid, sender, appId);
@@ -136,7 +120,7 @@ class FdoNotificationDaemon {
     }
 
     NotifyAsync(params, invocation) {
-        let [appName, replacesId, icon, summary, body, actions, hints, timeout] = params;
+        let [appName, replacesId, appIcon, summary, body, actions, hints, timeout] = params;
         let id;
 
         for (let hint in hints) {
@@ -145,23 +129,6 @@ class FdoNotificationDaemon {
         }
 
         hints = Params.parse(hints, {urgency: Urgency.NORMAL}, true);
-
-        // Filter out chat, presence, calls and invitation notifications from
-        // Empathy, since we handle that information from telepathyClient.js
-        //
-        // Note that empathy uses im.received for one to one chats and
-        // x-empathy.im.mentioned for multi-user, so we're good here
-        if (appName === 'Empathy' && hints['category'] === 'im.received') {
-            // Ignore replacesId since we already sent back a
-            // NotificationClosed for that id.
-            id = this._nextNotificationId++;
-            let idleId = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
-                this._emitNotificationClosed(id, NotificationClosedReason.DISMISSED);
-                return GLib.SOURCE_REMOVE;
-            });
-            GLib.Source.set_name_by_id(idleId, '[gnome-shell] this._emitNotificationClosed');
-            return invocation.return_value(GLib.Variant.new('(u)', [id]));
-        }
 
         // Be compatible with the various hints for image data and image path
         // 'image-data' and 'image-path' are the latest name of these hints, introduced in 1.2
@@ -179,7 +146,7 @@ class FdoNotificationDaemon {
 
         const ndata = {
             appName,
-            icon,
+            appIcon,
             summary,
             body,
             actions,
@@ -205,7 +172,7 @@ class FdoNotificationDaemon {
     }
 
     _notifyForSource(source, ndata) {
-        const {icon, summary, body, actions, hints} = ndata;
+        const {appIcon, summary, body, actions, hints} = ndata;
         let {notification} = ndata;
 
         if (notification == null) {
@@ -229,14 +196,7 @@ class FdoNotificationDaemon {
             });
         }
 
-        // 'image-data' (or 'image-path') takes precedence over 'app-icon'.
-        let gicon = this._imageForNotificationData(hints);
-
-        if (!gicon)
-            gicon = this._iconForNotificationData(icon);
-
-        if (!gicon)
-            gicon = this._fallbackIconForNotificationData(hints);
+        const gicon = this._imageForNotificationData(hints);
 
         const soundFile = 'sound-file' in hints
             ? Gio.File.new_for_path(hints['sound-file']) : null;
@@ -295,7 +255,8 @@ class FdoNotificationDaemon {
             ? MessageTray.PrivacyScope.SYSTEM
             : MessageTray.PrivacyScope.USER);
 
-        let sourceGIcon = source.useNotificationIcon ? gicon : null;
+        // Only fallback to 'app-icon' when the source doesn't have a valid app
+        const sourceGIcon = source.app ? null : this._iconForNotificationData(appIcon);
         source.processNotification(notification, sourceGIcon);
     }
 
@@ -345,17 +306,29 @@ class FdoNotificationDaemon {
 
 export const FdoNotificationDaemonSource = GObject.registerClass(
 class FdoNotificationDaemonSource extends MessageTray.Source {
-    _init(title, pid, sender, appId) {
+    constructor(title, pid, sender, appId) {
+        const appSys = Shell.AppSystem.get_default();
+        let app;
+
+        app = Shell.WindowTracker.get_default().get_app_from_pid(pid);
+        if (!app && appId)
+            app = appSys.lookup_app(`${appId}.desktop`);
+
+        if (!app)
+            app = appSys.lookup_app(`${title}.desktop`);
+
+        // Use app name as title if available, instead of whatever is provided
+        // through libnotify (usually garbage)
+        super({
+            title: app?.get_name() ?? title,
+            policy: MessageTray.NotificationPolicy.newForApp(app),
+        });
+
         this.pid = pid;
         this.initialTitle = title;
-        this.app = this._getApp(appId);
+        this.app = app;
+        this._appIcon = null;
 
-        super._init(title);
-
-        if (this.app)
-            this.title = this.app.get_name();
-        else
-            this.useNotificationIcon = true;
 
         if (sender) {
             this._nameWatcherId = Gio.DBus.session.watch_name(sender,
@@ -364,15 +337,6 @@ class FdoNotificationDaemonSource extends MessageTray.Source {
                 this._onNameVanished.bind(this));
         } else {
             this._nameWatcherId = 0;
-        }
-    }
-
-    _createPolicy() {
-        if (this.app && this.app.get_app_info()) {
-            let id = this.app.get_id().replace(/\.desktop$/, '');
-            return new MessageTray.NotificationApplicationPolicy(id);
-        } else {
-            return new MessageTray.NotificationGenericPolicy();
         }
     }
 
@@ -386,43 +350,18 @@ class FdoNotificationDaemonSource extends MessageTray.Source {
             this.destroy();
     }
 
-    processNotification(notification, gicon) {
-        if (gicon)
-            this._gicon = gicon;
-        this.iconUpdated();
+    processNotification(notification, appIcon) {
+        if (!this.app && appIcon) {
+            this._appIcon = appIcon;
+            this.notify('icon');
+        }
+
 
         let tracker = Shell.WindowTracker.get_default();
         if (notification.resident && this.app && tracker.focus_app === this.app)
             this.pushNotification(notification);
         else
             this.showNotification(notification);
-    }
-
-    _getApp(appId) {
-        const appSys = Shell.AppSystem.get_default();
-        let app;
-
-        app = Shell.WindowTracker.get_default().get_app_from_pid(this.pid);
-        if (app != null)
-            return app;
-
-        if (appId)
-            app = appSys.lookup_app(`${appId}.desktop`);
-
-        if (!app)
-            app = appSys.lookup_app(`${this.initialTitle}.desktop`);
-
-        return app;
-    }
-
-    setTitle(title) {
-        // Do nothing if .app is set, we don't want to override the
-        // app name with whatever is provided through libnotify (usually
-        // garbage)
-        if (this.app)
-            return;
-
-        super.setTitle(title);
     }
 
     open() {
@@ -448,17 +387,8 @@ class FdoNotificationDaemonSource extends MessageTray.Source {
         super.destroy();
     }
 
-    createIcon(size) {
-        if (this.app) {
-            return this.app.create_icon_texture(size);
-        } else if (this._gicon) {
-            return new St.Icon({
-                gicon: this._gicon,
-                icon_size: size,
-            });
-        } else {
-            return null;
-        }
+    get icon() {
+        return this.app?.get_icon() ?? this._appIcon;
     }
 });
 
@@ -562,31 +492,27 @@ function InvalidAppError() {}
 
 export const GtkNotificationDaemonAppSource = GObject.registerClass(
 class GtkNotificationDaemonAppSource extends MessageTray.Source {
-    _init(appId) {
-        let objectPath = objectPathFromAppId(appId);
+    constructor(appId) {
+        const objectPath = objectPathFromAppId(appId);
         if (!GLib.Variant.is_object_path(objectPath))
             throw new InvalidAppError();
 
-        let app = Shell.AppSystem.get_default().lookup_app(`${appId}.desktop`);
+        const app = Shell.AppSystem.get_default().lookup_app(`${appId}.desktop`);
         if (!app)
             throw new InvalidAppError();
+
+        super({
+            title: app.get_name(),
+            icon: app.get_icon(),
+            policy: new MessageTray.NotificationApplicationPolicy(appId),
+        });
 
         this._appId = appId;
         this._app = app;
         this._objectPath = objectPath;
 
-        super._init(app.get_name());
-
         this._notifications = {};
         this._notificationPending = false;
-    }
-
-    createIcon(size) {
-        return this._app.create_icon_texture(size);
-    }
-
-    _createPolicy() {
-        return new MessageTray.NotificationApplicationPolicy(this._appId);
     }
 
     _createApp() {
@@ -752,7 +678,8 @@ class GtkNotificationDaemon {
             source = this._ensureAppSource(appId);
         } catch (e) {
             if (e instanceof InvalidAppError) {
-                invocation.return_dbus_error('org.gtk.Notifications.InvalidApp',
+                invocation.return_error_literal(NotificationErrors,
+                    NotificationError.INVALID_APP,
                     `The app by ID "${appId}" could not be found`);
                 return;
             }

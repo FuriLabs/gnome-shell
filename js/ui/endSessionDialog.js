@@ -34,6 +34,8 @@ import * as LoginManager from '../misc/loginManager.js';
 import * as ModalDialog from './modalDialog.js';
 import * as UserWidget from './userWidget.js';
 
+import {ModalDialogErrors, ModalDialogError} from '../misc/dbusErrors.js';
+
 import {loadInterfaceXML} from '../misc/fileUtils.js';
 
 const _ITEM_ICON_SIZE = 64;
@@ -115,9 +117,9 @@ const restartUpdateDialogContent = {
     showBatteryWarning: true,
     confirmButtons: [{
         signal: 'ConfirmedReboot',
-        label: C_('button', 'Restart &amp; Install'),
+        label: C_('button', 'Restart & Install'),
     }],
-    unusedFutureButtonForTranslation: C_('button', 'Install &amp; Power Off'),
+    unusedFutureButtonForTranslation: C_('button', 'Install & Power Off'),
     unusedFutureCheckBoxForTranslation: C_('checkbox', 'Power off after updates are installed'),
     iconName: 'view-refresh-symbolic',
     showOtherSessions: true,
@@ -136,7 +138,7 @@ const restartUpgradeDialogContent = {
     showBatteryWarning: false,
     confirmButtons: [{
         signal: 'ConfirmedReboot',
-        label: C_('button', 'Restart &amp; Install'),
+        label: C_('button', 'Restart & Install'),
     }],
     iconName: 'view-refresh-symbolic',
     showOtherSessions: true,
@@ -739,8 +741,8 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
         this._sessionSection.list.destroy_all_children();
 
         if (!(this._type in DialogContent)) {
-            invocation.return_dbus_error(
-                'org.gnome.Shell.ModalDialog.TypeError',
+            invocation.return_error_literal(ModalDialogErrors,
+                ModalDialogError.UNKNOWN_TYPE,
                 'Unknown dialog type requested');
             return;
         }
@@ -773,8 +775,8 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
         this._updateButtons();
 
         if (!this.open(timestamp)) {
-            invocation.return_dbus_error(
-                'org.gnome.Shell.ModalDialog.GrabError',
+            invocation.return_error_literal(
+                ModalDialogError.GRAB_FAILED,
                 'Cannot grab pointer and keyboard');
             return;
         }

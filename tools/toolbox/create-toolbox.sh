@@ -5,6 +5,7 @@ set -e
 
 TOOLBOX_IMAGE=registry.gitlab.gnome.org/gnome/gnome-shell/toolbox
 DEFAULT_NAME=gnome-shell-devel
+CONFIG_FILE=${XDG_CONFIG_HOME:-$HOME/.config}/gnome-shell-toolbox-tools.conf
 
 usage() {
   cat <<-EOF
@@ -22,6 +23,8 @@ usage() {
 	  -b, --builder           Set up GNOME Builder configuration
 	  --locales=LOCALES       Enable support for additional locales LOCALES
 	  --skip-mutter           Do not build mutter
+	  --set-default           Set as default for other gnome-shell
+	                          toolbox tools
 	  -h, --help              Display this help
 
 	EOF
@@ -71,9 +74,13 @@ setup_classic() {
   local branch=${VERSION:+gnome-}${VERSION:-main}
 
   toolbox_run /usr/libexec/install-meson-project.sh \
-    --prepare "git submodule update --init" \
     -Dclassic_mode=true \
     https://gitlab.gnome.org/GNOME/gnome-shell-extensions.git $branch
+}
+
+set_default() {
+  mkdir -p $(dirname $CONFIG_FILE)
+  echo DEFAULT_TOOLBOX=$NAME > $CONFIG_FILE
 }
 
 TEMP=$(getopt \
@@ -86,14 +93,18 @@ TEMP=$(getopt \
   --longoptions 'builder' \
   --longoptions 'locales:' \
   --longoptions 'skip-mutter' \
+  --longoptions 'set-default' \
   --longoptions 'help' \
-  -- "$@")
+  -- "$@") || die "Run $(basename $0) --help to see available options"
 
 eval set -- "$TEMP"
 unset TEMP
 
 NAME=$DEFAULT_NAME
 LOCALES=()
+
+# set up first toolbox as default
+[ ! -f $CONFIG_FILE ] && SET_DEFAULT=1
 
 while true; do
   case "$1" in
@@ -124,6 +135,11 @@ while true; do
 
     --skip-mutter)
       SKIP_MUTTER=1
+      shift
+    ;;
+
+    --set-default)
+      SET_DEFAULT=1
       shift
     ;;
 
@@ -161,3 +177,4 @@ install_extra_packages
 
 [[ $SETUP_CLASSIC ]] && setup_classic
 [[ $SETUP_BUILDER ]] && create_builder_config
+[[ $SET_DEFAULT ]] && set_default

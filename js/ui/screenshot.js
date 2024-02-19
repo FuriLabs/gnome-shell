@@ -25,6 +25,7 @@ Gio._promisify(Shell.Screenshot.prototype, 'screenshot_area');
 Gio._promisify(Shell.Screenshot.prototype, 'screenshot_stage_to_content');
 Gio._promisify(Shell.Screenshot, 'composite_to_stream');
 
+import {ScreencastErrors, ScreencastError} from '../misc/dbusErrors.js';
 import {loadInterfaceXML} from '../misc/fileUtils.js';
 import {DBusSenderChecker} from '../misc/util.js';
 
@@ -771,10 +772,13 @@ class UIWindowSelectorLayout extends Workspace.WorkspaceLayout {
     }
 });
 
-const UIWindowSelectorWindow = GObject.registerClass(
-class UIWindowSelectorWindow extends St.Button {
-    _init(actor, params) {
-        super._init(params);
+const UIWindowSelectorWindowContent = GObject.registerClass(
+class UIWindowSelectorWindowContent extends Clutter.Actor {
+    constructor(actor) {
+        super({
+            x_expand: true,
+            y_expand: true,
+        });
 
         const window = actor.metaWindow;
         this._boundingBox = window.get_frame_rect();
@@ -785,19 +789,20 @@ class UIWindowSelectorWindow extends St.Button {
         });
         this.add_child(this._actor);
 
-        this._border = new St.Bin({style_class: 'screenshot-ui-window-selector-window-border'});
+        this._border = new St.Bin({
+            style_class: 'screenshot-ui-window-selector-window-border',
+            child: new St.Icon({
+                icon_name: 'object-select-symbolic',
+                style_class: 'screenshot-ui-window-selector-check',
+                x_align: Clutter.ActorAlign.CENTER,
+                y_align: Clutter.ActorAlign.CENTER,
+            }),
+        });
         this._border.connect('style-changed', () => {
             this._borderSize =
                 this._border.get_theme_node().get_border_width(St.Side.TOP);
         });
         this.add_child(this._border);
-
-        this._border.child = new St.Icon({
-            icon_name: 'object-select-symbolic',
-            style_class: 'screenshot-ui-window-selector-check',
-            x_align: Clutter.ActorAlign.CENTER,
-            y_align: Clutter.ActorAlign.CENTER,
-        });
 
         this._cursor = null;
         this._cursorPoint = {x: 0, y: 0};
@@ -808,26 +813,6 @@ class UIWindowSelectorWindow extends St.Button {
 
     get boundingBox() {
         return this._boundingBox;
-    }
-
-    get windowCenter() {
-        const boundingBox = this.boundingBox;
-        return {
-            x: boundingBox.x + boundingBox.width / 2,
-            y: boundingBox.y + boundingBox.height / 2,
-        };
-    }
-
-    chromeHeights() {
-        return [0, 0];
-    }
-
-    chromeWidths() {
-        return [0, 0];
-    }
-
-    overlapHeights() {
-        return [0, 0];
     }
 
     get cursorPoint() {
@@ -943,6 +928,64 @@ class UIWindowSelectorWindow extends St.Button {
     }
 });
 
+const UIWindowSelectorWindow = GObject.registerClass(
+class UIWindowSelectorWindow extends St.Button {
+    _init(actor, params) {
+        super._init({
+            child: new UIWindowSelectorWindowContent(actor),
+            ...params,
+        });
+    }
+
+    get boundingBox() {
+        return this.child.boundingBox;
+    }
+
+    get windowCenter() {
+        const boundingBox = this.boundingBox;
+        return {
+            x: boundingBox.x + boundingBox.width / 2,
+            y: boundingBox.y + boundingBox.height / 2,
+        };
+    }
+
+    chromeHeights() {
+        return [0, 0];
+    }
+
+    chromeWidths() {
+        return [0, 0];
+    }
+
+    overlapHeights() {
+        return [0, 0];
+    }
+
+    get cursorPoint() {
+        return this.child.cursorPoint;
+    }
+
+    get bufferScale() {
+        return this.child.bufferScale;
+    }
+
+    get windowContent() {
+        return this.child.windowContent;
+    }
+
+    addCursorTexture(content, point, scale) {
+        this.child.addCursorTexture(content, point, scale);
+    }
+
+    getCursorTexture() {
+        return this.child.getCursorTexture();
+    }
+
+    setCursorVisible(visible) {
+        this.child.setCursorVisible(visible);
+    }
+});
+
 const UIWindowSelector = GObject.registerClass(
 class UIWindowSelector extends St.Widget {
     _init(monitorIndex, params) {
@@ -1009,6 +1052,12 @@ class UIWindowSelector extends St.Widget {
 const UIMode = {
     SCREENSHOT: 0,
     SCREENCAST: 1,
+    SCREENSHOT_ONLY: 2,
+};
+
+const ScreencastPhase = {
+    STARTUP: 'STARTUP',
+    RECORDING: 'RECORDING',
 };
 
 export const ScreenshotUI = GObject.registerClass({
@@ -1019,6 +1068,10 @@ export const ScreenshotUI = GObject.registerClass({
             'screencast-in-progress',
             GObject.ParamFlags.READABLE,
             false),
+    },
+    Signals: {
+        'screenshot-taken': {param_types: [Gio.File.$gtype]},
+        'closed': {},
     },
 }, class ScreenshotUI extends St.Widget {
     _init() {
@@ -1036,6 +1089,7 @@ export const ScreenshotUI = GObject.registerClass({
 
         this._screencastInProgress = false;
         this._screencastSupported = false;
+        this._currentMode = UIMode.SCREENSHOT;
 
         this._screencastProxy = new ScreencastProxy(
             Gio.DBus.session,
@@ -1048,11 +1102,12 @@ export const ScreenshotUI = GObject.registerClass({
                 }
 
                 this._screencastSupported = this._screencastProxy.ScreencastSupported;
-                this._castButton.visible = this._screencastSupported;
+                this._syncCastButton();
             });
 
-        this._screencastProxy.connectSignal('Error',
-            () => this._screencastFailed());
+        this._screencastProxy.connectSignal('Error', (proxy, sender, [errorName, message]) =>
+            this._screencastFailed(ScreencastPhase.RECORDING,
+                Gio.DBusError.new_for_dbus_error(errorName, message)));
 
         this._screencastProxy.connect('notify::g-name-owner', () => {
             if (this._screencastProxy.g_name_owner)
@@ -1061,7 +1116,14 @@ export const ScreenshotUI = GObject.registerClass({
             if (!this._screencastInProgress)
                 return;
 
-            this._screencastFailed();
+            // If the recorder crashed while we're starting it in _startScreencast(),
+            // let the catch-block there handle the error.
+            if (this._screencastStarting)
+                return;
+
+            this._screencastFailed(ScreencastPhase.RECORDING,
+                new GLib.Error(ScreencastErrors, ScreencastError.SERVICE_CRASH,
+                    'Service crashed'));
         });
 
         this._lockdownSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.lockdown'});
@@ -1281,6 +1343,8 @@ export const ScreenshotUI = GObject.registerClass({
         this._captureButton = new St.Button({style_class: 'screenshot-ui-capture-button'});
         this._captureButton.set_child(new St.Widget({
             style_class: 'screenshot-ui-capture-button-circle',
+            x_expand: true,
+            y_expand: true,
         }));
         this.add_child(new Tooltip(this._captureButton, {
             /* Translators: since this string refers to an action,
@@ -1398,7 +1462,15 @@ export const ScreenshotUI = GObject.registerClass({
 
     _sessionUpdated() {
         this.close(true);
-        this._castButton.reactive = Main.sessionMode.allowScreencast;
+    }
+
+    _syncCastButton() {
+        const visible = this._screencastSupported;
+        const reactive = visible &&
+            this._currentMode !== UIMode.SCREENSHOT_ONLY &&
+            Main.sessionMode.allowScreencast;
+
+        this._castButton.set({visible, reactive});
     }
 
     _syncWindowButtonSensitivity() {
@@ -1500,7 +1572,9 @@ export const ScreenshotUI = GObject.registerClass({
         if (mode === UIMode.SCREENCAST && !this._screencastSupported)
             return;
 
+        this._currentMode = mode;
         this._castButton.checked = mode === UIMode.SCREENCAST;
+        this._syncCastButton();
 
         if (!this.visible) {
             // Screenshot UI is opening from completely closed state
@@ -1620,6 +1694,8 @@ export const ScreenshotUI = GObject.registerClass({
         this._areaSelector.reset();
         for (const selector of this._windowSelectors)
             selector.reset();
+
+        this.emit('closed');
     }
 
     close(instantly = false) {
@@ -1802,7 +1878,7 @@ export const ScreenshotUI = GObject.registerClass({
 
     _onCaptureButtonClicked() {
         if (this._shotButton.checked) {
-            this._saveScreenshot();
+            this._saveScreenshot().catch(logError);
             this.close();
         } else {
             // Screencast closes the UI on its own.
@@ -1810,7 +1886,9 @@ export const ScreenshotUI = GObject.registerClass({
         }
     }
 
-    _saveScreenshot() {
+    async _saveScreenshot() {
+        let file = null;
+
         if (this._selectionButton.checked || this._screenButton.checked) {
             const content = this._stageScreenshot.get_content();
             if (!content)
@@ -1823,15 +1901,19 @@ export const ScreenshotUI = GObject.registerClass({
             if (!this._cursor.visible)
                 cursorTexture = null;
 
-            captureScreenshot(
-                texture, geometry, this._scale,
-                {
-                    texture: cursorTexture ?? null,
-                    x: this._cursor.x * this._scale,
-                    y: this._cursor.y * this._scale,
-                    scale: this._cursorScale,
-                }
-            ).catch(e => logError(e, 'Error capturing screenshot'));
+            try {
+                file = await captureScreenshot(
+                    texture, geometry, this._scale,
+                    {
+                        texture: cursorTexture ?? null,
+                        x: this._cursor.x * this._scale,
+                        y: this._cursor.y * this._scale,
+                        scale: this._cursorScale,
+                    }
+                );
+            } catch (e) {
+                logError(e, 'Error capturing screenshot');
+            }
         } else if (this._windowButton.checked) {
             const window =
                 this._windowSelectors.flatMap(selector => selector.windows())
@@ -1849,21 +1931,28 @@ export const ScreenshotUI = GObject.registerClass({
             if (!this._cursor.visible)
                 cursorTexture = null;
 
-            captureScreenshot(
-                texture,
-                null,
-                window.bufferScale,
-                {
-                    texture: cursorTexture ?? null,
-                    x: window.cursorPoint.x * window.bufferScale,
-                    y: window.cursorPoint.y * window.bufferScale,
-                    scale: this._cursorScale,
-                }
-            ).catch(e => logError(e, 'Error capturing screenshot'));
+            try {
+                file = await captureScreenshot(
+                    texture,
+                    null,
+                    window.bufferScale,
+                    {
+                        texture: cursorTexture ?? null,
+                        x: window.cursorPoint.x * window.bufferScale,
+                        y: window.cursorPoint.y * window.bufferScale,
+                        scale: this._cursorScale,
+                    }
+                );
+            } catch (e) {
+                logError(e, 'Error capturing screenshot');
+            }
         }
+
+        if (file)
+            this.emit('screenshot-taken', file);
     }
 
-    async _startScreencast() {
+    async _startScreencast(nRetries = 0) {
         if (this._windowButton.checked)
             return; // TODO
 
@@ -1897,9 +1986,12 @@ export const ScreenshotUI = GObject.registerClass({
         // Set this before calling the method as the screen recording indicator
         // will check it before the success callback fires.
         this._setScreencastInProgress(true);
+        let retry = false;
 
         try {
-            const [success, path] = await method(
+            this._screencastStarting = true;
+
+            const [, path] = await method(
                 GLib.build_filenamev([
                     /* Translators: this is the folder where recorded
                        screencasts are stored. */
@@ -1911,16 +2003,24 @@ export const ScreenshotUI = GObject.registerClass({
                     _('Screencast from %d %t.webm'),
                 ]),
                 {'draw-cursor': new GLib.Variant('b', drawCursor)});
-            if (!success)
-                throw new Error();
+
             this._screencastPath = path;
         } catch (error) {
-            this._setScreencastInProgress(false);
-            const {message} = error;
-            if (message)
-                log(`Error starting screencast: ${message}`);
+            // Recorder service disconnected without reply -> service crash
+            // That should have blocklisted the pipeline that caused the crash,
+            // so try again.
+            if (error.matches(Gio.DBusError, Gio.DBusError.NO_REPLY) && nRetries < 2)
+                retry = true;
             else
-                log('Error starting screencast');
+                this._screencastFailed(ScreencastPhase.STARTUP, error);
+        }
+
+        delete this._screencastStarting;
+
+        if (retry) {
+            console.log('Screencast service crashed during startup, trying again');
+            this._setScreencastInProgress(false);
+            this._startScreencast(nRetries + 1);
         }
     }
 
@@ -1949,50 +2049,77 @@ export const ScreenshotUI = GObject.registerClass({
         this._showNotification(_('Screencast recorded'));
     }
 
-    _screencastFailed() {
+    _screencastFailed(phase, error) {
+        console.error(`Screencast failed during phase ${phase}: ${error}`);
+
         this._setScreencastInProgress(false);
 
-        // Translators: notification title.
-        this._showNotification(_('Screencast ended unexpectedly'));
+        switch (phase) {
+        case ScreencastPhase.STARTUP:
+            delete this._screencastPath;
+
+            // Translators: notification title.
+            this._showNotification(_('Screencast failed to start'));
+            break;
+
+        case ScreencastPhase.RECORDING:
+            if (error.matches(ScreencastErrors, ScreencastError.OUT_OF_DISK_SPACE)) {
+                // Translators: notification title.
+                this._showNotification(_('Screencast ended: Out of disk space'));
+            } else if (error.matches(ScreencastErrors, ScreencastError.SERVICE_CRASH)) {
+                // We can encourage user to try again on service crashes since the
+                // recorder will auto-blocklist the pipeline that crashed.
+
+                // Translators: notification title.
+                this._showNotification(_('Screencast ended unexpectedly, please try again'));
+            } else {
+                // Translators: notification title.
+                this._showNotification(_('Screencast ended unexpectedly'));
+            }
+
+            break;
+        }
     }
 
     _showNotification(title) {
-        // Show a notification.
-        const file = Gio.file_new_for_path(this._screencastPath);
-
-        const source = new MessageTray.Source(
+        const source = new MessageTray.Source({
             // Translators: notification source name.
-            _('Screenshot'),
-            'screencast-recorded-symbolic'
-        );
+            title: _('Screenshot'),
+            iconName: 'screencast-recorded-symbolic',
+        });
         const notification = new MessageTray.Notification(
             source,
             title,
             // Translators: notification body when a screencast was recorded.
-            _('Click here to view the video.')
+            this._screencastPath ? _('Click here to view the video.') : ''
         );
-        // Translators: button on the screencast notification.
-        notification.addAction(_('Show in Files'), () => {
-            const app =
-                Gio.app_info_get_default_for_type('inode/directory', false);
-
-            if (app === null) {
-                // It may be null e.g. in a toolbox without nautilus.
-                log('Error showing in files: no default app set for inode/directory');
-                return;
-            }
-
-            app.launch([file], global.create_app_launch_context(0, -1));
-        });
-        notification.connect('activated', () => {
-            try {
-                Gio.app_info_launch_default_for_uri(
-                    file.get_uri(), global.create_app_launch_context(0, -1));
-            } catch (err) {
-                logError(err, 'Error opening screencast');
-            }
-        });
         notification.setTransient(true);
+
+        if (this._screencastPath) {
+            const file = Gio.file_new_for_path(this._screencastPath);
+
+            // Translators: button on the screencast notification.
+            notification.addAction(_('Show in Files'), () => {
+                const app =
+                    Gio.app_info_get_default_for_type('inode/directory', false);
+
+                if (app === null) {
+                    // It may be null e.g. in a toolbox without nautilus.
+                    log('Error showing in files: no default app set for inode/directory');
+                    return;
+                }
+
+                app.launch([file], global.create_app_launch_context(0, -1));
+            });
+            notification.connect('activated', () => {
+                try {
+                    Gio.app_info_launch_default_for_uri(
+                        file.get_uri(), global.create_app_launch_context(0, -1));
+                } catch (err) {
+                    logError(err, 'Error opening screencast');
+                }
+            });
+        }
 
         Main.messageTray.add(source);
         source.showNotification(notification);
@@ -2197,11 +2324,11 @@ function _storeScreenshot(bytes, pixbuf) {
     );
 
     // Show a notification.
-    const source = new MessageTray.Source(
+    const source = new MessageTray.Source({
         // Translators: notification source name.
-        _('Screenshot'),
-        'screenshot-recorded-symbolic'
-    );
+        title: _('Screenshot'),
+        iconName: 'screenshot-recorded-symbolic',
+    });
     const notification = new MessageTray.Notification(
         source,
         // Translators: notification title.
@@ -2238,6 +2365,8 @@ function _storeScreenshot(bytes, pixbuf) {
     notification.setTransient(true);
     Main.messageTray.add(source);
     source.showNotification(notification);
+
+    return file;
 }
 
 /**
@@ -2271,7 +2400,7 @@ export async function captureScreenshot(texture, geometry, scale, cursor) {
     );
 
     stream.close(null);
-    _storeScreenshot(stream.steal_as_bytes(), pixbuf);
+    return _storeScreenshot(stream.steal_as_bytes(), pixbuf);
 }
 
 /**
@@ -2540,6 +2669,34 @@ export class ScreenshotService {
         }
     }
 
+    async InteractiveScreenshotAsync(params, invocation) {
+        try {
+            await this._senderChecker.checkInvocation(invocation);
+        } catch (e) {
+            invocation.return_gerror(e);
+            return;
+        }
+
+        Main.screenshotUI.connectObject(
+            'screenshot-taken', (ui, file) => {
+                Main.screenshotUI.disconnectObject(invocation);
+                invocation.return_value(new GLib.Variant('(bs)', [true, file.get_uri()]));
+            },
+            'closed', () => {
+                Main.screenshotUI.disconnectObject(invocation);
+                invocation.return_value(new GLib.Variant('(bs)', [false, '']));
+            },
+            invocation);
+
+
+        try {
+            Main.screenshotUI.open(UIMode.SCREENSHOT_ONLY);
+        } catch (e) {
+            Main.screenshotUI.disconnectObject(invocation);
+            invocation.return_value(new GLib.Variant('(bs)', [false, '']));
+        }
+    }
+
     async SelectAreaAsync(params, invocation) {
         try {
             await this._senderChecker.checkInvocation(invocation);
@@ -2626,7 +2783,7 @@ class SelectArea extends St.Widget {
             x: 0,
             y: 0,
         });
-        Main.uiGroup.add_actor(this);
+        Main.uiGroup.add_child(this);
 
         this._grabHelper = new GrabHelper.GrabHelper(this);
 
@@ -2640,7 +2797,7 @@ class SelectArea extends St.Widget {
             style_class: 'select-area-rubberband',
             visible: false,
         });
-        this.add_actor(this._rubberband);
+        this.add_child(this._rubberband);
     }
 
     async selectAsync() {
@@ -2854,7 +3011,7 @@ class PickPixel extends St.Widget {
         this._color = null;
         this._inPick = false;
 
-        Main.uiGroup.add_actor(this);
+        Main.uiGroup.add_child(this);
 
         this._grabHelper = new GrabHelper.GrabHelper(this);
 
@@ -2887,7 +3044,7 @@ class PickPixel extends St.Widget {
             effect: this._recolorEffect,
             visible: false,
         });
-        Main.uiGroup.add_actor(this._previewCursor);
+        Main.uiGroup.add_child(this._previewCursor);
     }
 
     async pickAsync() {

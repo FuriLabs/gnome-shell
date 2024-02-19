@@ -166,6 +166,9 @@ export const CloseDialog = GObject.registerClass({
         this._addWindowEffect();
         this._initDialog();
 
+        global.connectObject(
+            'shutdown', () => this._onWait(), this._dialog);
+
         this._dialog._dialog.scale_y = 0;
         this._dialog._dialog.set_pivot_point(0.5, 0.5);
 
@@ -205,7 +208,11 @@ export const CloseDialog = GObject.registerClass({
     }
 
     vfunc_focus() {
-        if (this._dialog)
-            this._dialog.grab_key_focus();
+        if (!this._dialog)
+            return;
+
+        const keyFocus = global.stage.key_focus;
+        if (!keyFocus || !this._dialog.contains(keyFocus))
+            this._dialog.initialKeyFocus.grab_key_focus();
     }
 });

@@ -30,9 +30,7 @@ const FADE_OUT_TRANSLATION = 200;
 const FADE_OUT_SCALE = 0.3;
 
 const BLUR_BRIGHTNESS = 0.65;
-const BLUR_SIGMA = 45;
-
-const SUMMARY_ICON_SIZE = 32;
+const BLUR_RADIUS = 90;
 
 const NotificationsBox = GObject.registerClass({
     Signals: {'wake-up-screen': {}},
@@ -43,13 +41,14 @@ const NotificationsBox = GObject.registerClass({
             name: 'unlockDialogNotifications',
         });
 
-        this._scrollView = new St.ScrollView({hscrollbar_policy: St.PolicyType.NEVER});
         this._notificationBox = new St.BoxLayout({
             vertical: true,
             style_class: 'unlock-dialog-notifications-container',
         });
-        this._scrollView.add_actor(this._notificationBox);
 
+        this._scrollView = new St.ScrollView({
+            child: this._notificationBox,
+        });
         this.add_child(this._scrollView);
 
         this._settings = new Gio.Settings({
@@ -82,8 +81,12 @@ const NotificationsBox = GObject.registerClass({
     }
 
     _makeNotificationSource(source, box) {
-        let sourceActor = new MessageTray.SourceActor(source, SUMMARY_ICON_SIZE);
-        box.add_child(sourceActor);
+        let iconActor = new St.Icon({
+            style_class: 'unlock-dialog-notification-icon',
+            fallback_icon_name: 'application-x-executable',
+        });
+        source.bind_property('icon', iconActor, 'gicon', GObject.BindingFlags.SYNC_CREATE);
+        box.add_child(iconActor);
 
         let textBox = new St.BoxLayout({
             x_expand: true,
@@ -98,7 +101,7 @@ const NotificationsBox = GObject.registerClass({
             x_expand: true,
             x_align: Clutter.ActorAlign.START,
         });
-        textBox.add(title);
+        textBox.add_child(title);
 
         let count = source.unseenCount;
         let countLabel = new St.Label({
@@ -106,16 +109,19 @@ const NotificationsBox = GObject.registerClass({
             visible: count > 1,
             style_class: 'unlock-dialog-notification-count-text',
         });
-        textBox.add(countLabel);
+        textBox.add_child(countLabel);
 
         box.visible = count !== 0;
         return [title, countLabel];
     }
 
     _makeNotificationDetailedSource(source, box) {
-        let sourceActor = new MessageTray.SourceActor(source, SUMMARY_ICON_SIZE);
-        let sourceBin = new St.Bin({child: sourceActor});
-        box.add(sourceBin);
+        let iconActor = new St.Icon({
+            style_class: 'unlock-dialog-notification-icon',
+            fallback_icon_name: 'application-x-executable',
+        });
+        source.bind_property('icon', iconActor, 'gicon', GObject.BindingFlags.SYNC_CREATE);
+        box.add_child(iconActor);
 
         let textBox = new St.BoxLayout({vertical: true});
         box.add_child(textBox);
@@ -124,7 +130,7 @@ const NotificationsBox = GObject.registerClass({
             text: source.title.replace(/\n/g, ' '),
             style_class: 'unlock-dialog-notification-label',
         });
-        textBox.add(title);
+        textBox.add_child(title);
 
         let visible = false;
         for (let i = 0; i < source.notifications.length; i++) {
@@ -143,7 +149,7 @@ const NotificationsBox = GObject.registerClass({
 
             let label = new St.Label({style_class: 'unlock-dialog-notification-count-text'});
             label.clutter_text.set_markup(`<b>${n.title}</b> ${body}`);
-            textBox.add(label);
+            textBox.add_child(label);
 
             visible = true;
         }
@@ -584,8 +590,10 @@ export const UnlockDialog = GObject.registerClass({
         this._lockdownSettings.connect('changed::disable-user-switching',
             this._updateUserSwitchVisibility.bind(this));
 
-        this._user.connectObject('notify::is-loaded',
-            this._updateUserSwitchVisibility.bind(this), this);
+        this._user.connectObject(
+            'notify::is-loaded', () => this._updateUserSwitchVisibility(),
+            'notify::has-multiple-users', () => this._updateUserSwitchVisibility(),
+            this);
 
         this._updateUserSwitchVisibility();
 
@@ -667,7 +675,7 @@ export const UnlockDialog = GObject.registerClass({
             if (effect) {
                 effect.set({
                     brightness: BLUR_BRIGHTNESS,
-                    sigma: BLUR_SIGMA * themeContext.scale_factor,
+                    radius: BLUR_RADIUS * themeContext.scale_factor,
                 });
             }
         }
@@ -849,6 +857,7 @@ export const UnlockDialog = GObject.registerClass({
 
     _updateUserSwitchVisibility() {
         this._otherUserButton.visible = this._userManager.can_switch() &&
+            this._userManager.has_multiple_users &&
             this._screenSaverSettings.get_boolean('user-switch-enabled') &&
             !this._lockdownSettings.get_boolean('disable-user-switching');
     }

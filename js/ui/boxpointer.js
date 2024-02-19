@@ -44,10 +44,10 @@ export const BoxPointer = GObject.registerClass({
         this._arrowOrigin = 0;
         this._arrowActor = null;
         this.bin = new St.Bin(binProperties);
-        this.add_actor(this.bin);
+        this.add_child(this.bin);
         this._border = new St.DrawingArea();
         this._border.connect('repaint', this._drawBorder.bind(this));
-        this.add_actor(this._border);
+        this.add_child(this._border);
         this.set_child_above_sibling(this.bin, this._border);
         this._sourceAlignment = 0.5;
         this._muteKeys = true;
@@ -422,13 +422,13 @@ export const BoxPointer = GObject.registerClass({
         const [hasColor, bgColor] =
             themeNode.lookup_color('-arrow-background-color', false);
         if (hasColor) {
-            Clutter.cairo_set_source_color(cr, bgColor);
+            cr.setSourceColor(bgColor);
             cr.fillPreserve();
         }
 
         if (borderWidth > 0) {
             let borderColor = themeNode.get_color('-arrow-border-color');
-            Clutter.cairo_set_source_color(cr, borderColor);
+            cr.setSourceColor(borderColor);
             cr.setLineWidth(borderWidth);
             cr.stroke();
         }
@@ -446,13 +446,13 @@ export const BoxPointer = GObject.registerClass({
                 () => (this._sourceActor = null), this);
         }
 
-        this._arrowAlignment = alignment;
+        this._arrowAlignment = Math.clamp(alignment, 0.0, 1.0);
 
         this.queue_relayout();
     }
 
     setSourceAlignment(alignment) {
-        this._sourceAlignment = alignment;
+        this._sourceAlignment = Math.clamp(alignment, 0.0, 1.0);
 
         if (!this._sourceActor)
             return;
@@ -533,6 +533,9 @@ export const BoxPointer = GObject.registerClass({
         switch (this._arrowSide) {
         case St.Side.TOP:
         case St.Side.BOTTOM:
+            if (this.text_direction === Clutter.TextDirection.RTL)
+                alignment = 1.0 - alignment;
+
             resX = sourceCenterX - (halfMargin + (natWidth - margin) * alignment);
 
             resX = Math.max(resX, workarea.x + padding);

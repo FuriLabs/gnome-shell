@@ -225,8 +225,8 @@ export const LayoutManager = GObject.registerClass({
 
         global.stage.add_child(this.uiGroup);
 
-        global.stage.remove_actor(global.window_group);
-        this.uiGroup.add_actor(global.window_group);
+        global.stage.remove_child(global.window_group);
+        this.uiGroup.add_child(global.window_group);
         global.connect('shutdown', () => {
             const monitorManager = global.backend.get_monitor_manager();
             monitorManager.disconnectObject(this);
@@ -234,12 +234,12 @@ export const LayoutManager = GObject.registerClass({
             const adoptedUiGroupActors = [
                 global.window_group,
                 global.top_window_group,
-                Meta.get_feedback_group_for_display(global.display),
+                global.compositor.get_feedback_group(),
             ];
 
             for (let adoptedActor of adoptedUiGroupActors) {
-                this.uiGroup.remove_actor(adoptedActor);
-                global.stage.add_actor(adoptedActor);
+                this.uiGroup.remove_child(adoptedActor);
+                global.stage.add_child(adoptedActor);
             }
 
             this._destroyHotCorners();
@@ -250,9 +250,9 @@ export const LayoutManager = GObject.registerClass({
         // Using addChrome() to add actors to uiGroup will position actors
         // underneath the top_window_group.
         // To insert actors at the top of uiGroup, we use addTopChrome() or
-        // add the actor directly using uiGroup.add_actor().
-        global.stage.remove_actor(global.top_window_group);
-        this.uiGroup.add_actor(global.top_window_group);
+        // add the actor directly using uiGroup.add_child().
+        global.stage.remove_child(global.top_window_group);
+        this.uiGroup.add_child(global.top_window_group);
 
         this.overviewGroup = new St.Widget({
             name: 'overviewGroup',
@@ -292,7 +292,7 @@ export const LayoutManager = GObject.registerClass({
             name: 'modalDialogGroup',
             layout_manager: new Clutter.BinLayout(),
         });
-        this.uiGroup.add_actor(this.modalDialogGroup);
+        this.uiGroup.add_child(this.modalDialogGroup);
 
         this.keyboardBox = new St.BoxLayout({
             name: 'keyboardBox',
@@ -311,11 +311,11 @@ export const LayoutManager = GObject.registerClass({
         // A dummy actor that tracks the mouse or text cursor, based on the
         // position and size set in setDummyCursorGeometry.
         this.dummyCursor = new St.Widget({width: 0, height: 0, opacity: 0});
-        this.uiGroup.add_actor(this.dummyCursor);
+        this.uiGroup.add_child(this.dummyCursor);
 
-        let feedbackGroup = Meta.get_feedback_group_for_display(global.display);
-        global.stage.remove_actor(feedbackGroup);
-        this.uiGroup.add_actor(feedbackGroup);
+        const feedbackGroup = global.compositor.get_feedback_group();
+        global.stage.remove_child(feedbackGroup);
+        this.uiGroup.add_child(feedbackGroup);
 
         this._backgroundGroup = new Meta.BackgroundGroup();
         global.window_group.add_child(this._backgroundGroup);
@@ -593,7 +593,7 @@ export const LayoutManager = GObject.registerClass({
             let primary = this.primaryMonitor;
 
             this._rightPanelBarrier = new Meta.Barrier({
-                display: global.display,
+                backend: global.backend,
                 x1: primary.x + primary.width, y1: primary.y,
                 x2: primary.x + primary.width, y2: primary.y + this.panelBox.height,
                 directions: Meta.BarrierDirection.NEGATIVE_X,
@@ -856,7 +856,7 @@ export const LayoutManager = GObject.registerClass({
     // monitor (it will be hidden whenever a fullscreen window is visible,
     // and shown otherwise)
     addChrome(actor, params) {
-        this.uiGroup.add_actor(actor);
+        this.uiGroup.add_child(actor);
         if (this.uiGroup.contains(global.top_window_group))
             this.uiGroup.set_child_below_sibling(actor, global.top_window_group);
         this._trackActor(actor, params);
@@ -868,7 +868,7 @@ export const LayoutManager = GObject.registerClass({
     //
     // Like addChrome(), but adds @actor above all windows, including popups.
     addTopChrome(actor, params) {
-        this.uiGroup.add_actor(actor);
+        this.uiGroup.add_child(actor);
         this._trackActor(actor, params);
     }
 
@@ -916,7 +916,7 @@ export const LayoutManager = GObject.registerClass({
     //
     // Removes @actor from the chrome
     removeChrome(actor) {
-        this.uiGroup.remove_actor(actor);
+        this.uiGroup.remove_child(actor);
         this._untrackActor(actor);
     }
 
@@ -1190,23 +1190,23 @@ class HotCorner extends Clutter.Actor {
         if (size > 0) {
             if (Clutter.get_default_text_direction() === Clutter.TextDirection.RTL) {
                 this._verticalBarrier = new Meta.Barrier({
-                    display: global.display,
+                    backend: global.backend,
                     x1: this._x, x2: this._x, y1: this._y, y2: this._y + size,
                     directions: Meta.BarrierDirection.NEGATIVE_X,
                 });
                 this._horizontalBarrier = new Meta.Barrier({
-                    display: global.display,
+                    backend: global.backend,
                     x1: this._x - size, x2: this._x, y1: this._y, y2: this._y,
                     directions: Meta.BarrierDirection.POSITIVE_Y,
                 });
             } else {
                 this._verticalBarrier = new Meta.Barrier({
-                    display: global.display,
+                    backend: global.backend,
                     x1: this._x, x2: this._x, y1: this._y, y2: this._y + size,
                     directions: Meta.BarrierDirection.POSITIVE_X,
                 });
                 this._horizontalBarrier = new Meta.Barrier({
-                    display: global.display,
+                    backend: global.backend,
                     x1: this._x, x2: this._x + size, y1: this._y, y2: this._y,
                     directions: Meta.BarrierDirection.POSITIVE_Y,
                 });
@@ -1218,7 +1218,8 @@ class HotCorner extends Clutter.Actor {
     }
 
     _setupFallbackCornerIfNeeded(layoutManager) {
-        if (!global.display.supports_extended_barriers()) {
+        const {capabilities} = global.backend;
+        if ((capabilities & Meta.BackendCapabilities.BARRIERS) === 0) {
             this.set({
                 name: 'hot-corner-environs',
                 x: this._x,

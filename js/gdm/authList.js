@@ -84,20 +84,18 @@ export const AuthList = GObject.registerClass({
         this.label = new St.Label({style_class: 'login-dialog-auth-list-title'});
         this.add_child(this.label);
 
-        this._scrollView = new St.ScrollView({
-            style_class: 'login-dialog-auth-list-view',
-        });
-        this._scrollView.set_policy(
-            St.PolicyType.NEVER, St.PolicyType.AUTOMATIC);
-        this.add_child(this._scrollView);
-
         this._box = new St.BoxLayout({
             vertical: true,
             style_class: 'login-dialog-auth-list',
             pseudo_class: 'expanded',
         });
 
-        this._scrollView.add_actor(this._box);
+        this._scrollView = new St.ScrollView({
+            style_class: 'login-dialog-auth-list-view',
+            child: this._box,
+        });
+        this.add_child(this._scrollView);
+
         this._items = new Map();
 
         this.connect('key-focus-in', this._moveFocusToItems.bind(this));
@@ -129,7 +127,7 @@ export const AuthList = GObject.registerClass({
     scrollToItem(item) {
         let box = item.get_allocation_box();
 
-        let adjustment = this._scrollView.get_vscroll_bar().get_adjustment();
+        const adjustment = this._scrollView.vadjustment;
 
         let value = (box.y1 + adjustment.step_increment / 2.0) - (adjustment.page_size / 2.0);
         adjustment.ease(value, {
@@ -142,7 +140,7 @@ export const AuthList = GObject.registerClass({
         this.removeItem(key);
 
         let item = new AuthListItem(key, text);
-        this._box.add(item);
+        this._box.add_child(item);
 
         this._items.set(key, item);
 

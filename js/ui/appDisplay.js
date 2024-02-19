@@ -520,17 +520,16 @@ var BaseAppView = GObject.registerClass({
             y_expand: true,
             reactive: true,
             enable_mouse_scrolling: false,
+            hscrollbar_policy: St.PolicyType.EXTERNAL,
+            vscrollbar_policy: St.PolicyType.NEVER,
+            child: this._grid,
         });
-        this._scrollView.set_policy(St.PolicyType.EXTERNAL, St.PolicyType.NEVER);
 
         this._canScroll = true; // limiting scrolling speed
         this._scrollTimeoutId = 0;
         this._scrollView.connect('scroll-event', this._onScroll.bind(this));
 
-        this._scrollView.add_actor(this._grid);
-
-        const scroll = this._scrollView.hscroll;
-        this._adjustment = scroll.adjustment;
+        this._adjustment = this._scrollView.hadjustment;
         this._adjustment.connect('notify::value', adj => {
             const value = adj.value / adj.page_size;
             this._pageIndicators.setCurrentPosition(value);
@@ -2325,7 +2324,7 @@ export const FolderIcon = GObject.registerClass({
 }, class FolderIcon extends AppViewItem {
     _init(id, path, parentView) {
         super._init({
-            style_class: 'app-well-app app-folder',
+            style_class: 'overview-tile app-folder',
             button_mask: St.ButtonMask.ONE,
             toggle_mode: true,
             can_focus: true,
@@ -2375,7 +2374,7 @@ export const FolderIcon = GObject.registerClass({
 
     open() {
         this._ensureFolderDialog();
-        this.view._scrollView.vscroll.adjustment.value = 0;
+        this.view._scrollView.vadjustment.value = 0;
         this._dialog.popup();
     }
 
@@ -2532,16 +2531,16 @@ export const AppFolderDialog = GObject.registerClass({
             style_class: 'app-folder-dialog',
             x_expand: true,
             y_expand: true,
-            x_align: Clutter.ActorAlign.FILL,
-            y_align: Clutter.ActorAlign.FILL,
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.CENTER,
             vertical: true,
         });
 
         this.child = new St.Bin({
             style_class: 'app-folder-dialog-container',
             child: this._viewBox,
-            x_align: Clutter.ActorAlign.CENTER,
-            y_align: Clutter.ActorAlign.CENTER,
+            x_align: Clutter.ActorAlign.FILL,
+            y_align: Clutter.ActorAlign.FILL,
         });
 
         this._addFolderNameEntry();
@@ -2608,7 +2607,7 @@ export const AppFolderDialog = GObject.registerClass({
 
         // Edit button
         this._editButton = new St.Button({
-            style_class: 'edit-folder-button',
+            style_class: 'icon-button',
             button_mask: St.ButtonMask.ONE,
             toggle_mode: true,
             reactive: true,
@@ -2993,7 +2992,7 @@ export const AppIcon = GObject.registerClass({
         const expandTitleOnHover = appIconParams['expandTitleOnHover'];
         delete iconParams['expandTitleOnHover'];
 
-        super._init({style_class: 'app-well-app'}, isDraggable, expandTitleOnHover);
+        super._init({style_class: 'overview-tile'}, isDraggable, expandTitleOnHover);
 
         this.app = app;
         this._id = app.get_id();
@@ -3015,13 +3014,14 @@ export const AppIcon = GObject.registerClass({
         this._iconContainer.add_child(this.icon);
 
         this._dot = new St.Widget({
-            style_class: 'app-well-app-running-dot',
+            style_class: 'app-grid-running-dot',
             layout_manager: new Clutter.BinLayout(),
             x_expand: true,
             y_expand: true,
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.END,
         });
+        this._dot.translationY = 8;
         this._iconContainer.add_child(this._dot);
 
         this.label_actor = this.icon.label;
@@ -3143,7 +3143,7 @@ export const AppIcon = GObject.registerClass({
             Main.overview.connectObject('hiding',
                 () => this._menu.close(), this);
 
-            Main.uiGroup.add_actor(this._menu.actor);
+            Main.uiGroup.add_child(this._menu.actor);
             this._menuManager.addMenu(this._menu);
         }
 

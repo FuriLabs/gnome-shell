@@ -1,6 +1,7 @@
 // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 
 import Clutter from 'gi://Clutter';
+import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
@@ -12,7 +13,7 @@ import * as ModalDialog from './modalDialog.js';
 
 /** @enum {number} */
 const DialogResponse = {
-    NO_THANKS: 0,
+    SKIP: 0,
     TAKE_TOUR: 1,
 };
 
@@ -34,9 +35,22 @@ class WelcomeDialog extends ModalDialog.ModalDialog {
         return super.open();
     }
 
-    _buildLayout() {
+    _getOSName() {
+        const prettyName = GLib.get_os_info('PRETTY_NAME');
+        if (prettyName)
+            return prettyName;
+
+        const name = GLib.get_os_info('NAME');
+        const version = GLib.get_os_info('VERSION');
+        if (name)
+            return version ? `${name} ${version}` : name;
+
         const [majorVersion] = Config.PACKAGE_VERSION.split('.');
-        const title = _('Welcome to GNOME %s').format(majorVersion);
+        return _('GNOME %s').format(majorVersion);
+    }
+
+    _buildLayout() {
+        const title = _('Welcome to %s').format(this._getOSName());
         const description = _('If you want to learn your way around, check out the tour.');
         const content = new Dialog.MessageDialogContent({title, description});
 
@@ -46,8 +60,8 @@ class WelcomeDialog extends ModalDialog.ModalDialog {
         this.contentLayout.add_child(content);
 
         this.addButton({
-            label: _('No Thanks'),
-            action: () => this._sendResponse(DialogResponse.NO_THANKS),
+            label: _('Skip'),
+            action: () => this._sendResponse(DialogResponse.SKIP),
             key: Clutter.KEY_Escape,
         });
         this.addButton({

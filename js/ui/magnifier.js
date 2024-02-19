@@ -109,7 +109,7 @@ export class Magnifier extends Signals.EventEmitter {
         this._mouseSprite.content = new MouseSpriteContent();
 
         this._cursorRoot = new Clutter.Actor();
-        this._cursorRoot.add_actor(this._mouseSprite);
+        this._cursorRoot.add_child(this._mouseSprite);
 
         // Create the first ZoomRegion and initialize it according to the
         // magnification settings.
@@ -250,7 +250,7 @@ export class Magnifier extends Signals.EventEmitter {
      * @returns {boolean} whether the magnifier is currently tracking the mouse
      */
     isTrackingMouse() {
-        return !!this._mouseTrackingId;
+        return !!this._pointerWatch;
     }
 
     /**
@@ -404,21 +404,6 @@ export class Magnifier extends Signals.EventEmitter {
         if (this._crossHairs) {
             let [res_, clutterColor] = Clutter.Color.from_string(color);
             this._crossHairs.setColor(clutterColor);
-        }
-    }
-
-    /**
-     * getCrosshairsColor:
-     * Get the color of the crosshairs.
-     *
-     * @returns {string} The color as a string, e.g. '#0000ffff' or 'blue'.
-     */
-    getCrosshairsColor() {
-        if (this._crossHairs) {
-            let clutterColor = this._crossHairs.getColor();
-            return clutterColor.to_string();
-        } else {
-            return '#00000000';
         }
     }
 
@@ -1469,21 +1454,23 @@ class ZoomRegion {
     // Private methods //
 
     _createActors() {
+        // Add a group to clip the contents of the magnified view.
+        const mainGroup = new Clutter.Actor({clip_to_allocation: true});
+
         // The root actor for the zoom region
-        this._magView = new St.Bin({style_class: 'magnifier-zoom-region'});
-        global.stage.add_actor(this._magView);
+        this._magView = new St.Bin({
+            style_class: 'magnifier-zoom-region',
+            child: mainGroup,
+        });
+        global.stage.add_child(this._magView);
 
         // hide the magnified region from CLUTTER_PICK_ALL
         Shell.util_set_hidden_from_pick(this._magView, true);
 
-        // Add a group to clip the contents of the magnified view.
-        let mainGroup = new Clutter.Actor({clip_to_allocation: true});
-        this._magView.set_child(mainGroup);
-
         // Add a background for when the magnified uiGroup is scrolled
         // out of view (don't want to see desktop showing through).
         this._background = new Background.SystemBackground();
-        mainGroup.add_actor(this._background);
+        mainGroup.add_child(this._background);
 
         // Clone the group that contains all of UI on the screen.  This is the
         // chrome, the windows, etc.
@@ -1491,7 +1478,7 @@ class ZoomRegion {
             source: Main.uiGroup,
             clip_to_allocation: true,
         });
-        mainGroup.add_actor(this._uiGroupClone);
+        mainGroup.add_child(this._uiGroupClone);
 
         // Add either the given mouseSourceActor to the ZoomRegion, or a clone of
         // it.
@@ -1499,7 +1486,7 @@ class ZoomRegion {
             this._mouseActor = new Clutter.Clone({source: this._mouseSourceActor});
         else
             this._mouseActor = this._mouseSourceActor;
-        mainGroup.add_actor(this._mouseActor);
+        mainGroup.add_child(this._mouseActor);
 
         if (this._crossHairs)
             this._crossHairsActor = this._crossHairs.addToZoomRegion(this, this._mouseActor);
@@ -1516,7 +1503,7 @@ class ZoomRegion {
 
     _destroyActors() {
         if (this._mouseActor === this._mouseSourceActor)
-            this._mouseActor.get_parent().remove_actor(this._mouseActor);
+            this._mouseActor.get_parent().remove_child(this._mouseActor);
         if (this._crossHairs)
             this._crossHairs.removeFromParent(this._crossHairsActor);
 
@@ -1833,10 +1820,10 @@ class Crosshairs extends Clutter.Actor {
         this._horizRightHair = new Clutter.Actor();
         this._vertTopHair = new Clutter.Actor();
         this._vertBottomHair = new Clutter.Actor();
-        this.add_actor(this._horizLeftHair);
-        this.add_actor(this._horizRightHair);
-        this.add_actor(this._vertTopHair);
-        this.add_actor(this._vertBottomHair);
+        this.add_child(this._horizLeftHair);
+        this.add_child(this._horizRightHair);
+        this.add_child(this._vertTopHair);
+        this.add_child(this._vertBottomHair);
         this._clipSize = [0, 0];
         this._clones = [];
         this.reCenter();
@@ -1887,7 +1874,7 @@ class Crosshairs extends Clutter.Actor {
                         GObject.BindingFlags.SYNC_CREATE);
                 }
 
-                container.add_actor(crosshairsActor);
+                container.add_child(crosshairsActor);
                 container.set_child_above_sibling(magnifiedMouse, crosshairsActor);
                 let [xMouse, yMouse] = magnifiedMouse.get_position();
                 let [crosshairsWidth, crosshairsHeight] = crosshairsActor.get_size();
@@ -1908,7 +1895,7 @@ class Crosshairs extends Clutter.Actor {
      */
     removeFromParent(childActor) {
         if (childActor === this)
-            childActor.get_parent().remove_actor(childActor);
+            childActor.get_parent().remove_child(childActor);
         else
             childActor.destroy();
     }
@@ -1924,16 +1911,6 @@ class Crosshairs extends Clutter.Actor {
         this._horizRightHair.background_color = clutterColor;
         this._vertTopHair.background_color = clutterColor;
         this._vertBottomHair.background_color = clutterColor;
-    }
-
-    /**
-     * getColor:
-     * Get the color of the crosshairs.
-     *
-     * @returns {ClutterColor} the crosshairs color
-     */
-    getColor() {
-        return this._horizLeftHair.get_color();
     }
 
     /**

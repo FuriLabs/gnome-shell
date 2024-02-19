@@ -391,7 +391,7 @@ export const TilePreview = GObject.registerClass(
 class TilePreview extends St.Widget {
     _init() {
         super._init();
-        global.window_group.add_actor(this);
+        global.window_group.add_child(this);
 
         this._reset();
         this._showing = false;
@@ -487,7 +487,7 @@ class ResizePopup extends St.Widget {
             y_expand: true,
         });
         this.add_child(this._label);
-        Main.uiGroup.add_actor(this);
+        Main.uiGroup.add_child(this);
     }
 
     set(rect, displayW, displayH) {
@@ -511,8 +511,6 @@ export class WindowManager {
         this._resizing = new Set();
         this._resizePending = new Set();
         this._destroying = new Set();
-
-        this._dimmedWindows = [];
 
         this._skippedActors = new Set();
 
@@ -819,6 +817,60 @@ export class WindowManager {
             Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
             this._switchToApplication.bind(this));
 
+        this.addKeybinding('open-new-window-application-1',
+            new Gio.Settings({schema_id: SHELL_KEYBINDINGS_SCHEMA}),
+            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+            this._openNewApplicationWindow.bind(this));
+
+        this.addKeybinding('open-new-window-application-2',
+            new Gio.Settings({schema_id: SHELL_KEYBINDINGS_SCHEMA}),
+            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+            this._openNewApplicationWindow.bind(this));
+
+        this.addKeybinding('open-new-window-application-3',
+            new Gio.Settings({schema_id: SHELL_KEYBINDINGS_SCHEMA}),
+            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+            this._openNewApplicationWindow.bind(this));
+
+        this.addKeybinding('open-new-window-application-4',
+            new Gio.Settings({schema_id: SHELL_KEYBINDINGS_SCHEMA}),
+            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+            this._openNewApplicationWindow.bind(this));
+
+        this.addKeybinding('open-new-window-application-5',
+            new Gio.Settings({schema_id: SHELL_KEYBINDINGS_SCHEMA}),
+            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+            this._openNewApplicationWindow.bind(this));
+
+        this.addKeybinding('open-new-window-application-6',
+            new Gio.Settings({schema_id: SHELL_KEYBINDINGS_SCHEMA}),
+            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+            this._openNewApplicationWindow.bind(this));
+
+        this.addKeybinding('open-new-window-application-7',
+            new Gio.Settings({schema_id: SHELL_KEYBINDINGS_SCHEMA}),
+            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+            this._openNewApplicationWindow.bind(this));
+
+        this.addKeybinding('open-new-window-application-8',
+            new Gio.Settings({schema_id: SHELL_KEYBINDINGS_SCHEMA}),
+            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+            this._openNewApplicationWindow.bind(this));
+
+        this.addKeybinding('open-new-window-application-9',
+            new Gio.Settings({schema_id: SHELL_KEYBINDINGS_SCHEMA}),
+            Meta.KeyBindingFlags.IGNORE_AUTOREPEAT,
+            Shell.ActionMode.NORMAL | Shell.ActionMode.OVERVIEW,
+            this._openNewApplicationWindow.bind(this));
+
         global.stage.connect('scroll-event', (stage, event) => {
             const allowedModes = Shell.ActionMode.NORMAL;
             if ((allowedModes & Main.actionMode) === 0)
@@ -874,15 +926,6 @@ export class WindowManager {
             this._stopX11Services(null);
 
             IBusManager.getIBusManager().restartDaemon();
-        });
-
-        Main.overview.connect('showing', () => {
-            for (let i = 0; i < this._dimmedWindows.length; i++)
-                this._undimWindow(this._dimmedWindows[i]);
-        });
-        Main.overview.connect('hiding', () => {
-            for (let i = 0; i < this._dimmedWindows.length; i++)
-                this._dimWindow(this._dimmedWindows[i]);
         });
 
         this._windowMenuManager = new WindowMenu.WindowMenuManager();
@@ -1070,6 +1113,21 @@ export class WindowManager {
         this._allowedKeybindings[name] = modes;
     }
 
+    _getAnimationWindowType(actor) {
+        const {metaWindow: window} = actor;
+        const {windowType} = window;
+
+        if (windowType !== Meta.WindowType.NORMAL ||
+            window.get_client_type() === Meta.WindowClientType.X11)
+            return windowType;
+
+        // wayland doesn't use the DIALOG type, but for
+        // animations we want transients to behave like ones
+        return window.get_transient_for() != null
+            ? Meta.WindowType.DIALOG
+            : windowType;
+    }
+
     _shouldAnimate() {
         const overviewOpen = Main.overview.visible && !Main.overview.closing;
         return !(overviewOpen || this._workspaceAnimation.gestureActive);
@@ -1085,7 +1143,7 @@ export class WindowManager {
         if (!actor.get_texture())
             return false;
 
-        let type = actor.meta_window.get_window_type();
+        const type = this._getAnimationWindowType(actor);
         return types.includes(type);
     }
 
@@ -1134,6 +1192,7 @@ export class WindowManager {
             }
 
             actor.ease({
+                opacity: 0,
                 scale_x: xScale,
                 scale_y: yScale,
                 x: xDest,
@@ -1357,12 +1416,9 @@ export class WindowManager {
 
         if (shouldDim && !window._dimmed) {
             window._dimmed = true;
-            this._dimmedWindows.push(window);
             this._dimWindow(window);
         } else if (!shouldDim && window._dimmed) {
             window._dimmed = false;
-            this._dimmedWindows =
-                this._dimmedWindows.filter(win => win !== window);
             this._undimWindow(window);
         }
     }
@@ -1433,7 +1489,7 @@ export class WindowManager {
             return;
         }
 
-        switch (actor._windowType) {
+        switch (this._getAnimationWindowType(actor)) {
         case Meta.WindowType.NORMAL:
             actor.set_pivot_point(0.5, 1.0);
             actor.scale_x = 0.01;
@@ -1491,10 +1547,6 @@ export class WindowManager {
     _destroyWindow(shellwm, actor) {
         let window = actor.meta_window;
         window.disconnectObject(actor);
-        if (window._dimmed) {
-            this._dimmedWindows =
-                this._dimmedWindows.filter(win => win !== window);
-        }
 
         if (window.is_attached_dialog())
             this._checkDimming(window.get_transient_for());
@@ -1509,7 +1561,7 @@ export class WindowManager {
             return;
         }
 
-        switch (actor.meta_window.window_type) {
+        switch (this._getAnimationWindowType(actor)) {
         case Meta.WindowType.NORMAL:
             actor.set_pivot_point(0.5, 0.5);
             this._destroying.add(actor);
@@ -1656,17 +1708,28 @@ export class WindowManager {
         return Main.sessionMode.hasOverview;
     }
 
-    _switchToApplication(display, window, binding) {
+    _getNthFavoriteApp(n) {
         if (!this._allowFavoriteShortcuts())
-            return;
+            return null;
 
-        let [, , , target] = binding.get_name().split('-');
-        let apps = AppFavorites.getAppFavorites().getFavorites();
-        let app = apps[target - 1];
+        const apps = AppFavorites.getAppFavorites().getFavorites();
+        return apps[n];
+    }
+
+    _switchToApplication(display, window, binding) {
+        const [, , , target] = binding.get_name().split('-');
+        const app = this._getNthFavoriteApp(target - 1);
         if (app) {
             Main.overview.hide();
             app.activate();
         }
+    }
+
+    _openNewApplicationWindow(display, window, binding) {
+        const [, , , , target] = binding.get_name().split('-');
+        const app = this._getNthFavoriteApp(target - 1);
+        if (app)
+            app.open_new_window(-1);
     }
 
     _toggleCalendar() {

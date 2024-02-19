@@ -19,6 +19,7 @@ export const Ornament = {
     DOT: 1,
     CHECK: 2,
     HIDDEN: 3,
+    NO_DOT: 4,
 };
 
 function isPopupMenuItemVisible(child) {
@@ -96,7 +97,7 @@ export const PopupBaseMenuItem = GObject.registerClass({
         this._delegate = this;
 
         this._ornamentIcon = new St.Icon({style_class: 'popup-menu-ornament'});
-        this.add(this._ornamentIcon);
+        this.add_child(this._ornamentIcon);
         this.setOrnament(Ornament.HIDDEN);
 
         this._parent = null;
@@ -256,8 +257,11 @@ export const PopupBaseMenuItem = GObject.registerClass({
         this._ornament = ornament;
 
         if (ornament === Ornament.DOT) {
-            this._ornamentIcon.icon_name = 'ornament-dot-symbolic';
+            this._ornamentIcon.icon_name = 'ornament-dot-checked-symbolic';
             this.add_accessible_state(Atk.StateType.CHECKED);
+        } else if (ornament === Ornament.NO_DOT) {
+            this._ornamentIcon.icon_name = 'ornament-dot-unchecked-symbolic';
+            this.remove_accessible_state(Atk.StateType.CHECKED);
         } else if (ornament === Ornament.CHECK) {
             this._ornamentIcon.icon_name = 'ornament-check-symbolic';
             this.add_accessible_state(Atk.StateType.CHECKED);
@@ -271,7 +275,7 @@ export const PopupBaseMenuItem = GObject.registerClass({
     }
 
     _updateOrnamentStyle() {
-        if (this._ornament !== Ornament.HIDDEN)
+        if (this._ornament === Ornament.CHECK || this._ornament === Ornament.NONE)
             this.add_style_class_name('popup-ornamented-menu-item');
         else
             this.remove_style_class_name('popup-ornamented-menu-item');
@@ -304,7 +308,7 @@ class PopupSeparatorMenuItem extends PopupBaseMenuItem {
         });
 
         this.label = new St.Label({text: text || ''});
-        this.add(this.label);
+        this.add_child(this.label);
         this.label_actor = this.label;
 
         this.label.connect('notify::text',
@@ -336,11 +340,54 @@ export const Switch = GObject.registerClass({
     _init(state) {
         this._state = false;
 
+        const box = new St.BoxLayout({
+            x_expand: true,
+            y_expand: true,
+        });
+
         super._init({
             style_class: 'toggle-switch',
+            child: box,
             accessible_role: Atk.Role.CHECK_BOX,
             state,
         });
+
+        this._onIcon = new St.Icon({
+            icon_name: 'switch-on-symbolic',
+            x_expand: true,
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        box.add_child(this._onIcon);
+
+        this._offIcon = new St.Icon({
+            icon_name: 'switch-off-symbolic',
+            x_expand: true,
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        box.add_child(this._offIcon);
+
+        this._a11ySettings = new Gio.Settings({
+            schema_id: 'org.gnome.desktop.a11y.interface',
+        });
+
+        this._a11ySettings.connectObject('changed::show-status-shapes',
+            () => this._updateIconOpacity(),
+            this);
+        this.connect('notify::state',
+            () => this._updateIconOpacity());
+        this._updateIconOpacity();
+    }
+
+    _updateIconOpacity() {
+        const activeOpacity = this._a11ySettings.get_boolean('show-status-shapes')
+            ? 255. : 0.;
+
+        this._onIcon.opacity = this.state
+            ? activeOpacity : 0.;
+        this._offIcon.opacity = this.state
+            ? 0. : activeOpacity;
     }
 
     get state() {
@@ -718,14 +765,14 @@ export class PopupMenuBase extends Signals.EventEmitter {
     addMenuItem(menuItem, position) {
         let beforeItem = null;
         if (position === undefined) {
-            this.box.add(menuItem.actor);
+            this.box.add_child(menuItem.actor);
         } else {
             let items = this._getMenuItems();
             if (position < items.length) {
                 beforeItem = items[position].actor;
                 this.box.insert_child_below(menuItem.actor, beforeItem);
             } else {
-                this.box.add(menuItem.actor);
+                this.box.add_child(menuItem.actor);
             }
         }
 
@@ -746,7 +793,7 @@ export class PopupMenuBase extends Signals.EventEmitter {
                 menuItem);
         } else if (menuItem instanceof PopupSubMenuMenuItem) {
             if (beforeItem == null)
-                this.box.add(menuItem.menu.actor);
+                this.box.add_child(menuItem.menu.actor);
             else
                 this.box.insert_child_below(menuItem.menu.actor, beforeItem);
 
@@ -1014,11 +1061,10 @@ export class PopupSubMenu extends PopupMenuBase {
         // effect if a CSS max-height is set on the top menu.
         this.actor = new St.ScrollView({
             style_class: 'popup-sub-menu',
-            hscrollbar_policy: St.PolicyType.NEVER,
             vscrollbar_policy: St.PolicyType.NEVER,
+            child: this.box,
         });
 
-        this.actor.add_actor(this.box);
         this.actor._delegate = this;
         this.actor.clip_to_allocation = true;
         this.actor.connect('key-press-event', this._onKeyPressEvent.bind(this));

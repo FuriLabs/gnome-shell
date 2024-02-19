@@ -351,7 +351,7 @@ do_grab_screenshot (ShellScreenshot     *screenshot,
   if (!clutter_stage_paint_to_buffer (stage, &screenshot_rect, scale,
                                       cairo_image_surface_get_data (image),
                                       cairo_image_surface_get_stride (image),
-                                      CLUTTER_CAIRO_FORMAT_ARGB32,
+                                      COGL_PIXEL_FORMAT_CAIRO_ARGB32_COMPAT,
                                       paint_flags,
                                       &error))
     {
@@ -376,7 +376,7 @@ draw_cursor_image (cairo_surface_t *surface,
   MetaDisplay *display;
   MetaCursorTracker *tracker;
   cairo_surface_t *cursor_surface;
-  cairo_region_t *screenshot_region;
+  g_autoptr (MtkRegion) screenshot_region = NULL;
   cairo_t *cr;
   int x, y;
   int xhot, yhot;
@@ -390,23 +390,20 @@ draw_cursor_image (cairo_surface_t *surface,
   if (!texture)
     return;
 
-  screenshot_region = cairo_region_create_rectangle (&area);
+  screenshot_region = mtk_region_create_rectangle (&area);
   meta_cursor_tracker_get_pointer (tracker, &point, NULL);
   x = point.x;
   y = point.y;
 
-  if (!cairo_region_contains_point (screenshot_region, point.x, point.y))
-    {
-      cairo_region_destroy (screenshot_region);
-      return;
-    }
+  if (!mtk_region_contains_point (screenshot_region, point.x, point.y))
+    return;
 
   meta_cursor_tracker_get_hot (tracker, &xhot, &yhot);
   width = cogl_texture_get_width (texture);
   height = cogl_texture_get_height (texture);
   stride = 4 * width;
   data = g_new (guint8, stride * height);
-  cogl_texture_get_data (texture, CLUTTER_CAIRO_FORMAT_ARGB32, stride, data);
+  cogl_texture_get_data (texture, COGL_PIXEL_FORMAT_CAIRO_ARGB32_COMPAT, stride, data);
 
   /* FIXME: cairo-gl? */
   cursor_surface = cairo_image_surface_create_for_data (data,
@@ -439,7 +436,6 @@ draw_cursor_image (cairo_surface_t *surface,
 
   cairo_destroy (cr);
   cairo_surface_destroy (cursor_surface);
-  cairo_region_destroy (screenshot_region);
   g_free (data);
 }
 
@@ -525,7 +521,7 @@ grab_screenshot_content (ShellScreenshot *screenshot,
       unsigned int width, height;
       CoglContext *ctx;
       CoglPipeline *pipeline;
-      CoglTexture2D *texture;
+      CoglTexture *texture;
       CoglOffscreen *offscreen;
       ClutterStageView *view;
 
@@ -548,12 +544,12 @@ grab_screenshot_content (ShellScreenshot *screenshot,
                                                 pipeline,
                                                 -1, 1, 1, -1,
                                                 0, 0, 1, 1);
-      cogl_object_unref (pipeline);
+      g_object_unref (pipeline);
       g_object_unref (offscreen);
 
       priv->cursor_content =
         clutter_texture_content_new_from_texture (texture, NULL);
-      cogl_object_unref (texture);
+      g_object_unref (texture);
 
       priv->cursor_scale = meta_cursor_tracker_get_scale (tracker);
 
@@ -1308,12 +1304,12 @@ shell_screenshot_composite_to_stream (CoglTexture         *texture,
                                         cogl_texture_get_width (sub_texture),
                                         cogl_texture_get_height (sub_texture));
 
-  cogl_texture_get_data (sub_texture, CLUTTER_CAIRO_FORMAT_ARGB32,
+  cogl_texture_get_data (sub_texture, COGL_PIXEL_FORMAT_CAIRO_ARGB32_COMPAT,
                          cairo_image_surface_get_stride (surface),
                          cairo_image_surface_get_data (surface));
   cairo_surface_mark_dirty (surface);
 
-  cogl_object_unref (sub_texture);
+  g_object_unref (sub_texture);
 
   cairo_surface_set_device_scale (surface, scale, scale);
 
@@ -1324,7 +1320,7 @@ shell_screenshot_composite_to_stream (CoglTexture         *texture,
         cairo_image_surface_create (CAIRO_FORMAT_ARGB32,
                                     cogl_texture_get_width (cursor),
                                     cogl_texture_get_height (cursor));
-      cogl_texture_get_data (cursor, CLUTTER_CAIRO_FORMAT_ARGB32,
+      cogl_texture_get_data (cursor, COGL_PIXEL_FORMAT_CAIRO_ARGB32_COMPAT,
                              cairo_image_surface_get_stride (cursor_surface),
                              cairo_image_surface_get_data (cursor_surface));
       cairo_surface_mark_dirty (cursor_surface);

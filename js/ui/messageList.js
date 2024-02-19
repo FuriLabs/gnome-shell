@@ -12,6 +12,7 @@ import * as Main from './main.js';
 import * as MessageTray from './messageTray.js';
 
 import * as Util from '../misc/util.js';
+import {formatTimeSpan} from '../misc/dateUtils.js';
 
 const MESSAGE_ANIMATION_TIME = 100;
 
@@ -305,6 +306,135 @@ const LabelExpanderLayout = GObject.registerClass({
     }
 });
 
+export const Source = GObject.registerClass({
+    Properties: {
+        'title': GObject.ParamSpec.string(
+            'title', 'title', 'title',
+            GObject.ParamFlags.READWRITE,
+            null),
+        'icon': GObject.ParamSpec.object(
+            'icon', 'icon', 'icon',
+            GObject.ParamFlags.READWRITE,
+            Gio.Icon),
+        'icon-name': GObject.ParamSpec.string(
+            'icon-name', 'icon-name', 'icon-name',
+            GObject.ParamFlags.READWRITE,
+            null),
+    },
+}, class Source extends GObject.Object {
+    get iconName() {
+        if (this.gicon instanceof Gio.ThemedIcon)
+            return this.gicon.iconName;
+        else
+            return null;
+    }
+
+    set iconName(iconName) {
+        this.icon = new Gio.ThemedIcon({name: iconName});
+    }
+});
+
+const TimeLabel = GObject.registerClass(
+class TimeLabel extends St.Label {
+    _init() {
+        super._init({
+            style_class: 'event-time',
+            x_expand: true,
+            y_expand: true,
+            x_align: Clutter.ActorAlign.START,
+            y_align: Clutter.ActorAlign.END,
+            visible: false,
+        });
+    }
+
+    get datetime() {
+        return this._datetime;
+    }
+
+    set datetime(datetime) {
+        if (this._datetime?.equal(datetime))
+            return;
+
+        this._datetime = datetime;
+
+        this.visible = !!this._datetime;
+
+        if (this.mapped)
+            this._updateText();
+    }
+
+    _updateText() {
+        if (this._datetime)
+            this.text = formatTimeSpan(this._datetime);
+    }
+
+    vfunc_map() {
+        this._updateText();
+
+        super.vfunc_map();
+    }
+});
+
+const MessageHeader = GObject.registerClass(
+class MessageHeader extends St.BoxLayout {
+    constructor(source) {
+        super({
+            style_class: 'message-header',
+            x_expand: true,
+        });
+
+        const sourceIconEffect = new Clutter.DesaturateEffect();
+        const sourceIcon = new St.Icon({
+            style_class: 'message-source-icon',
+            y_align: Clutter.ActorAlign.CENTER,
+            fallback_icon_name: 'application-x-executable-symbolic',
+        });
+        sourceIcon.add_effect(sourceIconEffect);
+        this.add_child(sourceIcon);
+
+        sourceIcon.connect('style-changed', () => {
+            const themeNode = sourceIcon.get_theme_node();
+            sourceIconEffect.enabled = themeNode.get_icon_style() === St.IconStyle.SYMBOLIC;
+        });
+
+        const headerContent = new St.BoxLayout({
+            style_class: 'message-header-content',
+            y_align: Clutter.ActorAlign.CENTER,
+            x_expand: true,
+        });
+        this.add_child(headerContent);
+
+        this.closeButton = new St.Button({
+            style_class: 'message-close-button',
+            icon_name: 'window-close-symbolic',
+            y_align: Clutter.ActorAlign.CENTER,
+            opacity: 0,
+        });
+        this.add_child(this.closeButton);
+
+        const sourceTitle = new St.Label({
+            style_class: 'message-source-title',
+            y_align: Clutter.ActorAlign.END,
+        });
+        headerContent.add_child(sourceTitle);
+
+        source.bind_property_full('title',
+            sourceTitle,
+            'text',
+            GObject.BindingFlags.SYNC_CREATE,
+            // Translators: this is the string displayed in the header when a message
+            // source doesn't have a name
+            (bind, value) => [true, value === null || value === '' ? _('Unknown App') : value],
+            null);
+        source.bind_property('icon',
+            sourceIcon,
+            'gicon',
+            GObject.BindingFlags.SYNC_CREATE);
+
+        this.timeLabel = new TimeLabel();
+        headerContent.add_child(this.timeLabel);
+    }
+});
 
 export const Message = GObject.registerClass({
     Signals: {
@@ -313,7 +443,7 @@ export const Message = GObject.registerClass({
         'unexpanded': {},
     },
 }, class Message extends St.Button {
-    _init(title, body) {
+    _init(source, title, body) {
         super._init({
             style_class: 'message',
             accessible_role: Atk.Role.NOTIFICATION,
@@ -331,14 +461,19 @@ export const Message = GObject.registerClass({
         });
         this.set_child(vbox);
 
-        let hbox = new St.BoxLayout();
-        vbox.add_actor(hbox);
+        this._header = new MessageHeader(source);
+        vbox.add_child(this._header);
+
+        const hbox = new St.BoxLayout({
+            style_class: 'message-box',
+        });
+        vbox.add_child(hbox);
 
         this._actionBin = new St.Widget({
             layout_manager: new ScaleLayout(),
             visible: false,
         });
-        vbox.add_actor(this._actionBin);
+        vbox.add_child(this._actionBin);
 
         this._iconBin = new St.Bin({
             style_class: 'message-icon-bin',
@@ -346,52 +481,39 @@ export const Message = GObject.registerClass({
             y_align: Clutter.ActorAlign.START,
             visible: false,
         });
-        hbox.add_actor(this._iconBin);
+        hbox.add_child(this._iconBin);
 
         const contentBox = new St.BoxLayout({
             style_class: 'message-content',
             vertical: true,
             x_expand: true,
         });
-        hbox.add_actor(contentBox);
+        hbox.add_child(contentBox);
 
         this._mediaControls = new St.BoxLayout();
-        hbox.add_actor(this._mediaControls);
+        hbox.add_child(this._mediaControls);
 
-        let titleBox = new St.BoxLayout();
-        contentBox.add_actor(titleBox);
-
-        this.titleLabel = new St.Label({style_class: 'message-title'});
+        this.titleLabel = new St.Label({
+            style_class: 'message-title',
+            y_align: Clutter.ActorAlign.END,
+        });
         this.setTitle(title);
-        titleBox.add_actor(this.titleLabel);
-
-        this._secondaryBin = new St.Bin({
-            style_class: 'message-secondary-bin',
-            x_expand: true, y_expand: true,
-        });
-        titleBox.add_actor(this._secondaryBin);
-
-        this._closeButton = new St.Button({
-            style_class: 'message-close-button',
-            icon_name: 'window-close-symbolic',
-            y_align: Clutter.ActorAlign.CENTER,
-            opacity: 0,
-        });
-        titleBox.add_actor(this._closeButton);
+        contentBox.add_child(this.titleLabel);
 
         this._bodyStack = new St.Widget({x_expand: true});
         this._bodyStack.layout_manager = new LabelExpanderLayout();
-        contentBox.add_actor(this._bodyStack);
+        contentBox.add_child(this._bodyStack);
 
         this.bodyLabel = new URLHighlighter('', false, this._useBodyMarkup);
         this.bodyLabel.add_style_class_name('message-body');
-        this._bodyStack.add_actor(this.bodyLabel);
+        this._bodyStack.add_child(this.bodyLabel);
         this.setBody(body);
 
-        this._closeButton.connect('clicked', this.close.bind(this));
-        let actorHoverId = this.connect('notify::hover', this._sync.bind(this));
-        this._closeButton.connect('destroy', this.disconnect.bind(this, actorHoverId));
         this.connect('destroy', this._onDestroy.bind(this));
+
+        this._header.closeButton.connect('clicked', this.close.bind(this));
+        let actorHoverId = this.connect('notify::hover', this._sync.bind(this));
+        this._header.closeButton.connect('destroy', this.disconnect.bind(this, actorHoverId));
         this._sync();
     }
 
@@ -404,8 +526,12 @@ export const Message = GObject.registerClass({
         this._iconBin.visible = actor != null;
     }
 
-    setSecondaryActor(actor) {
-        this._secondaryBin.child = actor;
+    get datetime() {
+        return this._header.timeLabel.datetime;
+    }
+
+    set datetime(datetime) {
+        this._header.timeLabel.datetime = datetime;
     }
 
     setTitle(text) {
@@ -439,7 +565,7 @@ export const Message = GObject.registerClass({
         if (this._actionBin.get_n_children() > 0)
             throw new Error('Message already has an action area');
 
-        this._actionBin.add_actor(actor);
+        this._actionBin.add_child(actor);
         this._actionBin.visible = this.expanded;
     }
 
@@ -449,7 +575,7 @@ export const Message = GObject.registerClass({
             iconName,
         });
         button.connect('clicked', callback);
-        this._mediaControls.add_actor(button);
+        this._mediaControls.add_child(button);
         return button;
     }
 
@@ -523,8 +649,8 @@ export const Message = GObject.registerClass({
 
     _sync() {
         let visible = this.hover && this.canClose();
-        this._closeButton.opacity = visible ? 255 : 0;
-        this._closeButton.reactive = visible;
+        this._header.closeButton.opacity = visible ? 255 : 0;
+        this._header.closeButton.reactive = visible;
     }
 
     _onDestroy() {
@@ -574,10 +700,10 @@ export const MessageListSection = GObject.registerClass({
             style_class: 'message-list-section-list',
             vertical: true,
         });
-        this.add_actor(this._list);
+        this.add_child(this._list);
 
-        this._list.connect('actor-added', this._sync.bind(this));
-        this._list.connect('actor-removed', this._sync.bind(this));
+        this._list.connect('child-added', this._sync.bind(this));
+        this._list.connect('child-removed', this._sync.bind(this));
 
         Main.sessionMode.connectObject(
             'updated', () => this._sync(), this);

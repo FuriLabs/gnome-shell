@@ -131,7 +131,7 @@ export const Button = GObject.registerClass({
             this.menu.connect('open-state-changed', this._onOpenStateChanged.bind(this));
             this.menu.actor.connect('key-press-event', this._onMenuKeyPress.bind(this));
 
-            Main.uiGroup.add_actor(this.menu.actor);
+            Main.uiGroup.add_child(this.menu.actor);
             this.menu.actor.hide();
         }
         this.emit('menu-set');
@@ -193,43 +193,5 @@ export const Button = GObject.registerClass({
         if (this.menu)
             this.menu.destroy();
         super._onDestroy();
-    }
-});
-
-/* SystemIndicator:
- *
- * This class manages one system indicator, which are the icons
- * that you see at the top right. A system indicator is composed
- * of an icon and a menu section, which will be composed into the
- * aggregate menu.
- */
-export const SystemIndicator = GObject.registerClass(
-class SystemIndicator extends St.BoxLayout {
-    _init() {
-        super._init({
-            style_class: 'panel-status-indicators-box',
-            reactive: true,
-            visible: false,
-        });
-        this.menu = new PopupMenu.PopupMenuSection();
-    }
-
-    get indicators() {
-        let klass = this.constructor.name;
-        let {stack} = new Error();
-        log(`Usage of indicator.indicators is deprecated for ${klass}\n${stack}`);
-        return this;
-    }
-
-    _syncIndicatorsVisible() {
-        this.visible = this.get_children().some(a => a.visible);
-    }
-
-    _addIndicator() {
-        let icon = new St.Icon({style_class: 'system-status-icon'});
-        this.add_actor(icon);
-        icon.connect('notify::visible', this._syncIndicatorsVisible.bind(this));
-        this._syncIndicatorsVisible();
-        return icon;
     }
 });

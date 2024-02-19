@@ -50,6 +50,7 @@ export const UserListItem = GObject.registerClass({
     _init(user) {
         let layout = new St.BoxLayout({
             vertical: true,
+            x_expand: true,
         });
         super._init({
             style_class: 'login-dialog-user-list-item',
@@ -68,7 +69,7 @@ export const UserListItem = GObject.registerClass({
         });
 
         this._userWidget = new UserWidget.UserWidget(this.user);
-        layout.add(this._userWidget);
+        layout.add_child(this._userWidget);
 
         this._userWidget.bind_property('label-actor',
             this, 'label-actor',
@@ -79,7 +80,7 @@ export const UserListItem = GObject.registerClass({
             scale_x: 0,
             visible: false,
         });
-        layout.add(this._timedLoginIndicator);
+        layout.add_child(this._timedLoginIndicator);
 
         this._onUserChanged();
     }
@@ -169,9 +170,6 @@ const UserList = GObject.registerClass({
             x_expand: true,
             y_expand: true,
         });
-        this.set_policy(
-            St.PolicyType.NEVER,
-            St.PolicyType.AUTOMATIC);
 
         this._box = new St.BoxLayout({
             vertical: true,
@@ -179,7 +177,7 @@ const UserList = GObject.registerClass({
             pseudo_class: 'expanded',
         });
 
-        this.add_actor(this._box);
+        this.child = this._box;
         this._items = {};
     }
 
@@ -226,7 +224,7 @@ const UserList = GObject.registerClass({
     scrollToItem(item) {
         let box = item.get_allocation_box();
 
-        let adjustment = this.get_vscroll_bar().get_adjustment();
+        const adjustment = this.vadjustment;
 
         let value = (box.y1 + adjustment.step_increment / 2.0) - (adjustment.page_size / 2.0);
         adjustment.ease(value, {
@@ -238,7 +236,7 @@ const UserList = GObject.registerClass({
     jumpToItem(item) {
         let box = item.get_allocation_box();
 
-        let adjustment = this.get_vscroll_bar().get_adjustment();
+        const adjustment = this.vadjustment;
 
         let value = (box.y1 + adjustment.step_increment / 2.0) - (adjustment.page_size / 2.0);
 
@@ -333,7 +331,7 @@ const SessionMenuButton = GObject.registerClass({
         this._button = button;
 
         this._menu = new PopupMenu.PopupMenu(this._button, 0, St.Side.BOTTOM);
-        Main.uiGroup.add_actor(this._menu.actor);
+        Main.uiGroup.add_child(this._menu.actor);
         this._menu.actor.hide();
 
         this._menu.connect('open-state-changed', (menu, isOpen) => {
@@ -367,7 +365,7 @@ const SessionMenuButton = GObject.registerClass({
             if (itemIds[i] === this._activeSessionId)
                 this._items[itemIds[i]].setOrnament(PopupMenu.Ornament.DOT);
             else
-                this._items[itemIds[i]].setOrnament(PopupMenu.Ornament.NONE);
+                this._items[itemIds[i]].setOrnament(PopupMenu.Ornament.NO_DOT);
         }
     }
 
@@ -487,17 +485,15 @@ export const LoginDialog = GObject.registerClass({
 
         this._userSelectionBox.add_child(this._notListedButton);
 
+        const bannerBox = new St.BoxLayout({vertical: true});
+
         this._bannerView = new St.ScrollView({
             style_class: 'login-dialog-banner-view',
             opacity: 0,
-            vscrollbar_policy: St.PolicyType.AUTOMATIC,
-            hscrollbar_policy: St.PolicyType.NEVER,
+            child: bannerBox,
         });
         this.add_child(this._bannerView);
 
-        let bannerBox = new St.BoxLayout({vertical: true});
-
-        this._bannerView.add_actor(bannerBox);
         this._bannerLabel = new St.Label({
             style_class: 'login-dialog-banner',
             text: '',

@@ -11,6 +11,10 @@ $notification_banner_width: 34em;
   border-radius: $modal_radius;
   margin: $base_margin;
 
+  @if $contrast == 'high' {
+    @include draw_hc_inset();
+  }
+
   .notification-actions {
     spacing: 0;
   }
@@ -52,8 +56,8 @@ $notification_banner_width: 34em;
 }
 
 .chat-meta-message {
+  @extend %caption;
   padding-left: 4px;
-  @include fontsize($base_font_size - 2);
   font-weight: bold;
   color: lighten($fg_color,18%);
   &:rtl { padding-left: 0; padding-right: 4px; }

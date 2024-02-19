@@ -68,11 +68,11 @@ const PieTimer = GObject.registerClass({
         cr.closePath();
 
         cr.setLineWidth(0);
-        Clutter.cairo_set_source_color(cr, backgroundColor);
+        cr.setSourceColor(backgroundColor);
         cr.fillPreserve();
 
         cr.setLineWidth(borderWidth);
-        Clutter.cairo_set_source_color(cr, borderColor);
+        cr.setSourceColor(borderColor);
         cr.stroke();
 
         cr.$dispose();
@@ -116,7 +116,7 @@ export class PointerA11yTimeout {
             let [x, y] = global.get_pointer();
 
             this._pieTimer = new PieTimer();
-            Main.uiGroup.add_actor(this._pieTimer);
+            Main.uiGroup.add_child(this._pieTimer);
             Main.uiGroup.set_child_above_sibling(this._pieTimer, null);
 
             this._pieTimer.start(x, y, timeout);

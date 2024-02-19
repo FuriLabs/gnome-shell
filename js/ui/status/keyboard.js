@@ -27,7 +27,7 @@ class LayoutMenuItem extends PopupMenu.PopupBaseMenuItem {
     _init(displayName, shortName) {
         super._init();
 
-        this.setOrnament(PopupMenu.Ornament.NONE);
+        this.setOrnament(PopupMenu.Ornament.NO_DOT);
 
         this.label = new St.Label({
             text: displayName,
@@ -35,7 +35,7 @@ class LayoutMenuItem extends PopupMenu.PopupBaseMenuItem {
         });
         this.indicator = new St.Label({text: shortName});
         this.add_child(this.label);
-        this.add(this.indicator);
+        this.add_child(this.indicator);
         this.label_actor = this.label;
     }
 });
@@ -125,14 +125,15 @@ class InputSourceSwitcher extends SwitcherPopup.SwitcherList {
     _addIcon(item) {
         let box = new St.BoxLayout({vertical: true});
 
-        let bin = new St.Bin({style_class: 'input-source-switcher-symbol'});
-        let symbol = new St.Label({
-            text: item.shortName,
-            x_align: Clutter.ActorAlign.CENTER,
-            y_align: Clutter.ActorAlign.CENTER,
+        const symbol = new St.Bin({
+            style_class: 'input-source-switcher-symbol',
+            child: new St.Label({
+                text: item.shortName,
+                x_align: Clutter.ActorAlign.CENTER,
+                y_align: Clutter.ActorAlign.CENTER,
+            }),
         });
-        bin.set_child(symbol);
-        box.add_child(bin);
+        box.add_child(symbol);
 
         let text = new St.Label({
             text: item.displayName,
@@ -158,6 +159,10 @@ class InputSourceSettings extends Signals.EventEmitter {
 
     _emitKeyboardOptionsChanged() {
         this.emit('keyboard-options-changed');
+    }
+
+    _emitKeyboardModelChanged() {
+        this.emit('keyboard-model-changed');
     }
 
     _emitPerWindowChanged() {
@@ -197,6 +202,7 @@ class InputSourceSystemSettings extends InputSourceSettings {
         this._layouts = '';
         this._variants = '';
         this._options = '';
+        this._model = '';
 
         this._reload();
 
@@ -228,6 +234,7 @@ class InputSourceSystemSettings extends InputSourceSettings {
         const layouts = props['X11Layout'].unpack();
         const variants = props['X11Variant'].unpack();
         const options = props['X11Options'].unpack();
+        const model = props['X11Model'].unpack();
 
         if (layouts !== this._layouts ||
             variants !== this._variants) {
@@ -238,6 +245,10 @@ class InputSourceSystemSettings extends InputSourceSettings {
         if (options !== this._options) {
             this._options = options;
             this._emitKeyboardOptionsChanged();
+        }
+        if (model !== this._model) {
+            this._model = model;
+            this._emitKeyboardModelChanged();
         }
     }
 
@@ -258,6 +269,10 @@ class InputSourceSystemSettings extends InputSourceSettings {
     get keyboardOptions() {
         return this._options.split(',');
     }
+
+    get keyboardModel() {
+        return this._model;
+    }
 }
 
 class InputSourceSessionSettings extends InputSourceSettings {
@@ -268,11 +283,13 @@ class InputSourceSessionSettings extends InputSourceSettings {
         this._KEY_INPUT_SOURCES = 'sources';
         this._KEY_MRU_SOURCES = 'mru-sources';
         this._KEY_KEYBOARD_OPTIONS = 'xkb-options';
+        this._KEY_KEYBOARD_MODEL = 'xkb-model';
         this._KEY_PER_WINDOW = 'per-window';
 
         this._settings = new Gio.Settings({schema_id: this._DESKTOP_INPUT_SOURCES_SCHEMA});
         this._settings.connect(`changed::${this._KEY_INPUT_SOURCES}`, this._emitInputSourcesChanged.bind(this));
         this._settings.connect(`changed::${this._KEY_KEYBOARD_OPTIONS}`, this._emitKeyboardOptionsChanged.bind(this));
+        this._settings.connect(`changed::${this._KEY_KEYBOARD_MODEL}`, this._emitKeyboardModelChanged.bind(this));
         this._settings.connect(`changed::${this._KEY_PER_WINDOW}`, this._emitPerWindowChanged.bind(this));
     }
 
@@ -303,6 +320,10 @@ class InputSourceSessionSettings extends InputSourceSettings {
 
     get keyboardOptions() {
         return this._settings.get_strv(this._KEY_KEYBOARD_OPTIONS);
+    }
+
+    get keyboardModel() {
+        return this._settings.get_string(this._KEY_KEYBOARD_MODEL);
     }
 
     get perWindow() {
@@ -346,6 +367,7 @@ export class InputSourceManager extends Signals.EventEmitter {
             this._settings = new InputSourceSessionSettings();
         this._settings.connect('input-sources-changed', this._inputSourcesChanged.bind(this));
         this._settings.connect('keyboard-options-changed', this._keyboardOptionsChanged.bind(this));
+        this._settings.connect('keyboard-model-changed', this._keyboardModelChanged.bind(this));
 
         this._xkbInfo = KeyboardManager.getXkbInfo();
         this._keyboardManager = KeyboardManager.getKeyboardManager();
@@ -370,6 +392,7 @@ export class InputSourceManager extends Signals.EventEmitter {
     reload() {
         this._reloading = true;
         this._keyboardManager.setKeyboardOptions(this._settings.keyboardOptions);
+        this._keyboardManager.setKeyboardModel(this._settings.keyboardModel);
         this._inputSourcesChanged();
         this._reloading = false;
     }
@@ -431,6 +454,11 @@ export class InputSourceManager extends Signals.EventEmitter {
 
     _keyboardOptionsChanged() {
         this._keyboardManager.setKeyboardOptions(this._settings.keyboardOptions);
+        this._keyboardManager.reapply();
+    }
+
+    _keyboardModelChanged() {
+        this._keyboardManager.setKeyboardModel(this._settings.keyboardModel);
         this._keyboardManager.reapply();
     }
 
@@ -922,7 +950,7 @@ class InputSourceIndicator extends PanelMenu.Button {
             });
 
             this.menu.addMenuItem(menuItem, menuIndex++);
-            this._container.add_actor(indicatorLabel);
+            this._container.add_child(indicatorLabel);
         }
     }
 
@@ -931,7 +959,7 @@ class InputSourceIndicator extends PanelMenu.Button {
         let newSource = this._inputSourceManager.currentSource;
 
         if (oldSource) {
-            this._menuItems[oldSource.index].setOrnament(PopupMenu.Ornament.NONE);
+            this._menuItems[oldSource.index].setOrnament(PopupMenu.Ornament.NO_DOT);
             this._indicatorLabels[oldSource.index].hide();
         }
 
@@ -1010,7 +1038,7 @@ class InputSourceIndicator extends PanelMenu.Button {
                 radioGroup.push(item);
                 item.radioGroup = radioGroup;
                 item.setOrnament(prop.get_state() === IBus.PropState.CHECKED
-                    ? PopupMenu.Ornament.DOT : PopupMenu.Ornament.NONE);
+                    ? PopupMenu.Ornament.DOT : PopupMenu.Ornament.NO_DOT);
                 item.connect('activate', () => {
                     if (item.prop.get_state() === IBus.PropState.CHECKED)
                         return;
@@ -1023,7 +1051,7 @@ class InputSourceIndicator extends PanelMenu.Button {
                             ibusManager.activateProperty(
                                 item.prop.get_key(), IBus.PropState.CHECKED);
                         } else {
-                            group[j].setOrnament(PopupMenu.Ornament.NONE);
+                            group[j].setOrnament(PopupMenu.Ornament.NO_DOT);
                             group[j].prop.set_state(IBus.PropState.UNCHECKED);
                             ibusManager.activateProperty(
                                 group[j].prop.get_key(), IBus.PropState.UNCHECKED);

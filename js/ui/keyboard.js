@@ -218,7 +218,7 @@ class LanguageSelectionPopup extends PopupMenu.PopupMenu {
             item.can_focus = false;
             item.setOrnament(is === inputSourceManager.currentSource
                 ? PopupMenu.Ornament.DOT
-                : PopupMenu.Ornament.NONE);
+                : PopupMenu.Ornament.NO_DOT);
         }
 
         this.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
@@ -434,8 +434,7 @@ const Key = GObject.registerClass({
         } else if (label) {
             button.set_label(label);
         } else if (commitString) {
-            const str = GLib.markup_escape_text(commitString, -1);
-            button.set_label(str);
+            button.set_label(commitString);
         }
 
         button.keyWidth = 1;
@@ -493,13 +492,13 @@ const Key = GObject.registerClass({
             let key = this._makeKey(extendedKey);
 
             key.extendedKey = extendedKey;
-            this._extendedKeyboard.add(key);
+            this._extendedKeyboard.add_child(key);
 
             key.set_size(...this.keyButton.allocation.get_size());
             this.keyButton.connect('notify::allocation',
                 () => key.set_size(...this.keyButton.allocation.get_size()));
         }
-        this._boxPointer.bin.add_actor(this._extendedKeyboard);
+        this._boxPointer.bin.add_child(this._extendedKeyboard);
     }
 
     get subkeys() {
@@ -1387,7 +1386,7 @@ export const Keyboard = GObject.registerClass({
         this._keyboardController.destroy();
 
         Main.layoutManager.untrackChrome(this);
-        Main.layoutManager.keyboardBox.remove_actor(this);
+        Main.layoutManager.keyboardBox.remove_child(this);
         Main.layoutManager.keyboardBox.hide();
 
         if (this._languagePopup) {
@@ -1399,7 +1398,7 @@ export const Keyboard = GObject.registerClass({
     }
 
     _setupKeyboard() {
-        Main.layoutManager.keyboardBox.add_actor(this);
+        Main.layoutManager.keyboardBox.add_child(this);
         Main.layoutManager.trackChrome(this);
 
         this._keyboardController = new KeyboardController();

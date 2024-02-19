@@ -22,6 +22,10 @@ const EXTENSION_DISABLE_VERSION_CHECK_KEY = 'disable-extension-version-validatio
 
 const UPDATE_CHECK_TIMEOUT = 24 * 60 * 60; // 1 day in seconds
 
+function stateToString(state) {
+    return Object.keys(ExtensionState).find(k => ExtensionState[k] === state);
+}
+
 export class ExtensionManager extends Signals.EventEmitter {
     constructor() {
         super();
@@ -116,8 +120,8 @@ export class ExtensionManager extends Signals.EventEmitter {
     }
 
     _loadExtensionStylesheet(extension) {
-        if (extension.state !== ExtensionState.ENABLED &&
-            extension.state !== ExtensionState.ENABLING)
+        if (extension.state !== ExtensionState.ACTIVE &&
+            extension.state !== ExtensionState.ACTIVATING)
             return;
 
         const variant = Main.getStyleVariant();
@@ -151,6 +155,14 @@ export class ExtensionManager extends Signals.EventEmitter {
         delete extension.stylesheet;
     }
 
+    _changeExtensionState(extension, newState) {
+        const strState = stateToString(newState);
+        console.debug(`Changing state of extension ${extension.uuid} to ${strState}`);
+
+        extension.state = newState;
+        this.emit('extension-state-changed', extension);
+    }
+
     _extensionSupportsSessionMode(uuid) {
         const extension = this.lookup(uuid);
 
@@ -171,11 +183,10 @@ export class ExtensionManager extends Signals.EventEmitter {
         if (!extension)
             return;
 
-        if (extension.state !== ExtensionState.ENABLED)
+        if (extension.state !== ExtensionState.ACTIVE)
             return;
 
-        extension.state = ExtensionState.DISABLING;
-        this.emit('extension-state-changed', extension);
+        this._changeExtensionState(extension, ExtensionState.DEACTIVATING);
 
         // "Rebase" the extension order by disabling and then enabling extensions
         // in order to help prevent conflicts.
@@ -192,6 +203,7 @@ export class ExtensionManager extends Signals.EventEmitter {
         for (let i = 0; i < orderReversed.length; i++) {
             let otherUuid = orderReversed[i];
             try {
+                console.debug(`Temporarily disable extension ${otherUuid}`);
                 this.lookup(otherUuid).stateObj.disable();
             } catch (e) {
                 this.logExtensionError(otherUuid, e);
@@ -209,6 +221,7 @@ export class ExtensionManager extends Signals.EventEmitter {
         for (let i = 0; i < order.length; i++) {
             let otherUuid = order[i];
             try {
+                console.debug(`Re-enable extension ${otherUuid}`);
                 // eslint-disable-next-line no-await-in-loop
                 await this.lookup(otherUuid).stateObj.enable();
             } catch (e) {
@@ -218,10 +231,8 @@ export class ExtensionManager extends Signals.EventEmitter {
 
         this._extensionOrder.splice(orderIdx, 1);
 
-        if (extension.state !== ExtensionState.ERROR) {
-            extension.state = ExtensionState.DISABLED;
-            this.emit('extension-state-changed', extension);
-        }
+        if (extension.state !== ExtensionState.ERROR)
+            this._changeExtensionState(extension, ExtensionState.INACTIVE);
     }
 
     async _callExtensionEnable(uuid) {
@@ -236,11 +247,10 @@ export class ExtensionManager extends Signals.EventEmitter {
             await this._callExtensionInit(uuid);
 
 
-        if (extension.state !== ExtensionState.DISABLED)
+        if (extension.state !== ExtensionState.INACTIVE)
             return;
 
-        extension.state = ExtensionState.ENABLING;
-        this.emit('extension-state-changed', extension);
+        this._changeExtensionState(extension, ExtensionState.ACTIVATING);
 
         try {
             this._loadExtensionStylesheet(extension);
@@ -251,9 +261,8 @@ export class ExtensionManager extends Signals.EventEmitter {
 
         try {
             await extension.stateObj.enable();
-            extension.state = ExtensionState.ENABLED;
+            this._changeExtensionState(extension, ExtensionState.ACTIVE);
             this._extensionOrder.push(uuid);
-            this.emit('extension-state-changed', extension);
         } catch (e) {
             this._unloadExtensionStylesheet(extension);
             this.logExtensionError(uuid, e);
@@ -353,6 +362,7 @@ export class ExtensionManager extends Signals.EventEmitter {
 
         const message = formatError(error, {showStack: false});
 
+        console.debug(`Changing state of extension ${uuid} to ERROR`);
         extension.error = message;
         extension.state = ExtensionState.ERROR;
         if (!extension.errors)
@@ -360,7 +370,6 @@ export class ExtensionManager extends Signals.EventEmitter {
         extension.errors.push(message);
 
         logError(error, `Extension ${uuid}`);
-        this._updateCanChange(extension);
         this.emit('extension-state-changed', extension);
     }
 
@@ -419,6 +428,7 @@ export class ExtensionManager extends Signals.EventEmitter {
             path: dir.get_path(),
             error: '',
             hasPrefs: dir.get_child('prefs.js').query_exists(null),
+            enabled: this._enabledExtensions.includes(uuid),
             hasUpdate: false,
             canChange: false,
             sessionModes: meta['session-modes'] ? meta['session-modes'] : ['user'],
@@ -442,30 +452,33 @@ export class ExtensionManager extends Signals.EventEmitter {
     }
 
     async loadExtension(extension) {
+        const {uuid} = extension;
+        console.debug(`Loading extension ${uuid}`);
         // Default to error, we set success as the last step
         extension.state = ExtensionState.ERROR;
 
         if (this._checkVersion && this._isOutOfDate(extension)) {
             extension.state = ExtensionState.OUT_OF_DATE;
         } else if (!this._canLoad(extension)) {
-            this.logExtensionError(extension.uuid, new Error(
+            this.logExtensionError(uuid, new Error(
                 'A different version was loaded previously. You need to log out for changes to take effect.'));
         } else {
-            let enabled = this._enabledExtensions.includes(extension.uuid) &&
-                          this._extensionSupportsSessionMode(extension.uuid);
+            const enabled = this._enabledExtensions.includes(uuid) &&
+                            this._extensionSupportsSessionMode(uuid);
             if (enabled) {
-                if (!await this._callExtensionInit(extension.uuid))
+                if (!await this._callExtensionInit(uuid))
                     return;
 
-                if (extension.state === ExtensionState.DISABLED)
-                    await this._callExtensionEnable(extension.uuid);
+                if (extension.state === ExtensionState.INACTIVE)
+                    await this._callExtensionEnable(uuid);
             } else {
                 extension.state = ExtensionState.INITIALIZED;
             }
 
-            this._unloadedExtensions.delete(extension.uuid);
+            this._unloadedExtensions.delete(uuid);
         }
 
+        console.debug(`Extension ${uuid} in state ${stateToString(extension.state)} after loading`);
         this._updateCanChange(extension);
         this.emit('extension-state-changed', extension);
     }
@@ -478,8 +491,7 @@ export class ExtensionManager extends Signals.EventEmitter {
         // broke too much.
         await this._callExtensionDisable(uuid);
 
-        extension.state = ExtensionState.UNINSTALLED;
-        this.emit('extension-state-changed', extension);
+        this._changeExtensionState(extension, ExtensionState.UNINSTALLED);
 
         // The extension is now cached and it's impossible to load a different version
         if (type === ExtensionType.PER_USER && extension.isImported)
@@ -548,8 +560,7 @@ export class ExtensionManager extends Signals.EventEmitter {
         }
 
         extension.stateObj = extensionState;
-        extension.state = ExtensionState.DISABLED;
-        this.emit('extension-loaded', uuid);
+        this._changeExtensionState(extension, ExtensionState.INACTIVE);
         return true;
     }
 
@@ -560,10 +571,6 @@ export class ExtensionManager extends Signals.EventEmitter {
     }
 
     _updateCanChange(extension) {
-        let hasError =
-            extension.state === ExtensionState.ERROR ||
-            extension.state === ExtensionState.OUT_OF_DATE;
-
         let isMode = this._getModeExtensions().includes(extension.uuid);
         let modeOnly = global.settings.get_boolean(DISABLE_USER_EXTENSIONS_KEY);
 
@@ -572,7 +579,6 @@ export class ExtensionManager extends Signals.EventEmitter {
             : ENABLED_EXTENSIONS_KEY;
 
         extension.canChange =
-            !hasError &&
             global.settings.is_writable(changeKey) &&
             (isMode || !modeOnly);
     }
@@ -582,6 +588,8 @@ export class ExtensionManager extends Signals.EventEmitter {
 
         if (!global.settings.get_boolean(DISABLE_USER_EXTENSIONS_KEY))
             extensions = extensions.concat(global.settings.get_strv(ENABLED_EXTENSIONS_KEY));
+
+        extensions.sort((a, b) => this._compareExtensions(this.lookup(a), this.lookup(b)));
 
         // filter out 'disabled-extensions' which takes precedence
         let disabledExtensions = global.settings.get_strv(DISABLED_EXTENSIONS_KEY);
@@ -595,6 +603,13 @@ export class ExtensionManager extends Signals.EventEmitter {
 
     async _onEnabledExtensionsChanged() {
         let newEnabledExtensions = this._getEnabledExtensions();
+
+        for (const extension of this._extensions.values()) {
+            const wasEnabled = extension.enabled;
+            extension.enabled = newEnabledExtensions.includes(extension.uuid);
+            if (wasEnabled !== extension.enabled)
+                this.emit('extension-state-changed', extension);
+        }
 
         // Find and enable all the newly enabled extensions: UUIDs found in the
         // new setting, but not in the old one.
@@ -700,6 +715,12 @@ export class ExtensionManager extends Signals.EventEmitter {
         }
     }
 
+    _compareExtensions(a, b) {
+        const modesA = a?.sessionModes ?? [];
+        const modesB = b?.sessionModes ?? [];
+        return modesB.length - modesA.length;
+    }
+
     async _loadExtensions() {
         global.settings.connect(`changed::${ENABLED_EXTENSIONS_KEY}`, () => {
             this._onEnabledExtensionsChanged();
@@ -748,7 +769,7 @@ export class ExtensionManager extends Signals.EventEmitter {
             }
 
             return extension;
-        }).filter(extension => extension !== null);
+        }).filter(extension => extension !== null).sort(this._compareExtensions.bind(this));
 
         // after updating to a new major version,
         // update extensions before loading them
@@ -803,21 +824,19 @@ export class ExtensionManager extends Signals.EventEmitter {
 
 const ExtensionUpdateSource = GObject.registerClass(
 class ExtensionUpdateSource extends MessageTray.Source {
-    _init() {
-        let appSys = Shell.AppSystem.get_default();
-        this._app = appSys.lookup_app('org.gnome.Extensions.desktop');
-        if (!this._app)
-            this._app = appSys.lookup_app('com.mattjakeman.ExtensionManager.desktop');
+    constructor() {
+        const appSys = Shell.AppSystem.get_default();
+        const app =
+            appSys.lookup_app('org.gnome.Extensions.desktop') ||
+            appSys.lookup_app('com.mattjakeman.ExtensionManager.desktop');
 
-        super._init(this._app.get_name());
-    }
+        super({
+            title: app.get_name(),
+            icon: app.get_icon(),
+            policy: MessageTray.NotificationPolicy.newForApp(app),
+        });
 
-    getIcon() {
-        return this._app.app_info.get_icon();
-    }
-
-    _createPolicy() {
-        return new MessageTray.NotificationApplicationPolicy(this._app.id);
+        this._app = app;
     }
 
     open() {

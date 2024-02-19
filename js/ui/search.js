@@ -94,7 +94,7 @@ class ListSearchResult extends SearchResult {
         // An icon for, or thumbnail of, content
         let icon = this.metaInfo['createIcon'](this.ICON_SIZE);
         if (icon)
-            titleBox.add(icon);
+            titleBox.add_child(icon);
 
         let title = new St.Label({
             text: this.metaInfo['name'],
@@ -171,7 +171,7 @@ const SearchResultsBase = GObject.registerClass({
         this.add_child(this._resultDisplayBin);
 
         let separator = new St.Widget({style_class: 'search-section-separator'});
-        this.add(separator);
+        this.add_child(separator);
 
         this._resultDisplays = {};
 
@@ -186,7 +186,7 @@ const SearchResultsBase = GObject.registerClass({
 
     _createResultDisplay(meta) {
         if (this.provider.createResultObject)
-            return this.provider.createResultObject(meta, this._resultsView);
+            return this.provider.createResultObject(meta);
 
         return null;
     }
@@ -286,7 +286,10 @@ class ListSearchResults extends SearchResultsBase {
     _init(provider, resultsView) {
         super._init(provider, resultsView);
 
-        this._container = new St.BoxLayout({style_class: 'search-section-content'});
+        this._container = new St.BoxLayout({
+            style_class: 'search-section-content',
+            x_expand: true,
+        });
         this.providerInfo = new ProviderInfo(provider);
         this.providerInfo.connect('key-focus-in', this._keyFocusIn.bind(this));
         this.providerInfo.connect('clicked', () => {
@@ -304,7 +307,7 @@ class ListSearchResults extends SearchResultsBase {
         });
         this._container.add_child(this._content);
 
-        this._resultDisplayBin.set_child(this._container);
+        this._resultDisplayBin.child = this._container;
     }
 
     _setMoreCount(count) {
@@ -325,7 +328,7 @@ class ListSearchResults extends SearchResultsBase {
     }
 
     _addItem(display) {
-        this._content.add_actor(display);
+        this._content.add_child(display);
     }
 
     getFirstResult() {
@@ -468,10 +471,10 @@ class GridSearchResults extends SearchResultsBase {
             this._grid.layout_manager.spacing = node.get_length('spacing');
         });
 
-        this._resultDisplayBin.set_child(new St.Bin({
+        this._resultDisplayBin.child = new St.Bin({
             child: this._grid,
             x_align: Clutter.ActorAlign.CENTER,
-        }));
+        });
 
         this._maxResults = provider.maxResults ?? -1;
     }
@@ -573,9 +576,8 @@ export const SearchResultsView = GObject.registerClass({
             style_class: 'search-display vfade',
             x_expand: true,
             y_expand: true,
+            child: this._content,
         });
-        this._scrollView.set_policy(St.PolicyType.NEVER, St.PolicyType.AUTOMATIC);
-        this._scrollView.add_actor(this._content);
 
         let action = new Clutter.PanAction({interpolate: true});
         action.connect('pan', this._onPan.bind(this));
@@ -588,9 +590,11 @@ export const SearchResultsView = GObject.registerClass({
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
         });
-        this._statusBin = new St.Bin({y_expand: true});
+        this._statusBin = new St.Bin({
+            y_expand: true,
+            child: this._statusText,
+        });
         this.add_child(this._statusBin);
-        this._statusBin.add_actor(this._statusText);
 
         this._highlightDefault = false;
         this._defaultResult = null;
@@ -749,7 +753,7 @@ export const SearchResultsView = GObject.registerClass({
 
     _onPan(action) {
         let [dist_, dx_, dy] = action.get_motion_delta(0);
-        let adjustment = this._scrollView.vscroll.adjustment;
+        let adjustment = this._scrollView.vadjustment;
         adjustment.value -= (dy / this.height) * adjustment.page_size;
         return false;
     }
@@ -770,7 +774,7 @@ export const SearchResultsView = GObject.registerClass({
 
         providerDisplay.connect('notify::focus-child', this._focusChildChanged.bind(this));
         providerDisplay.hide();
-        this._content.add(providerDisplay);
+        this._content.add_child(providerDisplay);
         provider.display = providerDisplay;
     }
 
@@ -937,12 +941,12 @@ class ProviderInfo extends St.Button {
 
         this._moreLabel = new St.Label({x_align: Clutter.ActorAlign.START});
 
-        detailsBox.add_actor(nameLabel);
-        detailsBox.add_actor(this._moreLabel);
+        detailsBox.add_child(nameLabel);
+        detailsBox.add_child(this._moreLabel);
 
 
-        this._content.add_actor(icon);
-        this._content.add_actor(detailsBox);
+        this._content.add_child(icon);
+        this._content.add_child(detailsBox);
     }
 
     get PROVIDER_ICON_SIZE() {

@@ -307,14 +307,19 @@ class TelepathyClient extends Tp.BaseClient {
 
 const ChatSource = HAVE_TP ? GObject.registerClass(
 class ChatSource extends MessageTray.Source {
-    _init(account, conn, channel, contact, client) {
+    constructor(account, conn, channel, contact, client) {
+        const appId = account.protocol_name === 'irc'
+            ? 'org.gnome.Polari'
+            : 'empathy';
+        const policy =
+            new MessageTray.NotificationApplicationPolicy(appId);
+
+        super({policy});
+
         this._account = account;
         this._contact = contact;
         this._client = client;
 
-        super._init(contact.get_alias());
-
-        this.isChat = true;
         this._pendingMessages = [];
 
         this._conn = conn;
@@ -332,9 +337,10 @@ class ChatSource extends MessageTray.Source {
 
         this._contact.connectObject(
             'notify::alias', this._updateAlias.bind(this),
-            'notify::avatar-file', this._updateAvatarIcon.bind(this),
-            'presence-changed', this._presenceChanged.bind(this), this);
+            'notify::avatar-file', this._updateAvatarIcon.bind(this), this);
 
+        this._updateAlias();
+        this._updateAvatarIcon();
         // Add ourselves as a source.
         Main.messageTray.add(this);
 
@@ -356,12 +362,6 @@ class ChatSource extends MessageTray.Source {
         this.pushNotification(this._notification);
     }
 
-    _createPolicy() {
-        if (this._account.protocol_name === 'irc')
-            return new MessageTray.NotificationApplicationPolicy('org.gnome.Polari');
-        return new MessageTray.NotificationApplicationPolicy('empathy');
-    }
-
     createBanner() {
         this._banner = new ChatNotificationBanner(this._notification);
 
@@ -380,55 +380,27 @@ class ChatSource extends MessageTray.Source {
         if (oldAlias === newAlias)
             return;
 
-        this.setTitle(newAlias);
+        this.title = newAlias;
         if (this._notification)
             this._notification.appendAliasChange(oldAlias, newAlias);
     }
 
-    getIcon() {
-        let file = this._contact.get_avatar_file();
-        if (file)
-            return new Gio.FileIcon({file});
-        else
-            return new Gio.ThemedIcon({name: 'avatar-default'});
-    }
-
-    getSecondaryIcon() {
-        let iconName;
-        let presenceType = this._contact.get_presence_type();
-
-        switch (presenceType) {
-        case Tp.ConnectionPresenceType.AVAILABLE:
-            iconName = 'user-available';
-            break;
-        case Tp.ConnectionPresenceType.BUSY:
-            iconName = 'user-busy';
-            break;
-        case Tp.ConnectionPresenceType.OFFLINE:
-            iconName = 'user-offline';
-            break;
-        case Tp.ConnectionPresenceType.HIDDEN:
-            iconName = 'user-invisible';
-            break;
-        case Tp.ConnectionPresenceType.AWAY:
-            iconName = 'user-away';
-            break;
-        case Tp.ConnectionPresenceType.EXTENDED_AWAY:
-            iconName = 'user-idle';
-            break;
-        default:
-            iconName = 'user-offline';
-        }
-        return new Gio.ThemedIcon({name: iconName});
-    }
-
     _updateAvatarIcon() {
-        this.iconUpdated();
-        if (this._notification) {
+        let file = this._contact.get_avatar_file();
+        if (file) {
+            if (this.icon instanceof Gio.FileIcon)
+                this.icon.file = file;
+            else
+                this.icon = new Gio.FileIcon({file});
+        } else if (!(this.icon instanceof Gio.ThemedIcon)) {
+            this.iconName = 'avatar-default';
+        }
+
+        if (this._notification && this.icon !== this._notification.gicon) {
             this._notification.update(
                 this._notification.title,
                 this._notification.bannerBodyText,
-                {gicon: this.getIcon()});
+                {gicon: this.icon});
         }
     }
 
@@ -630,15 +602,6 @@ class ChatSource extends MessageTray.Source {
         }
     }
 
-    _presenceChanged(_contact, _presence, _status, _message) {
-        if (this._notification) {
-            this._notification.update(
-                this._notification.title,
-                this._notification.bannerBodyText,
-                {secondaryGIcon: this.getSecondaryIcon()});
-        }
-    }
-
     _pendingRemoved(channel, message) {
         let idx = this._pendingMessages.indexOf(message);
 
@@ -674,9 +637,8 @@ const ChatNotification = HAVE_TP ? GObject.registerClass({
         'timestamp-changed': {param_types: [ChatNotificationMessage.$gtype]},
     },
 }, class ChatNotification extends MessageTray.Notification {
-    _init(source) {
-        super._init(source, source.title, null,
-            {secondaryGIcon: source.getSecondaryIcon()});
+    constructor(source) {
+        super(source, source.title, null, null);
         this.setUrgency(MessageTray.Urgency.HIGH);
         this.setResident(true);
 
@@ -870,17 +832,15 @@ class ChatNotificationBanner extends MessageTray.NotificationBanner {
             this.emit('unfocused');
         });
 
-        this._scrollArea = new St.ScrollView({
-            style_class: 'chat-scrollview vfade',
-            vscrollbar_policy: St.PolicyType.AUTOMATIC,
-            hscrollbar_policy: St.PolicyType.NEVER,
-            visible: this.expanded,
-        });
         this._contentArea = new St.BoxLayout({
             style_class: 'chat-body',
             vertical: true,
         });
-        this._scrollArea.add_actor(this._contentArea);
+        this._scrollArea = new St.ScrollView({
+            style_class: 'chat-scrollview vfade',
+            visible: this.expanded,
+            child: this._contentArea,
+        });
 
         this.setExpandedBody(this._scrollArea);
         this.setExpandedLines(CHAT_EXPAND_LINES);
@@ -890,8 +850,8 @@ class ChatNotificationBanner extends MessageTray.NotificationBanner {
         // Keep track of the bottom position for the current adjustment and
         // force a scroll to the bottom if things change while we were at the
         // bottom
-        this._oldMaxScrollValue = this._scrollArea.vscroll.adjustment.value;
-        this._scrollArea.vscroll.adjustment.connect('changed', adjustment => {
+        this._oldMaxScrollValue = this._scrollArea.vadjustment.value;
+        this._scrollArea.vadjustment.connect('changed', adjustment => {
             if (adjustment.value === this._oldMaxScrollValue)
                 this.scrollTo(St.Side.BOTTOM);
             this._oldMaxScrollValue = Math.max(adjustment.lower, adjustment.upper - adjustment.page_size);
@@ -917,7 +877,7 @@ class ChatNotificationBanner extends MessageTray.NotificationBanner {
     }
 
     scrollTo(side) {
-        let adjustment = this._scrollArea.vscroll.adjustment;
+        let adjustment = this._scrollArea.vadjustment;
         if (side === St.Side.TOP)
             adjustment.value = adjustment.lower;
         else if (side === St.Side.BOTTOM)
@@ -942,8 +902,8 @@ class ChatNotificationBanner extends MessageTray.NotificationBanner {
         }
 
         let lineBox = new ChatLineBox();
-        lineBox.add(body);
-        this._contentArea.add_actor(lineBox);
+        lineBox.add_child(body);
+        this._contentArea.add_child(lineBox);
         this._messageActors.set(message, lineBox);
 
         this._updateTimestamp(message);
@@ -966,7 +926,7 @@ class ChatNotificationBanner extends MessageTray.NotificationBanner {
             timeLabel.x_expand = timeLabel.y_expand = true;
             timeLabel.x_align = timeLabel.y_align = Clutter.ActorAlign.END;
 
-            actor.add_actor(timeLabel);
+            actor.add_child(timeLabel);
         }
     }
 

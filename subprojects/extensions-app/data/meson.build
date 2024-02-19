@@ -1,10 +1,18 @@
+subdir('icons')
+subdir('metainfo')
+
 gnome.compile_resources(
   app_id + '.data',
   configure_file(
     input: base_id + '.data.gresource.xml.in',
     output: app_id + '.data.gresource.xml',
-    configuration: {'profile': '/'.join(profile.split('.')) },
+    configuration: {
+      'app_id': app_id,
+      'profile': '/'.join(profile.split('.')),
+    },
   ),
+  dependencies: [metainfo],
+  source_dir: ['.', meson.current_build_dir()],
   gresource_bundle: true,
   install: true,
   install_dir: pkgdatadir
@@ -46,5 +54,4 @@ configure_file(
   install_dir: servicedir,
 )
 
-subdir('icons')
-subdir('metainfo')
+install_data(base_id + '.gschema.xml', install_dir: schemadir)

@@ -682,7 +682,6 @@ st_button_set_label (StButton    *button,
                             "text", priv->text,
                             "line-alignment", PANGO_ALIGN_CENTER,
                             "ellipsize", PANGO_ELLIPSIZE_END,
-                            "use-markup", TRUE,
                             "x-align", CLUTTER_ACTOR_ALIGN_CENTER,
                             "y-align", CLUTTER_ACTOR_ALIGN_CENTER,
                             NULL);
@@ -822,7 +821,7 @@ st_button_get_toggle_mode (StButton *button)
  * @button: a #Stbutton
  * @toggle: %TRUE or %FALSE
  *
- * Enables or disables toggle mode for the button. In toggle mode, the active
+ * Enables or disables toggle mode for the button. In toggle mode, the checked
  * state will be "toggled" when the user clicks the button.
  */
 void

@@ -6,6 +6,7 @@ import Gtk from 'gi://Gtk?version=4.0';
 
 import {ServiceImplementation} from './dbusService.js';
 
+import {ScreencastErrors, ScreencastError} from './misc/dbusErrors.js';
 import {loadInterfaceXML, loadSubInterfaceXML} from './misc/dbusUtils.js';
 import * as Signals from './misc/signals.js';
 
@@ -27,8 +28,21 @@ const ScreenCastStreamProxy = Gio.DBusProxy.makeProxyWrapper(ScreenCastStreamIfa
 const DEFAULT_FRAMERATE = 30;
 const DEFAULT_DRAW_CURSOR = true;
 
+const PIPELINE_BLOCKLIST_FILENAME = 'gnome-shell-screencast-pipeline-blocklist';
+
 const PIPELINES = [
     {
+        id: 'swenc-dmabuf-vp8-vp8enc',
+        pipelineString:
+            'capsfilter caps=video/x-raw(memory:DMABuf),max-framerate=%F/1 ! \
+             glupload ! glcolorconvert ! gldownload ! \
+             queue ! \
+             vp8enc cpu-used=16 max-quantizer=17 deadline=1 keyframe-mode=disabled threads=%T static-threshold=1000 buffer-size=20000 ! \
+             queue ! \
+             webmmux',
+    },
+    {
+        id: 'swenc-memfd-vp8-vp8enc',
         pipelineString:
             'capsfilter caps=video/x-raw,max-framerate=%F/1 ! \
              videoconvert chroma-mode=none dither=none matrix-mode=output-only n-threads=%T ! \
@@ -59,9 +73,7 @@ class Recorder extends Signals.EventEmitter {
         invocation) {
         super();
 
-        this._startInvocation = invocation;
         this._dbusConnection = invocation.get_connection();
-        this._stopInvocation = null;
 
         this._x = x;
         this._y = y;
@@ -80,6 +92,20 @@ class Recorder extends Signals.EventEmitter {
         this._pipelineString = null;
         this._framerate = DEFAULT_FRAMERATE;
         this._drawCursor = DEFAULT_DRAW_CURSOR;
+        this._blocklistFromPreviousCrashes = [];
+
+        const pipelineBlocklistPath = GLib.build_filenamev(
+            [GLib.get_user_runtime_dir(), PIPELINE_BLOCKLIST_FILENAME]);
+        this._pipelineBlocklistFile = Gio.File.new_for_path(pipelineBlocklistPath);
+
+        try {
+            const [success_, contents] = this._pipelineBlocklistFile.load_contents(null);
+            const decoder = new TextDecoder();
+            this._blocklistFromPreviousCrashes = JSON.parse(decoder.decode(contents));
+        } catch (e) {
+            if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND))
+                throw e;
+        }
 
         this._pipelineState = PipelineState.INIT;
         this._pipeline = null;
@@ -141,12 +167,18 @@ class Recorder extends Signals.EventEmitter {
         }
     }
 
-    _bailOutOnError(error) {
+    _bailOutOnError(message, errorDomain = ScreencastErrors, errorCode = ScreencastError.RECORDER_ERROR) {
+        const error = new GLib.Error(errorDomain, errorCode, message);
+
+        // If it's a PIPELINE_ERROR, we want to leave the failing pipeline on the
+        // blocklist for the next time. Other errors are pipeline-independent, so
+        // reset the blocklist to allow the pipeline to be tried again next time.
+        if (!error.matches(ScreencastErrors, ScreencastError.PIPELINE_ERROR))
+            this._updateServiceCrashBlocklist([...this._blocklistFromPreviousCrashes]);
+
         this._teardownPipeline();
         this._unwatchSender();
         this._stopSession();
-
-        log(`Recorder error: ${error.message}`);
 
         if (this._startRequest) {
             this._startRequest.reject(error);
@@ -161,13 +193,13 @@ class Recorder extends Signals.EventEmitter {
         this.emit('error', error);
     }
 
-    _handleFatalPipelineError(message) {
+    _handleFatalPipelineError(message, errorDomain, errorCode) {
         this._pipelineState = PipelineState.ERROR;
-        this._bailOutOnError(new Error(`Fatal pipeline error: ${message}`));
+        this._bailOutOnError(message, errorDomain, errorCode);
     }
 
     _senderVanished() {
-        this._bailOutOnError(new Error('Sender has vanished'));
+        this._bailOutOnError('Sender has vanished');
     }
 
     _onSessionClosed() {
@@ -175,7 +207,7 @@ class Recorder extends Signals.EventEmitter {
             return; // We closed the session ourselves
 
         this._sessionState = SessionState.STOPPED;
-        this._bailOutOnError(new Error('Session closed unexpectedly'));
+        this._bailOutOnError('Session closed unexpectedly');
     }
 
     _initSession(sessionPath) {
@@ -185,10 +217,31 @@ class Recorder extends Signals.EventEmitter {
         this._sessionProxy.connectSignal('Closed', this._onSessionClosed.bind(this));
     }
 
+    _updateServiceCrashBlocklist(blocklist) {
+        try {
+            if (blocklist.length === 0) {
+                this._pipelineBlocklistFile.delete(null);
+            } else {
+                this._pipelineBlocklistFile.replace_contents(
+                    JSON.stringify(blocklist), null, false,
+                    Gio.FileCreateFlags.NONE, null);
+            }
+        } catch (e) {
+            console.log(`Failed to update pipeline-blocklist file: ${e.message}`);
+        }
+    }
+
     _tryNextPipeline() {
         const {done, value: pipelineConfig} = this._pipelineConfigs.next();
         if (done) {
-            this._handleFatalPipelineError('All pipelines failed to start');
+            this._handleFatalPipelineError('All pipelines failed to start',
+                ScreencastErrors, ScreencastError.ALL_PIPELINES_FAILED);
+            return;
+        }
+
+        if (this._blocklistFromPreviousCrashes.includes(pipelineConfig.id)) {
+            console.info(`Skipping pipeline '${pipelineConfig.id}' due to pipeline blocklist`);
+            this._tryNextPipeline();
             return;
         }
 
@@ -202,12 +255,13 @@ class Recorder extends Signals.EventEmitter {
         try {
             this._pipeline = this._createPipeline(this._nodeId, pipelineConfig,
                 this._framerate);
-        } catch (error) {
-            this._tryNextPipeline();
-            return;
-        }
 
-        if (!this._pipeline) {
+            // Add the current pipeline to the blocklist, so it is skipped next
+            // time in case we crash; we'll remove it again on success or on
+            // non-pipeline-related failures.
+            this._updateServiceCrashBlocklist(
+                [...this._blocklistFromPreviousCrashes, pipelineConfig.id]);
+        } catch (error) {
             this._tryNextPipeline();
             return;
         }
@@ -316,10 +370,15 @@ class Recorder extends Signals.EventEmitter {
 
             case PipelineState.PLAYING:
                 this._addRecentItem();
-                this._handleFatalPipelineError('Unexpected EOS message');
+                this._handleFatalPipelineError('Unexpected EOS message',
+                    ScreencastErrors, ScreencastError.PIPELINE_ERROR);
                 break;
 
             case PipelineState.FLUSHING:
+                // The pipeline ran successfully and we didn't crash; we can remove it
+                // from the blocklist again now.
+                this._updateServiceCrashBlocklist([...this._blocklistFromPreviousCrashes]);
+
                 this._addRecentItem();
 
                 this._teardownPipeline();
@@ -349,11 +408,20 @@ class Recorder extends Signals.EventEmitter {
                 break;
 
             case PipelineState.PLAYING:
-            case PipelineState.FLUSHING:
-                // Everything else we can't handle, so error out
-                this._handleFatalPipelineError(
-                    `GStreamer error while in state ${this._pipelineState}: ${message.parse_error()[0].message}`);
+            case PipelineState.FLUSHING: {
+                const [error] = message.parse_error();
+
+                if (error.matches(Gst.ResourceError, Gst.ResourceError.NO_SPACE_LEFT)) {
+                    this._handleFatalPipelineError('Out of disk space',
+                        ScreencastErrors, ScreencastError.OUT_OF_DISK_SPACE);
+                } else {
+                    this._handleFatalPipelineError(
+                        `GStreamer error while in state ${this._pipelineState}: ${error.message}`,
+                        ScreencastErrors, ScreencastError.PIPELINE_ERROR);
+                }
+
                 break;
+            }
 
             default:
                 break;
@@ -517,17 +585,19 @@ export const ScreencastService = class extends ServiceImplementation {
     }
 
     async ScreencastAsync(params, invocation) {
-        let returnValue = [false, ''];
-
         if (this._lockdownSettings.get_boolean('disable-save-to-disk')) {
-            invocation.return_value(GLib.Variant.new('(bs)', returnValue));
+            invocation.return_error_literal(ScreencastErrors,
+                ScreencastError.SAVE_TO_DISK_DISABLED,
+                'Saving to disk is disabled');
             return;
         }
 
         const sender = invocation.get_sender();
 
         if (this._recorders.get(sender)) {
-            invocation.return_value(GLib.Variant.new('(bs)', returnValue));
+            invocation.return_error_literal(ScreencastErrors,
+                ScreencastError.ALREADY_RECORDING,
+                'Service is already recording');
             return;
         }
 
@@ -549,7 +619,10 @@ export const ScreencastService = class extends ServiceImplementation {
                 invocation);
         } catch (error) {
             log(`Failed to create recorder: ${error.message}`);
-            invocation.return_value(GLib.Variant.new('(bs)', returnValue));
+            invocation.return_error_literal(ScreencastErrors,
+                ScreencastError.RECORDER_ERROR,
+                error.message);
+
             return;
         }
 
@@ -557,33 +630,46 @@ export const ScreencastService = class extends ServiceImplementation {
 
         try {
             await recorder.startRecording();
-            returnValue = [true, filePath];
+            invocation.return_value(GLib.Variant.new('(bs)', [true, filePath]));
         } catch (error) {
             log(`Failed to start recorder: ${error.message}`);
             this._removeRecorder(sender);
-        } finally {
-            invocation.return_value(GLib.Variant.new('(bs)', returnValue));
+            if (error instanceof GLib.Error) {
+                invocation.return_gerror(error);
+            } else {
+                invocation.return_error_literal(ScreencastErrors,
+                    ScreencastError.RECORDER_ERROR,
+                    error.message);
+            }
+
+            return;
         }
 
         recorder.connect('error', (r, error) => {
+            log(`Fatal error while recording: ${error.message}`);
             this._removeRecorder(sender);
             this._dbusImpl.emit_signal('Error',
-                new GLib.Variant('(s)', [error.message]));
+                new GLib.Variant('(ss)', [
+                    Gio.DBusError.encode_gerror(error),
+                    error.message,
+                ]));
         });
     }
 
     async ScreencastAreaAsync(params, invocation) {
-        let returnValue = [false, ''];
-
         if (this._lockdownSettings.get_boolean('disable-save-to-disk')) {
-            invocation.return_value(GLib.Variant.new('(bs)', returnValue));
+            invocation.return_error_literal(ScreencastErrors,
+                ScreencastError.SAVE_TO_DISK_DISABLED,
+                'Saving to disk is disabled');
             return;
         }
 
         const sender = invocation.get_sender();
 
         if (this._recorders.get(sender)) {
-            invocation.return_value(GLib.Variant.new('(bs)', returnValue));
+            invocation.return_error_literal(ScreencastErrors,
+                ScreencastError.ALREADY_RECORDING,
+                'Service is already recording');
             return;
         }
 
@@ -604,7 +690,10 @@ export const ScreencastService = class extends ServiceImplementation {
                 invocation);
         } catch (error) {
             log(`Failed to create recorder: ${error.message}`);
-            invocation.return_value(GLib.Variant.new('(bs)', returnValue));
+            invocation.return_error_literal(ScreencastErrors,
+                ScreencastError.RECORDER_ERROR,
+                error.message);
+
             return;
         }
 
@@ -612,18 +701,29 @@ export const ScreencastService = class extends ServiceImplementation {
 
         try {
             await recorder.startRecording();
-            returnValue = [true, filePath];
+            invocation.return_value(GLib.Variant.new('(bs)', [true, filePath]));
         } catch (error) {
             log(`Failed to start recorder: ${error.message}`);
             this._removeRecorder(sender);
-        } finally {
-            invocation.return_value(GLib.Variant.new('(bs)', returnValue));
+            if (error instanceof GLib.Error) {
+                invocation.return_gerror(error);
+            } else {
+                invocation.return_error_literal(ScreencastErrors,
+                    ScreencastError.RECORDER_ERROR,
+                    error.message);
+            }
+
+            return;
         }
 
         recorder.connect('error', (r, error) => {
+            log(`Fatal error while recording: ${error.message}`);
             this._removeRecorder(sender);
             this._dbusImpl.emit_signal('Error',
-                new GLib.Variant('(s)', [error.message]));
+                new GLib.Variant('(ss)', [
+                    Gio.DBusError.encode_gerror(error),
+                    error.message,
+                ]));
         });
     }
 

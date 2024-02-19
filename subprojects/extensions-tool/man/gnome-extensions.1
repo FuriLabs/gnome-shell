@@ -87,7 +87,7 @@ Enables the extension identified by
 The command will not detect any errors from the extension itself, use the
 \fBinfo\fR
 command to confirm that the extension state is
-\fBENABLED\fR\&.
+\fBACTIVE\fR\&.
 .sp
 If the extension is already enabled, the command will do nothing\&.
 .RE
@@ -145,6 +145,16 @@ Include enabled extensions
 \fB\-\-disabled\fR
 .RS 4
 Include disabled extensions
+.RE
+.PP
+\fB\-\-active\fR
+.RS 4
+Only include extensions in active state
+.RE
+.PP
+\fB\-\-inactive\fR
+.RS 4
+Only include extensions in inactive state
 .RE
 .PP
 \fB\-\-prefs\fR

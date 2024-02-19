@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>org.gnome.Extensions</id>
+  <id>@app_id@</id>
 
   <name>Extensions</name>
   <summary>Manage your GNOME Extensions</summary>
@@ -8,21 +8,31 @@
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-2.0-or-later</project_license>
 
-  <url type="homepage">https://gitlab.gnome.org/GNOME/gnome-shell/-/tree/HEAD/subprojects/extensions-app</url>
+  <url type="homepage">https://apps.gnome.org/Extensions/</url>
   <url type="bugtracker">https://gitlab.gnome.org/GNOME/gnome-shell/issues/new</url>
-  <url type="donation">http://www.gnome.org/friends/</url>
+  <url type="donation">https://www.gnome.org/donate/</url>
   <url type="translate">https://wiki.gnome.org/TranslationProject</url>
+  <url type="vcs-browser">https://gitlab.gnome.org/GNOME/gnome-shell/-/tree/HEAD/subprojects/extensions-app</url>
 
   <project_group>GNOME</project_group>
+  <!-- developer_name tag deprecated with Appstream 1.0 -->
   <developer_name>The GNOME Project</developer_name>
+  <developer id="gnome.org">
+    <name>The GNOME Project</name>
+  </developer>
 
-  <launchable type="desktop-id">org.gnome.Extensions.desktop</launchable>
+  <translation type="gettext">gnome-extensions-app</translation>
+  <launchable type="desktop-id">@app_id@.desktop</launchable>
 
   <kudos>
     <kudo>HiDpiIcon</kudo>
     <kudo>HighContrast</kudo>
     <kudo>ModernToolkit</kudo>
   </kudos>
+
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
 
   <recommends>
     <control>pointing</control>
@@ -39,25 +49,32 @@
   </description>
 
   <releases>
-    <release version="45.3" date="2024-01-06"/>
-    <release version="45.2" date="2023-12-01">
-      <p>Support version-name field</p>
+    <release version="46.beta" date="2024-02-11" type="development">
+      <description>
+        <p>Remember window state.</p>
+        <p>Use adaptive dialogs.</p>
+      </description>
     </release>
-    <release version="45.1" date="2023-10-31"/>
-    <release version="45.0" date="2023-09-16">
-      <p>Modernize layout</p>
+    <release version="46.alpha" date="2024-01-06" type="development">
+      <description>
+        <p>Streamline layout to be fully adaptive on mobile.</p>
+        <p>Improve handling of extensions in error state.</p>
+      </description>
     </release>
   </releases>
 
   <screenshots>
     <screenshot type="default">
-      <image>https://gitlab.gnome.org/GNOME/gnome-shell/raw/gnome-45/subprojects/extensions-app/data/metainfo/extensions-main.png</image>
+      <image>https://gitlab.gnome.org/GNOME/gnome-shell/raw/HEAD/subprojects/extensions-app/data/metainfo/extensions-main.png</image>
+      <caption>Main Window</caption>
     </screenshot>
     <screenshot>
-      <image>https://gitlab.gnome.org/GNOME/gnome-shell/raw/gnome-45/subprojects/extensions-app/data/metainfo/extensions-update.png</image>
+      <image>https://gitlab.gnome.org/GNOME/gnome-shell/raw/HEAD/subprojects/extensions-app/data/metainfo/extensions-update.png</image>
+      <caption>Available Updates</caption>
     </screenshot>
     <screenshot>
-      <image>https://gitlab.gnome.org/GNOME/gnome-shell/raw/gnome-45/subprojects/extensions-app/data/metainfo/extensions-remove.png</image>
+      <image>https://gitlab.gnome.org/GNOME/gnome-shell/raw/HEAD/subprojects/extensions-app/data/metainfo/extensions-search.png</image>
+      <caption>Search View</caption>
     </screenshot>
   </screenshots>
 </component>

@@ -274,8 +274,7 @@ async function _initializeUI() {
         if (lookingGlass?.isOpen)
             return; // assume user action
 
-        const source = new MessageTray.SystemNotificationSource();
-        messageTray.add(source);
+        const source = MessageTray.getSystemSource();
         const notification = new MessageTray.Notification(source,
             _('System was put in unsafe mode'),
             _('Apps now have unrestricted access'));
@@ -615,8 +614,7 @@ export function loadTheme() {
  * @param {string} details Additional information
  */
 export function notify(msg, details) {
-    let source = new MessageTray.SystemNotificationSource();
-    messageTray.add(source);
+    const source = MessageTray.getSystemSource();
     let notification = new MessageTray.Notification(source, msg, details);
     notification.setTransient(true);
     source.showNotification(notification);
@@ -755,7 +753,8 @@ export function popModal(grab, timestamp) {
         if (record.prevFocus)
             record.prevFocus.disconnect(record.prevFocusDestroyId);
         actionMode = record.actionMode;
-        global.stage.set_key_focus(record.prevFocus);
+        if (global.stage.key_focus === record.actor)
+            global.stage.set_key_focus(record.prevFocus);
     } else {
         // If we have:
         //     global.stage.set_focus(a);

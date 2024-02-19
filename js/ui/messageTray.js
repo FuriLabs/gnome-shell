@@ -12,6 +12,7 @@ import * as Calendar from './calendar.js';
 import * as GnomeSession from '../misc/gnomeSession.js';
 import * as Layout from './layout.js';
 import * as Main from './main.js';
+import * as MessageList from './messageList.js';
 import * as Params from '../misc/params.js';
 import * as SignalTracker from '../misc/signalTracker.js';
 
@@ -160,6 +161,24 @@ export const NotificationPolicy = GObject.registerClass({
             GObject.ParamFlags.READABLE, false),
     },
 }, class NotificationPolicy extends GObject.Object {
+    /**
+     * Create a new policy for app.
+     *
+     * This will be a NotificationApplicationPolicy for valid apps,
+     * or a NotificationGenericPolicy otherwise.
+     *
+     * @param {Shell.App=} app
+     * @returns {NotificationPolicy}
+     */
+    static newForApp(app) {
+        // fallback to generic policy
+        if (!app?.get_app_info())
+            return new NotificationGenericPolicy();
+
+        const id = app.get_id().replace(/\.desktop$/, '');
+        return new NotificationApplicationPolicy(id);
+    }
+
     // Do nothing for the default policy. These methods are only useful for the
     // GSettings policy.
     store() { }
@@ -333,9 +352,6 @@ export const NotificationApplicationPolicy = GObject.registerClass({
 // However, if @params contains a 'gicon' parameter, the passed in gicon
 // will be used.
 //
-// You can add a secondary icon to the banner with 'secondaryGIcon'. There
-// is no fallback for this icon.
-//
 // If @params contains 'bannerMarkup', with the value %true, a subset (<b>,
 // <i> and <u>) of the markup in [1] will be interpreted within @banner. If
 // the parameter is not present, then anything that looks like markup
@@ -401,7 +417,6 @@ export const Notification = GObject.registerClass({
     update(title, banner, params) {
         params = Params.parse(params, {
             gicon: null,
-            secondaryGIcon: null,
             bannerMarkup: false,
             clear: false,
             datetime: null,
@@ -421,9 +436,6 @@ export const Notification = GObject.registerClass({
         if (params.gicon || params.clear)
             this.gicon = params.gicon;
 
-        if (params.secondaryGIcon || params.clear)
-            this.secondaryGIcon = params.secondaryGIcon;
-
         if (params.clear)
             this.actions = [];
 
@@ -435,6 +447,17 @@ export const Notification = GObject.registerClass({
         }
 
         this.emit('updated', params.clear);
+    }
+
+    get iconName() {
+        if (this.gicon instanceof Gio.ThemedIcon)
+            return this.gicon.iconName;
+        else
+            return null;
+    }
+
+    set iconName(iconName) {
+        this.gicon = new Gio.ThemedIcon({name: iconName});
     }
 
     // addAction:
@@ -518,7 +541,6 @@ export const NotificationBanner = GObject.registerClass({
         this._buttonBox = null;
 
         this._addActions();
-        this._addSecondaryIcon();
 
         this.notification.connectObject('activated', () => {
             // We hide all types of notifications once the user clicks on
@@ -533,29 +555,17 @@ export const NotificationBanner = GObject.registerClass({
         super._onUpdated(n, clear);
 
         if (clear) {
-            this.setSecondaryActor(null);
             this.setActionArea(null);
             this._buttonBox = null;
         }
 
         this._addActions();
-        this._addSecondaryIcon();
     }
 
     _addActions() {
         this.notification.actions.forEach(action => {
             this.addAction(action.label, action.callback);
         });
-    }
-
-    _addSecondaryIcon() {
-        if (this.notification.secondaryGIcon) {
-            const icon = new St.Icon({
-                gicon: this.notification.secondaryGIcon,
-                x_align: Clutter.ActorAlign.END,
-            });
-            this.setSecondaryActor(icon);
-        }
     }
 
     addButton(button, callback) {
@@ -571,7 +581,7 @@ export const NotificationBanner = GObject.registerClass({
         if (this._buttonBox.get_n_children() >= MAX_NOTIFICATION_BUTTONS)
             return null;
 
-        this._buttonBox.add(button);
+        this._buttonBox.add_child(button);
         button.connect('clicked', () => {
             callback();
 
@@ -600,46 +610,6 @@ export const NotificationBanner = GObject.registerClass({
     }
 });
 
-export const SourceActor = GObject.registerClass(
-class SourceActor extends St.Widget {
-    _init(source, size) {
-        super._init();
-
-        this._source = source;
-        this._size = size;
-
-        this.connect('destroy',
-            () => (this._actorDestroyed = true));
-        this._actorDestroyed = false;
-
-        let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
-        this._iconBin = new St.Bin({
-            x_expand: true,
-            height: size * scaleFactor,
-            width: size * scaleFactor,
-        });
-
-        this.add_actor(this._iconBin);
-
-        this._source.connectObject('icon-updated',
-            this._updateIcon.bind(this), this);
-        this._updateIcon();
-    }
-
-    setIcon(icon) {
-        this._iconBin.child = icon;
-        this._iconSet = true;
-    }
-
-    _updateIcon() {
-        if (this._actorDestroyed)
-            return;
-
-        if (!this._iconSet)
-            this._iconBin.child = this._source.createIcon(this._size);
-    }
-});
-
 export const Source = GObject.registerClass({
     Properties: {
         'count': GObject.ParamSpec.int(
@@ -650,30 +620,20 @@ export const Source = GObject.registerClass({
             'policy', 'policy', 'policy',
             GObject.ParamFlags.READWRITE,
             NotificationPolicy.$gtype),
-        'title': GObject.ParamSpec.string(
-            'title', 'title', 'title',
-            GObject.ParamFlags.READWRITE,
-            null),
     },
     Signals: {
         'destroy': {param_types: [GObject.TYPE_UINT]},
-        'icon-updated': {},
         'notification-added': {param_types: [Notification.$gtype]},
         'notification-show': {param_types: [Notification.$gtype]},
     },
-}, class Source extends GObject.Object {
-    _init(title, iconName) {
-        super._init({title});
-
-        this.SOURCE_ICON_SIZE = 48;
-
-        this.iconName = iconName;
-
-        this.isChat = false;
+}, class Source extends MessageList.Source {
+    constructor(params) {
+        super(params);
 
         this.notifications = [];
 
-        this._policy = this._createPolicy();
+        if (!this._policy)
+            this._policy = new NotificationGenericPolicy();
     }
 
     get policy() {
@@ -702,40 +662,14 @@ export const Source = GObject.registerClass({
         this.notify('count');
     }
 
-    _createPolicy() {
-        return new NotificationGenericPolicy();
-    }
-
     get narrowestPrivacyScope() {
         return this.notifications.every(n => n.privacyScope === PrivacyScope.SYSTEM)
             ? PrivacyScope.SYSTEM
             : PrivacyScope.USER;
     }
 
-    setTitle(newTitle) {
-        if (this.title === newTitle)
-            return;
-
-        this.title = newTitle;
-        this.notify('title');
-    }
-
     createBanner(notification) {
         return new NotificationBanner(notification);
-    }
-
-    // Called to create a new icon actor.
-    // Provides a sane default implementation, override if you need
-    // something more fancy.
-    createIcon(size) {
-        return new St.Icon({
-            gicon: this.getIcon(),
-            icon_size: size,
-        });
-    }
-
-    getIcon() {
-        return new Gio.ThemedIcon({name: this.iconName});
     }
 
     _onNotificationDestroy(notification) {
@@ -787,10 +721,6 @@ export const Source = GObject.registerClass({
 
         this.policy.destroy();
         this.run_dispose();
-    }
-
-    iconUpdated() {
-        this.emit('icon-updated');
     }
 
     // To be overridden by subclasses
@@ -849,7 +779,7 @@ export const MessageTray = GObject.registerClass({
             this._onNotificationKeyRelease.bind(this));
         this._bannerBin.connect('notify::hover',
             this._onNotificationHoverChanged.bind(this));
-        this.add_actor(this._bannerBin);
+        this.add_child(this._bannerBin);
 
         this._notificationFocusGrabber = new FocusGrabber(this._bannerBin);
         this._notificationQueue = [];
@@ -1240,7 +1170,7 @@ export const MessageTray = GObject.registerClass({
             'done-displaying', this._escapeTray.bind(this),
             'unfocused', () => this._updateState(), this);
 
-        this._bannerBin.add_actor(this._banner);
+        this._bannerBin.add_child(this._banner);
 
         this._bannerBin.opacity = 0;
         this._bannerBin.y = -this._banner.height;
@@ -1411,13 +1341,25 @@ export const MessageTray = GObject.registerClass({
     }
 });
 
-export const SystemNotificationSource = GObject.registerClass(
-class SystemNotificationSource extends Source {
-    _init() {
-        super._init(_('System Information'), 'dialog-information-symbolic');
+let systemNotificationSource = null;
+
+/**
+ * The {Source} that should be used to send system notifications.
+ *
+ * @returns {Source}
+ */
+export function getSystemSource() {
+    if (!systemNotificationSource) {
+        systemNotificationSource = new Source({
+            title: _('System'),
+            iconName: 'emblem-system-symbolic',
+        });
+
+        systemNotificationSource.connect('destroy', () => {
+            systemNotificationSource = null;
+        });
+        Main.messageTray.add(systemNotificationSource);
     }
 
-    open() {
-        this.destroy();
-    }
-});
+    return systemNotificationSource;
+}

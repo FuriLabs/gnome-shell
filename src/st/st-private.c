@@ -391,7 +391,7 @@ _st_create_shadow_pipeline (StShadow    *shadow_spec,
   CoglPipeline *pipeline;
   CoglTexture *texture;
   float sampling_radius;
-  float sigma;
+  float radius;
   int src_height, dst_height;
   int src_width, dst_width;
   CoglPipeline *texture_pipeline;
@@ -403,9 +403,8 @@ _st_create_shadow_pipeline (StShadow    *shadow_spec,
   g_return_val_if_fail (shadow_spec != NULL, NULL);
   g_return_val_if_fail (src_texture != NULL, NULL);
 
-  sampling_radius = resource_scale * shadow_spec->blur;
-  sigma = sampling_radius / 2.f;
-  sampling_radius = ceilf (sampling_radius);
+  radius = resource_scale * shadow_spec->blur;
+  sampling_radius = ceilf (radius);
 
   src_width = cogl_texture_get_width (src_texture);
   src_height = cogl_texture_get_height (src_texture);
@@ -420,7 +419,7 @@ _st_create_shadow_pipeline (StShadow    *shadow_spec,
   fb = COGL_FRAMEBUFFER (offscreen);
   if (!cogl_framebuffer_allocate (fb, &error))
     {
-      cogl_clear_object (&texture);
+      g_clear_object (&texture);
       return NULL;
     }
 
@@ -428,7 +427,7 @@ _st_create_shadow_pipeline (StShadow    *shadow_spec,
   cogl_framebuffer_orthographic (fb, 0, 0, dst_width, dst_height, 0, 1.0);
 
   /* Blur */
-  blur_node = clutter_blur_node_new (dst_width, dst_height, sigma);
+  blur_node = clutter_blur_node_new (dst_width, dst_height, radius);
   clutter_paint_node_add_rectangle (blur_node,
                                     &(ClutterActorBox) {
                                       0.f, 0.f,
@@ -450,7 +449,7 @@ _st_create_shadow_pipeline (StShadow    *shadow_spec,
 
       texture_pipeline = cogl_pipeline_new (ctx);
       cogl_pipeline_add_snippet (texture_pipeline, snippet);
-      cogl_object_unref (snippet);
+      g_object_unref (snippet);
 
       cogl_context_set_named_pipeline (ctx,
                                        &texture_pipeline_key,
@@ -493,7 +492,7 @@ _st_create_shadow_pipeline (StShadow    *shadow_spec,
   pipeline = cogl_pipeline_copy (shadow_pipeline_template);
   cogl_pipeline_set_layer_texture (pipeline, 0, texture);
 
-  cogl_clear_object (&texture);
+  g_clear_object (&texture);
 
   return pipeline;
 }
@@ -535,7 +534,7 @@ _st_create_shadow_pipeline_from_actor (StShadow     *shadow_spec,
 
   if (shadow_pipeline == NULL)
     {
-      CoglTexture *buffer;
+      g_autoptr(CoglTexture) buffer = NULL;
       CoglOffscreen *offscreen;
       CoglFramebuffer *fb;
       CoglContext *ctx;
@@ -556,7 +555,6 @@ _st_create_shadow_pipeline_from_actor (StShadow     *shadow_spec,
         {
           g_error_free (catch_error);
           g_object_unref (offscreen);
-          cogl_object_unref (buffer);
           return NULL;
         }
 
@@ -582,10 +580,9 @@ _st_create_shadow_pipeline_from_actor (StShadow     *shadow_spec,
 
       g_object_unref (fb);
 
-      shadow_pipeline = _st_create_shadow_pipeline (shadow_spec, buffer,
+      shadow_pipeline = _st_create_shadow_pipeline (shadow_spec,
+                                                    g_steal_pointer (&buffer),
                                                     resource_scale);
-
-      cogl_object_unref (buffer);
     }
 
   return shadow_pipeline;

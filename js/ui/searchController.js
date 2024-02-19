@@ -86,7 +86,7 @@ export const SearchController = GObject.registerClass({
 
         this._searchResults = new Search.SearchResultsView();
         this.add_child(this._searchResults);
-        Main.ctrlAltTabManager.addGroup(this._entry, _('Search'), 'edit-find-symbolic');
+        Main.ctrlAltTabManager.addGroup(this._entry, _('Search'), 'shell-focus-search-symbolic');
 
         // Since the entry isn't inside the results container we install this
         // dummy widget as the last results container child so that we can
@@ -95,7 +95,7 @@ export const SearchController = GObject.registerClass({
         this._focusTrap.connect('key-focus-in', () => {
             this._entry.grab_key_focus();
         });
-        this._searchResults.add_actor(this._focusTrap);
+        this._searchResults.add_child(this._focusTrap);
 
         global.focus_manager.add_group(this._searchResults);
 
@@ -114,6 +114,10 @@ export const SearchController = GObject.registerClass({
 
     prepareToEnterOverview() {
         this.reset();
+        this._setSearchActive(false);
+    }
+
+    prepareToLeaveOverview() {
         this._setSearchActive(false);
     }
 

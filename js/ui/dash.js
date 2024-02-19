@@ -154,7 +154,7 @@ class DashItemContainer extends St.Widget {
 
         this.child = actor;
         this.child.y_expand = true;
-        this.add_actor(this.child);
+        this.add_child(this.child);
     }
 
     show(animate) {
@@ -210,7 +210,7 @@ class ShowAppsIcon extends DashItemContainer {
         });
         this.icon.y_align = Clutter.ActorAlign.CENTER;
 
-        this.toggleButton.add_actor(this.icon);
+        this.toggleButton.child = this.icon;
         this.toggleButton._delegate = this;
 
         this.setChild(this.toggleButton);
@@ -406,8 +406,8 @@ export const Dash = GObject.registerClass({
             this._onWindowDragEnd.bind(this));
 
         // Translators: this is the name of the dock/favorites area on
-        // the left of the overview
-        Main.ctrlAltTabManager.addGroup(this, _('Dash'), 'user-bookmarks-symbolic');
+        // the bottom of the overview
+        Main.ctrlAltTabManager.addGroup(this, _('Dash'), 'shell-focus-dash-symbolic');
     }
 
     _onItemDragBegin() {
@@ -512,13 +512,13 @@ export const Dash = GObject.registerClass({
     }
 
     _createAppItem(app) {
+        let item = new DashItemContainer();
         let appIcon = new DashIcon(app);
 
         appIcon.connect('menu-state-changed', (o, opened) => {
             this._itemMenuStateChanged(item, opened);
         });
 
-        let item = new DashItemContainer();
         item.setChild(appIcon);
 
         // Override default AppIcon label_actor, now the

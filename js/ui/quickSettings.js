@@ -62,7 +62,7 @@ export const QuickToggle = GObject.registerClass({
             ...params,
         });
 
-        this._box = new St.BoxLayout();
+        this._box = new St.BoxLayout({x_expand: true});
         this.set_child(this._box);
 
         const iconProps = {};
@@ -167,7 +167,7 @@ export const QuickMenuToggle = GObject.registerClass({
 
         this.add_style_class_name('quick-menu-toggle');
 
-        this._box = new St.BoxLayout();
+        this._box = new St.BoxLayout({x_expand: true});
         this.set_child(this._box);
 
         const contents = new QuickToggle({
@@ -264,7 +264,7 @@ export const QuickSlider = GObject.registerClass({
             hasMenu: true,
         });
 
-        const box = new St.BoxLayout();
+        const box = new St.BoxLayout({x_expand: true});
         this.set_child(box);
 
         const iconProps = {};
@@ -847,7 +847,7 @@ class SystemIndicator extends St.BoxLayout {
 
     _addIndicator() {
         const icon = new St.Icon({style_class: 'system-status-icon'});
-        this.add_actor(icon);
+        this.add_child(icon);
         icon.connect('notify::visible', () => this._syncIndicatorsVisible());
         this._syncIndicatorsVisible();
         return icon;

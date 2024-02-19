@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: gnome-shell main\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-shell/issues\n"
 "POT-Creation-Date: 2023-11-11 06:48+0000\n"
-"PO-Revision-Date: 2023-11-11 13:54+0700\n"
+"PO-Revision-Date: 2023-11-11 13:57+0700\n"
 "Last-Translator: Trần Ngọc Quân <vnwildman@gmail.com>\n"
 "Language-Team: Vietnamese <Vietnamese <gnome-vi-list@gnome.org>>\n"
 "Language: vi\n"
@@ -62,7 +62,7 @@ msgid "Activate favorite app 9"
 msgstr "Kích hoạt ứng dụng ưa thích 9"
 
 #. Translators: name of the folder under ~/Pictures for screenshots.
-#: data/50-gnome-shell-screenshots.xml:6 js/ui/screenshot.js:2148
+#: data/50-gnome-shell-screenshots.xml:6 js/ui/screenshot.js:2187
 msgid "Screenshots"
 msgstr "Chụp màn hình"
 
@@ -496,27 +496,27 @@ msgstr "Thôi"
 msgid "Password"
 msgstr "Mật khẩu"
 
-#: js/gdm/loginDialog.js:326
+#: js/gdm/loginDialog.js:324
 msgid "Choose Session"
 msgstr "Chọn phiên làm việc"
 
-#: js/gdm/loginDialog.js:471
+#: js/gdm/loginDialog.js:469
 msgid "Not listed?"
 msgstr "Không có trong danh sách?"
 
 #. Translators: this message is shown below the username entry field
 #. to clue the user in on how to login to the local network realm
-#: js/gdm/loginDialog.js:941
+#: js/gdm/loginDialog.js:938
 #, javascript-format
 msgid "(e.g., user or %s)"
 msgstr "(ví dụ: tài khoản hoặc %s)"
 
-#: js/gdm/loginDialog.js:946 js/ui/components/networkAgent.js:259
+#: js/gdm/loginDialog.js:943 js/ui/components/networkAgent.js:259
 #: js/ui/components/networkAgent.js:294 js/ui/components/networkAgent.js:328
 msgid "Username"
 msgstr "Tài khoản"
 
-#: js/gdm/loginDialog.js:1270
+#: js/gdm/loginDialog.js:1267
 msgid "Login Window"
 msgstr "Cửa sổ đăng nhập"
 
@@ -632,17 +632,17 @@ msgctxt "search-result"
 msgid "Lock Screen Rotation"
 msgstr "Khóa hướng màn hình"
 
-#: js/misc/util.js:138
+#: js/misc/util.js:139
 msgid "Command not found"
 msgstr "Không tìm thấy lệnh"
 
 #. Replace "Error invoking GLib.shell_parse_argv: " with
 #. something nicer
-#: js/misc/util.js:178
+#: js/misc/util.js:179
 msgid "Could not parse command:"
 msgstr "Không thể phân tích lệnh:"
 
-#: js/misc/util.js:186
+#: js/misc/util.js:187
 #, javascript-format
 msgid "Execution of “%s” failed:"
 msgstr "Gặp lỗi khi thực thi “%s”:"
@@ -1046,18 +1046,18 @@ msgid "Service"
 msgstr "Dịch vụ"
 
 #: js/ui/components/networkAgent.js:372 js/ui/components/networkAgent.js:408
-#: js/ui/components/networkAgent.js:753 js/ui/components/networkAgent.js:774
+#: js/ui/components/networkAgent.js:754 js/ui/components/networkAgent.js:775
 msgid "Authentication required"
 msgstr "Cần xác thực"
 
-#: js/ui/components/networkAgent.js:373 js/ui/components/networkAgent.js:754
+#: js/ui/components/networkAgent.js:373 js/ui/components/networkAgent.js:755
 #, javascript-format
 msgid ""
 "Passwords or encryption keys are required to access the wireless network "
 "“%s”."
 msgstr "Cần mật mã hoặc khóa mã để truy cập mạng không dây “%s”."
 
-#: js/ui/components/networkAgent.js:377 js/ui/components/networkAgent.js:758
+#: js/ui/components/networkAgent.js:377 js/ui/components/networkAgent.js:759
 msgid "Wired 802.1X authentication"
 msgstr "Xác thực Wired 802.1X"
 
@@ -1065,15 +1065,15 @@ msgstr "Xác thực Wired 802.1X"
 msgid "Network name"
 msgstr "Tên mạng"
 
-#: js/ui/components/networkAgent.js:388 js/ui/components/networkAgent.js:762
+#: js/ui/components/networkAgent.js:388 js/ui/components/networkAgent.js:763
 msgid "DSL authentication"
 msgstr "Xác thực DSL"
 
-#: js/ui/components/networkAgent.js:395 js/ui/components/networkAgent.js:767
+#: js/ui/components/networkAgent.js:395 js/ui/components/networkAgent.js:768
 msgid "PIN code required"
 msgstr "Cần mã PIN"
 
-#: js/ui/components/networkAgent.js:396 js/ui/components/networkAgent.js:768
+#: js/ui/components/networkAgent.js:396 js/ui/components/networkAgent.js:769
 msgid "PIN code is needed for the mobile broadband device"
 msgstr "Thiết bị di động băng thông rộng cần mã PIN"
 
@@ -1081,18 +1081,18 @@ msgstr "Thiết bị di động băng thông rộng cần mã PIN"
 msgid "PIN"
 msgstr "PIN"
 
-#: js/ui/components/networkAgent.js:409 js/ui/components/networkAgent.js:759
-#: js/ui/components/networkAgent.js:763 js/ui/components/networkAgent.js:775
-#: js/ui/components/networkAgent.js:779
+#: js/ui/components/networkAgent.js:409 js/ui/components/networkAgent.js:760
+#: js/ui/components/networkAgent.js:764 js/ui/components/networkAgent.js:776
+#: js/ui/components/networkAgent.js:780
 #, javascript-format
 msgid "A password is required to connect to “%s”."
 msgstr "Cần mật khẩu để kết nối đến “%s”."
 
-#: js/ui/components/networkAgent.js:742 js/ui/status/network.js:2040
+#: js/ui/components/networkAgent.js:743 js/ui/status/network.js:2040
 msgid "Network Manager"
 msgstr "Trình quản lý mạng"
 
-#: js/ui/components/networkAgent.js:778
+#: js/ui/components/networkAgent.js:779
 msgid "VPN password"
 msgstr "Mật khẩu VPN"
 
@@ -1130,7 +1130,7 @@ msgid "Show Apps"
 msgstr "Hiện các ứng dụng"
 
 #. Translators: this is the name of the dock/favorites area on
-#. the left of the overview
+#. the bottom of the overview
 #: js/ui/dash.js:410
 msgid "Dash"
 msgstr "Chỗ gắn ứng dụng"
@@ -1471,63 +1471,63 @@ msgstr "Tắt"
 msgid "Leave Off"
 msgstr "Để tắt"
 
-#: js/ui/keyboard.js:225 js/ui/status/keyboard.js:871
+#: js/ui/keyboard.js:225 js/ui/status/keyboard.js:872
 msgid "Keyboard Settings"
 msgstr "Cài đặt bàn phím"
 
-#: js/ui/lookingGlass.js:725
+#: js/ui/lookingGlass.js:724
 msgid "No extensions installed"
 msgstr "Chưa cài phần mở rộng nào"
 
 #. Translators: argument is an extension UUID.
-#: js/ui/lookingGlass.js:786
+#: js/ui/lookingGlass.js:785
 #, javascript-format
 msgid "%s has not emitted any errors."
 msgstr "%s chưa phát sinh lỗi."
 
-#: js/ui/lookingGlass.js:792
+#: js/ui/lookingGlass.js:791
 msgid "Hide Errors"
 msgstr "Ẩn lỗi"
 
-#: js/ui/lookingGlass.js:796 js/ui/lookingGlass.js:873
+#: js/ui/lookingGlass.js:795 js/ui/lookingGlass.js:872
 msgid "Show Errors"
 msgstr "Hiện lỗi"
 
-#: js/ui/lookingGlass.js:805
+#: js/ui/lookingGlass.js:804
 msgid "Enabled"
 msgstr "Đã được bật"
 
 #. translators:
 #. * The device has been disabled
-#: js/ui/lookingGlass.js:808 subprojects/gvc/gvc-mixer-control.c:1908
+#: js/ui/lookingGlass.js:807 subprojects/gvc/gvc-mixer-control.c:1908
 msgid "Disabled"
 msgstr "Đã được tắt"
 
-#: js/ui/lookingGlass.js:810
+#: js/ui/lookingGlass.js:809
 msgid "Error"
 msgstr "Lỗi"
 
-#: js/ui/lookingGlass.js:812
+#: js/ui/lookingGlass.js:811
 msgid "Out of date"
 msgstr "Đã lạc hậu"
 
-#: js/ui/lookingGlass.js:814
+#: js/ui/lookingGlass.js:813
 msgid "Downloading"
 msgstr "Đang tải về"
 
-#: js/ui/lookingGlass.js:816
+#: js/ui/lookingGlass.js:815
 msgid "Disabling"
 msgstr "Đang tắt"
 
-#: js/ui/lookingGlass.js:818
+#: js/ui/lookingGlass.js:817
 msgid "Enabling"
 msgstr "Đang bật"
 
-#: js/ui/lookingGlass.js:851
+#: js/ui/lookingGlass.js:850
 msgid "View Source"
 msgstr "Xem mã nguồn"
 
-#: js/ui/lookingGlass.js:862
+#: js/ui/lookingGlass.js:861
 msgid "Web Page"
 msgstr "Trang thông tin điện tử"
 
@@ -1684,119 +1684,119 @@ msgstr "Không thể khóa"
 msgid "Lock was blocked by an app"
 msgstr "Khóa bị khóa bởi một ứng dụng"
 
-#: js/ui/screenshot.js:1192
+#: js/ui/screenshot.js:1231
 msgid "Selection"
 msgstr "Chọn"
 
-#: js/ui/screenshot.js:1202
+#: js/ui/screenshot.js:1241
 msgid "Area Selection"
 msgstr "Chọn theo vùng"
 
-#: js/ui/screenshot.js:1207
+#: js/ui/screenshot.js:1246
 msgid "Screen"
 msgstr "Màn hình"
 
-#: js/ui/screenshot.js:1217
+#: js/ui/screenshot.js:1256
 msgid "Screen Selection"
 msgstr "Chọn màn hình"
 
-#: js/ui/screenshot.js:1222
+#: js/ui/screenshot.js:1261
 msgid "Window"
 msgstr "Cửa sổ"
 
-#: js/ui/screenshot.js:1232
+#: js/ui/screenshot.js:1271
 msgid "Window Selection"
 msgstr "Chọn cửa sổ"
 
 #. Translators: entry in the window right click menu.
-#: js/ui/screenshot.js:1257 js/ui/status/system.js:113 js/ui/windowMenu.js:30
+#: js/ui/screenshot.js:1296 js/ui/status/system.js:113 js/ui/windowMenu.js:30
 msgid "Take Screenshot"
 msgstr "Chụp cửa sổ"
 
-#: js/ui/screenshot.js:1273
+#: js/ui/screenshot.js:1312
 msgid "Record Screen"
 msgstr "Quay màn hình"
 
 #. Translators: since this string refers to an action,
 #. it needs to be phrased as a verb.
-#: js/ui/screenshot.js:1288
+#: js/ui/screenshot.js:1327
 msgid "Capture"
 msgstr "Chụp ảnh"
 
-#: js/ui/screenshot.js:1310
+#: js/ui/screenshot.js:1349
 msgid "Show Pointer"
 msgstr "Hiện con trỏ"
 
 #. Translators: this is the folder where recorded
 #. screencasts are stored.
-#: js/ui/screenshot.js:1906
+#: js/ui/screenshot.js:1945
 msgid "Screencasts"
 msgstr "Quay phim màn hình"
 
 #. Translators: this is a filename used for screencast
 #. * recording, where "%d" and "%t" date and time, e.g.
 #. * "Screencast from 07-17-2013 10:00:46 PM.webm"
-#: js/ui/screenshot.js:1911
+#: js/ui/screenshot.js:1950
 #, no-c-format
 msgid "Screencast from %d %t.webm"
 msgstr "Quay phim màn hình từ %d %t.webm"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:1949
+#: js/ui/screenshot.js:1988
 msgid "Screencast recorded"
 msgstr "Màn hình đã được quay lại"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:1956
+#: js/ui/screenshot.js:1995
 msgid "Screencast ended unexpectedly"
 msgstr "Quay phim màn hình đã kết thúc bất ngờ"
 
 #. Translators: notification source name.
-#: js/ui/screenshot.js:1965 js/ui/screenshot.js:2201
+#: js/ui/screenshot.js:2004 js/ui/screenshot.js:2240
 msgid "Screenshot"
 msgstr "Chụp màn hình"
 
 #. Translators: notification body when a screencast was recorded.
-#: js/ui/screenshot.js:1972
+#: js/ui/screenshot.js:2011
 msgid "Click here to view the video."
 msgstr "Bấn vào đây để xem phim."
 
 #. Translators: button on the screencast notification.
 #. Translators: button on the screenshot notification.
-#: js/ui/screenshot.js:1975 js/ui/screenshot.js:2215
+#: js/ui/screenshot.js:2014 js/ui/screenshot.js:2254
 msgid "Show in Files"
 msgstr "Hiển thị trong \"Tập tin\""
 
 #. Translators: this is the name of the file that the screenshot is
 #. saved to. The placeholder is a timestamp, e.g. "2017-05-21 12-24-03".
-#: js/ui/screenshot.js:2161
+#: js/ui/screenshot.js:2200
 #, javascript-format
 msgid "Screenshot from %s"
 msgstr "Chụp màn hình từ %s"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2207
+#: js/ui/screenshot.js:2246
 msgid "Screenshot captured"
 msgstr "Đã chụp màn hình"
 
 #. Translators: notification body when a screenshot was captured.
-#: js/ui/screenshot.js:2209
+#: js/ui/screenshot.js:2248
 msgid "You can paste the image from the clipboard."
 msgstr "Bạn có thể dán ảnh từ clipboard."
 
-#: js/ui/screenshot.js:2262 js/ui/screenshot.js:2426
+#: js/ui/screenshot.js:2301 js/ui/screenshot.js:2465
 msgid "Screenshot taken"
 msgstr "Chụp màn hình"
 
-#: js/ui/search.js:818
+#: js/ui/search.js:829
 msgid "Searching…"
 msgstr "Đang tìm…"
 
-#: js/ui/search.js:820
+#: js/ui/search.js:831
 msgid "No results."
 msgstr "Không tìm thấy kết quả."
 
-#: js/ui/search.js:951
+#: js/ui/search.js:962
 #, javascript-format
 msgid "%d more"
 msgid_plural "%d more"
@@ -1968,7 +1968,7 @@ msgstr "Thấp"
 msgid "High"
 msgstr "Cao"
 
-#: js/ui/status/backlight.js:148 js/ui/status/keyboard.js:853
+#: js/ui/status/backlight.js:148 js/ui/status/keyboard.js:854
 msgid "Keyboard"
 msgstr "Bàn phím"
 
@@ -2027,7 +2027,7 @@ msgstr "Nhấn phụ"
 msgid "Dwell Click"
 msgstr "Nhấn giữ"
 
-#: js/ui/status/keyboard.js:870
+#: js/ui/status/keyboard.js:871
 msgid "Show Keyboard Layout"
 msgstr "Hiện bố cục của bàn phím"
 
@@ -2312,40 +2312,45 @@ msgstr "Chỉ tích-hợp"
 
 #. Translators: This is a time format for a date in
 #. long format
-#: js/ui/unlockDialog.js:368
+#: js/ui/unlockDialog.js:370
 msgid "%A %B %-d"
 msgstr "%A, %-d %B"
 
-#: js/ui/unlockDialog.js:374
+#: js/ui/unlockDialog.js:376
 msgid "Swipe up to unlock"
 msgstr "Vuốt lên trên để mở khóa"
 
-#: js/ui/unlockDialog.js:375
+#: js/ui/unlockDialog.js:377
 msgid "Click or press a key to unlock"
 msgstr "Bấm chuột hay nhấn một phím để mở khóa"
 
-#: js/ui/unlockDialog.js:558
+#: js/ui/unlockDialog.js:560
 msgid "Unlock Window"
 msgstr "Bỏ khóa cửa sổ"
 
-#: js/ui/unlockDialog.js:567
+#: js/ui/unlockDialog.js:569
 msgid "Log in as another user"
 msgstr "Đăng nhập dưới dạng người dùng khác"
 
-#: js/ui/welcomeDialog.js:39
+#: js/ui/welcomeDialog.js:49
 #, javascript-format
-msgid "Welcome to GNOME %s"
-msgstr "Chào mừng đến GNOME %s"
+msgid "GNOME %s"
+msgstr "GNOME %s"
 
-#: js/ui/welcomeDialog.js:40
+#: js/ui/welcomeDialog.js:53
+#, javascript-format
+msgid "Welcome to %s"
+msgstr "Chào mừng bạn dùng %s"
+
+#: js/ui/welcomeDialog.js:54
 msgid "If you want to learn your way around, check out the tour."
 msgstr "Nếu bạn muốn tìm hiểu tổng thể, hãy xem phần tham quan."
 
-#: js/ui/welcomeDialog.js:49
-msgid "No Thanks"
-msgstr "Không, cảm ơn"
+#: js/ui/welcomeDialog.js:63
+msgid "Skip"
+msgstr "Bỏ qua"
 
-#: js/ui/welcomeDialog.js:54
+#: js/ui/welcomeDialog.js:68
 msgid "Take Tour"
 msgstr "Tham quan"
 
@@ -2475,7 +2480,7 @@ msgctxt "program"
 msgid "Unknown"
 msgstr "Chưa biết"
 
-#: src/shell-app.c:555
+#: src/shell-app.c:556
 #, c-format
 msgid "Failed to launch “%s”"
 msgstr "Gặp lỗi khi khởi chạy “%s”"
@@ -3062,6 +3067,9 @@ msgstr[0] "%u đầu vào"
 #: subprojects/gvc/gvc-mixer-control.c:2876
 msgid "System Sounds"
 msgstr "Âm thanh hệ thống"
+
+#~ msgid "No Thanks"
+#~ msgstr "Không, cảm ơn"
 
 #, javascript-format
 #~ msgid "%d %%"
