@@ -1,0 +1,660 @@
+From: Ray Strode <rstrode@redhat.com>
+Date: Tue, 6 Feb 2024 14:18:24 -0500
+Subject: authPrompt: Add support for Web Login
+
+SSSD supports Web Login via a url on an external device. It
+advertises this support over the auth-selection json protocol
+we now have limited support for.
+
+This commit extends that support Web Login by way of showing a
+QR code as proposed in the design here:
+
+https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/web-login.png.
+---
+ .../gnome-shell-sass/widgets/_login-lock.scss      |  74 +++++-
+ js/gdm/authPrompt.js                               | 123 ++++++++++
+ js/gdm/util.js                                     |  46 ++++
+ js/gdm/webLogin.js                                 | 259 +++++++++++++++++++++
+ js/js-resources.gresource.xml                      |   1 +
+ 5 files changed, 502 insertions(+), 1 deletion(-)
+ create mode 100644 js/gdm/webLogin.js
+
+diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
+index 347930e..9b43287 100644
+--- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
++++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
+@@ -32,7 +32,8 @@ $_gdm_dialog_width: 25em;
+   &.cancel-button,
+   &.switch-user-button,
+   &.login-dialog-auth-menu-button,
+-  &.login-dialog-session-list-button {
++  &.login-dialog-session-list-button,
++  &.web-login-intro-button {
+     @extend .icon-button;
+     @extend %system_button;
+   }
+@@ -207,8 +208,79 @@ $_gdm_dialog_width: 25em;
+   }
+ }
+ 
++.login-dialog-prompt-layout {
++  spacing: $base_padding * 2;
++  min-width: 30em;
++}
++
++.login-dialog-prompt-entry {
++  @extend %system_entry;
++}
++
++.web-login-dialog-content-overlay {
++  background-color: transparentize($bg_color, 0.3);
++  border-radius: $modal_radius;
++  margin-bottom: 3em;
++}
++
++.web-login-spinner {
++  background-color: rgba(0, 0, 0, 0.5);
++  border: 5px rgba(0, 0, 0, 0.0);
++  border-radius: 50px;
++}
++
++.web-login-title-label {
++  @include fontsize($base_font_size);
++  color: darken($_gdm_fg,30%);
++}
++
++.web-login-url-label {
++  @include fontsize($base_font_size);
++  @extend %monospace;
++  color: $_gdm_fg;
++  text-align: center;
++}
++
++.web-login-code-title-label {
++  @include fontsize($base_font_size);
++  @include fontsize($base_font_size);
++  color: $_gdm_fg;
++}
++
++.web-login-code-label {
++  @include fontsize($base_font_size);
++  color: $_gdm_fg;
++  font-weight: bold;
++}
++
++.web-login-prompt {
++  padding-top: $base_padding;
++  padding-bottom: $base_padding;
++  padding-left: $base_padding * 4.5;
++  padding-right: $base_padding * 4.5;
++  spacing: 1.75em;
++  border-radius: $base_border_radius * 2;
++}
++
++.web-login-intro-button-label {
++  @include fontsize($base_font_size + 5);
++  color: $_gdm_fg;
++  height: 3em;
++  text-align: center;
++  font-weight: bold;
++}
++
++.web-login-intro-button {
++  @include fontsize($base_font_size);
++  color: $_gdm_fg;
++  height: 3em;
++  text-align: center;
++  border-radius: $base_border_radius * 4;
++}
++
+ // Screen Shield
+ // a.k.a. the lockscreen, uses transparent styles
++
+ .unlock-dialog {
+   background-color: transparent;
+ 
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 0841fe2..b75cacc 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -18,6 +18,7 @@ import * as MessageTray from '../ui/messageTray.js';
+ import * as Params from '../misc/params.js';
+ import * as ShellEntry from '../ui/shellEntry.js';
+ import * as UserWidget from '../ui/userWidget.js';
++import * as WebLogin from './webLogin.js';
+ import {wiggle} from '../misc/animationUtils.js';
+ 
+ const DEFAULT_BUTTON_WELL_ICON_SIZE = 16;
+@@ -88,6 +89,8 @@ export const AuthPrompt = GObject.registerClass({
+         this._userVerifier.connect('show-choice-list', this._onShowChoiceList.bind(this));
+         this._userVerifier.connect('mechanisms-list-changed', this._onAuthMechanismsListChanged.bind(this));
+         this._userVerifier.connect('foreground-mechanism-changed', this._onForegroundMechanismChanged.bind(this));
++        this._userVerifier.connect('web-login', this._onWebLogin.bind(this));
++        this._userVerifier.connect('web-login-time-out', this._onWebLoginTimeOut.bind(this));
+         this._userVerifier.connect('verification-failed', this._onVerificationFailed.bind(this));
+         this._userVerifier.connect('verification-complete', this._onVerificationComplete.bind(this));
+         this._userVerifier.connect('reset', this._onReset.bind(this));
+@@ -170,6 +173,13 @@ export const AuthPrompt = GObject.registerClass({
+             this.cancelButton.opacity = 0;
+         this._mainBox.add_child(this.cancelButton);
+ 
++        this._webLoginPromptWell = new St.Widget({
++            layout_manager: new Clutter.BinLayout(),
++            x_expand: true,
++            y_align: Clutter.ActorAlign.CENTER,
++        });
++        this._mainBox.add_child(this._webLoginPromptWell);
++
+         this._authList = new AuthList.AuthList();
+         this._authList.set({
+             visible: false,
+@@ -303,6 +313,9 @@ export const AuthPrompt = GObject.registerClass({
+             this._inactiveEntry = this._passwordEntry;
+         }
+         this._capsLockWarningLabel.visible = secret;
++
++        this._webLoginPromptWell.visible = false;
++        this._entry.visible = true;
+     }
+ 
+     _onAskQuestion(verifier, serviceName, question, secret) {
+@@ -349,6 +362,110 @@ export const AuthPrompt = GObject.registerClass({
+         this.emit('mechanisms-changed', serviceName);
+     }
+ 
++    _onWebLogin(userVerifier, serviceName, introMessage, linkMessage, uri, code) {
++        const introAlreadyUp = this._queryingService === serviceName;
++
++        if (this._queryingService)
++            this.clear();
++
++        this._entry.visible = false;
++
++        if (this._preemptiveAnswer)
++            this._preemptiveAnswer = null;
++
++        this._webLoginPromptWell.remove_all_children();
++
++        if (this._spinner)
++            this._spinner.stop();
++
++        if (!introAlreadyUp) {
++            this._webLoginIntro = new WebLogin.WebLoginIntro({message: introMessage});
++            this._webLoginIntro.set({
++                x_expand: true,
++                y_align: Clutter.ActorAlign.START,
++            });
++            this._webLoginIntro.connect('clicked', () => {
++                this._queryingService = serviceName;
++
++                if (this._webLoginTimedOut)
++                    this._refreshWebLogin(serviceName);
++                else
++                    this._openWebLoginDialog(userVerifier, serviceName, linkMessage, uri, code);
++            });
++            this._webLoginPromptWell.add_child(this._webLoginIntro);
++            this._webLoginPromptWell.visible = true;
++
++            this.updateSensitivity(true);
++        } else {
++            this._openWebLoginDialog(userVerifier, serviceName, linkMessage, uri, code);
++        }
++
++        this._webLoginTimedOut = false;
++        this.emit('prompted');
++    }
++
++    _refreshWebLogin(serviceName) {
++        this.reset({
++            beginRequestType: BeginRequestType.REUSE_USERNAME,
++            queryingService: serviceName,
++        });
++    }
++
++    _onWebLoginTimeOut(userVerifier, serviceName) {
++        this._webLoginTimedOut = true;
++
++        if (this._queryingService !== serviceName)
++            return;
++
++        this._refreshWebLogin(serviceName);
++    }
++
++    _closeWebLoginDialog() {
++        if (!this._webLoginDialog)
++            return;
++
++        this._webLoginDialog.close();
++        this._webLoginDialog = null;
++    }
++
++    _openWebLoginDialog(userVerifier, serviceName, message, url, code) {
++        if (this._queryingService)
++            this.clear();
++
++        this._closeWebLoginDialog();
++
++        this._queryingService = serviceName;
++
++        this._webLoginPromptWell.remove_all_children();
++
++        this._webLoginDialog = new WebLogin.WebLoginDialog({message, url, code});
++        this._webLoginDialog.open(global.get_current_time());
++        this._webLoginDialog.connect('cancel', () => {
++            if (this.verificationStatus !== AuthPromptStatus.VERIFICATION_SUCCEEDED)
++                this.reset();
++        });
++        this._webLoginDialog.connect('done', () => {
++            userVerifier.connectObject(
++                `service-request::${serviceName}`, this._closeWebLoginDialog.bind(this),
++
++                'verification-complete', this._closeWebLoginDialog.bind(this),
++
++                'verification-failed', () => {
++                    this._closeWebLoginDialog();
++                    this.showLoginFailedNotification();
++                    this.reset();
++                },
++                this);
++            userVerifier.webLoginDone(serviceName);
++        });
++
++        if (this._spinner)
++            this._spinner.stop();
++
++        this.updateSensitivity(true);
++        this.emit('prompted');
++    }
++
+     _onCredentialManagerAuthenticated() {
+         if (this.verificationStatus !== AuthPromptStatus.VERIFICATION_SUCCEEDED)
+             this.reset();
+@@ -505,6 +622,8 @@ export const AuthPrompt = GObject.registerClass({
+         this.stopSpinning();
+         this._authList.clear();
+         this._authList.hide();
++        this._webLoginPromptWell.remove_all_children();
++        this._webLoginPromptWell.visible = false;
+     }
+ 
+     setQuestion(question) {
+@@ -591,6 +710,9 @@ export const AuthPrompt = GObject.registerClass({
+     }
+ 
+     updateSensitivity(sensitive) {
++        if (this._webLoginDialog)
++            return;
++
+         if (this._entry.reactive === sensitive)
+             return;
+ 
+@@ -719,6 +841,7 @@ export const AuthPrompt = GObject.registerClass({
+             hold: null,
+         });
+ 
++        this.hideLoginFailedNotification();
+         this.updateSensitivity(false);
+ 
+         let hold = params.hold;
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index 4102861..fc35540 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -41,6 +41,7 @@ export const AUTH_MECHANISM_PROTOCOL = 'auth-mechanisms';
+ export const LOGIN_SCREEN_SCHEMA = 'org.gnome.login-screen';
+ export const UNIFIED_AUTHENTICATION_KEY = 'enable-unified-authentication';
+ export const PASSWORD_AUTHENTICATION_KEY = 'enable-password-authentication';
++export const WEB_LOGIN_AUTHENTICATION_KEY = 'enable-web-authentication';
+ export const FINGERPRINT_AUTHENTICATION_KEY = 'enable-fingerprint-authentication';
+ export const SMARTCARD_AUTHENTICATION_KEY = 'enable-smartcard-authentication';
+ export const BANNER_MESSAGE_KEY = 'banner-message-enable';
+@@ -266,6 +267,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             this._cancellable = null;
+         }
+ 
++        this._clearWebLoginTimeout();
+         this._clearUserVerifier();
+         this._clearMessageQueue();
+         this._activeServices.clear();
+@@ -846,6 +848,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+ 
+     _startMechanismFromUnifiedService(mechanism) {
+         const roleHandlers = {
++            [WEB_LOGIN_ROLE_NAME]: this._startWebLogin.bind(this),
+             [PASSWORD_ROLE_NAME]: this._startPasswordLogin.bind(this),
+         };
+ 
+@@ -949,6 +952,45 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         await this.replyWithJSON(serviceName, JSON.stringify(reply));
+     }
+ 
++    _startWebLogin(serviceName, mechanismId) {
++        const mechanisms = this._publishedMechanisms.get(serviceName);
++
++        if (!mechanisms)
++            return;
++
++        if (!mechanisms[mechanismId])
++            return;
++
++        const {init_prompt: initPrompt, link_prompt: linkPrompt, uri, code, role, timeout} = mechanisms[mechanismId];
++
++        if (!linkPrompt || !uri)
++            return;
++
++        if (timeout) {
++            this._webLoginTimeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, timeout * 1000,
++                () => {
++                    this.emit('web-login-time-out', serviceName);
++                    this._webLoginTimeoutId = 0;
++                    return GLib.SOURCE_REMOVE;
++                });
++        }
++
++        this._pendingMechanisms.set(role, mechanismId);
++        this.emit('web-login', serviceName, initPrompt, linkPrompt, uri, code);
++    }
++
++    _clearWebLoginTimeout() {
++        if (this._webLoginTimeoutId) {
++            GLib.source_remove(this._webLoginTimeoutId);
++            this._webLoginTimeoutId = 0;
++        }
++    }
++
++    webLoginDone(serviceName) {
++        this._clearWebLoginTimeout();
++        this._replyWithAuthSelectionResponse(serviceName, WEB_LOGIN_ROLE_NAME, {});
++    }
++
+     _filterAuthMechanisms(mechanismsList, filterFunc) {
+         return mechanismsList.filter(mechanism => {
+             const mapping = DiscreteServiceMechanismDefinitions.find(m =>
+@@ -1203,6 +1245,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         const doneTrying = !shouldRetry || !this._canRetry();
+ 
+         this.emit('verification-failed', serviceName, !doneTrying);
++
++        if (!this._userVerifier)
++            return;
++
+         try {
+             if (doneTrying) {
+                 this._disconnectSignals();
+diff --git a/js/gdm/webLogin.js b/js/gdm/webLogin.js
+new file mode 100644
+index 0000000..fafed7c
+--- /dev/null
++++ b/js/gdm/webLogin.js
+@@ -0,0 +1,259 @@
++// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
++//
++// A widget showing a URL for web login
++/* exported WebLoginPrompt */
++
++import Clutter from 'gi://Clutter';
++import GObject from 'gi://GObject';
++import Gio from 'gi://Gio';
++import Shell from 'gi://Shell';
++import St from 'gi://St';
++import {Spinner} from '../ui/animation.js';
++import * as ModalDialog from '../ui/modalDialog.js';
++import * as Params from '../misc/params.js';
++
++const QR_CODE_SIZE = 150;
++const WEB_LOGIN_SPINNER_SIZE = 35;
++
++Gio._promisify(Shell.QrCodeGenerator.prototype, 'generate_qr_code');
++
++export const QrCode = GObject.registerClass(
++class QrCode extends St.Bin {
++    _init(params) {
++        const themeContext = St.ThemeContext.get_for_stage(global.stage);
++        const {iconSize, url} = Params.parse(params, {
++            iconSize: QR_CODE_SIZE,
++            url: null,
++        });
++
++        super._init({
++            width: QR_CODE_SIZE,
++            height: QR_CODE_SIZE,
++            x_align: Clutter.ActorAlign.CENTER,
++        });
++
++        this._qrCodeGenerator = new Shell.QrCodeGenerator();
++        this._iconSize = iconSize;
++        this._url = url;
++        this.child = new St.Icon({
++            icon_size: this._iconSize,
++            style_class: 'qr-code',
++        });
++
++        themeContext.connectObject('notify::scale-factor', this.update.bind(this), this);
++
++        this.update();
++    }
++
++    vfunc_style_changed() {
++        super.vfunc_style_changed();
++
++        let node = this.get_theme_node();
++        let [found, iconSize] = node.lookup_length('icon-size', false);
++
++        if (!found)
++            return;
++
++        let themeContext = St.ThemeContext.get_for_stage(global.stage);
++
++        this._iconSize = iconSize / themeContext.scaleFactor;
++        this.update().catch(logError);
++    }
++
++    async update() {
++        let {scaleFactor} = St.ThemeContext.get_for_stage(global.stage);
++        this.set_size(
++            this._iconSize * scaleFactor,
++            this._iconSize * scaleFactor);
++
++        this.child.gicon = await this._qrCodeGenerator.generate_qr_code(
++            this._url, this._iconSize, this._iconSize);
++
++        this.style = null;
++    }
++});
++
++export const WebLoginPrompt = GObject.registerClass(
++class WebLoginPrompt extends St.BoxLayout {
++    _init(params) {
++        const {iconSize, message, url, code} = Params.parse(params, {
++            iconSize: QR_CODE_SIZE,
++            message: null,
++            url: null,
++            code: null,
++        });
++
++        super._init({
++            styleClass: 'web-login-prompt',
++            vertical: true,
++        });
++
++        this._urlTitleLabel = new St.Label({
++            text: message,
++            style_class: 'web-login-title-label',
++        });
++        this.add_child(this._urlTitleLabel);
++
++        this._qrCode = new QrCode({iconSize, url});
++        this.add_child(this._qrCode);
++
++        this._urlLabel = new St.Label({
++            style_class: 'web-login-url-label',
++            text: this._formatURLForDisplay(url),
++            x_expand: true,
++        });
++        this.add_child(this._urlLabel);
++
++        if (code) {
++            this._codeBox = new St.BoxLayout({
++                x_align: Clutter.ActorAlign.CENTER,
++                x_expand: true,
++            });
++            this.add_child(this._codeBox);
++
++            this._codeTitleLabel = new St.Label({
++                text: _('Login code: '),
++                style_class: 'web-login-code-title-label',
++            });
++            this._codeBox.add_child(this._codeTitleLabel);
++
++            this._codeLabel = new St.Label({
++                text: code,
++                style_class: 'web-login-code-label',
++            });
++            this._codeBox.add_child(this._codeLabel);
++        }
++    }
++
++    _formatURLForDisplay(url) {
++        const http = 'http://';
++        const https = 'https://';
++
++        if (url.startsWith(http))
++            return url.substring(http.length);
++
++        if (url.startsWith(https))
++            return url.substring(https.length);
++
++        return url;
++    }
++});
++
++export const WebLoginDialog = GObject.registerClass({
++    Signals: {
++        'cancel': {},
++        'done': {},
++    },
++}, class WebLoginDialog extends ModalDialog.ModalDialog {
++    _init(params) {
++        const {message, url, code} = Params.parse(params, {
++            message: null,
++            url: null,
++            code: null,
++        });
++
++        super._init({
++            shouldFadeOut: false,
++            styleClass: 'web-login-dialog',
++        });
++
++        this._webLoginPrompt = new WebLoginPrompt({code, message, url});
++        this._webLoginPrompt.set({
++            y_align: Clutter.ActorAlign.CENTER,
++        });
++
++        this.contentLayout.reactive = false;
++        this.contentLayout.can_focus = false;
++        this.contentLayout.add_child(this._webLoginPrompt);
++        this._updateButtons();
++
++        this._contentOverlay = new St.Widget({
++            layout_manager: new Clutter.BinLayout(),
++            style_class: 'web-login-dialog-content-overlay',
++        });
++        this._contentOverlay.hide();
++
++        this.backgroundStack.add_child(this._contentOverlay);
++
++        const constraint = new Clutter.BindConstraint({
++            source: this.dialogLayout,
++            coordinate: Clutter.BindCoordinate.ALL,
++        });
++
++        this._contentOverlay.add_constraint(constraint);
++
++        this._spinnerFrame = new St.Widget({
++            layout_manager: new Clutter.BinLayout(),
++            styleClass: 'web-login-spinner',
++        });
++        this._contentOverlay.add_child(this._spinnerFrame);
++
++        this._spinner = new Spinner(WEB_LOGIN_SPINNER_SIZE, {
++            hideOnStop: true,
++        });
++        this._spinnerFrame.add_child(this._spinner);
++    }
++
++    done() {
++        this._doneButton.reactive = false;
++        this._doneButton.can_focus = false;
++
++        this._contentOverlay.show();
++        global.stage.set_key_focus(this.dialogLayout);
++        this._spinner.play();
++
++        this.emit('done');
++    }
++
++    _updateButtons() {
++        this.clearButtons();
++
++        this._cancelButton = this.addButton({
++            action: this.cancel.bind(this),
++            label: _('Cancel'),
++            key: Clutter.KEY_Escape,
++        });
++
++        this._doneButton = this.addButton({
++            action: this.done.bind(this),
++            default: true,
++            label: _('Done'),
++        });
++    }
++
++    cancel() {
++        this.emit('cancel');
++        this.close();
++    }
++});
++
++export var WebLoginIntro = GObject.registerClass(
++class WebLoginIntro extends St.Button {
++    _init(params) {
++        const {message} = Params.parse(params, {
++            message: null,
++        });
++
++        const label = new St.Label({
++            text: message,
++            style_class: 'web-login-intro-button-label',
++            x_align: Clutter.ActorAlign.CENTER,
++            y_align: Clutter.ActorAlign.CENTER,
++            x_expand: true,
++            y_expand: false,
++        });
++
++        label.clutter_text.line_wrap = true;
++        label.clutter_text.y_align = Clutter.ActorAlign.CENTER;
++        label.clutter_text.x_align = Clutter.ActorAlign.CENTER;
++
++        super._init({
++            style_class: 'web-login-prompt login-dialog-button web-login-intro-button',
++            accessible_name: message,
++            button_mask: St.ButtonMask.ONE | St.ButtonMask.THREE,
++            reactive: true,
++            can_focus: true,
++            child: label,
++        });
++    }
++});
+diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
+index 75d76f5..3c88ab5 100644
+--- a/js/js-resources.gresource.xml
++++ b/js/js-resources.gresource.xml
+@@ -12,6 +12,7 @@
+     <file>gdm/realmd.js</file>
+     <file>gdm/util.js</file>
+     <file>gdm/vmware.js</file>
++    <file>gdm/webLogin.js</file>
+ 
+     <file>extensions/extension.js</file>
+     <file>extensions/sharedInternals.js</file>

@@ -1,0 +1,180 @@
+From: Ray Strode <rstrode@redhat.com>
+Date: Wed, 7 Feb 2024 11:47:32 -0500
+Subject: gdm: Add "Login Failed" notification
+
+One step toward implementing Web Login is adding the ability to
+show "Login Failed" as a notification banner.
+
+This is because with Web Login, the auth prompt is occluded so can't
+be used to show an error message itself.
+
+This commit adds the necessary code to show the Login Failed
+notification, but doesn't actually call that code yet.
+
+It will be used later when Web Login support is added.
+---
+ .../gnome-shell-sass/widgets/_login-lock.scss      | 13 +++++
+ js/gdm/authNotification.js                         | 64 ++++++++++++++++++++++
+ js/gdm/authPrompt.js                               | 25 +++++++++
+ js/js-resources.gresource.xml                      |  1 +
+ 4 files changed, 103 insertions(+)
+ create mode 100644 js/gdm/authNotification.js
+
+diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
+index e2c2dd4..347930e 100644
+--- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
++++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
+@@ -356,6 +356,19 @@ $_gdm_dialog_width: 25em;
+   }
+ }
+ 
++// Login Failed banner
++.auth-notification-banner {
++  .message-header {
++    width: 0px;
++    height: 0px;
++
++    .message-close-button {
++      border: none;
++      background-color: rgba(0, 0, 0, 0.0);
++    }
++  }
++}
++
+ // QR Code
+ .qr-code {
+   background: black;
+diff --git a/js/gdm/authNotification.js b/js/gdm/authNotification.js
+new file mode 100644
+index 0000000..fc24cb6
+--- /dev/null
++++ b/js/gdm/authNotification.js
+@@ -0,0 +1,64 @@
++// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
++/*
++ * Copyright 2024 Red Hat, Inc
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2, or (at your option)
++ * any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, see <http://www.gnu.org/licenses/>.
++ */
++
++import GObject from 'gi://GObject';
++import * as Calendar from '../ui/calendar.js';
++import * as MessageTray from '../ui/messageTray.js';
++import * as Params from '../misc/params.js';
++
++export const AuthNotificationSource = GObject.registerClass({
++}, class AuthNotificationSource extends MessageTray.Source {
++    constructor(params) {
++        params = Params.parse(params, {
++            title: _('Login Failed'),
++            iconName: 'dialog-password-symbolic',
++        });
++
++        super(params);
++    }
++
++    createBanner(notification) {
++        return new AuthNotificationBanner(notification);
++    }
++});
++
++const AuthNotificationBanner = GObject.registerClass({
++    Signals: {
++        'done-displaying': {},
++    },
++}, class AuthNotificationBanner extends Calendar.NotificationMessage {
++    _init(notification) {
++        super._init(notification);
++
++        this.can_focus = false;
++        this.add_style_class_name('notification-banner');
++        this.add_style_class_name('auth-notification-banner');
++
++        this.notification.connectObject('activated', () => {
++            // We hide all types of notifications once the user clicks on
++            // them because the common outcome of clicking should be the
++            // relevant window being brought forward and the user's
++            // attention switching to the window.
++            this.emit('done-displaying');
++        }, this);
++    }
++
++    createBanner(notification) {
++        return new AuthNotificationBanner(notification);
++    }
++});
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index e17fe8b..0841fe2 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -1,6 +1,7 @@
+ // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+ 
+ import Clutter from 'gi://Clutter';
++import Gio from 'gi://Gio';
+ import GLib from 'gi://GLib';
+ import GObject from 'gi://GObject';
+ import Pango from 'gi://Pango';
+@@ -9,8 +10,11 @@ import St from 'gi://St';
+ 
+ import * as Animation from '../ui/animation.js';
+ import * as AuthList from './authList.js';
++import * as AuthNotification from '../gdm/authNotification.js';
+ import * as Batch from './batch.js';
+ import * as GdmUtil from './util.js';
++import * as Main from '../ui/main.js';
++import * as MessageTray from '../ui/messageTray.js';
+ import * as Params from '../misc/params.js';
+ import * as ShellEntry from '../ui/shellEntry.js';
+ import * as UserWidget from '../ui/userWidget.js';
+@@ -630,6 +634,27 @@ export const AuthPrompt = GObject.registerClass({
+         this._userVerifier.setForegroundMechanism(mechanism);
+     }
+ 
++    showLoginFailedNotification() {
++        const source = new AuthNotification.AuthNotificationSource();
++        Main.messageTray.add(source);
++
++        const gicon = new Gio.ThemedIcon({name: 'dialog-password-symbolic'});
++        this._loginFailedNotification = new MessageTray.Notification(source,
++            _('Login Failed'),
++            _('Please try again'),
++            {gicon});
++        this._loginFailedNotification.setTransient(true);
++        source.showNotification(this._loginFailedNotification);
++    }
++
++    hideLoginFailedNotification() {
++        if (!this._loginFailedNotification)
++            return;
++
++        this._loginFailedNotification.destroy();
++        this._loginFailedNotification = null;
++    }
++
+     reset(params) {
+         let {beginRequestType, queryingService} = Params.parse(params, {
+             beginRequestType: null,
+diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
+index 8d68835..75d76f5 100644
+--- a/js/js-resources.gresource.xml
++++ b/js/js-resources.gresource.xml
+@@ -2,6 +2,7 @@
+ <gresources>
+   <gresource prefix="/org/gnome/shell">
+     <file>gdm/authList.js</file>
++    <file>gdm/authNotification.js</file>
+     <file>gdm/authMenuButton.js</file>
+     <file>gdm/authPrompt.js</file>
+     <file>gdm/batch.js</file>

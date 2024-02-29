@@ -1,0 +1,66 @@
+From: Ray Strode <rstrode@redhat.com>
+Date: Tue, 6 Feb 2024 14:15:12 -0500
+Subject: gdm/util: Emit "service-request" signal on every request
+
+GDM doesn't provide any sort of "ack" when a users input
+has been acknowledged by the underlying PAM conversation.
+
+We know when a bit of input has been processed when the next
+bit of input or output gets requested (or authentication succeeds).
+
+This commit emits a signal any time there is such a request so it
+can be connected to (which will later be used to know when to close
+a dialog used for Web Login)
+---
+ js/gdm/util.js | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index be4f659..4102861 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -912,6 +912,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     _onChoiceListQuery(client, serviceName, promptMessage, list) {
++        this.emit(`service-request::${serviceName}`);
++
+         if (!this.serviceIsForeground(serviceName))
+             return;
+ 
+@@ -1041,6 +1043,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     _onInfo(client, serviceName, info) {
++        this.emit(`service-request::${serviceName}`);
++
+         if (this.serviceIsForeground(serviceName)) {
+             this._queueMessage(serviceName, info, MessageType.INFO);
+         } else if (this.serviceIsFingerprint(serviceName)) {
+@@ -1062,6 +1066,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     _onProblem(client, serviceName, problem) {
++        this.emit(`service-request::${serviceName}`);
++
+         const isFingerprint = this.serviceIsFingerprint(serviceName);
+ 
+         if (!this.serviceIsForeground(serviceName) && !isFingerprint)
+@@ -1098,6 +1104,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     _onInfoQuery(client, serviceName, question) {
++        this.emit(`service-request::${serviceName}`);
++
+         if (!this.serviceIsForeground(serviceName))
+             return;
+ 
+@@ -1105,6 +1113,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     _onSecretInfoQuery(client, serviceName, secretQuestion) {
++        this.emit(`service-request::${serviceName}`);
++
+         if (!this.serviceIsForeground(serviceName))
+             return;
+ 

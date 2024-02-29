@@ -63,7 +63,7 @@ index 3b54960..3b73639 100644
          if (!this._updateRegionIdle) {
              const laters = global.compositor.get_laters();
 diff --git a/js/ui/magnifier.js b/js/ui/magnifier.js
-index 84a2d89..2de2676 100644
+index 7d131b8..b2e3b37 100644
 --- a/js/ui/magnifier.js
 +++ b/js/ui/magnifier.js
 @@ -51,6 +51,8 @@ const MouseSpriteContent = GObject.registerClass({
@@ -87,7 +87,7 @@ index 84a2d89..2de2676 100644
      }
  
      vfunc_paint_content(actor, node, _paintContext) {
-@@ -75,6 +80,29 @@ const MouseSpriteContent = GObject.registerClass({
+@@ -74,6 +79,29 @@ const MouseSpriteContent = GObject.registerClass({
          textureNode.add_rectangle(actor.get_content_box());
      }
  
@@ -117,7 +117,7 @@ index 84a2d89..2de2676 100644
      get texture() {
          return this._texture;
      }
-@@ -89,7 +117,19 @@ const MouseSpriteContent = GObject.registerClass({
+@@ -88,7 +116,19 @@ const MouseSpriteContent = GObject.registerClass({
  
          if (!oldTexture || !coglTexture ||
              oldTexture.get_width() !== coglTexture.get_width() ||
@@ -138,7 +138,7 @@ index 84a2d89..2de2676 100644
              this.invalidate_size();
      }
  });
-@@ -121,6 +161,8 @@ export class Magnifier extends Signals.EventEmitter {
+@@ -120,6 +160,8 @@ export class Magnifier extends Signals.EventEmitter {
          this._settingsInit(aZoomRegion);
          aZoomRegion.scrollContentsTo(this.xMouse, this.yMouse);
  
@@ -147,7 +147,7 @@ index 84a2d89..2de2676 100644
          St.Settings.get().connect('notify::magnifier-active', () => {
              this.setActive(St.Settings.get().magnifier_active);
          });
-@@ -129,6 +171,13 @@ export class Magnifier extends Signals.EventEmitter {
+@@ -128,6 +170,13 @@ export class Magnifier extends Signals.EventEmitter {
          this._cursorUnfocusInhibited = false;
      }
  
@@ -161,7 +161,7 @@ index 84a2d89..2de2676 100644
      /**
       * showSystemCursor:
       * Show the system mouse pointer.
-@@ -274,6 +323,8 @@ export class Magnifier extends Signals.EventEmitter {
+@@ -273,6 +322,8 @@ export class Magnifier extends Signals.EventEmitter {
          this.xMouse = xMouse;
          this.yMouse = yMouse;
  

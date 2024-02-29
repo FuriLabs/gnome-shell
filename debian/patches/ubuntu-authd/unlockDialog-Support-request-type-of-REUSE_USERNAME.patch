@@ -1,0 +1,23 @@
+From: Ray Strode <rstrode@redhat.com>
+Date: Tue, 6 Feb 2024 13:41:39 -0500
+Subject: unlockDialog: Support request type of REUSE_USERNAME
+
+The unlock dialog currently fails to reuse the username, when requested
+to do so. This commit fixes that.
+---
+ js/ui/unlockDialog.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
+index 15a3a98..562a623 100644
+--- a/js/ui/unlockDialog.js
++++ b/js/ui/unlockDialog.js
+@@ -786,7 +786,7 @@ export const UnlockDialog = GObject.registerClass({
+ 
+     _onReset(authPrompt, beginRequest) {
+         let userName;
+-        if (beginRequest === AuthPrompt.BeginRequestType.PROVIDE_USERNAME) {
++        if (beginRequest !== AuthPrompt.BeginRequestType.DONT_PROVIDE_USERNAME) {
+             this._authPrompt.setUser(this._user);
+             userName = this._userName;
+         } else {

@@ -1,0 +1,22 @@
+From: Ray Strode <rstrode@redhat.com>
+Date: Fri, 9 Feb 2024 16:39:13 -0500
+Subject: gdm/util: Add new "background" message type
+
+This commit adds a new "background" message type for messages that
+should appear in the footer.
+---
+ js/gdm/util.js | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index fc35540..9e264e0 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -103,6 +103,7 @@ export const MessageType = {
+     HINT: 1,
+     INFO: 2,
+     ERROR: 3,
++    BACKGROUND: 4,
+ };
+ 
+ const FingerprintReaderType = {
