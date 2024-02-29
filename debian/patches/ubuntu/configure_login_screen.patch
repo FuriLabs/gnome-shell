@@ -120,7 +120,7 @@ index 254c460..ebb6c06 100644
    command: [find_program('glib-compile-schemas'), data_builddir],
    build_by_default: true)
 diff --git a/js/ui/background.js b/js/ui/background.js
-index cef7c87..0da99da 100644
+index 328b1b4..70d7bcc 100644
 --- a/js/ui/background.js
 +++ b/js/ui/background.js
 @@ -543,7 +543,11 @@ export const SystemBackground = GObject.registerClass({
@@ -132,7 +132,7 @@ index cef7c87..0da99da 100644
                  const dummyBgActor = new St.Widget({name: 'lockDialogGroup'});
 +                if (bgColor)
 +                    dummyBgActor.set_style(`background-color: ${bgColor};`);
-                 Main.uiGroup.add_actor(dummyBgActor);
+                 Main.uiGroup.add_child(dummyBgActor);
                  backgroundColor = dummyBgActor.get_theme_node().get_background_color();
                  dummyBgActor.destroy();
 diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js

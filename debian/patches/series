@@ -6,7 +6,7 @@ gdm-util-Only-start-fingerprint-service-synchronously-whe.patch
 ubuntu/desktop_detect.patch
 ubuntu/lightdm-user-switching.patch
 ubuntu/lock_on_suspend.patch
-#ubuntu/background_login.patch
+ubuntu/background_login.patch
 ubuntu/gdm_alternatives.patch
 main-show-an-error-message-on-gnome-shell-crash.patch
 global-make-possible-to-set-debug-flags-dynamically.patch
@@ -18,7 +18,7 @@ ubuntu/search-call-XUbuntuCancel-method-on-providers-when-no-dat.patch
 ubuntu/resolve_alternate_theme_path.patch
 ubuntu/secure_mode_extension.patch
 ubuntu/keep-ubuntu-logo-bright-lp1867133-v1.patch
-#ubuntu/configure_login_screen.patch
+ubuntu/configure_login_screen.patch
 ubuntu/layout-Try-to-allocate-before-getting-size-of-tracke.patch
 Revert-st-Apply-css-foreground-color-to-text-as-a-PangoAt.patch
 ubuntu/sessionMode-Add-support-for-configuring-an-icons-resource.patch
