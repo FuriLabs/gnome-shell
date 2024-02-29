@@ -1,4 +1,4 @@
-gnome-shell (46~beta-0ubuntu3) UNRELEASED; urgency=medium
+gnome-shell (46~beta-0ubuntu3) noble; urgency=medium
 
   * debian/patches: Cherry-pick upstream fixes for fingerprint authentication
   * debian/patches: Add support for ubuntu authd - authentication daemon
@@ -6,7 +6,7 @@ gnome-shell (46~beta-0ubuntu3) UNRELEASED; urgency=medium
   * debian/rules: Regenerate the css files before building
   * debian/patches/ubuntu-authd: Add a gsettings to disable the gdm support
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 29 Feb 2024 23:36:47 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 29 Feb 2024 23:48:54 +0100
 
 gnome-shell (46~beta-0ubuntu2) noble; urgency=medium
 
