@@ -1,0 +1,61 @@
+From: Ray Strode <rstrode@redhat.com>
+Date: Mon, 12 Feb 2024 14:57:44 -0500
+Subject: gdm/util: Figure out default service from service definitions
+
+Now that we have a list of service definitions mapped to what
+sort of authentication they can do, conveniently already in
+the order of preferred default services, there's no reason
+we shouldn't use it for updating the default service.
+
+This commit changes the code to do that instead of the
+long if/else if code that was there before
+---
+ js/gdm/util.js | 25 ++++++++++++++++++-------
+ 1 file changed, 18 insertions(+), 7 deletions(-)
+
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index a85b513..be4f659 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -62,6 +62,7 @@ const USER_READ_TIME = 48;
+ const FINGERPRINT_SERVICE_PROXY_TIMEOUT = 5000;
+ const FINGERPRINT_ERROR_TIMEOUT_WAIT = 15;
+ 
++// Note these are specified in order of preference
+ const DiscreteServiceMechanismDefinitions = [
+     {
+         serviceName: PASSWORD_SERVICE_NAME,
+@@ -763,16 +764,26 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             this._cancelAndReset();
+     }
+ 
++    _isDiscreteServiceEnabled(definition) {
++        switch (definition.serviceName) {
++        case PASSWORD_AUTHENTICATION_KEY:
++            return this._settings.get_boolean(definition.setting);
++        case FINGERPRINT_AUTHENTICATION_KEY:
++            return this._fingerprintReaderType !== FingerprintReaderType.NONE;
++        case SMARTCARD_SERVICE_NAME:
++            return !!this._smartcardManager;
++        default:
++            return false;
++        }
++    }
++
+     _getDetectedDefaultService() {
+         if (this._settings.get_boolean(UNIFIED_AUTHENTICATION_KEY))
+             return UNIFIED_AUTH_SERVICE_NAME;
+-        else if (this._settings.get_boolean(PASSWORD_AUTHENTICATION_KEY))
+-            return PASSWORD_SERVICE_NAME;
+-        else if (this._smartcardManager)
+-            return SMARTCARD_SERVICE_NAME;
+-        else if (this._fingerprintReaderType !== FingerprintReaderType.NONE)
+-            return FINGERPRINT_SERVICE_NAME;
+-        return null;
++
++        const definition = DiscreteServiceMechanismDefinitions.find(
++            def => this._isDiscreteServiceEnabled(def.setting));
++        return definition?.serviceName ?? null;
+     }
+ 
+     _updateDefaultService() {

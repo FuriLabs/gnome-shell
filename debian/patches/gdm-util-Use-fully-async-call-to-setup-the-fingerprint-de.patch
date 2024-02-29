@@ -1,0 +1,73 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 12 Apr 2022 17:28:57 +0200
+Subject: gdm/util: Use fully async call to setup the fingerprint device proxy
+
+Since fingerprint service can now be started also if a conversation has
+already began, we can also initialize the proxy asynchronously, without
+the risk that the service won't be started early enough.
+
+As per this, remove the usage of FprintDeviceProxy wrapper completely
+since it's just not giving us anything here.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2267>
+---
+ js/gdm/util.js | 25 +++++++++++++++++--------
+ 1 file changed, 17 insertions(+), 8 deletions(-)
+
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index 7adeaeb..83912b7 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -16,8 +16,8 @@ import * as SmartcardManager from '../misc/smartcardManager.js';
+ 
+ const FprintManagerInfo = Gio.DBusInterfaceInfo.new_for_xml(
+     loadInterfaceXML('net.reactivated.Fprint.Manager'));
+-const FprintDeviceIface = loadInterfaceXML('net.reactivated.Fprint.Device');
+-const FprintDeviceProxy = Gio.DBusProxy.makeProxyWrapper(FprintDeviceIface);
++const FprintDeviceInfo = Gio.DBusInterfaceInfo.new_for_xml(
++    loadInterfaceXML('net.reactivated.Fprint.Device'));
+ 
+ Gio._promisify(Gdm.Client.prototype, 'open_reauthentication_channel');
+ Gio._promisify(Gdm.Client.prototype, 'get_user_verifier');
+@@ -361,9 +361,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+                 const [devicePath] = fprintManager.GetDefaultDeviceSync();
+                 this._fprintManager = fprintManager;
+ 
+-                const fprintDeviceProxy = new FprintDeviceProxy(Gio.DBus.system,
+-                    'net.reactivated.Fprint', devicePath, null, null,
+-                    Gio.DBusProxyFlags.NOT_CONNECT_SIGNALS);
++                const fprintDeviceProxy = this._getFingerprintDeviceProxy(devicePath);
++                fprintDeviceProxy.init(null);
+                 this._setFingerprintReaderType(fprintDeviceProxy['scan-type']);
+             } else {
+                 // Ensure fingerprint service starts, but do not wait for it
+@@ -377,6 +376,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         }
+     }
+ 
++    _getFingerprintDeviceProxy(devicePath) {
++        return new Gio.DBusProxy({
++            g_connection: Gio.DBus.system,
++            g_name: 'net.reactivated.Fprint',
++            g_object_path: devicePath,
++            g_interface_name: FprintDeviceInfo.name,
++            g_interface_info: FprintDeviceInfo,
++            g_flags: Gio.DBusProxyFlags.DO_NOT_CONNECT_SIGNALS,
++        });
++    }
++
+     _handleFingerprintError(e) {
+         this._fingerprintReaderType = FingerprintReaderType.NONE;
+ 
+@@ -409,9 +419,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         // Wrappers don't support null cancellable, so let's ignore it in case
+         const args = cancellable ? [cancellable] : [];
+         const [devicePath] = await fprintManager.GetDefaultDeviceAsync(...args);
+-        const fprintDeviceProxy = new FprintDeviceProxy(Gio.DBus.system,
+-            'net.reactivated.Fprint', devicePath, null, cancellable,
+-            Gio.DBusProxyFlags.NOT_CONNECT_SIGNALS);
++        const fprintDeviceProxy = this._getFingerprintDeviceProxy(devicePath);
++        await fprintDeviceProxy.init_async(GLib.PRIORITY_DEFAULT, cancellable);
+         this._setFingerprintReaderType(fprintDeviceProxy['scan-type']);
+         this._updateDefaultService();
+ 

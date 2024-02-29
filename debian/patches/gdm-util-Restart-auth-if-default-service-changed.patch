@@ -1,0 +1,37 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 21 Oct 2022 19:05:04 +0200
+Subject: gdm/util: Restart auth if default service changed
+
+If a default service changed while the previous one was active we need to
+reset the authentication so that we set back to the expected one.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2267>
+---
+ js/gdm/util.js | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index 9946b2c..3ea91d2 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -519,6 +519,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     _updateDefaultService() {
++        const oldDefaultService = this._defaultService;
++
+         if (this._settings.get_boolean(PASSWORD_AUTHENTICATION_KEY))
+             this._defaultService = PASSWORD_SERVICE_NAME;
+         else if (this._settings.get_boolean(SMARTCARD_AUTHENTICATION_KEY))
+@@ -530,6 +532,11 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             log('no authentication service is enabled, using password authentication');
+             this._defaultService = PASSWORD_SERVICE_NAME;
+         }
++
++        if (oldDefaultService &&
++            oldDefaultService !== this._defaultService &&
++            this._activeServices.has(oldDefaultService))
++            this._cancelAndReset();
+     }
+ 
+     async _startService(serviceName) {

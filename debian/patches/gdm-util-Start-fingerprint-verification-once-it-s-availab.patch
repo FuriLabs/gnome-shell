@@ -1,0 +1,49 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 12 Apr 2022 16:38:40 +0200
+Subject: gdm/util: Start fingerprint verification once it's available
+
+If fingerprint service is not replying fast enough to our async request,
+authentication is started but the fingerprint service is never started.
+
+So, in case the fingerprint type information is received after that the
+authentication has been started, let's start the service.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2267>
+---
+ js/gdm/util.js | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index 6731200..24593f6 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -366,6 +366,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             ? FingerprintReaderType.SWIPE
+             : FingerprintReaderType.PRESS;
+         this._updateDefaultService();
++
++        if (this._userVerifier &&
++            !this._activeServices.has(FINGERPRINT_SERVICE_NAME)) {
++            if (!this._hold?.isAcquired())
++                this._hold = new Batch.Hold();
++            await this._maybeStartFingerprintVerification();
++        }
+     }
+ 
+     _onCredentialManagerAuthenticated(credentialManager, _token) {
+@@ -617,11 +624,14 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+ 
+     _beginVerification() {
+         this._startService(this._getForegroundService());
++        this._maybeStartFingerprintVerification().catch(logError);
++    }
+ 
++    async _maybeStartFingerprintVerification() {
+         if (this._userName &&
+             this._fingerprintReaderType !== FingerprintReaderType.NONE &&
+             !this.serviceIsForeground(FINGERPRINT_SERVICE_NAME))
+-            this._startService(FINGERPRINT_SERVICE_NAME);
++            await this._startService(FINGERPRINT_SERVICE_NAME);
+     }
+ 
+     _onChoiceListQuery(client, serviceName, promptMessage, list) {

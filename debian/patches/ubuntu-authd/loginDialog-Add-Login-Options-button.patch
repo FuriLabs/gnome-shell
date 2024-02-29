@@ -1,0 +1,421 @@
+From: Ray Strode <rstrode@redhat.com>
+Date: Tue, 6 Feb 2024 13:40:26 -0500
+Subject: loginDialog: Add Login Options button
+
+This commit maps the various auth services to their roles, and
+calls this mapping an "auth mechanism". This list of auth
+mechanisms is used to populate a new Login Options menu, as
+speced out in the design here:
+
+https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/login-authentication.png
+---
+ js/gdm/authPrompt.js  |  19 ++++++++
+ js/gdm/loginDialog.js |  51 ++++++++++++++++++++
+ js/gdm/util.js        | 128 ++++++++++++++++++++++++++++++++++++++++++++++----
+ 3 files changed, 189 insertions(+), 9 deletions(-)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 35a0e27..6f138f4 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -51,6 +51,7 @@ export const AuthPrompt = GObject.registerClass({
+         'failed': {},
+         'next': {},
+         'prompted': {},
++        'mechanisms-changed': {param_types: [GObject.TYPE_STRING]},
+         'reset': {param_types: [GObject.TYPE_UINT]},
+     },
+ }, class AuthPrompt extends St.BoxLayout {
+@@ -81,6 +82,8 @@ export const AuthPrompt = GObject.registerClass({
+         this._userVerifier.connect('ask-question', this._onAskQuestion.bind(this));
+         this._userVerifier.connect('show-message', this._onShowMessage.bind(this));
+         this._userVerifier.connect('show-choice-list', this._onShowChoiceList.bind(this));
++        this._userVerifier.connect('mechanisms-list-changed', this._onAuthMechanismsListChanged.bind(this));
++        this._userVerifier.connect('foreground-mechanism-changed', this._onForegroundMechanismChanged.bind(this));
+         this._userVerifier.connect('verification-failed', this._onVerificationFailed.bind(this));
+         this._userVerifier.connect('verification-complete', this._onVerificationComplete.bind(this));
+         this._userVerifier.connect('reset', this._onReset.bind(this));
+@@ -89,6 +92,7 @@ export const AuthPrompt = GObject.registerClass({
+         this.smartcardDetected = this._userVerifier.smartcardDetected;
+ 
+         this.connect('destroy', this._onDestroy.bind(this));
++        this.mechanisms = new Map();
+ 
+         this._userWell = new St.Bin({
+             x_expand: true,
+@@ -336,6 +340,11 @@ export const AuthPrompt = GObject.registerClass({
+         this.emit('prompted');
+     }
+ 
++    _onAuthMechanismsListChanged(userVerifier, serviceName, mechanismsList) {
++        this.mechanisms.set(serviceName, mechanismsList);
++        this.emit('mechanisms-changed', serviceName);
++    }
++
+     _onCredentialManagerAuthenticated() {
+         if (this.verificationStatus !== AuthPromptStatus.VERIFICATION_SUCCEEDED)
+             this.reset();
+@@ -360,6 +369,11 @@ export const AuthPrompt = GObject.registerClass({
+             this.reset();
+     }
+ 
++    _onForegroundMechanismChanged() {
++        if (this.verificationStatus !== AuthPromptStatus.VERIFICATION_SUCCEEDED)
++            this.reset({beginRequestType: BeginRequestType.REUSE_USERNAME});
++    }
++
+     _onShowMessage(_userVerifier, serviceName, message, type) {
+         let wiggleParameters = {duration: 0};
+ 
+@@ -610,6 +624,11 @@ export const AuthPrompt = GObject.registerClass({
+             this._updateEntry(false);
+     }
+ 
++    setForegroundMechanism(mechanism) {
++        this._userVerifier.setForegroundService(mechanism.serviceName);
++        this._userVerifier.setForegroundMechanism(mechanism);
++    }
++
+     reset(params) {
+         let {beginRequestType, queryingService} = Params.parse(params, {
+             beginRequestType: null,
+diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
+index 7952d24..dc65574 100644
+--- a/js/gdm/loginDialog.js
++++ b/js/gdm/loginDialog.js
+@@ -364,6 +364,7 @@ export const LoginDialog = GObject.registerClass({
+         this._authPrompt = new AuthPrompt.AuthPrompt(this._gdmClient, AuthPrompt.AuthPromptMode.UNLOCK_OR_LOG_IN);
+         this._authPrompt.connect('prompted', this._onPrompted.bind(this));
+         this._authPrompt.connect('reset', this._onReset.bind(this));
++        this._authPrompt.connect('mechanisms-changed', this._onMechanismsChanged.bind(this));
+         this._authPrompt.hide();
+         this.add_child(this._authPrompt);
+ 
+@@ -411,6 +412,7 @@ export const LoginDialog = GObject.registerClass({
+         this._menuButtonBox = new St.BoxLayout({style_class: 'login-dialog-menu-button-box'});
+         this.add_child(this._menuButtonBox);
+ 
++        this._createLoginOptionsButton();
+         this._createSessionMenuButton();
+ 
+         this._logoBin = new St.Widget({
+@@ -444,6 +446,22 @@ export const LoginDialog = GObject.registerClass({
+             this._updateDisableUserList.bind(this), this);
+     }
+ 
++    _createLoginOptionsButton() {
++        this._loginOptionsButton = new AuthMenuButton.AuthMenuButton({
++            title: _('Login Options'),
++            iconName: 'dialog-password-symbolic',
++        });
++        this._loginOptionsButton.connect('active-item-changed',
++            () => {
++                const activeMechanism = this._loginOptionsButton.getActiveItem();
++                if (activeMechanism)
++                    this._authPrompt.setForegroundMechanism(activeMechanism);
++            });
++        this._loginOptionsButton.opacity = 0;
++        this._loginOptionsButton.show();
++        this._menuButtonBox.add_child(this._loginOptionsButton);
++    }
++
+     _createSessionMenuButton() {
+         this._sessionMenuButton = new AuthMenuButton.AuthMenuButton({
+             title: _('Session'),
+@@ -827,6 +845,34 @@ export const LoginDialog = GObject.registerClass({
+         }
+     }
+ 
++    _onMechanismsChanged(authPrompt, serviceName) {
++        const mechanisms = Array.from(authPrompt.mechanisms.get(serviceName));
++
++        const activeMechanism = this._loginOptionsButton.getActiveItem();
++
++        this._loginOptionsButton.clearItems({serviceName});
++        if (mechanisms.length === 0)
++            return;
++
++        const defaultId = mechanisms[0].id;
++
++        mechanisms.sort((a, b) => a.name.localeCompare(b.name));
++
++        for (const {role, id, name, selectable} of mechanisms) {
++            if (!selectable)
++                continue;
++
++            const mechanism = {serviceName, id, name, role};
++            this._loginOptionsButton.addItem(mechanism);
++
++            const wasActive = activeMechanism?.id === id;
++            const isDefault = id === defaultId;
++
++            if (wasActive || (!activeMechanism && isDefault))
++                this._loginOptionsButton.setActiveItem(mechanism);
++        }
++    }
++
+     _onDefaultSessionChanged(client, sessionId) {
+         this._sessionMenuButton.setActiveItem({id: sessionId});
+     }
+@@ -1096,6 +1142,8 @@ export const LoginDialog = GObject.registerClass({
+         });
+ 
+         this._authPrompt.begin(params);
++
++        this._loginOptionsButton.updateSensitivity(true);
+     }
+ 
+     _setUserListExpanded(expanded) {
+@@ -1104,6 +1152,7 @@ export const LoginDialog = GObject.registerClass({
+     }
+ 
+     _hideUserList() {
++        this._loginOptionsButton.clearItems();
+         this._setUserListExpanded(false);
+         if (this._userSelectionBox.visible)
+             GdmUtil.cloneAndFadeOutActor(this._userSelectionBox);
+@@ -1123,6 +1172,8 @@ export const LoginDialog = GObject.registerClass({
+         this._ensureUserListLoaded();
+         this._authPrompt.hide();
+         this._hideBannerView();
++        this._loginOptionsButton.clearItems();
++        this._loginOptionsButton.updateSensitivity(false);
+         this._sessionMenuButton.updateSensitivity(false);
+         this._setUserListExpanded(true);
+         this._notListedButton.show();
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index 97df6d6..5718b29 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -30,6 +30,10 @@ export const FINGERPRINT_SERVICE_NAME = 'gdm-fingerprint';
+ export const SMARTCARD_SERVICE_NAME = 'gdm-smartcard';
+ const CLONE_FADE_ANIMATION_TIME = 250;
+ 
++export const PASSWORD_ROLE_NAME = 'password';
++export const SMARTCARD_ROLE_NAME = 'smartcard';
++export const FINGERPRINT_ROLE_NAME = 'fingerprint';
++
+ export const LOGIN_SCREEN_SCHEMA = 'org.gnome.login-screen';
+ export const PASSWORD_AUTHENTICATION_KEY = 'enable-password-authentication';
+ export const FINGERPRINT_AUTHENTICATION_KEY = 'enable-fingerprint-authentication';
+@@ -46,6 +50,35 @@ const USER_READ_TIME = 48;
+ const FINGERPRINT_SERVICE_PROXY_TIMEOUT = 5000;
+ const FINGERPRINT_ERROR_TIMEOUT_WAIT = 15;
+ 
++const DiscreteServiceMechanismDefinitions = [
++    {
++        serviceName: PASSWORD_SERVICE_NAME,
++        mechanismId: 'password',
++        mechanismName: _('Password'),
++        setting: PASSWORD_AUTHENTICATION_KEY,
++        role: PASSWORD_ROLE_NAME,
++        selectable: true,
++    },
++
++    {
++        serviceName: SMARTCARD_SERVICE_NAME,
++        mechanismId: 'smartcard',
++        mechanismName: _('Smartcard'),
++        setting: SMARTCARD_AUTHENTICATION_KEY,
++        role: SMARTCARD_ROLE_NAME,
++        selectable: true,
++    },
++
++    {
++        serviceName: FINGERPRINT_SERVICE_NAME,
++        mechanismId: 'fingerprint',
++        mechanismName: _('Fingerprint'),
++        setting: FINGERPRINT_AUTHENTICATION_KEY,
++        role: FINGERPRINT_ROLE_NAME,
++        selectable: false,
++    },
++];
++
+ /**
+  * Keep messages in order by priority
+  *
+@@ -108,6 +141,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+ 
+         this._defaultService = null;
+         this._preemptingService = null;
++        this._foregroundMechanism = null;
+         this._fingerprintReaderType = FingerprintReaderType.NONE;
+ 
+         this._messageQueue = [];
+@@ -116,6 +150,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this._failCounter = 0;
+         this._activeServices = new Set();
+         this._unavailableServices = new Set();
++        this._activeServices = new Set();
++        this._pendingMechanisms = new Map();
+ 
+         this._credentialManagers = {};
+ 
+@@ -194,6 +230,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     _clearUserVerifier() {
++        this._pendingMechanisms.clear();
+         if (this._userVerifier) {
+             this._disconnectSignals();
+             this._userVerifier.run_dispose();
+@@ -446,7 +483,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     _onCredentialManagerAuthenticated(credentialManager, _token) {
+-        this._preemptingService = credentialManager.service;
++        this.setForegroundService(credentialManager.service);
+         this.emit('credential-manager-authenticated');
+     }
+ 
+@@ -482,9 +519,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             this.smartcardDetected = smartcardDetected;
+ 
+             if (this.smartcardDetected)
+-                this._preemptingService = SMARTCARD_SERVICE_NAME;
++                this.setForegroundService(SMARTCARD_SERVICE_NAME);
+             else if (this._preemptingService === SMARTCARD_SERVICE_NAME)
+-                this._preemptingService = null;
++                this.setForegroundService(null);
+ 
+             this.emit('smartcard-status-changed');
+         }
+@@ -586,6 +623,50 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         return this._defaultService;
+     }
+ 
++    setForegroundService(serviceName) {
++        if (this._getForegroundService() === serviceName)
++            return;
++
++        this._preemptingService = serviceName;
++        this.emit('foreground-service-changed');
++    }
++
++    _getForegroundMechanism() {
++        if (this._foregroundMechanism)
++            return this._foregroundMechanism;
++
++        const foregroundService = this._getForegroundService();
++        if (foregroundService === this._defaultService) {
++            const definition = DiscreteServiceMechanismDefinitions.find(
++                def => def.serviceName === foregroundService);
++
++            if (!definition)
++                return null;
++
++            const {mechanismName, mechanismId, role, serviceName} = definition;
++
++            return {name: mechanismName, id: mechanismId, role, serviceName};
++        }
++
++        return null;
++    }
++
++    setForegroundMechanism(mechanism) {
++        const foregroundMechanism = this._getForegroundMechanism();
++
++        this._foregroundMechanism = mechanism;
++
++        if (foregroundMechanism === mechanism)
++            return;
++
++        if (foregroundMechanism?.role === mechanism?.role &&
++            foregroundMechanism?.mechanismName === mechanism?.mechanismName &&
++            foregroundMechanism?.serviceName === mechanism?.serviceName)
++            return;
++
++        this.emit('foreground-mechanism-changed');
++    }
++
+     serviceIsForeground(serviceName) {
+         return serviceName === this._getForegroundService();
+     }
+@@ -666,6 +747,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     async _startService(serviceName) {
++        this._activeServices.add(serviceName);
+         this._hold.acquire();
+         try {
+             this._activeServices.add(serviceName);
+@@ -696,11 +778,6 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this._hold.release();
+     }
+ 
+-    _beginVerification() {
+-        this._startService(this._getForegroundService());
+-        this._maybeStartFingerprintVerification().catch(logError);
+-    }
+-
+     async _maybeStartFingerprintVerification() {
+         if (this._userName &&
+             this._fingerprintReaderType !== FingerprintReaderType.NONE &&
+@@ -708,6 +785,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             await this._startService(FINGERPRINT_SERVICE_NAME);
+     }
+ 
++    _startBackgroundServices() {
++        this._maybeStartFingerprintVerification().catch(logError);
++    }
++
++    _beginVerification() {
++        const foregroundService = this._getForegroundService();
++
++        this._synthesizeMechanismsFromServices();
++
++        this._startService(foregroundService);
++        this._startBackgroundServices();
++    }
++
+     _onChoiceListQuery(client, serviceName, promptMessage, list) {
+         if (!this.serviceIsForeground(serviceName))
+             return;
+@@ -795,11 +885,30 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this.emit('ask-question', serviceName, secretQuestion, true);
+     }
+ 
++    _generateMechanismsFromDiscreteServices() {
++        for (const definition of DiscreteServiceMechanismDefinitions) {
++            const enabled = this._settings.get_boolean(definition.setting);
++            const available = this._activeServices.has(definition.serviceName) && !this._unavailableServices.has(definition.serviceName);
++
++            let mechanismsList = [];
++            if (enabled && available) {
++                mechanismsList.push({
++                    id: definition.mechanismId,
++                    name: definition.mechanismName,
++                    role: definition.role,
++                    selectable: definition.selectable,
++                });
++            }
++            this.emit('mechanisms-list-changed', definition.serviceName, mechanismsList);
++        }
++    }
++
+     _onReset() {
+         // Clear previous attempts to authenticate
+         this._failCounter = 0;
+         this._activeServices.clear();
+         this._unavailableServices.clear();
++        this._activeServices.clear();
+         this._updateDefaultService();
+ 
+         this.emit('reset');
+@@ -887,6 +996,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+ 
+     _onConversationStopped(client, serviceName) {
+         this._activeServices.delete(serviceName);
++        this.emit('mechanisms-list-changed', serviceName, []);
+ 
+         // If the login failed with the preauthenticated oVirt credentials
+         // then discard the credentials and revert to default authentication
+@@ -895,7 +1005,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             this.serviceIsForeground(service));
+         if (foregroundService) {
+             this._credentialManagers[foregroundService].token = null;
+-            this._preemptingService = null;
++            this.setForegroundService(null);
+             this._verificationFailed(serviceName, false);
+             return;
+         }

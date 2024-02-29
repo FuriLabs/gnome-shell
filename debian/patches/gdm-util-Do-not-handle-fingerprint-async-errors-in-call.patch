@@ -1,0 +1,56 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 25 Oct 2022 04:47:08 +0200
+Subject: gdm/util: Do not handle fingerprint async errors in call
+
+It's better to do this at caller level so that we have more control of
+what to do on errors.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2267>
+---
+ js/gdm/util.js | 26 ++++++++++++--------------
+ 1 file changed, 12 insertions(+), 14 deletions(-)
+
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index 36a63da..6731200 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -170,7 +170,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this._userName = userName;
+         this.reauthenticating = false;
+ 
+-        this._checkForFingerprintReader();
++        this._checkForFingerprintReader().catch(logError);
+ 
+         // If possible, reauthenticate an already running session,
+         // so any session specific credentials get updated appropriately
+@@ -355,19 +355,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             return;
+         }
+ 
+-        try {
+-            const [device] = await this._fprintManager.GetDefaultDeviceAsync(
+-                Gio.DBusCallFlags.NONE, this._cancellable);
+-            const fprintDeviceProxy = new FprintDeviceProxy(Gio.DBus.system,
+-                'net.reactivated.Fprint',
+-                device);
+-            const fprintDeviceType = fprintDeviceProxy['scan-type'];
+-
+-            this._fingerprintReaderType = fprintDeviceType === 'swipe'
+-                ? FingerprintReaderType.SWIPE
+-                : FingerprintReaderType.PRESS;
+-            this._updateDefaultService();
+-        } catch (e) {}
++        const [device] = await this._fprintManager.GetDefaultDeviceAsync(
++            Gio.DBusCallFlags.NONE, this._cancellable);
++        const fprintDeviceProxy = new FprintDeviceProxy(Gio.DBus.system,
++            'net.reactivated.Fprint',
++            device);
++        const fprintDeviceType = fprintDeviceProxy['scan-type'];
++
++        this._fingerprintReaderType = fprintDeviceType === 'swipe'
++            ? FingerprintReaderType.SWIPE
++            : FingerprintReaderType.PRESS;
++        this._updateDefaultService();
+     }
+ 
+     _onCredentialManagerAuthenticated(credentialManager, _token) {

@@ -1,0 +1,29 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 28 Feb 2024 21:52:55 +0100
+Subject: js/gdm/util: Rename fingerprint device into devicePath
+
+It's just the dbus object path, so let's not be confused by that.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2267>
+---
+ js/gdm/util.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index 24593f6..2db9188 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -355,11 +355,11 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             return;
+         }
+ 
+-        const [device] = await this._fprintManager.GetDefaultDeviceAsync(
++        const [devicePath] = await this._fprintManager.GetDefaultDeviceAsync(
+             Gio.DBusCallFlags.NONE, this._cancellable);
+         const fprintDeviceProxy = new FprintDeviceProxy(Gio.DBus.system,
+             'net.reactivated.Fprint',
+-            device);
++            devicePath);
+         const fprintDeviceType = fprintDeviceProxy['scan-type'];
+ 
+         this._fingerprintReaderType = fprintDeviceType === 'swipe'
