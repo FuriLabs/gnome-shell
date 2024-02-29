@@ -45,3 +45,4 @@ ubuntu-authd/gdm-util-Catch-errors-on-re-authentication.patch
 ubuntu-authd/shell-qr-code-generator-Use-g-c-c-embedded-library-simpli.patch
 ubuntu-authd/start-abstracting-the-unified-mechanism-handler.patch
 ubuntu-authd/Implement-authd-support-via-the-unified-mechanism.patch
+ubuntu-authd/js-Minify-the-authd-protocol-during-build.patch

@@ -1,0 +1,74 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 29 Feb 2024 22:38:26 +0100
+Subject: js: Minify the authd protocol during build
+
+---
+ js/gdm/authd.js               |  2 +-
+ js/gdm/meson.build            | 12 ++++++++++++
+ js/js-resources.gresource.xml |  2 +-
+ js/meson.build                |  3 ++-
+ 4 files changed, 16 insertions(+), 3 deletions(-)
+ create mode 100644 js/gdm/meson.build
+
+diff --git a/js/gdm/authd.js b/js/gdm/authd.js
+index 4415c98..5c0b084 100644
+--- a/js/gdm/authd.js
++++ b/js/gdm/authd.js
+@@ -3,7 +3,7 @@
+ // import Gio from 'gi://Gio';
+ import GLib from 'gi://GLib';
+ import {MessageType} from './util.js';
+-import {authd as Authd, gdm as AuthdGdm, pam as AuthdPam} from './authdProtocol.js';
++import {authd as Authd, gdm as AuthdGdm, pam as AuthdPam} from './authdProtocol.min.js';
+ import {UnifiedAuthService} from './unifiedMechanism.js';
+ import * as Const from './const.js';
+ 
+diff --git a/js/gdm/meson.build b/js/gdm/meson.build
+new file mode 100644
+index 0000000..858cc16
+--- /dev/null
++++ b/js/gdm/meson.build
+@@ -0,0 +1,12 @@
++minified_authd_proto_js =   custom_target('authd-min-proto',
++  input: files('authdProtocol.js'),
++  output: '@BASENAME@.min.js',
++  command: [
++    find_program('terser', required: true),
++    '--compress',
++    '--mangle',
++    '--',
++    '@INPUT@',
++  ],
++  capture: true,
++)
+diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
+index 6aa47ad..a10ccf3 100644
+--- a/js/js-resources.gresource.xml
++++ b/js/js-resources.gresource.xml
+@@ -17,7 +17,7 @@
+     <file>gdm/webLogin.js</file>
+ 
+     <file>gdm/authd.js</file>
+-    <file>gdm/authdProtocol.js</file>
++    <file>gdm/authdProtocol.min.js</file>
+ 
+     <file>extensions/extension.js</file>
+     <file>extensions/sharedInternals.js</file>
+diff --git a/js/meson.build b/js/meson.build
+index 4809f82..8f1fce5 100644
+--- a/js/meson.build
++++ b/js/meson.build
+@@ -1,11 +1,12 @@
+ subdir('misc')
+ subdir('dbusServices')
++subdir('gdm')
+ 
+ js_resources = gnome.compile_resources(
+   'js-resources', 'js-resources.gresource.xml',
+   source_dir: ['.', meson.current_build_dir()],
+   c_name: 'shell_js_resources',
+-  dependencies: [config_js]
++  dependencies: [config_js, minified_authd_proto_js]
+ )
+ 
+ portal_resources = gnome.compile_resources(

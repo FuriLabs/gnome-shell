@@ -64,6 +64,7 @@ Build-Depends: appstream,
                pkg-config,
                sassc,
                systemd [linux-any],
+               terser,
                xauth <!nocheck>,
                xvfb <!nocheck>,
                xwayland <!nocheck>
