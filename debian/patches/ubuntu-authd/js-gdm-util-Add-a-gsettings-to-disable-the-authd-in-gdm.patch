@@ -1,0 +1,67 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 29 Feb 2024 23:33:23 +0100
+Subject: js/gdm/util: Add a gsettings to disable the authd in gdm
+
+---
+ data/com.ubuntu.login-screen.gschema.xml.in | 10 ++++++++++
+ js/gdm/util.js                              | 10 +++++++++-
+ 2 files changed, 19 insertions(+), 1 deletion(-)
+
+diff --git a/data/com.ubuntu.login-screen.gschema.xml.in b/data/com.ubuntu.login-screen.gschema.xml.in
+index ee8b3a2..136d67a 100644
+--- a/data/com.ubuntu.login-screen.gschema.xml.in
++++ b/data/com.ubuntu.login-screen.gschema.xml.in
+@@ -66,5 +66,15 @@
+         It overrides the value defined in the default style sheet.
+       </description>
+     </key>
++    <key name="enable-authd-authentication" type="b">
++      <default>true</default>
++      <summary>
++        Enable AuthD authentication.
++      </summary>
++      <description>
++        A pluggable authentication system for external brokers.
++        This key allows to toggle its support in gdm.
++      </description>
++    </key>
+   </schema>
+ </schemalist>
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index b43f2b4..93098ec 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -49,6 +49,9 @@ export const BANNER_MESSAGE_KEY = 'banner-message-enable';
+ export const BANNER_MESSAGE_TEXT_KEY = 'banner-message-text';
+ export const ALLOWED_FAILURES_KEY = 'allowed-failures';
+ 
++export const UBUNTU_LOGIN_SCREEN_SCHEMA = 'com.ubuntu.login-screen';
++export const UBUNTU_AUTHD_AUTHENTICATION_KEY = 'enable-authd-authentication';
++
+ export const LOGO_KEY = 'logo';
+ export const DISABLE_USER_LIST_KEY = 'disable-user-list';
+ 
+@@ -177,6 +180,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+ 
+         this._settings = new Gio.Settings({schema_id: LOGIN_SCREEN_SCHEMA});
+         this._settings.connect('changed', () => this._onSettingsChanged());
++        this._ubuntuSettings = new Gio.Settings({schema_id: UBUNTU_LOGIN_SCREEN_SCHEMA});
++        this._ubuntuSettings.connectObject('changed', () => this._onSettingsChanged(), this);
+         this._updateEnabledServices();
+         this._updateDefaultService();
+ 
+@@ -869,10 +874,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     _getDetectedDefaultService() {
+-        if (!this._settings.settingsSchema.has_key(UNIFIED_AUTHENTICATION_KEY) ||
++        if (this._settings.settingsSchema.has_key(UNIFIED_AUTHENTICATION_KEY) &&
+             this._settings.get_boolean(UNIFIED_AUTHENTICATION_KEY))
+             return UNIFIED_AUTH_SERVICE_NAME;
+ 
++        if (this._ubuntuSettings.get_boolean(UBUNTU_AUTHD_AUTHENTICATION_KEY))
++            return UNIFIED_AUTH_SERVICE_NAME;
++
+         const definition = DiscreteServiceMechanismDefinitions.find(
+             def => this._isDiscreteServiceEnabled(def.setting));
+         return definition?.serviceName ?? null;
