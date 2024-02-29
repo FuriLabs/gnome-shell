@@ -46,14 +46,14 @@ endif
 
 meson_test_options = --timeout-multiplier $(test_timeout_multiplier)
 
-ifneq ($(filter mips%,$(DEB_HOST_ARCH_CPU)),)
+#ifneq ($(filter mips%,$(DEB_HOST_ARCH_CPU)),)
 # gnome-shell on mips(64)el works on a real GPU (in practice usually an
 # AMD GPU), but crashes when using llvmpipe or softpipe, which is all that
 # is available on the buildds, so we only run the unit tests at build time
 # and skip the tests that would run the whole Shell. See discussion in
 # https://salsa.debian.org/gnome-team/gnome-shell/-/merge_requests/71
 meson_test_options += --no-suite shell
-endif
+#endif
 
 override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
