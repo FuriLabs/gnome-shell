@@ -1,8 +1,11 @@
-gnome-shell (46~rc-1) UNRELEASED; urgency=medium
+gnome-shell (46~rc-0ubuntu1) noble; urgency=medium
 
   * New upstream release
+  * Bump minimum mutter to 46~rc
+  * Drop fingerprint patch applied in new release
+  * Refresh patches
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 07 Mar 2024 17:27:14 -0500
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 07 Mar 2024 17:27:34 -0500
 
 gnome-shell (46~beta-0ubuntu2) noble; urgency=medium
 
