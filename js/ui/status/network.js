@@ -7,6 +7,7 @@ import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import NM from 'gi://NM';
 import Polkit from 'gi://Polkit';
+import Shell from 'gi://Shell';
 import St from 'gi://St';
 
 import * as Main from '../main.js';
@@ -65,25 +66,13 @@ function ssidToLabel(ssid) {
 function launchSettingsPanel(panel, ...args) {
     const param = new GLib.Variant('(sav)',
         [panel, args.map(s => new GLib.Variant('s', s))]);
-    const platformData = {
-        'desktop-startup-id': new GLib.Variant('s',
-            `_TIME${global.get_current_time()}`),
-    };
-    try {
-        Gio.DBus.session.call(
-            'org.gnome.Settings',
-            '/org/gnome/Settings',
-            'org.freedesktop.Application',
-            'ActivateAction',
-            new GLib.Variant('(sava{sv})',
-                ['launch-panel', [param], platformData]),
-            null,
-            Gio.DBusCallFlags.NONE,
-            -1,
-            null);
-    } catch (e) {
-        log(`Failed to launch Settings panel: ${e.message}`);
-    }
+
+    const app = Shell.AppSystem.get_default()
+        .lookup_app('org.gnome.Settings.desktop');
+
+    app.activate_action('launch-panel', param, 0, -1, null).catch(error => {
+        log(`Failed to launch Settings panel: ${error.message}`);
+    });
 }
 
 class ItemSorter {
@@ -1608,6 +1597,10 @@ class NMVpnToggle extends NMToggle {
             'activation-failed', () => this.emit('activation-failed'),
             this);
         this._addItem(connection, item);
+
+        // FIXME: NM is emitting "connection-added" after "notify::active-connections",
+        // so we need to sync connections here once again.
+        this._syncActiveConnections();
     }
 
     _removeConnection(connection) {
@@ -2037,17 +2030,18 @@ class Indicator extends SystemIndicator {
         this._notification?.destroy();
 
         const source = MessageTray.getSystemSource();
-        this._notification = new MessageTray.Notification(source,
-            _('Connection failed'),
-            _('Activation of network connection failed'));
-        this._notification.iconName = 'network-error-symbolic';
-        this._notification.setUrgency(MessageTray.Urgency.HIGH);
-        this._notification.setTransient(true);
+        this._notification = new MessageTray.Notification({
+            source,
+            title: _('Connection failed'),
+            body: _('Activation of network connection failed'),
+            iconName: 'network-error-symbolic',
+            urgency: MessageTray.Urgency.HIGH,
+            isTransient: true,
+        });
         this._notification.connect('destroy',
             () => (this._notification = null));
 
-        Main.messageTray.add(source);
-        source.showNotification(this._notification);
+        source.addNotification(this._notification);
     }
 
     _syncMainConnection() {

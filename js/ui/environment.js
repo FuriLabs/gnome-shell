@@ -30,6 +30,7 @@ Gio._promisify(Gio.DBusProxy.prototype, 'init_async');
 Gio._promisify(Gio.DBusProxy.prototype, 'call_with_unix_fd_list');
 Gio._promisify(Gio.File.prototype, 'query_info_async');
 Gio._promisify(Polkit.Permission, 'new');
+Gio._promisify(Shell.App.prototype, 'activate_action');
 
 // We can't import shell JS modules yet, because they may have
 // variable initializations, etc, that depend on this file's
@@ -211,13 +212,14 @@ function _easeActorProperty(actor, propName, target, params) {
     }
 
     let pspec = actor.find_property(propName);
-    let transition = new Clutter.PropertyTransition(Object.assign({
+    let transition = new Clutter.PropertyTransition({
         property_name: propName,
         interval: new Clutter.Interval({value_type: pspec.value_type}),
         remove_on_complete: true,
         repeat_count: repeatCount,
         auto_reverse: autoReverse,
-    }, params));
+        ...params,
+    });
     actor.add_transition(propName, transition);
 
     transition.set_to(target);

@@ -1,7 +1,7 @@
 {
   "levels": [
     {
-      "level": "",
+      "level": "default",
       "mode": "default",
       "rows": [
         [
@@ -151,6 +151,7 @@
         ],
         [
           {
+            "leftOffset": 1,
             "strings": [
               "ذ"
             ]
@@ -207,7 +208,7 @@
           {
             "action": "levelSwitch",
             "label": "?123",
-            "level": 2,
+            "level": "opt",
             "width": 1.5
           },
           {
@@ -335,6 +336,7 @@
         ],
         [
           {
+            "leftOffset": 0.5,
             "strings": [
               "@"
             ]
@@ -409,7 +411,7 @@
           {
             "action": "levelSwitch",
             "label": "=/<",
-            "level": 3,
+            "level": "opt+shift",
             "width": 1.5
           },
           {
@@ -463,7 +465,7 @@
           {
             "action": "levelSwitch",
             "label": "=/<",
-            "level": 3,
+            "level": "opt+shift",
             "width": 3
           }
         ],
@@ -471,7 +473,7 @@
           {
             "action": "levelSwitch",
             "label": "ABC",
-            "level": 0,
+            "level": "default",
             "width": 1.5
           },
           {
@@ -603,6 +605,7 @@
         ],
         [
           {
+            "leftOffset": 0.5,
             "strings": [
               "£"
             ]
@@ -666,7 +669,7 @@
           {
             "action": "levelSwitch",
             "label": "?123",
-            "level": 2,
+            "level": "opt",
             "width": 1.5
           },
           {
@@ -707,7 +710,7 @@
           {
             "action": "levelSwitch",
             "label": "?123",
-            "level": 2,
+            "level": "opt",
             "width": 3
           }
         ],
@@ -715,7 +718,7 @@
           {
             "action": "levelSwitch",
             "label": "ABC",
-            "level": 0,
+            "level": "default",
             "width": 1.5
           },
           {

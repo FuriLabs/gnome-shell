@@ -27,7 +27,7 @@ default:
       - 'api_failure'
 
 variables:
-  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/39:x86_64-2024-02-10.0
+  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/40:x86_64-2024-02-23.0
   FDO_UPSTREAM_REPO: GNOME/gnome-shell
   BUNDLE: "extensions-git.flatpak"
   LINT_LOG: "eslint-report.xml"
@@ -51,13 +51,14 @@ workflow:
 
 .gnome-shell.fedora:
   variables:
-    FDO_DISTRIBUTION_VERSION: 39
-    FDO_DISTRIBUTION_TAG: '2023-08-15.1'
+    FDO_DISTRIBUTION_VERSION: 40
+    FDO_DISTRIBUTION_TAG: '2024-02-23.0'
     FDO_DISTRIBUTION_PACKAGES:
       gjs
       nodejs
       npm
       meson
+      git
       'pkgconfig(gobject-introspection-1.0)'
       'pkgconfig(gio-2.0)'
       'pkgconfig(gio-unix-2.0)'
@@ -66,9 +67,6 @@ workflow:
     FDO_DISTRIBUTION_EXEC: |
       # For static analysis with eslint
       npm install -g eslint@^8.0.0 eslint-plugin-jsdoc@^46.0.0 &&
-
-      dnf group install -y 'Development Tools' \
-                 'C Development Tools and Libraries' &&
 
       ./.gitlab-ci/install-meson-project.sh \
         https://gitlab.gnome.org/fmuellner/gjs-ci-tools.git \

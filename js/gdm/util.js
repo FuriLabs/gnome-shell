@@ -14,10 +14,10 @@ import {loadInterfaceXML} from '../misc/fileUtils.js';
 import * as Params from '../misc/params.js';
 import * as SmartcardManager from '../misc/smartcardManager.js';
 
-const FprintManagerIface = loadInterfaceXML('net.reactivated.Fprint.Manager');
-const FprintManagerProxy = Gio.DBusProxy.makeProxyWrapper(FprintManagerIface);
-const FprintDeviceIface = loadInterfaceXML('net.reactivated.Fprint.Device');
-const FprintDeviceProxy = Gio.DBusProxy.makeProxyWrapper(FprintDeviceIface);
+const FprintManagerInfo = Gio.DBusInterfaceInfo.new_for_xml(
+    loadInterfaceXML('net.reactivated.Fprint.Manager'));
+const FprintDeviceInfo = Gio.DBusInterfaceInfo.new_for_xml(
+    loadInterfaceXML('net.reactivated.Fprint.Device'));
 
 Gio._promisify(Gdm.Client.prototype, 'open_reauthentication_channel');
 Gio._promisify(Gdm.Client.prototype, 'get_user_verifier');
@@ -43,6 +43,7 @@ export const DISABLE_USER_LIST_KEY = 'disable-user-list';
 
 // Give user 48ms to read each character of a PAM message
 const USER_READ_TIME = 48;
+const FINGERPRINT_SERVICE_PROXY_TIMEOUT = 5000;
 const FINGERPRINT_ERROR_TIMEOUT_WAIT = 15;
 
 /**
@@ -103,42 +104,28 @@ export class ShellUserVerifier extends Signals.EventEmitter {
         this._reauthOnly = params.reauthenticationOnly;
 
         this._client = client;
+        this._cancellable = null;
 
         this._defaultService = null;
         this._preemptingService = null;
-
-        this._settings = new Gio.Settings({schema_id: LOGIN_SCREEN_SCHEMA});
-        this._settings.connect('changed',
-            this._updateDefaultService.bind(this));
-        this._updateDefaultService();
-
-        this._fprintManager = new FprintManagerProxy(Gio.DBus.system,
-            'net.reactivated.Fprint',
-            '/net/reactivated/Fprint/Manager',
-            null,
-            null,
-            Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES);
-        this._smartcardManager = SmartcardManager.getSmartcardManager();
-
-        // We check for smartcards right away, since an inserted smartcard
-        // at startup should result in immediately initiating authentication.
-        // This is different than fingerprint readers, where we only check them
-        // after a user has been picked.
-        this.smartcardDetected = false;
-        this._checkForSmartcard();
-
-        this._smartcardManager.connectObject(
-            'smartcard-inserted', this._checkForSmartcard.bind(this),
-            'smartcard-removed', this._checkForSmartcard.bind(this), this);
+        this._fingerprintReaderType = FingerprintReaderType.NONE;
 
         this._messageQueue = [];
         this._messageQueueTimeoutId = 0;
-        this.reauthenticating = false;
 
         this._failCounter = 0;
+        this._activeServices = new Set();
         this._unavailableServices = new Set();
 
         this._credentialManagers = {};
+
+        this.reauthenticating = false;
+        this.smartcardDetected = false;
+
+        this._settings = new Gio.Settings({schema_id: LOGIN_SCREEN_SCHEMA});
+        this._settings.connect('changed', () => this._onSettingsChanged());
+        this._updateEnabledServices();
+        this._updateDefaultService();
 
         this.addCredentialManager(OVirt.SERVICE_NAME, OVirt.getOVirtCredentialsManager());
         this.addCredentialManager(Vmware.SERVICE_NAME, Vmware.getVmwareCredentialsManager());
@@ -185,7 +172,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
         this._userName = userName;
         this.reauthenticating = false;
 
-        this._checkForFingerprintReader();
+        this._checkForFingerprintReader().catch(e =>
+            this._handleFingerprintError(e));
 
         // If possible, reauthenticate an already running session,
         // so any session specific credentials get updated appropriately
@@ -225,6 +213,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
 
         this._clearUserVerifier();
         this._clearMessageQueue();
+        this._activeServices.clear();
     }
 
     destroy() {
@@ -233,8 +222,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
         this._settings.run_dispose();
         this._settings = null;
 
-        this._smartcardManager.disconnectObject(this);
+        this._smartcardManager?.disconnectObject(this);
         this._smartcardManager = null;
+
+        this._fingerprintManager = null;
 
         for (let service in this._credentialManagers)
             this.removeCredentialManager(service);
@@ -344,33 +335,137 @@ export class ShellUserVerifier extends Signals.EventEmitter {
         this.emit('show-message', null, null, MessageType.NONE);
     }
 
-    async _checkForFingerprintReader() {
+    async _initFingerprintManager() {
+        if (this._fprintManager)
+            return;
+
+        const fprintManager = new Gio.DBusProxy({
+            g_connection: Gio.DBus.system,
+            g_name: 'net.reactivated.Fprint',
+            g_object_path: '/net/reactivated/Fprint/Manager',
+            g_interface_name: FprintManagerInfo.name,
+            g_interface_info: FprintManagerInfo,
+            g_flags: Gio.DBusProxyFlags.DO_NOT_LOAD_PROPERTIES |
+                Gio.DBusProxyFlags.DO_NOT_AUTO_START_AT_CONSTRUCTION |
+                Gio.DBusProxyFlags.DO_NOT_CONNECT_SIGNALS,
+        });
+
+        try {
+            if (!this._getDetectedDefaultService()) {
+                // Other authentication methods would have already been detected by
+                // now as possibilities if they were available.
+                // If we're here it means that FINGERPRINT_AUTHENTICATION_KEY is
+                // true and so fingerprint authentication is our last potential
+                // option, so go ahead a synchronously look for a fingerprint device
+                // during startup or default service update.
+                fprintManager.init(null);
+                // Do not wait too much for fprintd to reply, as in case it hangs
+                // we should fail early without having the shell to misbehave
+                fprintManager.set_default_timeout(FINGERPRINT_SERVICE_PROXY_TIMEOUT);
+
+                const [devicePath] = fprintManager.GetDefaultDeviceSync();
+                this._fprintManager = fprintManager;
+
+                const fprintDeviceProxy = this._getFingerprintDeviceProxy(devicePath);
+                fprintDeviceProxy.init(null);
+                this._setFingerprintReaderType(fprintDeviceProxy['scan-type']);
+            } else {
+                // Ensure fingerprint service starts, but do not wait for it
+                const cancellable = this._cancellable;
+                await fprintManager.init_async(GLib.PRIORITY_DEFAULT, cancellable);
+                await this._updateFingerprintReaderType(fprintManager, cancellable);
+                this._fprintManager = fprintManager;
+            }
+        } catch (e) {
+            this._handleFingerprintError(e);
+        }
+    }
+
+    _getFingerprintDeviceProxy(devicePath) {
+        return new Gio.DBusProxy({
+            g_connection: Gio.DBus.system,
+            g_name: 'net.reactivated.Fprint',
+            g_object_path: devicePath,
+            g_interface_name: FprintDeviceInfo.name,
+            g_interface_info: FprintDeviceInfo,
+            g_flags: Gio.DBusProxyFlags.DO_NOT_CONNECT_SIGNALS,
+        });
+    }
+
+    _handleFingerprintError(e) {
         this._fingerprintReaderType = FingerprintReaderType.NONE;
 
-        if (!this._settings.get_boolean(FINGERPRINT_AUTHENTICATION_KEY) ||
-            this._fprintManager == null) {
+        if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+            return;
+        if (e.matches(Gio.DBusError, Gio.DBusError.SERVICE_UNKNOWN))
+            return;
+
+        if (Gio.DBusError.is_remote_error(e) &&
+            Gio.DBusError.get_remote_error(e) ===
+                'net.reactivated.Fprint.Error.NoSuchDevice')
+            return;
+
+        logError(e, 'Failed to interact with fprintd service');
+    }
+
+    async _checkForFingerprintReader() {
+        if (!this._fprintManager) {
             this._updateDefaultService();
             return;
         }
 
-        try {
-            const [device] = await this._fprintManager.GetDefaultDeviceAsync(
-                Gio.DBusCallFlags.NONE, this._cancellable);
-            const fprintDeviceProxy = new FprintDeviceProxy(Gio.DBus.system,
-                'net.reactivated.Fprint',
-                device);
-            const fprintDeviceType = fprintDeviceProxy['scan-type'];
+        if (this._fingerprintReaderType !== FingerprintReaderType.NONE)
+            return;
 
-            this._fingerprintReaderType = fprintDeviceType === 'swipe'
-                ? FingerprintReaderType.SWIPE
-                : FingerprintReaderType.PRESS;
-            this._updateDefaultService();
-        } catch (e) {}
+        await this._updateFingerprintReaderType(this._fprintManager, this._cancellable);
+    }
+
+    async _updateFingerprintReaderType(fprintManager, cancellable) {
+        // Wrappers don't support null cancellable, so let's ignore it in case
+        const args = cancellable ? [cancellable] : [];
+        const [devicePath] = await fprintManager.GetDefaultDeviceAsync(...args);
+        const fprintDeviceProxy = this._getFingerprintDeviceProxy(devicePath);
+        await fprintDeviceProxy.init_async(GLib.PRIORITY_DEFAULT, cancellable);
+        this._setFingerprintReaderType(fprintDeviceProxy['scan-type']);
+        this._updateDefaultService();
+
+        if (this._userVerifier &&
+            !this._activeServices.has(FINGERPRINT_SERVICE_NAME)) {
+            if (!this._hold?.isAcquired())
+                this._hold = new Batch.Hold();
+            await this._maybeStartFingerprintVerification();
+        }
+    }
+
+    _setFingerprintReaderType(fprintDeviceType) {
+        this._fingerprintReaderType =
+            FingerprintReaderType[fprintDeviceType.toUpperCase()];
+
+        if (this._fingerprintReaderType === undefined)
+            throw new Error(`Unexpected fingerprint device type '${fprintDeviceType}'`);
     }
 
     _onCredentialManagerAuthenticated(credentialManager, _token) {
         this._preemptingService = credentialManager.service;
         this.emit('credential-manager-authenticated');
+    }
+
+    _initSmartcardManager() {
+        if (this._smartcardManager)
+            return;
+
+        this._smartcardManager = SmartcardManager.getSmartcardManager();
+
+        // We check for smartcards right away, since an inserted smartcard
+        // at startup should result in immediately initiating authentication.
+        // This is different than fingerprint readers, where we only check them
+        // after a user has been picked.
+        this.smartcardDetected = false;
+        this._checkForSmartcard();
+
+        this._smartcardManager.connectObject(
+            'smartcard-inserted', () => this._checkForSmartcard(),
+            'smartcard-removed', () => this._checkForSmartcard(), this);
     }
 
     _checkForSmartcard() {
@@ -466,6 +561,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
             'problem', this._onProblem.bind(this),
             'info-query', this._onInfoQuery.bind(this),
             'secret-info-query', this._onSecretInfoQuery.bind(this),
+            'conversation-started', this._onConversationStarted.bind(this),
             'conversation-stopped', this._onConversationStopped.bind(this),
             'service-unavailable', this._onServiceUnavailable.bind(this),
             'reset', this._onReset.bind(this),
@@ -512,23 +608,67 @@ export class ShellUserVerifier extends Signals.EventEmitter {
             serviceName === FINGERPRINT_SERVICE_NAME;
     }
 
-    _updateDefaultService() {
+    _onSettingsChanged() {
+        this._updateEnabledServices();
+        this._updateDefaultService();
+    }
+
+    _updateEnabledServices() {
+        let needsReset = false;
+
+        if (this._settings.get_boolean(FINGERPRINT_AUTHENTICATION_KEY)) {
+            this._initFingerprintManager().catch(logError);
+        } else if (this._fingerprintManager) {
+            this._fingerprintManager = null;
+            this._fingerprintReaderType = FingerprintReaderType.NONE;
+
+            if (this._activeServices.has(FINGERPRINT_SERVICE_NAME))
+                needsReset = true;
+        }
+
+        if (this._settings.get_boolean(SMARTCARD_AUTHENTICATION_KEY)) {
+            this._initSmartcardManager();
+        } else if (this._smartcardManager) {
+            this._smartcardManager.disconnectObject(this);
+            this._smartcardManager = null;
+
+            if (this._activeServices.has(SMARTCARD_SERVICE_NAME))
+                needsReset = true;
+        }
+
+        if (needsReset)
+            this._cancelAndReset();
+    }
+
+    _getDetectedDefaultService() {
         if (this._settings.get_boolean(PASSWORD_AUTHENTICATION_KEY))
-            this._defaultService = PASSWORD_SERVICE_NAME;
-        else if (this._settings.get_boolean(SMARTCARD_AUTHENTICATION_KEY))
-            this._defaultService = SMARTCARD_SERVICE_NAME;
+            return PASSWORD_SERVICE_NAME;
+        else if (this._smartcardManager)
+            return SMARTCARD_SERVICE_NAME;
         else if (this._fingerprintReaderType !== FingerprintReaderType.NONE)
-            this._defaultService = FINGERPRINT_SERVICE_NAME;
+            return FINGERPRINT_SERVICE_NAME;
+        return null;
+    }
+
+    _updateDefaultService() {
+        const oldDefaultService = this._defaultService;
+        this._defaultService = this._getDetectedDefaultService();
 
         if (!this._defaultService) {
             log('no authentication service is enabled, using password authentication');
             this._defaultService = PASSWORD_SERVICE_NAME;
         }
+
+        if (oldDefaultService &&
+            oldDefaultService !== this._defaultService &&
+            this._activeServices.has(oldDefaultService))
+            this._cancelAndReset();
     }
 
     async _startService(serviceName) {
         this._hold.acquire();
         try {
+            this._activeServices.add(serviceName);
             if (this._userName) {
                 await this._userVerifier.call_begin_verification_for_user(
                     serviceName, this._userName, this._cancellable);
@@ -537,6 +677,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                     serviceName, this._cancellable);
             }
         } catch (e) {
+            this._activeServices.delete(serviceName);
             if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
                 return;
             if (!this.serviceIsForeground(serviceName)) {
@@ -557,11 +698,14 @@ export class ShellUserVerifier extends Signals.EventEmitter {
 
     _beginVerification() {
         this._startService(this._getForegroundService());
+        this._maybeStartFingerprintVerification().catch(logError);
+    }
 
+    async _maybeStartFingerprintVerification() {
         if (this._userName &&
             this._fingerprintReaderType !== FingerprintReaderType.NONE &&
             !this.serviceIsForeground(FINGERPRINT_SERVICE_NAME))
-            this._startService(FINGERPRINT_SERVICE_NAME);
+            await this._startService(FINGERPRINT_SERVICE_NAME);
     }
 
     _onChoiceListQuery(client, serviceName, promptMessage, list) {
@@ -654,6 +798,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
     _onReset() {
         // Clear previous attempts to authenticate
         this._failCounter = 0;
+        this._activeServices.clear();
         this._unavailableServices.clear();
         this._updateDefaultService();
 
@@ -736,7 +881,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {
             this._queueMessage(serviceName, errorMessage, MessageType.ERROR);
     }
 
+    _onConversationStarted(client, serviceName) {
+        this._activeServices.add(serviceName);
+    }
+
     _onConversationStopped(client, serviceName) {
+        this._activeServices.delete(serviceName);
+
         // If the login failed with the preauthenticated oVirt credentials
         // then discard the credentials and revert to default authentication
         // mechanism.

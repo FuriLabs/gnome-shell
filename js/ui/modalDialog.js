@@ -141,11 +141,8 @@ export const ModalDialog = GObject.registerClass({
         return this.dialogLayout.addButton(buttonInfo);
     }
 
-    _fadeOpen(onPrimary) {
-        if (onPrimary)
-            this._monitorConstraint.primary = true;
-        else
-            this._monitorConstraint.index = global.display.get_current_monitor();
+    _fadeOpen() {
+        this._monitorConstraint.index = global.display.get_current_monitor();
 
         this._setState(State.OPENING);
 
@@ -174,14 +171,14 @@ export const ModalDialog = GObject.registerClass({
             () => (this._initialKeyFocus = null), this);
     }
 
-    open(timestamp, onPrimary) {
+    open() {
         if (this.state === State.OPENED || this.state === State.OPENING)
             return true;
 
-        if (!this.pushModal(timestamp))
+        if (!this.pushModal())
             return false;
 
-        this._fadeOpen(onPrimary);
+        this._fadeOpen();
         return true;
     }
 
@@ -217,7 +214,7 @@ export const ModalDialog = GObject.registerClass({
     // Drop modal status without closing the dialog; this makes the
     // dialog insensitive as well, so it needs to be followed shortly
     // by either a close() or a pushModal()
-    popModal(timestamp) {
+    popModal() {
         if (!this._hasModal)
             return;
 
@@ -226,7 +223,7 @@ export const ModalDialog = GObject.registerClass({
             this._savedKeyFocus = focus;
         else
             this._savedKeyFocus = null;
-        Main.popModal(this._grab, timestamp);
+        Main.popModal(this._grab);
         this._grab = null;
         this._hasModal = false;
 
@@ -234,14 +231,11 @@ export const ModalDialog = GObject.registerClass({
             this.backgroundStack.set_child_above_sibling(this._eventBlocker, null);
     }
 
-    pushModal(timestamp) {
+    pushModal() {
         if (this._hasModal)
             return true;
 
-        let params = {actionMode: this._actionMode};
-        if (timestamp)
-            params['timestamp'] = timestamp;
-        let grab = Main.pushModal(this, params);
+        const grab = Main.pushModal(this, {actionMode: this._actionMode});
         if (grab.get_seat_state() !== Clutter.GrabState.ALL) {
             Main.popModal(grab);
             return false;
@@ -275,14 +269,14 @@ export const ModalDialog = GObject.registerClass({
     // e.g., if a user clicked "Log Out" then the dialog should go away
     // immediately, but the lightbox should remain until the logout is
     // complete.
-    _fadeOutDialog(timestamp) {
+    _fadeOutDialog() {
         if (this.state === State.CLOSED || this.state === State.CLOSING)
             return;
 
         if (this.state === State.FADED_OUT)
             return;
 
-        this.popModal(timestamp);
+        this.popModal();
         this.dialogLayout.ease({
             opacity: 0,
             duration: FADE_OUT_DIALOG_TIME,

@@ -53,12 +53,14 @@ export async function run() {
     const source = new MessageTray.getSystemSource();
 
     Scripting.scriptEvent('notificationShowStart');
-    source.connect('notification-show',
+    source.connect('notification-request-banner',
         () => Scripting.scriptEvent('notificationShowDone'));
 
-    const notification = new MessageTray.Notification(source,
-        'A test notification');
-    source.showNotification(notification);
+    const notification = new MessageTray.Notification({
+        source,
+        title: 'A test notification',
+    });
+    source.addNotification(notification);
     await Scripting.sleep(400);
 
     console.debug('Show date menu');

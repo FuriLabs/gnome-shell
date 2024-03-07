@@ -26,7 +26,6 @@ import * as OsdMonitorLabeler from './osdMonitorLabeler.js';
 import * as Overview from './overview.js';
 import * as PadOsd from './padOsd.js';
 import * as Panel from './panel.js';
-import * as Params from '../misc/params.js';
 import * as RunDialog from './runDialog.js';
 import * as WelcomeDialog from './welcomeDialog.js';
 import * as Layout from './layout.js';
@@ -275,13 +274,15 @@ async function _initializeUI() {
             return; // assume user action
 
         const source = MessageTray.getSystemSource();
-        const notification = new MessageTray.Notification(source,
-            _('System was put in unsafe mode'),
-            _('Apps now have unrestricted access'));
+        const notification = new MessageTray.Notification({
+            source,
+            title: _('System was put in unsafe mode'),
+            body: _('Apps now have unrestricted access'),
+            isTransient: true,
+        });
         notification.addAction(_('Undo'),
             () => (global.context.unsafe_mode = false));
-        notification.setTransient(true);
-        source.showNotification(notification);
+        source.addNotification(notification);
     });
 
     // Provide the bus object for gnome-session to
@@ -615,9 +616,13 @@ export function loadTheme() {
  */
 export function notify(msg, details) {
     const source = MessageTray.getSystemSource();
-    let notification = new MessageTray.Notification(source, msg, details);
-    notification.setTransient(true);
-    source.showNotification(notification);
+    const notification = new MessageTray.Notification({
+        source,
+        title: msg,
+        body: details,
+        isTransient: true,
+    });
+    source.addNotification(notification);
 }
 
 /**
@@ -659,13 +664,6 @@ function _findModal(grab) {
  * which was focused at the time pushModal() was invoked.
  *
  * `params` may be used to provide the following parameters:
- *  - timestamp: used to associate the call with a specific user initiated
- *               event. If not provided then the value of
- *               global.get_current_time() is assumed.
- *
- *  - options: Meta.ModalOptions flags to indicate that the pointer is
- *             already grabbed
- *
  *  - actionMode: used to set the current Shell.ActionMode to filter
  *                global keybindings; the default of NONE will filter
  *                out all keybindings
@@ -674,12 +672,11 @@ function _findModal(grab) {
  * @param {object=} params - optional parameters
  * @returns {Clutter.Grab} - the grab handle created
  */
-export function pushModal(actor, params) {
-    params = Params.parse(params, {
-        timestamp: global.get_current_time(),
-        options: 0,
+export function pushModal(actor, params = {}) {
+    const {actionMode: newActionMode} = {
         actionMode: Shell.ActionMode.NONE,
-    });
+        ...params,
+    };
 
     let grab = global.stage.grab(actor);
 
@@ -713,7 +710,7 @@ export function pushModal(actor, params) {
         actionMode,
     });
 
-    actionMode = params.actionMode;
+    actionMode = newActionMode;
     global.stage.set_key_focus(actor);
     return grab;
 }
@@ -723,17 +720,9 @@ export function pushModal(actor, params) {
  * the topmost invocation, then the focus will be restored to the
  * previous focus at the time when pushModal() was invoked.
  *
- * `timestamp` is optionally used to associate the call with a specific user
- * initiated event. If not provided then the value of
- * global.get_current_time() is assumed.
- *
  * @param {Clutter.Grab} grab - the grab given by pushModal()
- * @param {number=} timestamp - optional timestamp
  */
-export function popModal(grab, timestamp) {
-    if (timestamp === undefined)
-        timestamp = global.get_current_time();
-
+export function popModal(grab) {
     let focusIndex = _findModal(grab);
     if (focusIndex < 0) {
         global.stage.set_key_focus(null);
