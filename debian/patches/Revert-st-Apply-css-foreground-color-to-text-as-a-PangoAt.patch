@@ -41,7 +41,7 @@ index 52fbdb7..ea48bce 100644
    priv->spacing = 6.0f;
  
 diff --git a/src/st/st-private.c b/src/st/st-private.c
-index f7ea118..c484e2d 100644
+index e310bdb..1ca9aac 100644
 --- a/src/st/st-private.c
 +++ b/src/st/st-private.c
 @@ -115,22 +115,42 @@ _st_set_text_from_style (ClutterText *text,

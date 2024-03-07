@@ -63,7 +63,7 @@ index 3b54960..3b73639 100644
          if (!this._updateRegionIdle) {
              const laters = global.compositor.get_laters();
 diff --git a/js/ui/magnifier.js b/js/ui/magnifier.js
-index 60971e9..cfc2770 100644
+index 84a2d89..2de2676 100644
 --- a/js/ui/magnifier.js
 +++ b/js/ui/magnifier.js
 @@ -51,6 +51,8 @@ const MouseSpriteContent = GObject.registerClass({
@@ -147,8 +147,8 @@ index 60971e9..cfc2770 100644
          St.Settings.get().connect('notify::magnifier-active', () => {
              this.setActive(St.Settings.get().magnifier_active);
          });
-@@ -128,6 +170,13 @@ export class Magnifier extends Signals.EventEmitter {
-         this.setActive(St.Settings.get().magnifier_active);
+@@ -129,6 +171,13 @@ export class Magnifier extends Signals.EventEmitter {
+         this._cursorUnfocusInhibited = false;
      }
  
 +    _updateContentScale() {
@@ -161,7 +161,7 @@ index 60971e9..cfc2770 100644
      /**
       * showSystemCursor:
       * Show the system mouse pointer.
-@@ -269,6 +318,8 @@ export class Magnifier extends Signals.EventEmitter {
+@@ -274,6 +323,8 @@ export class Magnifier extends Signals.EventEmitter {
          this.xMouse = xMouse;
          this.yMouse = yMouse;
  

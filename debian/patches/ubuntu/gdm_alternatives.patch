@@ -28,10 +28,10 @@ index 4501c31..cd6b3e6 100644
      <file>gnome-shell-light.css</file>
      <file>gnome-shell-high-contrast.css</file>
 diff --git a/js/ui/sessionMode.js b/js/ui/sessionMode.js
-index 8e30a66..e27f4fa 100644
+index 895b507..4bd1fa3 100644
 --- a/js/ui/sessionMode.js
 +++ b/js/ui/sessionMode.js
-@@ -53,6 +53,8 @@ const _modes = {
+@@ -52,6 +52,8 @@ const _modes = {
  
      'gdm': {
          hasNotifications: true,

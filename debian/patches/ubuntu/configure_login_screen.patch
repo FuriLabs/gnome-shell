@@ -136,7 +136,7 @@ index 328b1b4..70d7bcc 100644
                  backgroundColor = dummyBgActor.get_theme_node().get_background_color();
                  dummyBgActor.destroy();
 diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js
-index df49bb4..528622b 100644
+index 6e42de4..33086e5 100644
 --- a/js/ui/screenShield.js
 +++ b/js/ui/screenShield.js
 @@ -33,6 +33,12 @@ const DISABLE_LOCK_KEY = 'disable-lock-screen';
@@ -207,5 +207,5 @@ index df49bb4..528622b 100644
              this._dialog = new constructor(this._lockDialogGroup);
 +            this._refreshBackground();
  
-             let time = global.get_current_time();
-             if (!this._dialog.open(time)) {
+             if (!this._dialog.open()) {
+                 // This is kind of an impossible error: we're already modal

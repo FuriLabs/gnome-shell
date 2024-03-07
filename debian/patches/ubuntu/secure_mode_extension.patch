@@ -18,7 +18,7 @@ Forwarded: https://bugzilla.gnome.org/show_bug.cgi?id=789852
  2 files changed, 20 insertions(+)
 
 diff --git a/js/ui/extensionDownloader.js b/js/ui/extensionDownloader.js
-index 6486bbc..e62b05b 100644
+index 0366c5d..d3cfc86 100644
 --- a/js/ui/extensionDownloader.js
 +++ b/js/ui/extensionDownloader.js
 @@ -7,6 +7,7 @@ import GObject from 'gi://GObject';
@@ -29,7 +29,7 @@ index 6486bbc..e62b05b 100644
  import * as Dialog from './dialog.js';
  import * as ExtensionUtils from '../misc/extensionUtils.js';
  import * as FileUtils from '../misc/fileUtils.js';
-@@ -37,6 +38,13 @@ export async function installExtension(uuid, invocation) {
+@@ -44,6 +45,13 @@ export async function installExtension(uuid, invocation) {
          shell_version: Config.PACKAGE_VERSION,
      };
  
@@ -43,7 +43,7 @@ index 6486bbc..e62b05b 100644
      const message = Soup.Message.new_from_encoded_form('GET',
          REPOSITORY_URL_INFO,
          Soup.form_encode_hash(params));
-@@ -197,6 +205,9 @@ export async function checkForUpdates() {
+@@ -204,6 +212,9 @@ export async function checkForUpdates() {
              return;
          if (extension.hasUpdate)
              return;
@@ -54,7 +54,7 @@ index 6486bbc..e62b05b 100644
              version: extension.metadata.version,
          };
 diff --git a/js/ui/extensionSystem.js b/js/ui/extensionSystem.js
-index 07be806..f00eb57 100644
+index 8e4af6f..d384a85 100644
 --- a/js/ui/extensionSystem.js
 +++ b/js/ui/extensionSystem.js
 @@ -8,6 +8,7 @@ import Shell from 'gi://Shell';
@@ -65,7 +65,7 @@ index 07be806..f00eb57 100644
  import * as ExtensionDownloader from './extensionDownloader.js';
  import {formatError} from '../misc/errorUtils.js';
  import {ExtensionState, ExtensionType} from '../misc/extensionUtils.js';
-@@ -521,6 +522,10 @@ export class ExtensionManager extends Signals.EventEmitter {
+@@ -526,6 +527,10 @@ export class ExtensionManager extends Signals.EventEmitter {
          await this.loadExtension(newExtension);
      }
  
@@ -76,7 +76,7 @@ index 07be806..f00eb57 100644
      async _callExtensionInit(uuid) {
          if (!this._extensionSupportsSessionMode(uuid))
              return false;
-@@ -761,6 +766,10 @@ export class ExtensionManager extends Signals.EventEmitter {
+@@ -767,6 +772,10 @@ export class ExtensionManager extends Signals.EventEmitter {
              let type = dir.has_prefix(perUserDir)
                  ? ExtensionType.PER_USER
                  : ExtensionType.SYSTEM;
