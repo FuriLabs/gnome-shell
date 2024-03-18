@@ -1429,8 +1429,9 @@ export const Keyboard = GObject.registerClass({
             for (const group of groups) {
                 try {
                     keyboardModel = new KeyboardModel(group);
+                    break;
                 } catch (e) {
-                    // Ignore this error
+                    // Ignore this error and fall back to next model
                 }
             }
 
@@ -2188,7 +2189,7 @@ class KeyboardController extends Signals.EventEmitter {
                         }
                         this._surroundingUpdateTimeoutId =
                             GLib.timeout_add(GLib.PRIORITY_DEFAULT, KEY_RELEASE_TIMEOUT, () => {
-                                func(text, cursor);
+                                func(text, cursor, cursor);
                                 this._surroundingUpdateTimeoutId = 0;
                                 return GLib.SOURCE_REMOVE;
                             });
