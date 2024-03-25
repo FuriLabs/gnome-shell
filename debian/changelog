@@ -1,3 +1,9 @@
+gnome-shell (46.0-0ubuntu3) noble; urgency=medium
+
+  * No-change rebuild for mutter ABI changes on armhf.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 25 Mar 2024 19:27:16 +0100
+
 gnome-shell (46.0-0ubuntu2) noble; urgency=medium
 
   * Add again patches that were uploaded as part of 46~beta-0ubuntu3 and that
