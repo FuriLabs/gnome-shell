@@ -15,9 +15,9 @@ It will be used later when Web Login support is added.
 ---
  .../gnome-shell-sass/widgets/_login-lock.scss      | 13 +++++
  js/gdm/authNotification.js                         | 64 ++++++++++++++++++++++
- js/gdm/authPrompt.js                               | 25 +++++++++
+ js/gdm/authPrompt.js                               | 28 ++++++++++
  js/js-resources.gresource.xml                      |  1 +
- 4 files changed, 103 insertions(+)
+ 4 files changed, 106 insertions(+)
  create mode 100644 js/gdm/authNotification.js
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
@@ -115,7 +115,7 @@ index 0000000..fc24cb6
 +    }
 +});
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index e17fe8b..0841fe2 100644
+index e17fe8b..4bd48ea 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -1,6 +1,7 @@
@@ -138,7 +138,7 @@ index e17fe8b..0841fe2 100644
  import * as Params from '../misc/params.js';
  import * as ShellEntry from '../ui/shellEntry.js';
  import * as UserWidget from '../ui/userWidget.js';
-@@ -630,6 +634,27 @@ export const AuthPrompt = GObject.registerClass({
+@@ -630,6 +634,30 @@ export const AuthPrompt = GObject.registerClass({
          this._userVerifier.setForegroundMechanism(mechanism);
      }
  
@@ -147,12 +147,15 @@ index e17fe8b..0841fe2 100644
 +        Main.messageTray.add(source);
 +
 +        const gicon = new Gio.ThemedIcon({name: 'dialog-password-symbolic'});
-+        this._loginFailedNotification = new MessageTray.Notification(source,
-+            _('Login Failed'),
-+            _('Please try again'),
-+            {gicon});
-+        this._loginFailedNotification.setTransient(true);
-+        source.showNotification(this._loginFailedNotification);
++        this._loginFailedNotification = new MessageTray.Notification({
++            source,
++            title: _('Login Failed'),
++            body: _('Please try again'),
++            gicon,
++            isTransient: true,
++        });
++
++        source.addNotification(this._loginFailedNotification);
 +    }
 +
 +    hideLoginFailedNotification() {
