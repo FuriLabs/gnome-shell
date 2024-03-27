@@ -1,3 +1,10 @@
+gnome-shell (46.0-0ubuntu3.1) UNRELEASED; urgency=medium
+
+  * debian/patces/gdm: Update gdm login notification to current API
+  * debian/patches/authd: Cleanup code and fix mechanism switch handling
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 27 Mar 2024 12:47:39 +0100
+
 gnome-shell (46.0-0ubuntu2) noble; urgency=medium
 
   * Add again patches that were uploaded as part of 46~beta-0ubuntu3 and that
