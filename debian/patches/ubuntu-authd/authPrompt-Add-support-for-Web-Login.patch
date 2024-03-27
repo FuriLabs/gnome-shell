@@ -114,7 +114,7 @@ index 347930e..9b43287 100644
    background-color: transparent;
  
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 0841fe2..b75cacc 100644
+index 4bd48ea..e40104a 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -18,6 +18,7 @@ import * as MessageTray from '../ui/messageTray.js';
@@ -288,7 +288,7 @@ index 0841fe2..b75cacc 100644
          if (this._entry.reactive === sensitive)
              return;
  
-@@ -719,6 +841,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -722,6 +844,7 @@ export const AuthPrompt = GObject.registerClass({
              hold: null,
          });
  

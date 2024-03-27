@@ -28,7 +28,7 @@ index ee8b3a2..136d67a 100644
    </schema>
  </schemalist>
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index b43f2b4..93098ec 100644
+index 0017fb1..157bfe5 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -49,6 +49,9 @@ export const BANNER_MESSAGE_KEY = 'banner-message-enable';
@@ -50,7 +50,7 @@ index b43f2b4..93098ec 100644
          this._updateEnabledServices();
          this._updateDefaultService();
  
-@@ -869,10 +874,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -871,10 +876,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _getDetectedDefaultService() {

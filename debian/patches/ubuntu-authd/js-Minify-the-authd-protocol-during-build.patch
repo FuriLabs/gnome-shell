@@ -11,11 +11,11 @@ Subject: js: Minify the authd protocol during build
  create mode 100644 js/gdm/meson.build
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
-index 4415c98..5c0b084 100644
+index 4e05fc9..46c139a 100644
 --- a/js/gdm/authd.js
 +++ b/js/gdm/authd.js
-@@ -3,7 +3,7 @@
- // import Gio from 'gi://Gio';
+@@ -2,7 +2,7 @@
+ 
  import GLib from 'gi://GLib';
  import {MessageType} from './util.js';
 -import {authd as Authd, gdm as AuthdGdm, pam as AuthdPam} from './authdProtocol.js';
