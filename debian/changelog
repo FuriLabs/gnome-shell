@@ -1,9 +1,9 @@
-gnome-shell (46.0-0ubuntu4) UNRELEASED; urgency=medium
+gnome-shell (46.0-0ubuntu4) noble; urgency=medium
 
   * debian/changelog: Add missing 46.0-0ubuntu3 changelog
   * debian/patches/ubuntu-authd: Handle various races on cancellation
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 08 Apr 2024 02:30:25 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 08 Apr 2024 02:31:14 +0200
 
 gnome-shell (46.0-0ubuntu3.1) noble; urgency=medium
 
