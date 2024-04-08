@@ -4,18 +4,18 @@ Subject: Implement authd support via the unified mechanism
 
 ---
  js/gdm/authPrompt.js          |   41 +-
- js/gdm/authd.js               |  573 +++++
- js/gdm/authdProtocol.js       | 5618 +++++++++++++++++++++++++++++++++++++++++
+ js/gdm/authd.js               |  603 +++++
+ js/gdm/authdProtocol.js       | 5648 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    9 +
  js/gdm/consts.js              |    6 -
  js/gdm/loginDialog.js         |    5 +-
- js/gdm/unifiedMechanism.js    |   46 +-
- js/gdm/util.js                |  186 +-
+ js/gdm/unifiedMechanism.js    |   49 +-
+ js/gdm/util.js                |  196 +-
  js/gdm/webLogin.js            |    5 +
  js/js-resources.gresource.xml |    5 +-
  js/misc/ibusManager.js        |   48 +-
  js/ui/unlockDialog.js         |    1 +
- 12 files changed, 6446 insertions(+), 97 deletions(-)
+ 12 files changed, 6519 insertions(+), 97 deletions(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
  create mode 100644 js/gdm/const.js
@@ -130,10 +130,10 @@ index ccb5a1f..7628834 100644
              this._userVerifier.cancel();
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..4e05fc9
+index 0000000..21d9bee
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,573 @@
+@@ -0,0 +1,603 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import GLib from 'gi://GLib';
@@ -188,6 +188,7 @@ index 0000000..4e05fc9
 +        super();
 +        this._brokers = {};
 +        this._authModes = {};
++        this._authMechanisms = {};
 +        this._pendingEvents = [];
 +        this._stage = undefined;
 +
@@ -281,17 +282,33 @@ index 0000000..4e05fc9
 +    }
 +
 +    setForegroundMechanism(mechanism) {
-+        if (this._authenticationStarted && this._selectedAuthMode !== this._preemptAuthMode) {
-+            this._requestStageChange(AuthdPam.Stage.authModeSelection);
-+            this._preemptAuthMode = mechanism.id;
++        if (this._selectedAuthMode === mechanism.id)
++            return true;
++        if (!this._authMechanisms[mechanism.id])
++            return true;
++
++        if (this._authenticationStarted) {
++            this._pendingEvents.push(
++                new AuthdGdm.EventData({
++                    type: AuthdGdm.EventType.isAuthenticatedCancelled,
++                    isAuthenticatedCancelled: new AuthdGdm.Events.IsAuthenticatedCancelled(),
++                }),
++                new AuthdGdm.EventData({
++                    type: AuthdGdm.EventType.authModeSelected,
++                    authModeSelected: new AuthdGdm.Events.AuthModeSelected({
++                        authModeId: mechanism.id,
++                    })}),
++                );
++            this._authenticationStarted = false;
 +        }
 +
 +        return true;
 +    }
 +
 +    handleMechanism(mechanism) {
-+        if (!this._selectedAuthMode)
-+            return false;
++        if (!this._selectedAuthMode || !this._authenticationInProgress) {
++            return mechanism.role !== Const.CHOICE_LIST_ROLE_NAME;
++        }
 +
 +        if (this._selectedAuthMode !== mechanism.id)
 +            return true;
@@ -346,6 +363,12 @@ index 0000000..4e05fc9
 +        return true;
 +    }
 +
++    _doStageChange(stage) {
++
++        this._onStageChanged(stage);
++        this._requestStageChange(stage);
++    }
++
 +    _requestStageChange(stage) {
 +        this._pendingEvents.push(new AuthdGdm.EventData({
 +            type: AuthdGdm.EventType.stageChanged,
@@ -372,17 +395,6 @@ index 0000000..4e05fc9
 +
 +        if (this._authenticationInProgress || this._authenticationStarted)
 +            return;
-+
-+        if (this._preemptAuthMode) {
-+            this._pendingEvents.push(new AuthdGdm.EventData({
-+                type: AuthdGdm.EventType.authModeSelected,
-+                authModeSelected: new AuthdGdm.Events.AuthModeSelected({
-+                    authModeId: this._preemptAuthMode,
-+                }),
-+            }));
-+            this._preemptAuthMode = null;
-+            return;
-+        }
 +
 +        this._showChoiceList(AuthMechanismIDs.AuthModeSelection,
 +            _('Select the authentication mode'), this._authModes);
@@ -434,6 +446,7 @@ index 0000000..4e05fc9
 +            return true;
 +        }
 +
++        this._selectedAuthMode = null;
 +        this._requestStageChange(this._stage - 1);
 +        return true;
 +    }
@@ -445,6 +458,10 @@ index 0000000..4e05fc9
 +        }
 +
 +        switch (stage) {
++        case AuthdPam.Stage.userSelection:
++            this._cancelAndReset();
++            break;
++
 +        case AuthdPam.Stage.brokerSelection:
 +            this._authenticationInProgress = false;
 +            this._maybeStartBrokerSelection();
@@ -510,9 +527,7 @@ index 0000000..4e05fc9
 +
 +        case AuthdGdm.EventType.authModeSelected:
 +            this._selectedAuthMode = event.authModeSelected.authModeId;
-+            if (this._stage === AuthdPam.Stage.authModeSelection)
-+                this.emit('choice-list-selected', this._selectedAuthMode);
-+            else if (this._stage >= AuthdPam.Stage.brokerSelection)
++            if (this._stage >= AuthdPam.Stage.brokerSelection)
 +                this._maybeStartChallenge();
 +            /*  else if (this._stage === AuthdPam.Stage.undefined) {
 +                    this._showAuthMode();
@@ -524,7 +539,6 @@ index 0000000..4e05fc9
 +            break;
 +
 +        case AuthdGdm.EventType.startAuthentication:
-+            // if (this._stage === undefined)
 +            this._authenticationStarted = true;
 +            this._maybeStartChallenge();
 +
@@ -532,6 +546,9 @@ index 0000000..4e05fc9
 +
 +        case AuthdGdm.EventType.authEvent:
 +            this._authenticationInProgress = false;
++
++            if (!this._authenticationStarted)
++                return;
 +            this._authenticationStarted = false;
 +            this._handleAuthResponse(event.authEvent.response);
 +            break;
@@ -542,7 +559,12 @@ index 0000000..4e05fc9
 +    }
 +
 +    reset() {
++        this.cancel()
++    }
++
++    cancel() {
 +        this._uiLayout = null;
++        this._selectedAuthMode = null;
 +        this._authenticationInProgress = false;
 +        this._authenticationStarted = false;
 +        this._authMechanisms = {};
@@ -564,6 +586,14 @@ index 0000000..4e05fc9
 +            return;
 +
 +        this._showChallenge();
++    }
++
++    sortMechanisms(mA, mB) {
++        if (mA.id === this._selectedAuthMode)
++            return -1;
++        if (mB.id === this._selectedAuthMode)
++            return 1;
++        return 0;
 +    }
 +
 +    _showChallenge() {
@@ -689,7 +719,7 @@ index 0000000..4e05fc9
 +            this.emit('queue-message',
 +                _('Authentication was cancelled, try again!'), MessageType.ERROR);
 +
-+            this._requestStageChange(AuthdPam.Stage.authModeSelection);
++            this._doStageChange(AuthdPam.Stage.authModeSelection);
 +            break;
 +        }
 +
@@ -709,10 +739,10 @@ index 0000000..4e05fc9
 +}
 diff --git a/js/gdm/authdProtocol.js b/js/gdm/authdProtocol.js
 new file mode 100644
-index 0000000..555423a
+index 0000000..846048c
 --- /dev/null
 +++ b/js/gdm/authdProtocol.js
-@@ -0,0 +1,5618 @@
+@@ -0,0 +1,5648 @@
 +var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 +
 +var indexMinimal = {};
@@ -4094,7 +4124,8 @@ index 0000000..555423a
 +        values[valuesById[8] = "uiLayoutReceived"] = 8;
 +        values[valuesById[9] = "startAuthentication"] = 9;
 +        values[valuesById[10] = "isAuthenticatedRequested"] = 10;
-+        values[valuesById[11] = "stageChanged"] = 11;
++        values[valuesById[12] = "stageChanged"] = 12;
++        values[valuesById[11] = "isAuthenticatedCancelled"] = 11;
 +        return values;
 +    })();
 +
@@ -4256,26 +4287,14 @@ index 0000000..555423a
 +                            this[keys[i]] = properties[keys[i]];
 +            }
 +
-+            StartAuthentication.prototype.wait = "";
-+
 +            StartAuthentication.fromObject = function fromObject(object) {
 +                if (object instanceof $root.gdm.Events.StartAuthentication)
 +                    return object;
-+                let message = new $root.gdm.Events.StartAuthentication();
-+                if (object.wait != null)
-+                    message.wait = String(object.wait);
-+                return message;
++                return new $root.gdm.Events.StartAuthentication();
 +            };
 +
-+            StartAuthentication.toObject = function toObject(message, options) {
-+                if (!options)
-+                    options = {};
-+                let object = {};
-+                if (options.defaults)
-+                    object.wait = "";
-+                if (message.wait != null && message.hasOwnProperty("wait"))
-+                    object.wait = message.wait;
-+                return object;
++            StartAuthentication.toObject = function toObject() {
++                return {};
 +            };
 +
 +            StartAuthentication.prototype.toJSON = function toJSON() {
@@ -4481,6 +4500,32 @@ index 0000000..555423a
 +            return IsAuthenticatedRequested;
 +        })();
 +
++        Events.IsAuthenticatedCancelled = (function() {
++
++            function IsAuthenticatedCancelled(properties) {
++                if (properties)
++                    for (let keys = Object.keys(properties), i = 0; i < keys.length; ++i)
++                        if (properties[keys[i]] != null)
++                            this[keys[i]] = properties[keys[i]];
++            }
++
++            IsAuthenticatedCancelled.fromObject = function fromObject(object) {
++                if (object instanceof $root.gdm.Events.IsAuthenticatedCancelled)
++                    return object;
++                return new $root.gdm.Events.IsAuthenticatedCancelled();
++            };
++
++            IsAuthenticatedCancelled.toObject = function toObject() {
++                return {};
++            };
++
++            IsAuthenticatedCancelled.prototype.toJSON = function toJSON() {
++                return this.constructor.toObject(this, minimal.util.toJSONOptions);
++            };
++
++            return IsAuthenticatedCancelled;
++        })();
++
 +        Events.StageChanged = (function() {
 +
 +            function StageChanged(properties) {
@@ -4606,11 +4651,12 @@ index 0000000..555423a
 +        EventData.prototype.reselectAuthMode = null;
 +        EventData.prototype.startAuthentication = null;
 +        EventData.prototype.userSelected = null;
++        EventData.prototype.isAuthenticatedCancelled = null;
 +
 +        let $oneOfFields;
 +
 +        Object.defineProperty(EventData.prototype, "data", {
-+            get: $util.oneOfGetter($oneOfFields = ["brokersReceived", "brokerSelected", "authModesReceived", "authModeSelected", "isAuthenticatedRequested", "stageChanged", "uiLayoutReceived", "authEvent", "reselectAuthMode", "startAuthentication", "userSelected"]),
++            get: $util.oneOfGetter($oneOfFields = ["brokersReceived", "brokerSelected", "authModesReceived", "authModeSelected", "isAuthenticatedRequested", "stageChanged", "uiLayoutReceived", "authEvent", "reselectAuthMode", "startAuthentication", "userSelected", "isAuthenticatedCancelled"]),
 +            set: $util.oneOfSetter($oneOfFields)
 +        });
 +
@@ -4670,6 +4716,10 @@ index 0000000..555423a
 +                message.type = 10;
 +                break;
 +            case "stageChanged":
++            case 12:
++                message.type = 12;
++                break;
++            case "isAuthenticatedCancelled":
 +            case 11:
 +                message.type = 11;
 +                break;
@@ -4728,6 +4778,11 @@ index 0000000..555423a
 +                if (typeof object.userSelected !== "object")
 +                    throw TypeError(".gdm.EventData.userSelected: object expected");
 +                message.userSelected = $root.gdm.Events.UserSelected.fromObject(object.userSelected);
++            }
++            if (object.isAuthenticatedCancelled != null) {
++                if (typeof object.isAuthenticatedCancelled !== "object")
++                    throw TypeError(".gdm.EventData.isAuthenticatedCancelled: object expected");
++                message.isAuthenticatedCancelled = $root.gdm.Events.IsAuthenticatedCancelled.fromObject(object.isAuthenticatedCancelled);
 +            }
 +            return message;
 +        };
@@ -4794,6 +4849,11 @@ index 0000000..555423a
 +                object.userSelected = $root.gdm.Events.UserSelected.toObject(message.userSelected, options);
 +                if (options.oneofs)
 +                    object.data = "userSelected";
++            }
++            if (message.isAuthenticatedCancelled != null && message.hasOwnProperty("isAuthenticatedCancelled")) {
++                object.isAuthenticatedCancelled = $root.gdm.Events.IsAuthenticatedCancelled.toObject(message.isAuthenticatedCancelled, options);
++                if (options.oneofs)
++                    object.data = "isAuthenticatedCancelled";
 +            }
 +            return object;
 +        };
@@ -6390,7 +6450,7 @@ index 58888bd..43d20d4 100644
          this._sessionMenuButton.updateSensitivity(false);
          this._authPrompt.updateSensitivity(true);
 diff --git a/js/gdm/unifiedMechanism.js b/js/gdm/unifiedMechanism.js
-index 059d161..f46555b 100644
+index 059d161..a2b6890 100644
 --- a/js/gdm/unifiedMechanism.js
 +++ b/js/gdm/unifiedMechanism.js
 @@ -5,7 +5,7 @@ import * as Signals from '../misc/signals.js';
@@ -6428,7 +6488,7 @@ index 059d161..f46555b 100644
      getSupportedRoles() {
          throw new GObject.NotImplementedError(
              `getSupportedRoles in ${this.constructor.name}`);
-@@ -49,10 +50,28 @@ export class UnifiedAuthService extends Signals.EventEmitter {
+@@ -49,10 +50,30 @@ export class UnifiedAuthService extends Signals.EventEmitter {
          return false;
      }
  
@@ -6454,11 +6514,13 @@ index 059d161..f46555b 100644
 +        return false;
 +    }
 +
++    cancel() {}
++
 +    reset() {}
  }
  
  export class UnifiedMechanismProtocolHandler extends  UnifiedAuthService/* Signals.EventEmitter */ {
-@@ -64,17 +83,6 @@ export class UnifiedMechanismProtocolHandler extends  UnifiedAuthService/* Signa
+@@ -64,17 +85,6 @@ export class UnifiedMechanismProtocolHandler extends  UnifiedAuthService/* Signa
          return SUPPORTED_ROLES;
      }
  
@@ -6476,8 +6538,16 @@ index 059d161..f46555b 100644
      handleProtocolRequest(_protocol, _version, json) {
          let requestObject;
  
+@@ -94,6 +104,7 @@ export class UnifiedMechanismProtocolHandler extends  UnifiedAuthService/* Signa
+     _handleAuthSelection(authSelection) {
+         const mechanisms = authSelection.mechanisms;
+         const priorityList = authSelection.priority;
++        const mechanismsList = [];
+ 
+         if (!mechanisms)
+             return;
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 276b283..0017fb1 100644
+index 276b283..1ee12b3 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -6,6 +6,7 @@ import Gio from 'gi://Gio';
@@ -6542,13 +6612,17 @@ index 276b283..0017fb1 100644
              let mechanismsList = [];
              for (const id of Object.keys(mechanisms)) {
                  const name = mechanisms[id].name;
-@@ -222,11 +219,26 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -222,11 +219,30 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                  delete mechanisms[m.id];
              });
  
 -            log('newly published mechanisms:', mechanisms);
-             this._publishedMechanisms.set(serviceName, mechanisms);
--
+-            this._publishedMechanisms.set(serviceName, mechanisms);
++            if (unifiedService.sortMechanisms)
++                mechanismsList = mechanismsList.sort((a, b) =>
++                    unifiedService.sortMechanisms(a, b));
+ 
++            this._publishedMechanisms.set(serviceName, mechanisms);
              this.emit('mechanisms-list-changed', serviceName, mechanismsList);
          }, this);
 +
@@ -6571,7 +6645,20 @@ index 276b283..0017fb1 100644
      }
  
      addCredentialManager(serviceName, credentialManager) {
-@@ -337,7 +349,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -285,6 +301,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         if (this._cancellable)
+             this._cancellable.cancel();
+ 
++        [...this._unifiedAuthServices.values()].forEach(s => s.cancel());
++        if (this._mechanismsListChangedSignalId) {
++            this.disconnect(this._mechanismsListChangedSignalId);
++            this._mechanismsListChangedSignalId = 0;
++        }
++
+         if (this._userVerifier) {
+             this._userVerifier.call_cancel_sync(null);
+             this.clear();
+@@ -337,7 +359,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              this.removeCredentialManager(service);
      }
  
@@ -6590,7 +6677,7 @@ index 276b283..0017fb1 100644
          this._userVerifierChoiceList.call_select_choice(serviceName, key, this._cancellable, null);
      }
  
-@@ -346,6 +369,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -346,6 +379,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              await this._handlePendingMessages();
              if (this._pendingMechanisms.has(PASSWORD_ROLE_NAME))
                  this._replyWithAuthSelectionResponse(serviceName, PASSWORD_ROLE_NAME, {password: answer});
@@ -6599,7 +6686,7 @@ index 276b283..0017fb1 100644
              else
                  this._userVerifier.call_answer_query(serviceName, answer, this._cancellable, null);
          } catch (e) {
-@@ -354,9 +379,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -354,9 +389,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          }
      }
  
@@ -6618,7 +6705,7 @@ index 276b283..0017fb1 100644
              this._userVerifierCustomJSON.call_reply(serviceName, json, this._cancellable, null);
          } catch (e) {
              if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
-@@ -737,9 +770,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -737,9 +780,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              if (!definition)
                  return null;
  
@@ -6630,7 +6717,7 @@ index 276b283..0017fb1 100644
          }
  
          return null;
-@@ -754,10 +787,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -754,10 +797,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              return;
  
          if (foregroundMechanism?.role === mechanism?.role &&
@@ -6650,7 +6737,7 @@ index 276b283..0017fb1 100644
          this.emit('foreground-mechanism-changed');
      }
  
-@@ -829,7 +871,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -829,7 +881,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _getDetectedDefaultService() {
@@ -6660,7 +6747,7 @@ index 276b283..0017fb1 100644
              return UNIFIED_AUTH_SERVICE_NAME;
  
          const definition = DiscreteServiceMechanismDefinitions.find(
-@@ -897,21 +940,25 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -897,21 +950,25 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      _startMechanismFromUnifiedService(mechanism) {
          const unifiedService = this._unifiedAuthServices.get(mechanism.protocol);
@@ -6693,7 +6780,7 @@ index 276b283..0017fb1 100644
      }
  
      _shouldStartBackgroundService(serviceName) {
-@@ -961,6 +1008,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -961,6 +1018,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      _beginVerification() {
          const foregroundService = this._getForegroundService();
  
@@ -6702,7 +6789,7 @@ index 276b283..0017fb1 100644
          this._mechanismsListChangedSignalId =
              this.connect('mechanisms-list-changed',
                  (_, ...args) => this._onMechanismsListChanged(...args));
-@@ -979,7 +1028,27 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -979,7 +1038,43 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this.emit('show-choice-list', serviceName, promptMessage, list.deepUnpack());
      }
  
@@ -6728,22 +6815,6 @@ index 276b283..0017fb1 100644
 +    }
 +
 +    _startQuestionLogin(serviceName, mechanismId) {
-         const mechanisms = this._publishedMechanisms.get(serviceName);
- 
-         if (!mechanisms)
-@@ -989,12 +1058,28 @@ export class ShellUserVerifier extends Signals.EventEmitter {
-             return;
- 
-         const {prompt, role} = mechanisms[mechanismId];
-+        const secret = role !== Const.PLAIN_TEXT_ROLE_NAME;
- 
-         this._pendingMechanisms.set(role, mechanismId);
--        this.emit('ask-question', serviceName, prompt, true);
-+        this.emit('ask-question', serviceName, prompt, secret);
-     }
- 
--    async _replyWithAuthSelectionResponse(serviceName, role, response) {
-+    _startMessageLogin(serviceName, mechanismId) {
 +        const mechanisms = this._publishedMechanisms.get(serviceName);
 +
 +        if (!mechanisms)
@@ -6753,16 +6824,30 @@ index 276b283..0017fb1 100644
 +            return;
 +
 +        const {prompt, role} = mechanisms[mechanismId];
++        const secret = role !== Const.PLAIN_TEXT_ROLE_NAME;
 +
 +        this._pendingMechanisms.set(role, mechanismId);
-+        this.emit('show-waiting-message', serviceName, prompt);
++        this.emit('ask-question', serviceName, prompt, secret);
 +    }
 +
++    _startMessageLogin(serviceName, mechanismId) {
+         const mechanisms = this._publishedMechanisms.get(serviceName);
+ 
+         if (!mechanisms)
+@@ -991,10 +1086,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         const {prompt, role} = mechanisms[mechanismId];
+ 
+         this._pendingMechanisms.set(role, mechanismId);
+-        this.emit('ask-question', serviceName, prompt, true);
++        this.emit('show-waiting-message', serviceName, prompt);
+     }
+ 
+-    async _replyWithAuthSelectionResponse(serviceName, role, response) {
 +    _replyWithAuthSelectionResponse(serviceName, role, response) {
          const mechanism = this._getPendingMechanismForRole(role);
          if (!mechanism)
              return;
-@@ -1005,21 +1090,25 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1005,21 +1100,25 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          if (!authService)
              throw new Error(`No authentication service for protocol ${mechanism.protocol}`);
  
@@ -6796,7 +6881,7 @@ index 276b283..0017fb1 100644
  
          const {init_prompt: initPrompt, link_prompt: linkPrompt, uri, code, role, timeout} = mechanisms[mechanismId];
  
-@@ -1059,7 +1148,6 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1059,7 +1158,6 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
          const mechanism = this._getPendingMechanismForRole(WEB_LOGIN_ROLE_NAME);
          const authService = this._unifiedAuthServices.get(mechanism?.protocol);
@@ -6804,7 +6889,7 @@ index 276b283..0017fb1 100644
          if (!authService)
              return;
  
-@@ -1090,17 +1178,28 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1090,17 +1188,28 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _onCustomJSONRequest(client, serviceName, protocol, version, json) {
@@ -6839,7 +6924,7 @@ index 276b283..0017fb1 100644
      }
  
      _onInfo(client, serviceName, info) {
-@@ -1222,6 +1321,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1222,6 +1331,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._activeServices.clear();
          this._unavailableServices.clear();
          this._activeServices.clear();
