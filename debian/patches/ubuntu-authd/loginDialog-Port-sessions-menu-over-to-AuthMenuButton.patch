@@ -64,7 +64,7 @@ index 4dc9aec..1d8845b 100644
    margin: 3em 0;
  }
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 5e8121f..25a00f0 100644
+index 5e8121f..a0d025a 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -28,9 +28,9 @@ import Pango from 'gi://Pango';
@@ -118,15 +118,15 @@ index 5e8121f..25a00f0 100644
 +        let ids = Gdm.get_session_ids();
 +        ids.sort();
 +
-+        if (ids.length <= 1) {
-+            this._button.hide();
-+            return;
-+        }
-+
 +        for (const id of ids) {
 +            let [sessionName, sessionDescription_] = Gdm.get_session_name_and_description(id);
 +
 +            this._sessionMenuButton.addItem({name: sessionName, id});
++        }
++
++        if (ids.length <= 1) {
++            this._sessionMenuButton.hide();
++            return;
 +        }
 +
 +        this._sessionMenuButton.connect('active-item-changed', () => {

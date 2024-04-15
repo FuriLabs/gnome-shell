@@ -4,7 +4,7 @@ Subject: Implement authd support via the unified mechanism
 
 ---
  js/gdm/authPrompt.js          |   41 +-
- js/gdm/authd.js               |  603 +++++
+ js/gdm/authd.js               |  601 +++++
  js/gdm/authdProtocol.js       | 5648 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    9 +
  js/gdm/consts.js              |    6 -
@@ -15,7 +15,7 @@ Subject: Implement authd support via the unified mechanism
  js/js-resources.gresource.xml |    5 +-
  js/misc/ibusManager.js        |   48 +-
  js/ui/unlockDialog.js         |    1 +
- 12 files changed, 6519 insertions(+), 97 deletions(-)
+ 12 files changed, 6517 insertions(+), 97 deletions(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
  create mode 100644 js/gdm/const.js
@@ -130,10 +130,10 @@ index ccb5a1f..7628834 100644
              this._userVerifier.cancel();
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..21d9bee
+index 0000000..c1b8b99
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,603 @@
+@@ -0,0 +1,601 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import GLib from 'gi://GLib';
@@ -191,8 +191,6 @@ index 0000000..21d9bee
 +        this._authMechanisms = {};
 +        this._pendingEvents = [];
 +        this._stage = undefined;
-+
-+        console.log('Starting Authd!!!');
 +    }
 +
 +    handleProtocolRequest(protocol, version, json) {
@@ -6419,7 +6417,7 @@ index ad854ca..0000000
 -export const SMARTCARD_ROLE_NAME = 'smartcard';
 -export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 58888bd..43d20d4 100644
+index 8a19100..c2952c6 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -536,6 +536,8 @@ export const LoginDialog = GObject.registerClass({

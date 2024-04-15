@@ -80,7 +80,7 @@ index 4b70111..e17fe8b 100644
          let {beginRequestType, queryingService} = Params.parse(params, {
              beginRequestType: null,
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 25a00f0..c8f26d8 100644
+index a0d025a..b81d22d 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -532,6 +532,7 @@ export const LoginDialog = GObject.registerClass({
