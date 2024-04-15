@@ -38,7 +38,6 @@ ubuntu-authd/gdm-util-Emit-service-request-signal-on-every-request.patch
 ubuntu-authd/src-Add-function-for-generating-QR-codes.patch
 ubuntu-authd/gdm-Add-Login-Failed-notification.patch
 ubuntu-authd/authPrompt-Add-support-for-Web-Login.patch
-ubuntu-authd/loginDialog-Create-footer-container.patch
 ubuntu-authd/authPrompt-Fade-out-cancel-button-after-verification.patch
 ubuntu-authd/gdm-util-Add-new-background-message-type.patch
 ubuntu-authd/gdm-util-Catch-errors-on-re-authentication.patch
