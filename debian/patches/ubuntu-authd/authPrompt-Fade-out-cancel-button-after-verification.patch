@@ -13,7 +13,7 @@ This commit fades it out as well.
  1 file changed, 5 insertions(+)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index e40104a..ccb5a1f 100644
+index bb46762..a03103c 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -537,6 +537,11 @@ export const AuthPrompt = GObject.registerClass({

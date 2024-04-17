@@ -27,10 +27,10 @@ index 0000000..ad854ca
 +export const SMARTCARD_ROLE_NAME = 'smartcard';
 +export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 4e449c6..8a19100 100644
+index bfde7af..ef67811 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -1044,11 +1044,11 @@ export const LoginDialog = GObject.registerClass({
+@@ -1029,11 +1029,11 @@ export const LoginDialog = GObject.registerClass({
  
          mechanisms.sort((a, b) => a.name.localeCompare(b.name));
  
@@ -180,7 +180,7 @@ index 0000000..059d161
 +    }
 +}
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 59af2d6..276b283 100644
+index 59af2d6..d197c5c 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -13,6 +13,8 @@ import * as Main from '../ui/main.js';
@@ -291,7 +291,7 @@ index 59af2d6..276b283 100644
 +                    continue;
 +
 +                const protocol = unifiedService.protocolName;
-+                const selectable = mechanisms[id].selectable;
++                const selectable = mechanisms[id].selectable ?? true;
 +                mechanisms[id].protocol = protocol;
 +                mechanismsList.push({id, name, role, serviceName, protocol, selectable});
 +            }
