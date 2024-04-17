@@ -10,12 +10,12 @@ Subject: Implement authd support via the unified mechanism
  js/gdm/consts.js              |    6 -
  js/gdm/loginDialog.js         |    5 +-
  js/gdm/unifiedMechanism.js    |   49 +-
- js/gdm/util.js                |  196 +-
+ js/gdm/util.js                |  213 +-
  js/gdm/webLogin.js            |    5 +
  js/js-resources.gresource.xml |    5 +-
  js/misc/ibusManager.js        |   48 +-
  js/ui/unlockDialog.js         |    1 +
- 12 files changed, 6517 insertions(+), 97 deletions(-)
+ 12 files changed, 6534 insertions(+), 97 deletions(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
  create mode 100644 js/gdm/const.js
@@ -6545,7 +6545,7 @@ index 059d161..a2b6890 100644
          if (!mechanisms)
              return;
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 276b283..1ee12b3 100644
+index 276b283..bbc685e 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -6,6 +6,7 @@ import Gio from 'gi://Gio';
@@ -6735,17 +6735,49 @@ index 276b283..1ee12b3 100644
          this.emit('foreground-mechanism-changed');
      }
  
-@@ -829,7 +881,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -828,8 +880,15 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         }
      }
  
++    _serviceIsAvailable(serviceName) {
++        return GLib.file_test(`/etc/pam.d/${serviceName}`, GLib.FileTest.EXISTS) ||
++            GLib.file_test(`/usr/lib/pam.d/${serviceName}`, GLib.FileTest.EXISTS)
++    }
++
      _getDetectedDefaultService() {
 -        if (this._settings.get_boolean(UNIFIED_AUTHENTICATION_KEY))
 +        if (!this._settings.settingsSchema.has_key(UNIFIED_AUTHENTICATION_KEY) ||
-+            this._settings.get_boolean(UNIFIED_AUTHENTICATION_KEY))
++            this._settings.get_boolean(UNIFIED_AUTHENTICATION_KEY) &&
++            this._serviceIsAvailable(UNIFIED_AUTH_SERVICE_NAME))
              return UNIFIED_AUTH_SERVICE_NAME;
  
          const definition = DiscreteServiceMechanismDefinitions.find(
-@@ -897,21 +950,25 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -841,6 +900,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         const oldDefaultService = this._defaultService;
+         this._defaultService = this._getDetectedDefaultService();
+ 
++        if (this._unavailableServices.has(this._defaultService))
++            this._defaultService = null;
++
+         if (!this._defaultService) {
+             log('no authentication service is enabled, using password authentication');
+             this._defaultService = PASSWORD_SERVICE_NAME;
+@@ -866,6 +928,14 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             }
+         } catch (e) {
+             this._activeServices.delete(serviceName);
++            if (this.serviceIsForeground(serviceName) &&
++                Gio.DBusError.is_remote_error(e) &&
++                Gio.DBusError.get_remote_error(e) === 'org.gnome.DisplayManager.SessionWorker.Error.ServiceUnavailable') {
++                this._unavailableServices.add(serviceName);
++                this._updateDefaultService();
++                this._beginVerification();
++                return;
++            }
+             if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+                 return;
+             if (!this.serviceIsForeground(serviceName)) {
+@@ -897,21 +967,25 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      _startMechanismFromUnifiedService(mechanism) {
          const unifiedService = this._unifiedAuthServices.get(mechanism.protocol);
@@ -6778,7 +6810,7 @@ index 276b283..1ee12b3 100644
      }
  
      _shouldStartBackgroundService(serviceName) {
-@@ -961,6 +1018,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -961,6 +1035,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      _beginVerification() {
          const foregroundService = this._getForegroundService();
  
@@ -6787,7 +6819,7 @@ index 276b283..1ee12b3 100644
          this._mechanismsListChangedSignalId =
              this.connect('mechanisms-list-changed',
                  (_, ...args) => this._onMechanismsListChanged(...args));
-@@ -979,7 +1038,43 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -979,7 +1055,27 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this.emit('show-choice-list', serviceName, promptMessage, list.deepUnpack());
      }
  
@@ -6813,6 +6845,22 @@ index 276b283..1ee12b3 100644
 +    }
 +
 +    _startQuestionLogin(serviceName, mechanismId) {
+         const mechanisms = this._publishedMechanisms.get(serviceName);
+ 
+         if (!mechanisms)
+@@ -989,12 +1085,28 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             return;
+ 
+         const {prompt, role} = mechanisms[mechanismId];
++        const secret = role !== Const.PLAIN_TEXT_ROLE_NAME;
+ 
+         this._pendingMechanisms.set(role, mechanismId);
+-        this.emit('ask-question', serviceName, prompt, true);
++        this.emit('ask-question', serviceName, prompt, secret);
+     }
+ 
+-    async _replyWithAuthSelectionResponse(serviceName, role, response) {
++    _startMessageLogin(serviceName, mechanismId) {
 +        const mechanisms = this._publishedMechanisms.get(serviceName);
 +
 +        if (!mechanisms)
@@ -6822,30 +6870,16 @@ index 276b283..1ee12b3 100644
 +            return;
 +
 +        const {prompt, role} = mechanisms[mechanismId];
-+        const secret = role !== Const.PLAIN_TEXT_ROLE_NAME;
 +
 +        this._pendingMechanisms.set(role, mechanismId);
-+        this.emit('ask-question', serviceName, prompt, secret);
++        this.emit('show-waiting-message', serviceName, prompt);
 +    }
 +
-+    _startMessageLogin(serviceName, mechanismId) {
-         const mechanisms = this._publishedMechanisms.get(serviceName);
- 
-         if (!mechanisms)
-@@ -991,10 +1086,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
-         const {prompt, role} = mechanisms[mechanismId];
- 
-         this._pendingMechanisms.set(role, mechanismId);
--        this.emit('ask-question', serviceName, prompt, true);
-+        this.emit('show-waiting-message', serviceName, prompt);
-     }
- 
--    async _replyWithAuthSelectionResponse(serviceName, role, response) {
 +    _replyWithAuthSelectionResponse(serviceName, role, response) {
          const mechanism = this._getPendingMechanismForRole(role);
          if (!mechanism)
              return;
-@@ -1005,21 +1100,25 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1005,21 +1117,25 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          if (!authService)
              throw new Error(`No authentication service for protocol ${mechanism.protocol}`);
  
@@ -6879,7 +6913,7 @@ index 276b283..1ee12b3 100644
  
          const {init_prompt: initPrompt, link_prompt: linkPrompt, uri, code, role, timeout} = mechanisms[mechanismId];
  
-@@ -1059,7 +1158,6 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1059,7 +1175,6 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
          const mechanism = this._getPendingMechanismForRole(WEB_LOGIN_ROLE_NAME);
          const authService = this._unifiedAuthServices.get(mechanism?.protocol);
@@ -6887,7 +6921,7 @@ index 276b283..1ee12b3 100644
          if (!authService)
              return;
  
-@@ -1090,17 +1188,28 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1090,17 +1205,28 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _onCustomJSONRequest(client, serviceName, protocol, version, json) {
@@ -6922,7 +6956,7 @@ index 276b283..1ee12b3 100644
      }
  
      _onInfo(client, serviceName, info) {
-@@ -1222,6 +1331,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1222,6 +1348,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._activeServices.clear();
          this._unavailableServices.clear();
          this._activeServices.clear();
