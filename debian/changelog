@@ -1,9 +1,18 @@
 gnome-shell (46.0-0ubuntu5) UNRELEASED; urgency=medium
 
+  [ Daniel van Vugt ]
   * Drop loginDialog-Create-footer-container.patch - it's buggy and still
     under active development (LP: #2060893)
 
- -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Mon, 15 Apr 2024 17:01:49 +0800
+  [ Marco Trevisan (Treviño) ]
+  * debian/patches/ubuntu-authd: Hide the right button if there are no
+    sessions to choose (LP: #2061153)
+  * debian/patches/ubuntu-authd: Do not start an unavailable authentication
+    service (LP: #2060575)
+  * d/p/ubuntu-authd: Fix selection of multi-factor auth modes (related to
+    lp:2060546)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 17 Apr 2024 06:24:06 +0200
 
 gnome-shell (46.0-0ubuntu4) noble; urgency=medium
 
