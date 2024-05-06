@@ -1,3 +1,15 @@
+gnome-shell (3.38.6-1~deb11u2) bullseye-security; urgency=high
+
+  * d/p/screencast-Correct-expected-bus-name-for-streams.patch:
+    Avoid screencast regression after fixing CVE-2024-34397.
+    Previously, screencasting expected signals to come from the wrong
+    D-Bus name, which only worked because there was a vulnerability in
+    GLib that resulted in the sender being ignored.
+  * Set urgency=high because this fixes a regression triggered by a
+    security fix.
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 06 May 2024 22:16:03 +0100
+
 gnome-shell (3.38.6-1~deb11u1) bullseye; urgency=medium
 
   * Rebuild for bullseye
