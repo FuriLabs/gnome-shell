@@ -1,3 +1,11 @@
+gnome-shell (46.0-0ubuntu5.1) noble-security; urgency=medium
+
+  * Fix compatibility with glib2.0 security update
+    - debian/patches/correct_expected_bus_name.patch: correct expected bus
+      name for streams in js/dbusServices/screencast/screencastService.js.
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 07 May 2024 17:03:32 -0400
+
 gnome-shell (46.0-0ubuntu5) noble; urgency=medium
 
   [ Daniel van Vugt ]
