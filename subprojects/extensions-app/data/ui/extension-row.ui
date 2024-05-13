@@ -2,6 +2,7 @@
 <interface>
   <template class="ExtensionRow" parent="AdwActionRow">
     <property name="activatable-widget">switch</property>
+    <property name="use-markup">false</property>
     <binding name="title">
       <lookup name="name" type="Extension">
         <lookup name="extension" type="ExtensionRow"/>
@@ -100,12 +101,10 @@
     </child>
     <child type="suffix">
       <object class="GtkMenuButton">
+        <property name="tooltip-text" translatable="yes">Extension Details</property>
         <property name="icon-name">view-more-symbolic</property>
         <property name="has-frame">false</property>
         <property name="valign">center</property>
-        <accessibility>
-          <property name="label" translatable="yes">Extension Details</property>
-        </accessibility>
         <property name="popover">
           <object class="GtkPopover" id="detailsPopover">
             <style>

@@ -63,9 +63,9 @@ class FdoNotificationDaemon {
 
     _iconForNotificationData(icon) {
         if (icon) {
-            if (icon.substr(0, 7) === 'file://')
+            if (icon.startsWith('file://'))
                 return new Gio.FileIcon({file: Gio.File.new_for_uri(icon)});
-            else if (icon[0] === '/')
+            else if (icon.startsWith('/'))
                 return new Gio.FileIcon({file: Gio.File.new_for_path(icon)});
             else
                 return new Gio.ThemedIcon({name: icon});
@@ -204,7 +204,7 @@ class FdoNotificationDaemon {
             title: summary,
             body,
             gicon,
-            bannerMarkup: true,
+            useBodyMarkup: true,
             sound: new MessageTray.Sound(soundFile, hints['sound-name']),
             acknowledged: false,
         });

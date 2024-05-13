@@ -1,3 +1,36 @@
+gnome-shell (46.1-1) experimental; urgency=medium
+
+  * New upstream release
+  * Bump minimum gir1.2-glib-2.0 to 2.80 (LP: #2065587)
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 13 May 2024 15:32:04 +0200
+
+gnome-shell (46.0-2) experimental; urgency=high
+
+  * Team upload
+  * d/p/screencast-Correct-expected-bus-name-for-streams.patch:
+    Avoid screencast regression after fixing CVE-2024-34397.
+    Previously, screencasting expected signals to come from the wrong
+    D-Bus name, which only worked because there was a vulnerability in
+    GLib that resulted in the sender being ignored.
+  * Set urgency=high because this fixes a regression triggered by a
+    security fix.
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 07 May 2024 11:32:22 +0100
+
+gnome-shell (46.0-1) experimental; urgency=medium
+
+  * New upstream release
+  * Bump minimum mutter to 46.0
+  * Bump minimum gsettings-desktop-schemas
+  * Build-Depend on libgtk-3-dev
+  * debian/gnome-shell.install: GNOME Shell no longer provides
+    xdg-desktop-portal components
+  * Skip shell build tests for now since they are flaky
+  * Refresh patches
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 19 Mar 2024 15:36:16 -0400
+
 gnome-shell (46.0-0ubuntu5) noble; urgency=medium
 
   [ Daniel van Vugt ]
@@ -91,6 +124,15 @@ gnome-shell (46~beta-0ubuntu1) noble; urgency=medium
 
  -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 28 Feb 2024 23:51:36 -0500
 
+gnome-shell (45.3-2) experimental; urgency=medium
+
+  * Merge packaging changes from unstable
+    - Build-depend on systemd-dev instead of systemd (Closes: #1060607)
+    - Adjust Lintian overrides
+    - All other changes were included in 45.3-1
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 15 Jan 2024 17:46:37 +0000
+
 gnome-shell (45.3-1ubuntu1) noble; urgency=medium
 
   * Merge with Debian. Remaining changes:
@@ -163,6 +205,44 @@ gnome-shell (45.3-1ubuntu1) noble; urgency=medium
   * Refresh patches
 
  -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 09 Jan 2024 15:28:52 -0500
+
+gnome-shell (44.9-1) unstable; urgency=medium
+
+  * New upstream release
+  * Build with gcr4
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 27 Feb 2024 16:47:08 -0500
+
+gnome-shell (44.8-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream release
+    - Request the intended height for StBin (gnome-shell!3043)
+    - Fix a crash if an extension incorrectly attempts to add/remove
+      an empty style class (gnome-shell#7152)
+    - Allow edge fade to be removed from scroll views (gnome-shell!3047)
+    - Don't hide the overlay while hovering over a window preview's icon
+      (gnome-shell!3049)
+    - Fix warnings during Shell exit (gnome-shell#7132, gnome-shell!3064)
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 15 Jan 2024 13:49:59 +0000
+
+gnome-shell (44.7-2) unstable; urgency=medium
+
+  * Team upload
+
+  [ Jeremy Bícha ]
+  * Stop using debian/control.in and dh_gnome_clean
+  * Drop evolution .desktop lintian override: not needed since 44
+
+  [ Simon McVittie ]
+  * Build-depend on systemd-dev instead of systemd (Closes: #1060607)
+  * d/gnome-shell.lintian-overrides: Remove unused override
+  * d/gnome-shell.lintian-overrides: Tidy up whitespace
+  * d/g-s-common.lintian-overrides: /usr/share/g-s/modes is intentionally
+    empty
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 14 Jan 2024 19:32:07 +0000
 
 gnome-shell (45.3-1) experimental; urgency=medium
 
