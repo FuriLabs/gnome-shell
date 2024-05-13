@@ -21,7 +21,7 @@ Forwarded: not-needed
  create mode 100644 data/org.gnome.shell.ubuntu.gschema.xml.in
 
 diff --git a/data/meson.build b/data/meson.build
-index ebb6c06..89eca4d 100644
+index 9fb1c94..5d449d7 100644
 --- a/data/meson.build
 +++ b/data/meson.build
 @@ -96,6 +96,12 @@ schema = configure_file(
@@ -44,7 +44,7 @@ index ebb6c06..89eca4d 100644
 -  input: [schema, schema_ubuntu_login],
 +  input: [schema, schema_ubuntu, schema_ubuntu_login],
    output: 'gschemas.compiled',
-   command: [find_program('glib-compile-schemas'), data_builddir],
+   command: [find_program('glib-compile-schemas'), '--strict', data_builddir],
    build_by_default: true)
 diff --git a/data/org.gnome.shell.ubuntu.gschema.xml.in b/data/org.gnome.shell.ubuntu.gschema.xml.in
 new file mode 100644
