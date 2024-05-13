@@ -14,7 +14,7 @@ Subject: shell-qr-code-generator: Use g-c-c embedded library,
  create mode 100644 src/qrcodegen.h
 
 diff --git a/meson.build b/meson.build
-index b5b7f10..a6d83b1 100644
+index ce75335..e71d655 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -34,7 +34,6 @@ systemd_req = '>= 246'
