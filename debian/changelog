@@ -1,8 +1,9 @@
-gnome-shell (46.1-1ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (46.1-1ubuntu1) oracular; urgency=medium
 
   * Merge with Debian
+  * Refresh patches
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 13 May 2024 15:37:28 +0200
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 13 May 2024 15:38:15 +0200
 
 gnome-shell (46.1-1) experimental; urgency=medium
 
@@ -36,6 +37,14 @@ gnome-shell (46.0-1) experimental; urgency=medium
   * Refresh patches
 
  -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 19 Mar 2024 15:36:16 -0400
+
+gnome-shell (46.0-0ubuntu5.1) noble-security; urgency=medium
+
+  * Fix compatibility with glib2.0 security update
+    - debian/patches/correct_expected_bus_name.patch: correct expected bus
+      name for streams in js/dbusServices/screencast/screencastService.js.
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Tue, 07 May 2024 17:03:32 -0400
 
 gnome-shell (46.0-0ubuntu5) noble; urgency=medium
 
