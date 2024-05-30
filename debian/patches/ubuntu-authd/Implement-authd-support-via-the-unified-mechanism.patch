@@ -6970,7 +6970,7 @@ index d197c5c..f8ff01e 100644
              this.disconnect(this._mechanismsListChangedSignalId);
              this._mechanismsListChangedSignalId = 0;
 diff --git a/js/gdm/webLogin.js b/js/gdm/webLogin.js
-index fafed7c..7abe618 100644
+index 2e7029e..1871af4 100644
 --- a/js/gdm/webLogin.js
 +++ b/js/gdm/webLogin.js
 @@ -7,6 +7,7 @@ import Clutter from 'gi://Clutter';
@@ -6981,7 +6981,7 @@ index fafed7c..7abe618 100644
  import St from 'gi://St';
  import {Spinner} from '../ui/animation.js';
  import * as ModalDialog from '../ui/modalDialog.js';
-@@ -92,6 +93,10 @@ class WebLoginPrompt extends St.BoxLayout {
+@@ -103,6 +104,10 @@ class WebLoginPrompt extends St.BoxLayout {
              text: message,
              style_class: 'web-login-title-label',
          });
