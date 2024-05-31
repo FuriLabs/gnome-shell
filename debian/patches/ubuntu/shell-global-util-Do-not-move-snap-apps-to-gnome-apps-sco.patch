@@ -11,13 +11,13 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2011806
  2 files changed, 25 insertions(+), 2 deletions(-)
 
 diff --git a/js/misc/util.js b/js/misc/util.js
-index 508c87d..38d0bed 100644
+index 571258c..786b94c 100644
 --- a/js/misc/util.js
 +++ b/js/misc/util.js
 @@ -119,6 +119,20 @@ export function spawnApp(argv) {
   */
  export function trySpawn(argv) {
-     let success_, pid;
+     let pid;
 +    let path = argv[0];
 +
 +    if (!path?.includes('/')) {
@@ -34,8 +34,8 @@ index 508c87d..38d0bed 100644
 +
      try {
          const launchContext = global.create_app_launch_context(0, -1);
-         [success_, pid] = GLib.spawn_async(
-@@ -151,8 +165,10 @@ export function trySpawn(argv) {
+         pid = Shell.util_spawn_async(
+@@ -144,8 +158,10 @@ export function trySpawn(argv) {
          }
      }
  
