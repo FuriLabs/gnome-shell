@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '46.1',
+  version: '46.2',
   meson_version: '>= 0.58.0',
   license: 'GPLv2+'
 )
@@ -22,7 +22,7 @@ libmutter_test_pc = 'libmutter-test-' + mutter_api_version
 ecal_req = '>= 3.33.1'
 eds_req = '>= 3.33.1'
 gcr_req = '>= 3.90.0'
-gio_req = '>= 2.56.0'
+gio_req = '>= 2.79.2'
 gi_req = '>= 1.49.1'
 gjs_req = '>= 1.73.1'
 gtk_req = '>= 4.0'
@@ -291,6 +291,7 @@ if get_option('tests')
   common_test_env = environment()
   common_test_env.set('GSETTINGS_SCHEMA_DIR', meson.project_build_root() / 'data')
   common_test_env.set('GSETTINGS_BACKEND', 'memory')
+  common_test_env.set('XDG_CURRENT_DESKTOP', '')
 
   add_test_setup('default',
     is_default: true,

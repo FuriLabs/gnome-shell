@@ -63,7 +63,7 @@ Build-Depends: appstream,
                mutter (>= 46.0) <!nocheck>,
                pkgconf,
                sassc,
-               systemd [linux-any],
+               systemd-dev [linux-any],
                terser,
                xauth <!nocheck>,
                xvfb <!nocheck>,
@@ -73,8 +73,8 @@ Standards-Version: 4.6.2
 Homepage: https://wiki.gnome.org/Projects/GnomeShell
 XS-Debian-Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git
 XS-Debian-Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell
-Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git -b ubuntu/master
-Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell/tree/ubuntu/master
+Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git -b ubuntu/latest
+Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell/tree/ubuntu/latest
 
 Package: gnome-shell
 Architecture: linux-any
@@ -112,6 +112,7 @@ Depends: gir1.2-accountsservice-1.0,
          gstreamer1.0-pipewire (>= 0.3.10) [linux-any],
          libglib2.0-bin,
          python3,
+         tecla,
          ubuntu-wallpapers,
          ${gir:Depends},
          ${misc:Depends},
@@ -119,7 +120,6 @@ Depends: gir1.2-accountsservice-1.0,
 Recommends: bolt,
             evolution-data-server (>= 3.45),
             gdm3,
-            gkbd-capplet,
             gnome-control-center (>= 1:42),
             gnome-remote-desktop,
             gnome-menus,

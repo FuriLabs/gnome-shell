@@ -1,7 +1,5 @@
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
-Revert-keyboard-Spawn-tecla-to-show-keyboard-map.patch
-screencast-Correct-expected-bus-name-for-streams.patch
 ubuntu/desktop_detect.patch
 ubuntu/lightdm-user-switching.patch
 ubuntu/lock_on_suspend.patch

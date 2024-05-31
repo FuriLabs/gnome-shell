@@ -1,3 +1,12 @@
+gnome-shell (46.2-1) experimental; urgency=medium
+
+  * New upstream release
+  * Drop screencast patch applied in new release
+  * Drop revert tecla patch: no longer needed
+  * Add Depends: tecla. Drop Recommends: gkbd-capplet
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 31 May 2024 08:03:22 -0400
+
 gnome-shell (46.1-1ubuntu1) oracular; urgency=medium
 
   * Merge with Debian
