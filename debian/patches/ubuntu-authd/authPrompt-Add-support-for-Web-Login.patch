@@ -20,7 +20,7 @@ https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/web-lo
  create mode 100644 js/gdm/webLogin.js
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index 347930e..9124cb4 100644
+index 2482b2d..42f0b4f 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 @@ -32,7 +32,8 @@ $_gdm_dialog_width: 25em;
@@ -33,7 +33,7 @@ index 347930e..9124cb4 100644
      @extend .icon-button;
      @extend %system_button;
    }
-@@ -207,8 +208,80 @@ $_gdm_dialog_width: 25em;
+@@ -212,8 +213,80 @@ $_gdm_dialog_width: 25em;
    }
  }
  
@@ -115,7 +115,7 @@ index 347930e..9124cb4 100644
    background-color: transparent;
  
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 4bd48ea..bb46762 100644
+index fe12820..6793ccb 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -18,6 +18,7 @@ import * as MessageTray from '../ui/messageTray.js';
@@ -135,7 +135,7 @@ index 4bd48ea..bb46762 100644
          this._userVerifier.connect('verification-failed', this._onVerificationFailed.bind(this));
          this._userVerifier.connect('verification-complete', this._onVerificationComplete.bind(this));
          this._userVerifier.connect('reset', this._onReset.bind(this));
-@@ -170,6 +173,13 @@ export const AuthPrompt = GObject.registerClass({
+@@ -172,6 +175,13 @@ export const AuthPrompt = GObject.registerClass({
              this.cancelButton.opacity = 0;
          this._mainBox.add_child(this.cancelButton);
  
@@ -149,7 +149,7 @@ index 4bd48ea..bb46762 100644
          this._authList = new AuthList.AuthList();
          this._authList.set({
              visible: false,
-@@ -303,6 +313,9 @@ export const AuthPrompt = GObject.registerClass({
+@@ -305,6 +315,9 @@ export const AuthPrompt = GObject.registerClass({
              this._inactiveEntry = this._passwordEntry;
          }
          this._capsLockWarningLabel.visible = secret;
@@ -159,7 +159,7 @@ index 4bd48ea..bb46762 100644
      }
  
      _onAskQuestion(verifier, serviceName, question, secret) {
-@@ -349,6 +362,110 @@ export const AuthPrompt = GObject.registerClass({
+@@ -351,6 +364,110 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('mechanisms-changed', serviceName);
      }
  
@@ -270,7 +270,7 @@ index 4bd48ea..bb46762 100644
      _onCredentialManagerAuthenticated() {
          if (this.verificationStatus !== AuthPromptStatus.VERIFICATION_SUCCEEDED)
              this.reset();
-@@ -505,12 +622,16 @@ export const AuthPrompt = GObject.registerClass({
+@@ -507,12 +624,16 @@ export const AuthPrompt = GObject.registerClass({
          this.stopSpinning();
          this._authList.clear();
          this._authList.hide();
@@ -287,7 +287,7 @@ index 4bd48ea..bb46762 100644
          this._entry.show();
          this._entry.grab_key_focus();
      }
-@@ -591,6 +712,9 @@ export const AuthPrompt = GObject.registerClass({
+@@ -593,6 +714,9 @@ export const AuthPrompt = GObject.registerClass({
      }
  
      updateSensitivity(sensitive) {
@@ -297,7 +297,7 @@ index 4bd48ea..bb46762 100644
          if (this._entry.reactive === sensitive)
              return;
  
-@@ -722,6 +846,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -724,6 +848,7 @@ export const AuthPrompt = GObject.registerClass({
              hold: null,
          });
  
@@ -306,7 +306,7 @@ index 4bd48ea..bb46762 100644
  
          let hold = params.hold;
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 4102861..fc35540 100644
+index 3a8231f..f49f994 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -41,6 +41,7 @@ export const AUTH_MECHANISM_PROTOCOL = 'auth-mechanisms';
@@ -325,7 +325,7 @@ index 4102861..fc35540 100644
          this._clearUserVerifier();
          this._clearMessageQueue();
          this._activeServices.clear();
-@@ -846,6 +848,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -847,6 +849,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      _startMechanismFromUnifiedService(mechanism) {
          const roleHandlers = {
@@ -333,7 +333,7 @@ index 4102861..fc35540 100644
              [PASSWORD_ROLE_NAME]: this._startPasswordLogin.bind(this),
          };
  
-@@ -949,6 +952,45 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -950,6 +953,45 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          await this.replyWithJSON(serviceName, JSON.stringify(reply));
      }
  
@@ -379,7 +379,7 @@ index 4102861..fc35540 100644
      _filterAuthMechanisms(mechanismsList, filterFunc) {
          return mechanismsList.filter(mechanism => {
              const mapping = DiscreteServiceMechanismDefinitions.find(m =>
-@@ -1203,6 +1245,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1204,6 +1246,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const doneTrying = !shouldRetry || !this._canRetry();
  
          this.emit('verification-failed', serviceName, !doneTrying);

@@ -180,7 +180,7 @@ index 0000000..059d161
 +    }
 +}
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 59af2d6..d197c5c 100644
+index 77b8abb..db178b7 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -13,6 +13,8 @@ import * as Main from '../ui/main.js';
@@ -320,7 +320,7 @@ index 59af2d6..d197c5c 100644
  
          for (let service in this._credentialManagers)
              this.removeCredentialManager(service);
-@@ -848,6 +896,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -849,6 +897,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _startMechanismFromUnifiedService(mechanism) {
@@ -334,7 +334,7 @@ index 59af2d6..d197c5c 100644
          const roleHandlers = {
              [WEB_LOGIN_ROLE_NAME]: this._startWebLogin.bind(this),
              [PASSWORD_ROLE_NAME]: this._startPasswordLogin.bind(this),
-@@ -940,16 +995,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -941,16 +996,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      async _replyWithAuthSelectionResponse(serviceName, role, response) {
@@ -360,7 +360,7 @@ index 59af2d6..d197c5c 100644
          await this.replyWithJSON(serviceName, JSON.stringify(reply));
      }
  
-@@ -957,10 +1014,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -958,10 +1015,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const mechanisms = this._publishedMechanisms.get(serviceName);
  
          if (!mechanisms)
@@ -375,7 +375,7 @@ index 59af2d6..d197c5c 100644
  
          const {init_prompt: initPrompt, link_prompt: linkPrompt, uri, code, role, timeout} = mechanisms[mechanismId];
  
-@@ -987,8 +1046,23 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -988,8 +1047,23 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          }
      }
  
@@ -399,7 +399,7 @@ index 59af2d6..d197c5c 100644
          this._replyWithAuthSelectionResponse(serviceName, WEB_LOGIN_ROLE_NAME, {});
      }
  
-@@ -1015,74 +1089,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1016,74 +1090,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          });
      }
  
@@ -480,7 +480,7 @@ index 59af2d6..d197c5c 100644
      }
  
      _onInfo(client, serviceName, info) {
-@@ -1180,8 +1198,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1181,8 +1199,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const unifiedAuthAvailable = this._activeServices.has(UNIFIED_AUTH_SERVICE_NAME) && !this._unavailableServices.has(UNIFIED_AUTH_SERVICE_NAME);
          for (const definition of DiscreteServiceMechanismDefinitions) {
              const enabled = this._isDiscreteServiceEnabled(definition);
@@ -513,10 +513,10 @@ index 3c88ab5..0df340e 100644
  
      <file>extensions/extension.js</file>
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index 109df73..587195a 100644
+index cba9a2f..5418f53 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
-@@ -835,11 +835,11 @@ export const UnlockDialog = GObject.registerClass({
+@@ -841,11 +841,11 @@ export const UnlockDialog = GObject.registerClass({
  
          mechanisms.sort((a, b) => a.name.localeCompare(b.name));
  
