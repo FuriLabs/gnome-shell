@@ -1,3 +1,19 @@
+gnome-shell (46.2-1ubuntu1) oracular; urgency=medium
+
+  [ Jeremy Bícha ]
+  * Merge with Debian
+  * Refresh patches
+
+  [ Marco Trevisan (Treviño) ]
+  * debian/patches/ubuntu-authd: Properly draw qr-codes for longer URIs
+    (LP: #2067610)
+  * debian/patches/ubuntu-authd: Fix dialog text color when using light theme
+    (LP: #2067661)
+  * debian/patches/ubuntu-authd: Use right colors to draw the QR code in
+    light mode (LP: #2067661)
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 31 May 2024 07:14:43 -0400
+
 gnome-shell (46.2-1) experimental; urgency=medium
 
   * New upstream release
