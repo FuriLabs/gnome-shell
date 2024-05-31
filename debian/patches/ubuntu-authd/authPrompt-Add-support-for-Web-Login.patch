@@ -11,16 +11,16 @@ QR code as proposed in the design here:
 
 https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/web-login.png.
 ---
- .../gnome-shell-sass/widgets/_login-lock.scss      |  74 +++++-
+ .../gnome-shell-sass/widgets/_login-lock.scss      |  75 +++++-
  js/gdm/authPrompt.js                               | 125 ++++++++++
  js/gdm/util.js                                     |  46 ++++
  js/gdm/webLogin.js                                 | 259 +++++++++++++++++++++
  js/js-resources.gresource.xml                      |   1 +
- 5 files changed, 504 insertions(+), 1 deletion(-)
+ 5 files changed, 505 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/webLogin.js
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index 347930e..9b43287 100644
+index 347930e..9124cb4 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 @@ -32,7 +32,8 @@ $_gdm_dialog_width: 25em;
@@ -33,7 +33,7 @@ index 347930e..9b43287 100644
      @extend .icon-button;
      @extend %system_button;
    }
-@@ -207,8 +208,79 @@ $_gdm_dialog_width: 25em;
+@@ -207,8 +208,80 @@ $_gdm_dialog_width: 25em;
    }
  }
  
@@ -53,32 +53,33 @@ index 347930e..9b43287 100644
 +}
 +
 +.web-login-spinner {
-+  background-color: rgba(0, 0, 0, 0.5);
-+  border: 5px rgba(0, 0, 0, 0.0);
++  color: $osd_fg_color;
++  background-color: transparentize($osd_bg_color, 0.5);
++  border: 5px transparent;
 +  border-radius: 50px;
 +}
 +
 +.web-login-title-label {
 +  @include fontsize($base_font_size);
-+  color: darken($_gdm_fg,30%);
++  color: if($variant == 'dark', darken($fg_color,30%), lighten($fg_color,20%));
 +}
 +
 +.web-login-url-label {
 +  @include fontsize($base_font_size);
 +  @extend %monospace;
-+  color: $_gdm_fg;
++  color: $fg_color;
 +  text-align: center;
 +}
 +
 +.web-login-code-title-label {
 +  @include fontsize($base_font_size);
 +  @include fontsize($base_font_size);
-+  color: $_gdm_fg;
++  color: $fg_color;
 +}
 +
 +.web-login-code-label {
 +  @include fontsize($base_font_size);
-+  color: $_gdm_fg;
++  color: $fg_color;
 +  font-weight: bold;
 +}
 +
@@ -93,7 +94,7 @@ index 347930e..9b43287 100644
 +
 +.web-login-intro-button-label {
 +  @include fontsize($base_font_size + 5);
-+  color: $_gdm_fg;
++  color: $fg_color;
 +  height: 3em;
 +  text-align: center;
 +  font-weight: bold;
@@ -101,7 +102,7 @@ index 347930e..9b43287 100644
 +
 +.web-login-intro-button {
 +  @include fontsize($base_font_size);
-+  color: $_gdm_fg;
++  color: $fg_color;
 +  height: 3em;
 +  text-align: center;
 +  border-radius: $base_border_radius * 4;
