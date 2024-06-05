@@ -4,7 +4,7 @@ Subject: Implement authd support via the unified mechanism
 
 ---
  js/gdm/authPrompt.js          |   41 +-
- js/gdm/authd.js               |  607 +++++
+ js/gdm/authd.js               |  679 +++++
  js/gdm/authdProtocol.js       | 5648 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    9 +
  js/gdm/consts.js              |    6 -
@@ -129,10 +129,10 @@ index a03103c..5fd317d 100644
              this._userVerifier.cancel();
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..6c50f9d
+index 0000000..75e6c35
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,607 @@
+@@ -0,0 +1,679 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import GLib from 'gi://GLib';
@@ -144,7 +144,7 @@ index 0000000..6c50f9d
 +export const SERVICE_NAME = 'gdm-authd';
 +
 +const STRING_PROTOCOL_NAME = 'com.ubuntu.authd.gdm';
-+const STRING_PROTOCOL_VERSION = 1;
++const STRING_PROTOCOL_VERSION_ = 1;
 +
 +const AuthMechanismIDs = Object.freeze({
 +    BrokerSelection: 'authd-broker-selection',
@@ -168,6 +168,33 @@ index 0000000..6c50f9d
 +    QrCode: 'qrcode',
 +});
 +
++const EntryTypes = Object.freeze({
++    Chars: 'chars',
++    CharsPassword: 'chars_password',
++    Digits: 'digits',
++    DigitsPassword: 'digits_password',
++});
++
++function isEntryPassword(entryType) {
++    switch (entryType) {
++    case EntryTypes.Chars:
++    case EntryTypes.Digits:
++        return false;
++    default:
++        return true;
++    }
++}
++
++function isEntryPIN(entryType) {
++    switch (entryType) {
++    case EntryTypes.Digits:
++    case EntryTypes.DigitsPassword:
++        return true;
++    default:
++        return false;
++    }
++}
++
 +export class AuthdSwitchableHandler extends UnifiedAuthService {
 +    get protocolName() {
 +        return STRING_PROTOCOL_NAME;
@@ -190,6 +217,7 @@ index 0000000..6c50f9d
 +        this._authMechanisms = {};
 +        this._pendingEvents = [];
 +        this._stage = undefined;
++        this._pendingNewChallenge = null;
 +    }
 +
 +    handleProtocolRequest(protocol, version, json) {
@@ -206,7 +234,7 @@ index 0000000..6c50f9d
 +    _handleAuthdProtocol(authdData) {
 +        switch (authdData.type) {
 +        case AuthdGdm.DataType.hello:
-+            console.log("Starting authd protocol");
++            console.log('Starting authd protocol');
 +            return new AuthdGdm.Data({
 +                type: AuthdGdm.DataType.hello,
 +                hello: new AuthdGdm.HelloData({version: 1}),
@@ -240,32 +268,34 @@ index 0000000..6c50f9d
 +
 +    _handleAuthdRequest(request) {
 +        switch (request.type) {
-+        case AuthdGdm.RequestType.uiLayoutCapabilities:
++        case AuthdGdm.RequestType.uiLayoutCapabilities: {
++            const supportedEntries = Object.values(EntryTypes).join(',');
++            const supportedWait = [true, false].join(',');
 +            return {
 +                uiLayoutCapabilities: new AuthdGdm.Responses.UiLayoutCapabilities({
 +                    supportedUiLayouts: [
 +                        new Authd.UILayout({
 +                            type: UILayoutTypes.Form,
 +                            label: 'required',
-+                            wait: 'optional:true,false',
-+                            entry: 'optional:chars,chars_password,digits',
++                            wait: `optional:${supportedWait}`,
++                            entry: `optional:${supportedEntries}`,
 +                        }),
 +                        new Authd.UILayout({
 +                            type: UILayoutTypes.NewPassword,
 +                            label: 'required',
-+                            entry: 'optional:chars,chars_password,digits',
++                            entry: `optional:${supportedEntries}`,
 +                        }),
 +                        new Authd.UILayout({
-+                            type: 'qrcode',
++                            type: UILayoutTypes.QrCode,
 +                            content: 'required',
-+                            wait: 'required:true,false',
++                            wait: `required:${supportedWait}`,
 +                            label: 'required',
 +                            button: 'optional',
-+                            // entry: 'optional:chars,chars_password',
 +                        }),
 +                    ],
 +                }),
 +            };
++        }
 +
 +        case AuthdGdm.RequestType.changeStage: {
 +            // FIXME: Check is valid value of AuthdPam.Stage
@@ -294,8 +324,9 @@ index 0000000..6c50f9d
 +                    type: AuthdGdm.EventType.authModeSelected,
 +                    authModeSelected: new AuthdGdm.Events.AuthModeSelected({
 +                        authModeId: mechanism.id,
-+                    })}),
-+                );
++                    }),
++                })
++            );
 +            this._authenticationStarted = false;
 +        }
 +
@@ -303,12 +334,32 @@ index 0000000..6c50f9d
 +    }
 +
 +    handleMechanism(mechanism) {
-+        if (!this._selectedAuthMode || !this._authenticationInProgress) {
++        if (!this._selectedAuthMode || !this._authenticationInProgress)
 +            return mechanism.role !== Const.CHOICE_LIST_ROLE_NAME;
-+        }
 +
 +        if (this._selectedAuthMode !== mechanism.id)
 +            return true;
++
++        return false;
++    }
++
++    _newPasswordConfirmed(newPassword) {
++        if (this._pendingNewChallenge === newPassword)
++            return true;
++
++        if (!this._pendingNewChallenge?.length) {
++            let msg = _('Please, type the new passphrase again');
++            if (isEntryPIN(this._uiLayout.entry))
++                msg = _('Please, type the new PIN again');
++            this.emit('queue-message', msg, MessageType.INFO);
++            this._pendingNewChallenge = newPassword;
++        } else {
++            let msg = _('The provided passphrases do not match, please try again');
++            if (isEntryPIN(this._uiLayout.entry))
++                msg = _('The provided PIN numbers do not match, please try again');
++            this.emit('queue-message', msg, MessageType.ERROR);
++            this._pendingNewChallenge = null;
++        }
 +
 +        return false;
 +    }
@@ -320,6 +371,12 @@ index 0000000..6c50f9d
 +            break;
 +
 +        case Const.PASSWORD_ROLE_NAME:
++            if (this._uiLayout.type === UILayoutTypes.NewPassword &&
++                !this._newPasswordConfirmed(response.password)) {
++                this._showChallenge();
++                break;
++            }
++
 +            this._pendingEvents.push(
 +                new AuthdGdm.EventData({
 +                    type: AuthdGdm.EventType.isAuthenticatedRequested,
@@ -332,6 +389,12 @@ index 0000000..6c50f9d
 +            break;
 +
 +        case Const.PLAIN_TEXT_ROLE_NAME:
++            if (this._uiLayout.type === UILayoutTypes.NewPassword &&
++                !this._newPasswordConfirmed(response.text)) {
++                this._showChallenge();
++                break;
++            }
++
 +            this._pendingEvents.push(
 +                new AuthdGdm.EventData({
 +                    type: AuthdGdm.EventType.isAuthenticatedRequested,
@@ -539,6 +602,7 @@ index 0000000..6c50f9d
 +
 +        case AuthdGdm.EventType.startAuthentication:
 +            this._authenticationStarted = true;
++            this._pendingNewChallenge = null;
 +            this._maybeStartChallenge();
 +
 +            break;
@@ -558,11 +622,12 @@ index 0000000..6c50f9d
 +    }
 +
 +    reset() {
-+        this.cancel()
++        this.cancel();
 +    }
 +
 +    cancel() {
 +        this._uiLayout = null;
++        this._pendingNewChallenge = null;
 +        this._selectedAuthMode = null;
 +        this._authenticationInProgress = false;
 +        this._authenticationStarted = false;
@@ -615,7 +680,7 @@ index 0000000..6c50f9d
 +
 +        switch (this._uiLayout.type) {
 +        case UILayoutTypes.Form:
-+        /* case UILayoutTypes.NewPassword: */ {
++        case UILayoutTypes.NewPassword: {
 +            const label = this._uiLayout.label;
 +            let infoMsg;
 +            let prompt;
@@ -628,19 +693,24 @@ index 0000000..6c50f9d
 +
 +                if (!prompt?.length) {
 +                    switch (this._uiLayout.entry) {
-+                    case 'chars_password':
++                    case EntryTypes.CharsPassword:
 +                        prompt = _('Password');
 +                        break;
-+                    case 'chars':
++                    case EntryTypes.Chars:
 +                        prompt = _('Input value');
 +                        break;
-+                    case 'digits':
++                    case EntryTypes.DigitsPassword:
++                        // FIXME: Add another role for validating them
++                        prompt = _('Input numbers');
++                        break;
++                    case EntryTypes.Digits:
++                        // FIXME: Add another role for validating them
 +                        prompt = _('Input numbers');
 +                        break;
 +                    }
 +                }
 +
-+                if (this._uiLayout.entry !== 'chars_password')
++                if (!isEntryPassword(this._uiLayout.entry))
 +                    mechanism.role = Const.PLAIN_TEXT_ROLE_NAME;
 +            } else {
 +                // FIXME: We need to add other roles to show wait actions.
@@ -689,6 +759,8 @@ index 0000000..6c50f9d
 +    }
 +
 +    _handleAuthResponse(response) {
++        this._pendingNewChallenge = null;
++
 +        if (response.access !== AuthResult.Retry) {
 +            this._selectedAuthMode = null;
 +            this._uiLayout = null;
