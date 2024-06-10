@@ -15,7 +15,8 @@ Subject: Implement authd support via the unified mechanism
  js/js-resources.gresource.xml |    5 +-
  js/misc/ibusManager.js        |   34 +-
  js/ui/unlockDialog.js         |    1 +
- 12 files changed, 6605 insertions(+), 90 deletions(-)
+ po/POTFILES.in                |    1 +
+ 13 files changed, 6606 insertions(+), 90 deletions(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
  create mode 100644 js/gdm/const.js
@@ -7147,3 +7148,15 @@ index 5418f53..50f15dd 100644
          if (mechanisms.length === 0)
              return;
  
+diff --git a/po/POTFILES.in b/po/POTFILES.in
+index 66e6967..6a569fd 100644
+--- a/po/POTFILES.in
++++ b/po/POTFILES.in
+@@ -8,6 +8,7 @@ data/org.gnome.shell.gschema.xml.in
+ data/org.gnome.Shell.Extensions.desktop.in.in
+ data/org.gnome.Shell.PortalHelper.desktop.in.in
+ js/dbusServices/extensions/ui/extension-error-page.ui
++js/gdm/authd.js
+ js/gdm/authNotification.js
+ js/gdm/authPrompt.js
+ js/gdm/loginDialog.js

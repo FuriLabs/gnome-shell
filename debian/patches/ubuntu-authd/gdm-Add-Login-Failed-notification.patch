@@ -17,7 +17,8 @@ It will be used later when Web Login support is added.
  js/gdm/authNotification.js                         | 64 ++++++++++++++++++++++
  js/gdm/authPrompt.js                               | 28 ++++++++++
  js/js-resources.gresource.xml                      |  1 +
- 4 files changed, 106 insertions(+)
+ po/POTFILES.in                                     |  1 +
+ 5 files changed, 107 insertions(+)
  create mode 100644 js/gdm/authNotification.js
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
@@ -181,3 +182,15 @@ index 8d68835..75d76f5 100644
      <file>gdm/authMenuButton.js</file>
      <file>gdm/authPrompt.js</file>
      <file>gdm/batch.js</file>
+diff --git a/po/POTFILES.in b/po/POTFILES.in
+index 0a9aa2f..ae8aba5 100644
+--- a/po/POTFILES.in
++++ b/po/POTFILES.in
+@@ -8,6 +8,7 @@ data/org.gnome.shell.gschema.xml.in
+ data/org.gnome.Shell.Extensions.desktop.in.in
+ data/org.gnome.Shell.PortalHelper.desktop.in.in
+ js/dbusServices/extensions/ui/extension-error-page.ui
++js/gdm/authNotification.js
+ js/gdm/authPrompt.js
+ js/gdm/loginDialog.js
+ js/gdm/util.js
