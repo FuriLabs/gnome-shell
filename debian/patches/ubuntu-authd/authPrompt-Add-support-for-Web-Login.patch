@@ -16,7 +16,8 @@ https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/web-lo
  js/gdm/util.js                                     |  46 ++++
  js/gdm/webLogin.js                                 | 259 +++++++++++++++++++++
  js/js-resources.gresource.xml                      |   1 +
- 5 files changed, 505 insertions(+), 1 deletion(-)
+ po/POTFILES.in                                     |   1 +
+ 6 files changed, 506 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/webLogin.js
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
@@ -667,3 +668,15 @@ index 75d76f5..3c88ab5 100644
  
      <file>extensions/extension.js</file>
      <file>extensions/sharedInternals.js</file>
+diff --git a/po/POTFILES.in b/po/POTFILES.in
+index ae8aba5..66e6967 100644
+--- a/po/POTFILES.in
++++ b/po/POTFILES.in
+@@ -12,6 +12,7 @@ js/gdm/authNotification.js
+ js/gdm/authPrompt.js
+ js/gdm/loginDialog.js
+ js/gdm/util.js
++js/gdm/webLogin.js
+ js/misc/systemActions.js
+ js/misc/util.js
+ js/misc/dateUtils.js
