@@ -1,0 +1,33 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 31 May 2024 16:46:14 +0200
+Subject: shell-util: Pass the mutter context to the spawn child setup
+ function
+
+This was the type the function expected, but we were actually passing
+the global context to it.
+
+This didn't crash for some reason, but indeed it was wrong and we didn't
+catch it because mutter side had not type-checks either
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3355>
+(cherry picked from commit 9abad7f25ff40072bed135a0d54e9f0b572ee0fd)
+
+LP: #2019776
+---
+ src/shell-util.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/shell-util.c b/src/shell-util.c
+index 311576c..9d1f240 100644
+--- a/src/shell-util.c
++++ b/src/shell-util.c
+@@ -873,7 +873,8 @@ shell_util_spawn_async_with_pipes_and_fds (const char          *working_director
+   GPid child_pid = 0;
+ 
+   if (!g_spawn_async_with_pipes_and_fds (working_directory, argv, envp, flags,
+-                                         spawn_child_setup, shell_global,
++                                         spawn_child_setup,
++                                         shell_global_get_context (shell_global),
+                                          stdin_fd, stdout_fd, stderr_fd,
+                                          source_fds, target_fds, n_fds,
+                                          &child_pid,
