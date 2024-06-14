@@ -1,0 +1,40 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 3 May 2024 18:13:37 +0200
+Subject: js/environment: Always use Shell.util_spawn_async functions if
+ possible
+
+If no child setup is provided then all the shell extensions that use
+GLib.spawn_async should actually use the shell spawning utils since we
+are supposed to always restore the default nofile rlimit on launched
+children.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3293>
+(cherry picked from commit 64edd7940d97da368f4deb5af2446ad0e2909bdb)
+(cherry picked from commit b910cc62de6c52399b6c500e4189286a67d466ca)
+---
+ js/ui/environment.js | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/js/ui/environment.js b/js/ui/environment.js
+index 4ce7036..24e52d7 100644
+--- a/js/ui/environment.js
++++ b/js/ui/environment.js
+@@ -348,14 +348,17 @@ if (slowdownEnv) {
+ function wrapSpawnFunction(func) {
+     const originalFunc = GLib[func];
+     return function (workingDirectory, argv, envp, flags, childSetup, ...args) {
++        const commonArgs = [workingDirectory, argv, envp, flags];
+         if (childSetup) {
+             logError(new Error(`Using child GLib.${func} with a GLib.SpawnChildSetupFunc ` +
+                 'is unsafe and may dead-lock, thus it should never be used from JavaScript. ' +
+                 `Shell.${func} can be used to perform default actions or an ` +
+                 'async-signal-safe alternative should be used instead'));
++            return originalFunc(...commonArgs, childSetup, ...args);
+         }
+ 
+-        return originalFunc(workingDirectory, argv, envp, flags, childSetup, ...args);
++        const retValue = Shell[`util_${func}`](...commonArgs, ...args);
++        return [true, ...Array.isArray(retValue) ? retValue : [retValue]];
+     };
+ }
+ GLib.spawn_async = wrapSpawnFunction('spawn_async');

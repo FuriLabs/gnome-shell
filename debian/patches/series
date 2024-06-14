@@ -47,3 +47,9 @@ ubuntu-authd/Implement-authd-support-via-the-unified-mechanism.patch
 ubuntu-authd/js-Minify-the-authd-protocol-during-build.patch
 ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch
 correct_expected_bus_name.patch
+shell-app-Do-not-allocate-memory-during-GSpawnChildSetupF.patch
+shell-util-Add-async-signal-safe-wrappers-for-GLib.spawn_.patch
+js-Use-Shell.util_spawn_async-functions-to-launch-externa.patch
+js-environment-Add-GLib-spawn-async-overrides-warning-whe.patch
+js-environment-Always-use-Shell.util_spawn_async-function.patch
+shell-util-Pass-the-mutter-context-to-the-spawn-child-set.patch
