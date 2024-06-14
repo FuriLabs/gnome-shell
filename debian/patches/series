@@ -53,3 +53,6 @@ js-Use-Shell.util_spawn_async-functions-to-launch-externa.patch
 js-environment-Add-GLib-spawn-async-overrides-warning-whe.patch
 js-environment-Always-use-Shell.util_spawn_async-function.patch
 shell-util-Pass-the-mutter-context-to-the-spawn-child-set.patch
+shell-tray-icon-Use-available-space-when-that-s-defined.patch
+shell-tray-icon-Trigger-a-relayout-when-the-underneath-xe.patch
+tray-na-xembed-Destroy-socket-window-when-ending-the-embe.patch
