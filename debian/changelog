@@ -1,4 +1,4 @@
-gnome-shell (46.0-0ubuntu6~24.04.1) UNRELEASED; urgency=medium
+gnome-shell (46.0-0ubuntu6~24.04.1) noble; urgency=medium
 
   * debian: Prepare for noble branching
   * d/p/ubuntu-authd: Revert unwanted change causing ibus not to launch
@@ -17,7 +17,7 @@ gnome-shell (46.0-0ubuntu6~24.04.1) UNRELEASED; urgency=medium
   * d/p: Do not make tray icons to take any input event directly.
     This is all handled through their actor proxy representation (LP: #2012388)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 14 Jun 2024 07:36:08 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 14 Jun 2024 08:04:48 +0200
 
 gnome-shell (46.0-0ubuntu5.1) noble-security; urgency=medium
 
