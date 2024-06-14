@@ -1,3 +1,10 @@
+gnome-shell (46.2-1ubuntu3) UNRELEASED; urgency=medium
+
+  * d/p/ubuntu-authd: Revert unwanted change causing ibus not to launch
+    (LP: #2069381)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 14 Jun 2024 06:44:13 +0200
+
 gnome-shell (46.2-1ubuntu2) oracular; urgency=medium
 
   * debian/patches/ubuntu-authd: Properly handle new-password messages requests
