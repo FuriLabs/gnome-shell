@@ -1,3 +1,22 @@
+gnome-shell (46.2-1ubuntu2) oracular; urgency=medium
+
+  * debian/patches/ubuntu-authd: Properly handle new-password messages requests
+    (LP: #2068080)
+  * d/p/ubuntu-authd: Add translatable js files to POTFILES.in (LP: #2068912)
+  * d/p: Do not call unsafe functions when spawning new processes (LP: #2019776)
+  * d/p: Resize tray icon windows to respect their actor representation
+    (LP: #2012388)
+  * d/p: Do not make tray icons to take any input event directly (LP: #2012388)
+  * debian/patches/ubuntu-authd: Properly handle new-password messages requests
+    (LP: #2068080)
+  * d/p/ubuntu-authd: Add translatable js files to POTFILES.in (LP: #2068912)
+  * d/p: Do not call unsafe functions when spawning new processes (LP: #2019776)
+  * d/p: Resize tray icon windows to respect their actor representation
+    (LP: #2012388)
+  * d/p: Do not make tray icons to take any input event directly (LP: #2012388)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 14 Jun 2024 05:47:07 +0200
+
 gnome-shell (46.2-1ubuntu1) oracular; urgency=medium
 
   [ Jeremy Bícha ]
