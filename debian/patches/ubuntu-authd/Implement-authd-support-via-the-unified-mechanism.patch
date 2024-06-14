@@ -13,10 +13,9 @@ Subject: Implement authd support via the unified mechanism
  js/gdm/util.js                |  213 +-
  js/gdm/webLogin.js            |    5 +
  js/js-resources.gresource.xml |    5 +-
- js/misc/ibusManager.js        |   34 +-
  js/ui/unlockDialog.js         |    1 +
  po/POTFILES.in                |    1 +
- 13 files changed, 6606 insertions(+), 90 deletions(-)
+ 12 files changed, 6589 insertions(+), 73 deletions(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
  create mode 100644 js/gdm/const.js
@@ -7091,51 +7090,6 @@ index 0df340e..6aa47ad 100644
      <file>extensions/extension.js</file>
      <file>extensions/sharedInternals.js</file>
  
-diff --git a/js/misc/ibusManager.js b/js/misc/ibusManager.js
-index 6a51587..b171ad7 100644
---- a/js/misc/ibusManager.js
-+++ b/js/misc/ibusManager.js
-@@ -109,23 +109,23 @@ class IBusManager extends Signals.EventEmitter {
-     }
- 
-     _spawn(extraArgs = []) {
--        try {
--            const cmdLine = ['ibus-daemon', '--panel', 'disable', ...extraArgs];
--            const launchContext = global.create_app_launch_context(0, -1);
--            const env = launchContext.get_environment();
--            // Use DO_NOT_REAP_CHILD to avoid adouble-fork internally
--            // since ibus-daemon refuses to start with init as its parent.
--            const pid = Shell.util_spawn_async(
--                null, cmdLine, env,
--                GLib.SpawnFlags.SEARCH_PATH | GLib.SpawnFlags.DO_NOT_REAP_CHILD);
--            GLib.child_watch_add(
--                GLib.PRIORITY_DEFAULT,
--                pid,
--                () => GLib.spawn_close_pid(pid)
--            );
--        } catch (e) {
--            log(`Failed to launch ibus-daemon: ${e.message}`);
--        }
-+        // try {
-+        //     const cmdLine = ['ibus-daemon', '--panel', 'disable', ...extraArgs];
-+        //     const launchContext = global.create_app_launch_context(0, -1);
-+        //     const env = launchContext.get_environment();
-+        //     // Use DO_NOT_REAP_CHILD to avoid adouble-fork internally
-+        //     // since ibus-daemon refuses to start with init as its parent.
-+        //     const pid = Shell.util_spawn_async(
-+        //         null, cmdLine, env,
-+        //         GLib.SpawnFlags.SEARCH_PATH | GLib.SpawnFlags.DO_NOT_REAP_CHILD);
-+        //     GLib.child_watch_add(
-+        //         GLib.PRIORITY_DEFAULT,
-+        //         pid,
-+        //         () => GLib.spawn_close_pid(pid)
-+        //     );
-+        // } catch (e) {
-+        //     log(`Failed to launch ibus-daemon: ${e.message}`);
-+        // }
-     }
- 
-     async restartDaemon(extraArgs = []) {
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
 index 5418f53..50f15dd 100644
 --- a/js/ui/unlockDialog.js
