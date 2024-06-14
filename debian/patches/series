@@ -46,3 +46,6 @@ ubuntu-authd/Implement-authd-support-via-the-unified-mechanism.patch
 ubuntu-authd/js-Minify-the-authd-protocol-during-build.patch
 ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch
 shell-util-Pass-the-mutter-context-to-the-spawn-child-set.patch
+shell-tray-icon-Use-available-space-when-that-s-defined.patch
+shell-tray-icon-Trigger-a-relayout-when-the-underneath-xe.patch
+tray-na-xembed-Destroy-socket-window-when-ending-the-embe.patch
