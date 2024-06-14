@@ -1,3 +1,24 @@
+gnome-shell (46.0-0ubuntu6~24.04.1) UNRELEASED; urgency=medium
+
+  * debian: Prepare for noble branching
+  * d/p/ubuntu-authd: Revert unwanted change causing ibus not to launch
+    (LP: #2069381)
+  * d/p: Do not allocate memory or call async-signal-unsafe code on spawn
+  * d/p/ubuntu-authd: Properly draw qr-codes for longer URIs (LP: #2067610)
+  * d/p/ubuntu-authd: Fix dialog text color when using light theme
+    (LP: #2067661)
+  * d/p/ubuntu-authd: Use right colors to draw the qr code in light mode
+    (LP: #2067661)
+  * d/p/ubuntu-authd: Properly handle new-password messages requests
+    (LP: #2068080)
+  * d/p/ubuntu-authd: Add translatable js files to POTFILES.in (LP: #2068912)
+  * d/p: Resize tray icon windows to respect their actor representation
+    (LP: #2012388)
+  * d/p: Do not make tray icons to take any input event directly.
+    This is all handled through their actor proxy representation (LP: #2012388)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 14 Jun 2024 07:36:08 +0200
+
 gnome-shell (46.0-0ubuntu5.1) noble-security; urgency=medium
 
   * Fix compatibility with glib2.0 security update
