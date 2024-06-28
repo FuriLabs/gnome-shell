@@ -4,8 +4,8 @@ Subject: Implement authd support via the unified mechanism
 
 ---
  js/gdm/authPrompt.js          |   78 +-
- js/gdm/authd.js               |  700 +++++
- js/gdm/authdProtocol.js       | 5648 +++++++++++++++++++++++++++++++++++++++++
+ js/gdm/authd.js               |  702 +++++
+ js/gdm/authdProtocol.js       | 5653 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    9 +
  js/gdm/consts.js              |    6 -
  js/gdm/loginDialog.js         |    5 +-
@@ -15,7 +15,7 @@ Subject: Implement authd support via the unified mechanism
  js/js-resources.gresource.xml |    5 +-
  js/ui/unlockDialog.js         |    1 +
  po/POTFILES.in                |    1 +
- 12 files changed, 6664 insertions(+), 97 deletions(-)
+ 12 files changed, 6671 insertions(+), 97 deletions(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
  create mode 100644 js/gdm/const.js
@@ -195,10 +195,10 @@ index b959198..bdf9b74 100644
              this._userVerifier.cancel();
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..b06adfc
+index 0000000..d97c251
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,700 @@
+@@ -0,0 +1,702 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import GLib from 'gi://GLib';
@@ -357,6 +357,7 @@ index 0000000..b06adfc
 +                            wait: `required:${supportedWait}`,
 +                            label: 'required',
 +                            button: 'optional',
++                            code: 'optional',
 +                        }),
 +                    ],
 +                }),
@@ -822,6 +823,7 @@ index 0000000..b06adfc
 +            mechanism.link_prompt = this._uiLayout.label;
 +            mechanism.init_prompt = _('Use the qr code to log-in');
 +            mechanism.uri = this._uiLayout.content;
++            mechanism.code = this._uiLayout.code;
 +            mechanism.autoAck = true;
 +
 +            if (this._uiLayout.button) {
@@ -910,10 +912,10 @@ index 0000000..b06adfc
 +}
 diff --git a/js/gdm/authdProtocol.js b/js/gdm/authdProtocol.js
 new file mode 100644
-index 0000000..3acb500
+index 0000000..9a2f765
 --- /dev/null
 +++ b/js/gdm/authdProtocol.js
-@@ -0,0 +1,5648 @@
+@@ -0,0 +1,5653 @@
 +var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 +
 +var indexMinimal = {};
@@ -4295,8 +4297,8 @@ index 0000000..3acb500
 +        values[valuesById[8] = "uiLayoutReceived"] = 8;
 +        values[valuesById[9] = "startAuthentication"] = 9;
 +        values[valuesById[10] = "isAuthenticatedRequested"] = 10;
-+        values[valuesById[12] = "stageChanged"] = 12;
 +        values[valuesById[11] = "isAuthenticatedCancelled"] = 11;
++        values[valuesById[12] = "stageChanged"] = 12;
 +        return values;
 +    })();
 +
@@ -4886,13 +4888,13 @@ index 0000000..3acb500
 +            case 10:
 +                message.type = 10;
 +                break;
-+            case "stageChanged":
-+            case 12:
-+                message.type = 12;
-+                break;
 +            case "isAuthenticatedCancelled":
 +            case 11:
 +                message.type = 11;
++                break;
++            case "stageChanged":
++            case 12:
++                message.type = 12;
 +                break;
 +            }
 +            if (object.brokersReceived != null) {
@@ -5116,14 +5118,7 @@ index 0000000..3acb500
 +                        this[keys[i]] = properties[keys[i]];
 +        }
 +
-+        GPBResponse.prototype.previousBroker = null;
-+
-+        let $oneOfFields;
-+
-+        Object.defineProperty(GPBResponse.prototype, "_previousBroker", {
-+            get: $util.oneOfGetter($oneOfFields = ["previousBroker"]),
-+            set: $util.oneOfSetter($oneOfFields)
-+        });
++        GPBResponse.prototype.previousBroker = "";
 +
 +        GPBResponse.fromObject = function fromObject(object) {
 +            if (object instanceof $root.authd.GPBResponse)
@@ -5138,11 +5133,10 @@ index 0000000..3acb500
 +            if (!options)
 +                options = {};
 +            let object = {};
-+            if (message.previousBroker != null && message.hasOwnProperty("previousBroker")) {
++            if (options.defaults)
++                object.previousBroker = "";
++            if (message.previousBroker != null && message.hasOwnProperty("previousBroker"))
 +                object.previousBroker = message.previousBroker;
-+                if (options.oneofs)
-+                    object._previousBroker = "previousBroker";
-+            }
 +            return object;
 +        };
 +
@@ -5501,6 +5495,7 @@ index 0000000..3acb500
 +        UILayout.prototype.wait = null;
 +        UILayout.prototype.entry = null;
 +        UILayout.prototype.content = null;
++        UILayout.prototype.code = null;
 +
 +        let $oneOfFields;
 +
@@ -5529,6 +5524,11 @@ index 0000000..3acb500
 +            set: $util.oneOfSetter($oneOfFields)
 +        });
 +
++        Object.defineProperty(UILayout.prototype, "_code", {
++            get: $util.oneOfGetter($oneOfFields = ["code"]),
++            set: $util.oneOfSetter($oneOfFields)
++        });
++
 +        UILayout.fromObject = function fromObject(object) {
 +            if (object instanceof $root.authd.UILayout)
 +                return object;
@@ -5545,6 +5545,8 @@ index 0000000..3acb500
 +                message.entry = String(object.entry);
 +            if (object.content != null)
 +                message.content = String(object.content);
++            if (object.code != null)
++                message.code = String(object.code);
 +            return message;
 +        };
 +
@@ -5580,6 +5582,11 @@ index 0000000..3acb500
 +                object.content = message.content;
 +                if (options.oneofs)
 +                    object._content = "content";
++            }
++            if (message.code != null && message.hasOwnProperty("code")) {
++                object.code = message.code;
++                if (options.oneofs)
++                    object._code = "code";
 +            }
 +            return object;
 +        };
