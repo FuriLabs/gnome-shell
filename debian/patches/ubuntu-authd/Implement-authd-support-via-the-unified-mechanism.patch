@@ -3,26 +3,26 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authPrompt.js          |   78 +-
- js/gdm/authd.js               |  702 +++++
+ js/gdm/authPrompt.js          |   79 +-
+ js/gdm/authd.js               |  715 ++++++
  js/gdm/authdProtocol.js       | 5653 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    9 +
  js/gdm/consts.js              |    6 -
  js/gdm/loginDialog.js         |    5 +-
  js/gdm/unifiedMechanism.js    |   49 +-
- js/gdm/util.js                |  234 +-
+ js/gdm/util.js                |  243 +-
  js/gdm/webLogin.js            |   25 +-
  js/js-resources.gresource.xml |    5 +-
  js/ui/unlockDialog.js         |    1 +
  po/POTFILES.in                |    1 +
- 12 files changed, 6671 insertions(+), 97 deletions(-)
+ 12 files changed, 6694 insertions(+), 97 deletions(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
  create mode 100644 js/gdm/const.js
  delete mode 100644 js/gdm/consts.js
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index b959198..bdf9b74 100644
+index b959198..fd41f4e 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -59,6 +59,12 @@ export const AuthPrompt = GObject.registerClass({
@@ -80,7 +80,7 @@ index b959198..bdf9b74 100644
          else
              this.cancelButton.opacity = 0;
          this._mainBox.add_child(this.cancelButton);
-@@ -345,6 +360,18 @@ export const AuthPrompt = GObject.registerClass({
+@@ -345,6 +360,19 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('prompted');
      }
  
@@ -89,17 +89,18 @@ index b959198..bdf9b74 100644
 +            this.clear();
 +
 +        this._queryingService = serviceName;
++        this._entry.visible = false;
 +        this.setMessage(info, GdmUtil.MessageType.INFO);
 +        this.startSpinning();
 +        this.emit('prompted');
 +
-+        // FIXME: we should stop spinning and unset the querying service when done.
++        this._userVerifier.waitMessageShown(serviceName);
 +    }
 +
      _onShowChoiceList(userVerifier, serviceName, promptMessage, choiceList) {
          if (this._queryingService)
              this.clear();
-@@ -364,7 +391,12 @@ export const AuthPrompt = GObject.registerClass({
+@@ -364,7 +392,12 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('mechanisms-changed', serviceName);
      }
  
@@ -113,7 +114,7 @@ index b959198..bdf9b74 100644
          const introAlreadyUp = this._queryingService === serviceName;
  
          if (this._queryingService)
-@@ -392,14 +424,14 @@ export const AuthPrompt = GObject.registerClass({
+@@ -392,14 +425,14 @@ export const AuthPrompt = GObject.registerClass({
                  if (this._webLoginTimedOut)
                      this._refreshWebLogin(serviceName);
                  else
@@ -130,7 +131,7 @@ index b959198..bdf9b74 100644
          }
  
          this._webLoginTimedOut = false;
-@@ -430,7 +462,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -430,7 +463,7 @@ export const AuthPrompt = GObject.registerClass({
          this._webLoginDialog = null;
      }
  
@@ -139,7 +140,7 @@ index b959198..bdf9b74 100644
          if (this._queryingService)
              this.clear();
  
-@@ -440,26 +472,31 @@ export const AuthPrompt = GObject.registerClass({
+@@ -440,26 +473,31 @@ export const AuthPrompt = GObject.registerClass({
  
          this._webLoginPromptWell.remove_all_children();
  
@@ -185,7 +186,7 @@ index b959198..bdf9b74 100644
  
          if (this._spinner)
              this._spinner.stop();
-@@ -800,6 +837,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -800,6 +838,7 @@ export const AuthPrompt = GObject.registerClass({
          this.cancelButton.reactive = this._hasCancelButton;
          this.cancelButton.can_focus = this._hasCancelButton;
          this._preemptiveAnswer = null;
@@ -195,10 +196,10 @@ index b959198..bdf9b74 100644
              this._userVerifier.cancel();
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..d97c251
+index 0000000..d10d37e
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,702 @@
+@@ -0,0 +1,715 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import GLib from 'gi://GLib';
@@ -660,7 +661,11 @@ index 0000000..d97c251
 +            break;
 +
 +        case AuthdGdm.EventType.authModeSelected:
-+            this._selectedAuthMode = event.authModeSelected.authModeId;
++            if (this._selectedAuthMode !== event.authModeSelected.authModeId) {
++                this._selectedAuthMode = event.authModeSelected.authModeId;
++                this.emit('clear-message-queue');
++            }
++
 +            if (this._stage >= AuthdPam.Stage.brokerSelection)
 +                this._maybeStartChallenge();
 +            /*  else if (this._stage === AuthdPam.Stage.undefined) {
@@ -6725,7 +6730,7 @@ index 059d161..a2b6890 100644
          if (!mechanisms)
              return;
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index db178b7..e857ee7 100644
+index 69f83ae..a792ac4 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -6,6 +6,7 @@ import Gio from 'gi://Gio';
@@ -6999,7 +7004,7 @@ index db178b7..e857ee7 100644
          this._mechanismsListChangedSignalId =
              this.connect('mechanisms-list-changed',
                  (_, ...args) => this._onMechanismsListChanged(...args));
-@@ -980,7 +1056,27 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -980,7 +1056,43 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this.emit('show-choice-list', serviceName, promptMessage, list.deepUnpack());
      }
  
@@ -7025,22 +7030,6 @@ index db178b7..e857ee7 100644
 +    }
 +
 +    _startQuestionLogin(serviceName, mechanismId) {
-         const mechanisms = this._publishedMechanisms.get(serviceName);
- 
-         if (!mechanisms)
-@@ -990,12 +1086,28 @@ export class ShellUserVerifier extends Signals.EventEmitter {
-             return;
- 
-         const {prompt, role} = mechanisms[mechanismId];
-+        const secret = role !== Const.PLAIN_TEXT_ROLE_NAME;
- 
-         this._pendingMechanisms.set(role, mechanismId);
--        this.emit('ask-question', serviceName, prompt, true);
-+        this.emit('ask-question', serviceName, prompt, secret);
-     }
- 
--    async _replyWithAuthSelectionResponse(serviceName, role, response) {
-+    _startMessageLogin(serviceName, mechanismId) {
 +        const mechanisms = this._publishedMechanisms.get(serviceName);
 +
 +        if (!mechanisms)
@@ -7050,11 +7039,25 @@ index db178b7..e857ee7 100644
 +            return;
 +
 +        const {prompt, role} = mechanisms[mechanismId];
++        const secret = role !== Const.PLAIN_TEXT_ROLE_NAME;
 +
 +        this._pendingMechanisms.set(role, mechanismId);
-+        this.emit('show-waiting-message', serviceName, prompt);
++        this.emit('ask-question', serviceName, prompt, secret);
 +    }
 +
++    _startMessageLogin(serviceName, mechanismId) {
+         const mechanisms = this._publishedMechanisms.get(serviceName);
+ 
+         if (!mechanisms)
+@@ -992,10 +1104,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         const {prompt, role} = mechanisms[mechanismId];
+ 
+         this._pendingMechanisms.set(role, mechanismId);
+-        this.emit('ask-question', serviceName, prompt, true);
++        this.emit('show-waiting-message', serviceName, prompt);
+     }
+ 
+-    async _replyWithAuthSelectionResponse(serviceName, role, response) {
 +    _replyWithAuthSelectionResponse(serviceName, role, response) {
          const mechanism = this._getPendingMechanismForRole(role);
          if (!mechanism)
@@ -7109,7 +7112,7 @@ index db178b7..e857ee7 100644
      }
  
      _clearWebLoginTimeout() {
-@@ -1059,8 +1179,20 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1059,14 +1179,35 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._clearWebLoginTimeout();
  
          const mechanism = this._getPendingMechanismForRole(WEB_LOGIN_ROLE_NAME);
@@ -7131,7 +7134,22 @@ index db178b7..e857ee7 100644
          if (!authService)
              return;
  
-@@ -1091,17 +1223,28 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this._replyWithAuthSelectionResponse(serviceName, WEB_LOGIN_ROLE_NAME, {});
+     }
+ 
++    waitMessageShown(serviceName) {
++        const mechanism = this._getPendingMechanismForRole(Const.MESSAGE_ROLE_NAME);
++        const authService = this._unifiedAuthServices.get(mechanism?.protocol);
++        if (!authService)
++            return;
++
++        this._replyWithAuthSelectionResponse(serviceName, Const.MESSAGE_ROLE_NAME, {});
++    }
++
+     _filterAuthMechanisms(mechanismsList, filterFunc) {
+         return mechanismsList.filter(mechanism => {
+             const mapping = DiscreteServiceMechanismDefinitions.find(m =>
+@@ -1091,17 +1232,28 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _onCustomJSONRequest(client, serviceName, protocol, version, json) {
@@ -7166,7 +7184,7 @@ index db178b7..e857ee7 100644
      }
  
      _onInfo(client, serviceName, info) {
-@@ -1223,6 +1366,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1223,6 +1375,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._activeServices.clear();
          this._unavailableServices.clear();
          this._activeServices.clear();
