@@ -3,7 +3,7 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authPrompt.js          |   79 +-
+ js/gdm/authPrompt.js          |   80 +-
  js/gdm/authd.js               |  715 ++++++
  js/gdm/authdProtocol.js       | 5653 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    9 +
@@ -15,14 +15,14 @@ Subject: Implement authd support via the unified mechanism
  js/js-resources.gresource.xml |    5 +-
  js/ui/unlockDialog.js         |    1 +
  po/POTFILES.in                |    1 +
- 12 files changed, 6694 insertions(+), 97 deletions(-)
+ 12 files changed, 6695 insertions(+), 97 deletions(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
  create mode 100644 js/gdm/const.js
  delete mode 100644 js/gdm/consts.js
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index b959198..fd41f4e 100644
+index b959198..aa1074a 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -59,6 +59,12 @@ export const AuthPrompt = GObject.registerClass({
@@ -80,7 +80,7 @@ index b959198..fd41f4e 100644
          else
              this.cancelButton.opacity = 0;
          this._mainBox.add_child(this.cancelButton);
-@@ -345,6 +360,19 @@ export const AuthPrompt = GObject.registerClass({
+@@ -345,6 +360,20 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('prompted');
      }
  
@@ -90,6 +90,7 @@ index b959198..fd41f4e 100644
 +
 +        this._queryingService = serviceName;
 +        this._entry.visible = false;
++        this._message.grab_key_focus();
 +        this.setMessage(info, GdmUtil.MessageType.INFO);
 +        this.startSpinning();
 +        this.emit('prompted');
@@ -100,7 +101,7 @@ index b959198..fd41f4e 100644
      _onShowChoiceList(userVerifier, serviceName, promptMessage, choiceList) {
          if (this._queryingService)
              this.clear();
-@@ -364,7 +392,12 @@ export const AuthPrompt = GObject.registerClass({
+@@ -364,7 +393,12 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('mechanisms-changed', serviceName);
      }
  
@@ -114,7 +115,7 @@ index b959198..fd41f4e 100644
          const introAlreadyUp = this._queryingService === serviceName;
  
          if (this._queryingService)
-@@ -392,14 +425,14 @@ export const AuthPrompt = GObject.registerClass({
+@@ -392,14 +426,14 @@ export const AuthPrompt = GObject.registerClass({
                  if (this._webLoginTimedOut)
                      this._refreshWebLogin(serviceName);
                  else
@@ -131,7 +132,7 @@ index b959198..fd41f4e 100644
          }
  
          this._webLoginTimedOut = false;
-@@ -430,7 +463,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -430,7 +464,7 @@ export const AuthPrompt = GObject.registerClass({
          this._webLoginDialog = null;
      }
  
@@ -140,7 +141,7 @@ index b959198..fd41f4e 100644
          if (this._queryingService)
              this.clear();
  
-@@ -440,26 +473,31 @@ export const AuthPrompt = GObject.registerClass({
+@@ -440,26 +474,31 @@ export const AuthPrompt = GObject.registerClass({
  
          this._webLoginPromptWell.remove_all_children();
  
@@ -186,7 +187,7 @@ index b959198..fd41f4e 100644
  
          if (this._spinner)
              this._spinner.stop();
-@@ -800,6 +838,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -800,6 +839,7 @@ export const AuthPrompt = GObject.registerClass({
          this.cancelButton.reactive = this._hasCancelButton;
          this.cancelButton.can_focus = this._hasCancelButton;
          this._preemptiveAnswer = null;
