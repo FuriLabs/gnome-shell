@@ -1,3 +1,12 @@
+gnome-shell (46.2-1ubuntu4) oracular; urgency=medium
+
+  * Add st-theme-node-Forget-properties-cache-on-stylesheet-chang.patch
+    to fix crashes that occur when locking the screen from within the overview.
+    But more generally can occur whenever any extension that modifies
+    stylesheets (like ubuntu-dock or dash-to-dock) is unloaded (LP: #2069559).
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 03 Jul 2024 14:37:10 +0800
+
 gnome-shell (46.2-1ubuntu3) oracular; urgency=medium
 
   * d/p/ubuntu-authd: Revert unwanted change causing ibus not to launch
