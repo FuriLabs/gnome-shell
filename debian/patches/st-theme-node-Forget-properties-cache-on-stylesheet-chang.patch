@@ -1,0 +1,89 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Thu, 28 Mar 2024 14:45:26 +0800
+Subject: st/theme-node: Forget properties cache on stylesheet change
+
+To avoid `node->properties` pointing to freed memory after each
+`st_theme_unload_stylesheet`, flush the cache that is `node->properties`.
+They will be reloaded as soon as they are required by `ensure_properties`.
+
+And yes `node->stylesheets_changed_id` already existed, but was unused.
+
+Why not just fix Croco? Croco does not use proper reference counting
+everywhere it should, and retrofitting it would be difficult due to the
+recursive nature of `CRDeclaration`.
+
+Includes commit:
+st/theme-node: Forget properties cache before unref'ing the theme
+Which the properties point into.
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3252
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7339
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2069559
+Bug-Dash-to-Dock: https://github.com/micheleg/dash-to-dock/issues/2179
+---
+ src/st/st-theme-node-private.h |  2 +-
+ src/st/st-theme-node.c         | 17 +++++++++++++++--
+ 2 files changed, 16 insertions(+), 3 deletions(-)
+
+diff --git a/src/st/st-theme-node-private.h b/src/st/st-theme-node-private.h
+index 02eb95e..b802892 100644
+--- a/src/st/st-theme-node-private.h
++++ b/src/st/st-theme-node-private.h
+@@ -105,7 +105,7 @@ struct _StThemeNode {
+   int box_shadow_min_width;
+   int box_shadow_min_height;
+ 
+-  guint stylesheets_changed_id;
++  gulong stylesheets_changed_id;
+ 
+   CoglTexture *border_slices_texture;
+   CoglPipeline *border_slices_pipeline;
+diff --git a/src/st/st-theme-node.c b/src/st/st-theme-node.c
+index 51e6d21..31b2758 100644
+--- a/src/st/st-theme-node.c
++++ b/src/st/st-theme-node.c
+@@ -75,6 +75,10 @@ maybe_free_properties (StThemeNode *node)
+       cr_declaration_destroy (node->inline_properties);
+       node->inline_properties = NULL;
+     }
++
++  g_clear_signal_handler (&node->stylesheets_changed_id, node->theme);
++
++  node->properties_computed = FALSE;
+ }
+ 
+ static void
+@@ -102,6 +106,7 @@ st_theme_node_dispose (GObject *gobject)
+ 
+   st_theme_node_paint_state_free (&node->cached_state);
+ 
++  maybe_free_properties (node);
+   g_clear_object (&node->theme);
+ 
+   G_OBJECT_CLASS (st_theme_node_parent_class)->dispose (gobject);
+@@ -117,8 +122,6 @@ st_theme_node_finalize (GObject *object)
+   g_strfreev (node->pseudo_classes);
+   g_free (node->inline_style);
+ 
+-  maybe_free_properties (node);
+-
+   g_clear_pointer (&node->font_desc, pango_font_description_free);
+ 
+   g_clear_pointer (&node->box_shadow, st_shadow_unref);
+@@ -473,6 +476,16 @@ ensure_properties (StThemeNode *node)
+           node->n_properties = properties->len;
+           node->properties = (CRDeclaration **)g_ptr_array_free (properties, FALSE);
+         }
++
++      if (!node->stylesheets_changed_id)
++        {
++          node->stylesheets_changed_id =
++            g_signal_connect_object (node->theme,
++                                     "custom-stylesheets-changed",
++                                     G_CALLBACK (maybe_free_properties),
++                                     G_OBJECT (node),
++                                     G_CONNECT_SWAPPED);
++        }
+     }
+ }
+ 
