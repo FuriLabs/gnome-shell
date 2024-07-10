@@ -1,3 +1,24 @@
+gnome-shell (46.3.1-1) experimental; urgency=medium
+
+  [ Marco Trevisan (Treviño) ]
+  * New upstream release (LP: #2072703)
+  * debian/control: Remove unused dependencies, following upstream.
+    Upstream meson.build removed various unused dependencies, so drop them
+    from our control file too
+  * d/p: Do not make tray icons to take any input event directly.
+    This is all handled through their actor proxy representation (LP: #2012388)
+  * d/p: Resize tray icon windows to respect their actor representation
+    (LP: #2012388)
+  * debian/changelog: Reference bugs fixed in previous versions
+
+  [ Daniel van Vugt ]
+  * Add st-theme-node-Forget-properties-cache-on-stylesheet-chang.patch.
+    To fix crashes that occur when locking the screen from within the overview.
+    But more generally can occur whenever any extension that modifies
+    stylesheets (like ubuntu-dock or dash-to-dock) is unloaded (LP: #2069559).
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 11 Jul 2024 00:02:12 +0200
+
 gnome-shell (46.2-1ubuntu4) oracular; urgency=medium
 
   * Add st-theme-node-Forget-properties-cache-on-stylesheet-chang.patch
@@ -51,7 +72,10 @@ gnome-shell (46.2-1ubuntu1) oracular; urgency=medium
 
 gnome-shell (46.2-1) experimental; urgency=medium
 
-  * New upstream release
+  * New upstream release:
+    - Exclude override-redirect windows from workspace animation (LP: #2039543)
+    - Fix possible hang on startup during ibus-daemon launch (LP: #2019776)
+    - Use absolute tray icon position in root event coordinates (LP: #2059819)
   * Drop screencast patch applied in new release
   * Drop revert tecla patch: no longer needed
   * Add Depends: tecla. Drop Recommends: gkbd-capplet

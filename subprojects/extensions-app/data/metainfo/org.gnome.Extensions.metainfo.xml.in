@@ -9,7 +9,7 @@
   <project_license>GPL-2.0-or-later</project_license>
 
   <url type="homepage">https://apps.gnome.org/Extensions/</url>
-  <url type="bugtracker">https://gitlab.gnome.org/GNOME/gnome-shell/issues/new</url>
+  <url type="bugtracker">https://gitlab.gnome.org/GNOME/gnome-shell/issues</url>
   <url type="donation">https://www.gnome.org/donate/</url>
   <url type="translate">https://l10n.gnome.org/module/gnome-shell/</url>
   <url type="vcs-browser">https://gitlab.gnome.org/GNOME/gnome-shell/-/tree/HEAD/subprojects/extensions-app</url>
@@ -21,7 +21,7 @@
     <name>The GNOME Project</name>
   </developer>
 
-  <translation type="gettext">gnome-extensions-app</translation>
+  <translation type="gettext">@package_name@</translation>
   <launchable type="desktop-id">@app_id@.desktop</launchable>
 
   <kudos>
@@ -54,6 +54,8 @@
   </description>
 
   <releases>
+    <release version="46.3.1" date="2024-06-29"/>
+    <release version="46.3" date="2024-06-29"/>
     <release version="46.2" date="2024-05-25"/>
     <release version="46.1" date="2024-04-20">
       <description>
