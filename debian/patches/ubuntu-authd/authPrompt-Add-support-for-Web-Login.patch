@@ -307,7 +307,7 @@ index fe12820..6793ccb 100644
  
          let hold = params.hold;
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 3a8231f..f49f994 100644
+index c89ca97..7cfb74d 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -41,6 +41,7 @@ export const AUTH_MECHANISM_PROTOCOL = 'auth-mechanisms';
@@ -380,7 +380,7 @@ index 3a8231f..f49f994 100644
      _filterAuthMechanisms(mechanismsList, filterFunc) {
          return mechanismsList.filter(mechanism => {
              const mapping = DiscreteServiceMechanismDefinitions.find(m =>
-@@ -1204,6 +1246,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1211,6 +1253,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const doneTrying = !shouldRetry || !this._canRetry();
  
          this.emit('verification-failed', serviceName, !doneTrying);

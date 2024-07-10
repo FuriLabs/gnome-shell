@@ -137,10 +137,10 @@ index fafed7c..029950d 100644
  });
  
 diff --git a/meson.build b/meson.build
-index 8fe08e5..30864ce 100644
+index 742d391..3147eda 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -34,7 +34,6 @@ systemd_req = '>= 246'
+@@ -33,7 +33,6 @@ systemd_req = '>= 246'
  ibus_req = '>= 1.5.19'
  gnome_desktop_req = '>= 40'
  pipewire_req = '>= 0.3.49'
@@ -148,8 +148,8 @@ index 8fe08e5..30864ce 100644
  
  nm_req = '>= 1.10.4'
  secret_req = '>= 0.18'
-@@ -94,7 +93,6 @@ ibus_dep = dependency('ibus-1.0', version: ibus_req)
- x11_dep = dependency('x11')
+@@ -93,7 +92,6 @@ xext_dep = dependency('xext')
+ xfixes_dep = dependency('xfixes')
  schemas_dep = dependency('gsettings-desktop-schemas', version: schemas_req)
  gnome_desktop_dep = dependency('gnome-desktop-4', version: gnome_desktop_req)
 -qrencode_dep = dependency('libqrencode', version: qrencode_req)
@@ -157,13 +157,13 @@ index 8fe08e5..30864ce 100644
  nm_deps = []
  if get_option('networkmanager')
 diff --git a/src/meson.build b/src/meson.build
-index f29ae19..bf8c6eb 100644
+index 0dd7fed..0e2c5c2 100644
 --- a/src/meson.build
 +++ b/src/meson.build
 @@ -73,7 +73,6 @@ gnome_shell_deps = [
-   gcr_dep,
    libsystemd_dep,
    libpipewire_dep,
+   x11_dep,
 -  qrencode_dep
  ]
  
