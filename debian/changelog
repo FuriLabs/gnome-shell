@@ -1,3 +1,23 @@
+gnome-shell (46.3.1-1ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge with Debian
+  * debian/patches: Refresh
+  * d/p/ubuntu-authd: Add custom button to the qrcode view and automatic ack.
+    Do not require manual intervention to dismiss the qrcode view and start
+    the qrcode authentication, and support regenerating the qrcode using
+    a custom button (LP: #2072710, #2072711)
+  * d/p/ubuntu-authd: Add support for showing the login code in the qrcode view
+    (LP: #2072714)
+  * d/p/ubuntu-authd: Cleanup prompt view when changing auth mode.
+    When switching from an auth mode to another we need to hide the uneeded
+    items and cleanup the messages, do it so that switching form password
+    auth, to a field-less view works as expected (LP: #2072718)
+  * d/p/ubuntu-authd: Fix key navigation on choice list and waiting items.
+    Make possible to use key-navigation automatically when such views are
+    shown (LP: #2072716)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 11 Jul 2024 03:06:34 +0200
+
 gnome-shell (46.3.1-1) experimental; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
