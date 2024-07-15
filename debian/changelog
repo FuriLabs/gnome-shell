@@ -1,4 +1,4 @@
-gnome-shell (46.3.1-1ubuntu1~24.04.1) UNRELEASED; urgency=medium
+gnome-shell (46.3.1-1ubuntu1~24.04.1) noble; urgency=medium
 
   * Merge with oracular containing new upstream version (LP: #2072703):
     - Droppping the unrelated packaging changes for noble
@@ -7,7 +7,7 @@ gnome-shell (46.3.1-1ubuntu1~24.04.1) UNRELEASED; urgency=medium
     We still use gkbd-keyboard-display in noble, so the upstream change
     should be reverted for us
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 15 Jul 2024 16:34:20 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 15 Jul 2024 16:38:28 +0200
 
 gnome-shell (46.3.1-1ubuntu1) oracular; urgency=medium
 
