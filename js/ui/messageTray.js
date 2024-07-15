@@ -475,6 +475,11 @@ export class Notification extends GObject.Object {
 
     destroy(reason = NotificationDestroyedReason.DISMISSED) {
         this.emit('destroy', reason);
+
+        if (this._updateDatetimeId)
+            GLib.source_remove(this._updateDatetimeId);
+        delete this._updateDatetimeId;
+
         this.run_dispose();
     }
 }
@@ -572,6 +577,7 @@ export const Source = GObject.registerClass({
 
         this.emit('notification-added', notification);
         this.emit('notification-request-banner', notification);
+        this.countUpdated();
     }
 
     destroy(reason) {
@@ -1107,6 +1113,7 @@ export const MessageTray = GObject.registerClass({
 
         this._banner = new Calendar.NotificationMessage(this._notification);
         this._banner.can_focus = false;
+        this._banner._header.expandButton.visible = false;
         this._banner.add_style_class_name('notification-banner');
 
         this._bannerBin.add_child(this._banner);

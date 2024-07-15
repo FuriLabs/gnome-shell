@@ -94,7 +94,7 @@ index 0000000..ee8b3a2
 +  </schema>
 +</schemalist>
 diff --git a/data/meson.build b/data/meson.build
-index 254c460..ebb6c06 100644
+index 0307613..9fb1c94 100644
 --- a/data/meson.build
 +++ b/data/meson.build
 @@ -96,6 +96,12 @@ schema = configure_file(
@@ -117,7 +117,7 @@ index 254c460..ebb6c06 100644
 -  input: schema,
 +  input: [schema, schema_ubuntu_login],
    output: 'gschemas.compiled',
-   command: [find_program('glib-compile-schemas'), data_builddir],
+   command: [find_program('glib-compile-schemas'), '--strict', data_builddir],
    build_by_default: true)
 diff --git a/js/ui/background.js b/js/ui/background.js
 index 328b1b4..70d7bcc 100644

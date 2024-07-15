@@ -14,7 +14,7 @@ long if/else if code that was there before
  1 file changed, 18 insertions(+), 7 deletions(-)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index a85b513..be4f659 100644
+index 620dcc5..9ea762f 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -62,6 +62,7 @@ const USER_READ_TIME = 48;
@@ -25,7 +25,7 @@ index a85b513..be4f659 100644
  const DiscreteServiceMechanismDefinitions = [
      {
          serviceName: PASSWORD_SERVICE_NAME,
-@@ -763,16 +764,26 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -764,16 +765,26 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              this._cancelAndReset();
      }
  

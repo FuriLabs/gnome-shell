@@ -27,11 +27,11 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/2012388
  3 files changed, 17 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index dcd9e0b..1911027 100644
+index a9837fc..3147eda 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -91,6 +91,7 @@ polkit_dep = dependency('polkit-agent-1', version: polkit_req)
- startup_dep = dependency('libstartup-notification-1.0', version: startup_req)
+@@ -88,6 +88,7 @@ mutter_dep = dependency(libmutter_pc, version: mutter_req)
+ polkit_dep = dependency('polkit-agent-1', version: polkit_req)
  ibus_dep = dependency('ibus-1.0', version: ibus_req)
  x11_dep = dependency('x11')
 +xext_dep = dependency('xext')
@@ -51,7 +51,7 @@ index 2fc73f3..c91e940 100644
    include_directories: conf_inc
  )
 diff --git a/src/tray/na-xembed.c b/src/tray/na-xembed.c
-index 8f78530..5858acc 100644
+index 59b1071..69690f1 100644
 --- a/src/tray/na-xembed.c
 +++ b/src/tray/na-xembed.c
 @@ -24,6 +24,7 @@

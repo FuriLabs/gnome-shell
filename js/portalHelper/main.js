@@ -113,6 +113,8 @@ class PortalWindow extends Gtk.ApplicationWindow {
         super._init({
             application,
             title: _('Hotspot Login'),
+            default_width: 600,
+            default_height: 450,
         });
 
         const headerbar = new Gtk.HeaderBar();
@@ -153,7 +155,6 @@ class PortalWindow extends Gtk.ApplicationWindow {
         this._syncUri();
 
         this.set_child(this._webView);
-        this.set_size_request(600, 450);
         this.maximize();
         this.present_with_time(timestamp);
 
@@ -207,7 +208,7 @@ class PortalWindow extends Gtk.ApplicationWindow {
     _onLoadFailedWithTlsErrors(view, failingURI, certificate, _errors) {
         this._secureMenu.setSecurityIcon(PortalHelperSecurityLevel.INSECURE);
         let uri = GLib.Uri.parse(failingURI, HTTP_URI_FLAGS);
-        this._webContext.allow_tls_certificate_for_host(certificate, uri.get_host());
+        this._networkSession.allow_tls_certificate_for_host(certificate, uri.get_host());
         this._webView.load_uri(failingURI);
         return true;
     }

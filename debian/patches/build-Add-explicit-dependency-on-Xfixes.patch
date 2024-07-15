@@ -15,11 +15,11 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/2012388
  2 files changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index a6d83b1..dcd9e0b 100644
+index 923a522..a9837fc 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -91,6 +91,7 @@ polkit_dep = dependency('polkit-agent-1', version: polkit_req)
- startup_dep = dependency('libstartup-notification-1.0', version: startup_req)
+@@ -88,6 +88,7 @@ mutter_dep = dependency(libmutter_pc, version: mutter_req)
+ polkit_dep = dependency('polkit-agent-1', version: polkit_req)
  ibus_dep = dependency('ibus-1.0', version: ibus_req)
  x11_dep = dependency('x11')
 +xfixes_dep = dependency('xfixes')

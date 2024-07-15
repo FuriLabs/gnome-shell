@@ -3,26 +3,26 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authPrompt.js          |   41 +-
- js/gdm/authd.js               |  679 +++++
- js/gdm/authdProtocol.js       | 5648 +++++++++++++++++++++++++++++++++++++++++
+ js/gdm/authPrompt.js          |   80 +-
+ js/gdm/authd.js               |  715 ++++++
+ js/gdm/authdProtocol.js       | 5653 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    9 +
  js/gdm/consts.js              |    6 -
  js/gdm/loginDialog.js         |    5 +-
  js/gdm/unifiedMechanism.js    |   49 +-
- js/gdm/util.js                |  213 +-
- js/gdm/webLogin.js            |    5 +
+ js/gdm/util.js                |  243 +-
+ js/gdm/webLogin.js            |   25 +-
  js/js-resources.gresource.xml |    5 +-
  js/ui/unlockDialog.js         |    1 +
  po/POTFILES.in                |    1 +
- 12 files changed, 6589 insertions(+), 73 deletions(-)
+ 12 files changed, 6695 insertions(+), 97 deletions(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
  create mode 100644 js/gdm/const.js
  delete mode 100644 js/gdm/consts.js
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index a03103c..5fd317d 100644
+index b959198..aa1074a 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -59,6 +59,12 @@ export const AuthPrompt = GObject.registerClass({
@@ -50,13 +50,15 @@ index a03103c..5fd317d 100644
          this._userVerifier.connect('web-login', this._onWebLogin.bind(this));
          this._userVerifier.connect('web-login-time-out', this._onWebLoginTimeOut.bind(this));
          this._userVerifier.connect('verification-failed', this._onVerificationFailed.bind(this));
-@@ -146,10 +154,17 @@ export const AuthPrompt = GObject.registerClass({
+@@ -146,12 +154,19 @@ export const AuthPrompt = GObject.registerClass({
  
-     vfunc_key_press_event(event) {
-         if (event.get_key_symbol() === Clutter.KEY_Escape)
+     on_key_press_event(event) {
+         if (event.get_key_symbol() === Clutter.KEY_Escape) {
 -            this.cancel();
 +            this._handleCancel();
-         return super.vfunc_key_press_event(event);
+             return Clutter.EVENT_STOP;
+         }
+         return Clutter.EVENT_PROPAGATE;
      }
  
 +    _handleCancel() {
@@ -69,7 +71,7 @@ index a03103c..5fd317d 100644
      _initInputRow() {
          this._mainBox = new St.BoxLayout({
              style_class: 'login-dialog-button-box',
-@@ -168,7 +183,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -170,7 +185,7 @@ export const AuthPrompt = GObject.registerClass({
              icon_name: 'go-previous-symbolic',
          });
          if (this._hasCancelButton)
@@ -78,7 +80,7 @@ index a03103c..5fd317d 100644
          else
              this.cancelButton.opacity = 0;
          this._mainBox.add_child(this.cancelButton);
-@@ -343,6 +358,18 @@ export const AuthPrompt = GObject.registerClass({
+@@ -345,6 +360,20 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('prompted');
      }
  
@@ -87,31 +89,65 @@ index a03103c..5fd317d 100644
 +            this.clear();
 +
 +        this._queryingService = serviceName;
++        this._entry.visible = false;
++        this._message.grab_key_focus();
 +        this.setMessage(info, GdmUtil.MessageType.INFO);
 +        this.startSpinning();
 +        this.emit('prompted');
 +
-+        // FIXME: we should stop spinning and unset the querying service when done.
++        this._userVerifier.waitMessageShown(serviceName);
 +    }
 +
      _onShowChoiceList(userVerifier, serviceName, promptMessage, choiceList) {
          if (this._queryingService)
              this.clear();
-@@ -362,6 +389,11 @@ export const AuthPrompt = GObject.registerClass({
+@@ -364,7 +393,12 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('mechanisms-changed', serviceName);
      }
  
+-    _onWebLogin(userVerifier, serviceName, introMessage, linkMessage, uri, code) {
 +    _onChoiceListSelected(service, key) {
 +        if (this._authList?.visible)
 +            this._authList.emit('activate', key);
 +    }
 +
-     _onWebLogin(userVerifier, serviceName, introMessage, linkMessage, uri, code) {
++    _onWebLogin(userVerifier, serviceName, introMessage, linkMessage, uri, code, autoAck, customButton) {
          const introAlreadyUp = this._queryingService === serviceName;
  
-@@ -441,6 +473,10 @@ export const AuthPrompt = GObject.registerClass({
-         this._webLoginDialog = new WebLogin.WebLoginDialog({message, url, code});
-         this._webLoginDialog.open(global.get_current_time());
+         if (this._queryingService)
+@@ -392,14 +426,14 @@ export const AuthPrompt = GObject.registerClass({
+                 if (this._webLoginTimedOut)
+                     this._refreshWebLogin(serviceName);
+                 else
+-                    this._openWebLoginDialog(userVerifier, serviceName, linkMessage, uri, code);
++                    this._openWebLoginDialog(userVerifier, serviceName, linkMessage, uri, code, autoAck, customButton);
+             });
+             this._webLoginPromptWell.add_child(this._webLoginIntro);
+             this._webLoginPromptWell.visible = true;
+ 
+             this.updateSensitivity(true);
+         } else {
+-            this._openWebLoginDialog(userVerifier, serviceName, linkMessage, uri, code);
++            this._openWebLoginDialog(userVerifier, serviceName, linkMessage, uri, code, autoAck, customButton);
+         }
+ 
+         this._webLoginTimedOut = false;
+@@ -430,7 +464,7 @@ export const AuthPrompt = GObject.registerClass({
+         this._webLoginDialog = null;
+     }
+ 
+-    _openWebLoginDialog(userVerifier, serviceName, message, url, code) {
++    _openWebLoginDialog(userVerifier, serviceName, message, url, code, autoAck, customButton) {
+         if (this._queryingService)
+             this.clear();
+ 
+@@ -440,26 +474,31 @@ export const AuthPrompt = GObject.registerClass({
+ 
+         this._webLoginPromptWell.remove_all_children();
+ 
+-        this._webLoginDialog = new WebLogin.WebLoginDialog({message, url, code});
+-        this._webLoginDialog.open(global.get_current_time());
++        this._webLoginDialog = new WebLogin.WebLoginDialog({message, url, code, autoAck, customButton});
          this._webLoginDialog.connect('cancel', () => {
 +            if (userVerifier.cancelRequested()) {
 +                this._closeWebLoginDialog();
@@ -120,7 +156,38 @@ index a03103c..5fd317d 100644
              if (this.verificationStatus !== AuthPromptStatus.VERIFICATION_SUCCEEDED)
                  this.reset();
          });
-@@ -798,6 +834,7 @@ export const AuthPrompt = GObject.registerClass({
+-        this._webLoginDialog.connect('done', () => {
+-            userVerifier.connectObject(
+-                `service-request::${serviceName}`, this._closeWebLoginDialog.bind(this),
++        this._webLoginDialog.connect('done', () =>
++            userVerifier.webLoginDone(serviceName))
++        this._webLoginDialog.connect('opened', () =>
++            userVerifier.webLoginOpened(serviceName))
+ 
+-                'verification-complete', this._closeWebLoginDialog.bind(this),
++        this._webLoginDialog.open(global.get_current_time());
+ 
+-                'verification-failed', () => {
+-                    this._closeWebLoginDialog();
+-                    this.showLoginFailedNotification();
+-                    this.reset();
+-                },
+-                this);
+-            userVerifier.webLoginDone(serviceName);
+-        });
++        userVerifier.connectObject(
++            `service-request::${serviceName}`, this._closeWebLoginDialog.bind(this),
++            'verification-complete', this._closeWebLoginDialog.bind(this),
++            'verification-failed', () => {
++                this._closeWebLoginDialog();
++                this.showLoginFailedNotification();
++                this.reset();
++            },
++            this._webLoginDialog);
+ 
+         if (this._spinner)
+             this._spinner.stop();
+@@ -800,6 +839,7 @@ export const AuthPrompt = GObject.registerClass({
          this.cancelButton.reactive = this._hasCancelButton;
          this.cancelButton.can_focus = this._hasCancelButton;
          this._preemptiveAnswer = null;
@@ -130,10 +197,10 @@ index a03103c..5fd317d 100644
              this._userVerifier.cancel();
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..75e6c35
+index 0000000..d10d37e
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,679 @@
+@@ -0,0 +1,715 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import GLib from 'gi://GLib';
@@ -292,6 +359,7 @@ index 0000000..75e6c35
 +                            wait: `required:${supportedWait}`,
 +                            label: 'required',
 +                            button: 'optional',
++                            code: 'optional',
 +                        }),
 +                    ],
 +                }),
@@ -366,6 +434,12 @@ index 0000000..75e6c35
 +    }
 +
 +    handleAuthSelectionResponse(mechanism, role, response) {
++        if (role !== Const.CHOICE_LIST_ROLE_NAME &&
++            role !== Const.MESSAGE_ROLE_NAME) {
++            this._pendingEvents = this._pendingEvents.filter(ev =>
++                ev.type !== AuthdGdm.EventType.isAuthenticatedRequested);
++        }
++
 +        switch (role) {
 +        case Const.CHOICE_LIST_ROLE_NAME:
 +            this._onChoiceSelected(mechanism, response);
@@ -525,12 +599,14 @@ index 0000000..75e6c35
 +        case AuthdPam.Stage.brokerSelection:
 +            this._authenticationInProgress = false;
 +            this._uiLayout = null;
++            this._selectedAuthMode = null;
 +            this._maybeStartBrokerSelection();
 +            break;
 +
 +        case AuthdPam.Stage.authModeSelection:
 +            this._authenticationInProgress = false;
 +            this._uiLayout = null;
++            this._selectedAuthMode = null;
 +            this._maybeStartAuthModeSelection();
 +            break;
 +
@@ -541,8 +617,6 @@ index 0000000..75e6c35
 +    }
 +
 +    _handleAuthdEvent(event) {
-+        this.emit('service-request', event);
-+
 +        switch (event.type) {
 +        case AuthdGdm.EventType.userSelected:
 +            break;
@@ -588,7 +662,11 @@ index 0000000..75e6c35
 +            break;
 +
 +        case AuthdGdm.EventType.authModeSelected:
-+            this._selectedAuthMode = event.authModeSelected.authModeId;
++            if (this._selectedAuthMode !== event.authModeSelected.authModeId) {
++                this._selectedAuthMode = event.authModeSelected.authModeId;
++                this.emit('clear-message-queue');
++            }
++
 +            if (this._stage >= AuthdPam.Stage.brokerSelection)
 +                this._maybeStartChallenge();
 +            /*  else if (this._stage === AuthdPam.Stage.undefined) {
@@ -731,6 +809,9 @@ index 0000000..75e6c35
 +            if (!hasWait)
 +                break;
 +
++            this._pendingEvents = this._pendingEvents.filter(ev =>
++                ev.type !== AuthdGdm.EventType.isAuthenticatedRequested);
++
 +            this._pendingEvents.push(new AuthdGdm.EventData({
 +                type: AuthdGdm.EventType.isAuthenticatedRequested,
 +                isAuthenticatedRequested: new AuthdGdm.Events.IsAuthenticatedRequested({
@@ -748,6 +829,23 @@ index 0000000..75e6c35
 +            mechanism.link_prompt = this._uiLayout.label;
 +            mechanism.init_prompt = _('Use the qr code to log-in');
 +            mechanism.uri = this._uiLayout.content;
++            mechanism.code = this._uiLayout.code;
++            mechanism.autoAck = true;
++
++            if (this._uiLayout.button) {
++                mechanism.customButton = {
++                    default: true,
++                    label: this._uiLayout.button,
++                    action: () => {
++                        this._ignoreNextCancellation = true;
++                        this._pendingEvents.push(
++                            new AuthdGdm.EventData({
++                                type: AuthdGdm.EventType.reselectAuthMode,
++                                reselectAuthMode: new AuthdGdm.Events.ReselectAuthMode(),
++                            }))
++                    },
++                };
++            }
 +
 +            this.emit('mechanisms-changed', this._authMechanisms);
 +            this.emit('start-mechanism', mechanism);
@@ -762,10 +860,10 @@ index 0000000..75e6c35
 +    _handleAuthResponse(response) {
 +        this._pendingNewChallenge = null;
 +
-+        if (response.access !== AuthResult.Retry) {
-+            this._selectedAuthMode = null;
++        if (response.access !== AuthResult.Retry)
 +            this._uiLayout = null;
-+        }
++
++        this.emit('service-request', {authResponse: response.access});
 +
 +        switch (response.access) {
 +        case AuthResult.Granted:
@@ -793,6 +891,11 @@ index 0000000..75e6c35
 +        }
 +
 +        case AuthResult.Cancelled: {
++            if (this._ignoreNextCancellation) {
++                this._ignoreNextCancellation = false;
++                return;
++            }
++
 +            this.emit('queue-message',
 +                _('Authentication was cancelled, try again!'), MessageType.ERROR);
 +
@@ -815,10 +918,10 @@ index 0000000..75e6c35
 +}
 diff --git a/js/gdm/authdProtocol.js b/js/gdm/authdProtocol.js
 new file mode 100644
-index 0000000..846048c
+index 0000000..9a2f765
 --- /dev/null
 +++ b/js/gdm/authdProtocol.js
-@@ -0,0 +1,5648 @@
+@@ -0,0 +1,5653 @@
 +var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 +
 +var indexMinimal = {};
@@ -4200,8 +4303,8 @@ index 0000000..846048c
 +        values[valuesById[8] = "uiLayoutReceived"] = 8;
 +        values[valuesById[9] = "startAuthentication"] = 9;
 +        values[valuesById[10] = "isAuthenticatedRequested"] = 10;
-+        values[valuesById[12] = "stageChanged"] = 12;
 +        values[valuesById[11] = "isAuthenticatedCancelled"] = 11;
++        values[valuesById[12] = "stageChanged"] = 12;
 +        return values;
 +    })();
 +
@@ -4791,13 +4894,13 @@ index 0000000..846048c
 +            case 10:
 +                message.type = 10;
 +                break;
-+            case "stageChanged":
-+            case 12:
-+                message.type = 12;
-+                break;
 +            case "isAuthenticatedCancelled":
 +            case 11:
 +                message.type = 11;
++                break;
++            case "stageChanged":
++            case 12:
++                message.type = 12;
 +                break;
 +            }
 +            if (object.brokersReceived != null) {
@@ -5021,14 +5124,7 @@ index 0000000..846048c
 +                        this[keys[i]] = properties[keys[i]];
 +        }
 +
-+        GPBResponse.prototype.previousBroker = null;
-+
-+        let $oneOfFields;
-+
-+        Object.defineProperty(GPBResponse.prototype, "_previousBroker", {
-+            get: $util.oneOfGetter($oneOfFields = ["previousBroker"]),
-+            set: $util.oneOfSetter($oneOfFields)
-+        });
++        GPBResponse.prototype.previousBroker = "";
 +
 +        GPBResponse.fromObject = function fromObject(object) {
 +            if (object instanceof $root.authd.GPBResponse)
@@ -5043,11 +5139,10 @@ index 0000000..846048c
 +            if (!options)
 +                options = {};
 +            let object = {};
-+            if (message.previousBroker != null && message.hasOwnProperty("previousBroker")) {
++            if (options.defaults)
++                object.previousBroker = "";
++            if (message.previousBroker != null && message.hasOwnProperty("previousBroker"))
 +                object.previousBroker = message.previousBroker;
-+                if (options.oneofs)
-+                    object._previousBroker = "previousBroker";
-+            }
 +            return object;
 +        };
 +
@@ -5406,6 +5501,7 @@ index 0000000..846048c
 +        UILayout.prototype.wait = null;
 +        UILayout.prototype.entry = null;
 +        UILayout.prototype.content = null;
++        UILayout.prototype.code = null;
 +
 +        let $oneOfFields;
 +
@@ -5434,6 +5530,11 @@ index 0000000..846048c
 +            set: $util.oneOfSetter($oneOfFields)
 +        });
 +
++        Object.defineProperty(UILayout.prototype, "_code", {
++            get: $util.oneOfGetter($oneOfFields = ["code"]),
++            set: $util.oneOfSetter($oneOfFields)
++        });
++
 +        UILayout.fromObject = function fromObject(object) {
 +            if (object instanceof $root.authd.UILayout)
 +                return object;
@@ -5450,6 +5551,8 @@ index 0000000..846048c
 +                message.entry = String(object.entry);
 +            if (object.content != null)
 +                message.content = String(object.content);
++            if (object.code != null)
++                message.code = String(object.code);
 +            return message;
 +        };
 +
@@ -5485,6 +5588,11 @@ index 0000000..846048c
 +                object.content = message.content;
 +                if (options.oneofs)
 +                    object._content = "content";
++            }
++            if (message.code != null && message.hasOwnProperty("code")) {
++                object.code = message.code;
++                if (options.oneofs)
++                    object._code = "code";
 +            }
 +            return object;
 +        };
@@ -6495,7 +6603,7 @@ index ad854ca..0000000
 -export const SMARTCARD_ROLE_NAME = 'smartcard';
 -export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index ef67811..c1d288d 100644
+index 505e388..bcb3dc9 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -536,6 +536,8 @@ export const LoginDialog = GObject.registerClass({
@@ -6623,7 +6731,7 @@ index 059d161..a2b6890 100644
          if (!mechanisms)
              return;
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index d197c5c..f8ff01e 100644
+index 69f83ae..a792ac4 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -6,6 +6,7 @@ import Gio from 'gi://Gio';
@@ -6781,7 +6889,7 @@ index d197c5c..f8ff01e 100644
              this._userVerifierCustomJSON.call_reply(serviceName, json, this._cancellable, null);
          } catch (e) {
              if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
-@@ -737,9 +780,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -738,9 +781,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              if (!definition)
                  return null;
  
@@ -6793,7 +6901,7 @@ index d197c5c..f8ff01e 100644
          }
  
          return null;
-@@ -754,10 +797,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -755,10 +798,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              return;
  
          if (foregroundMechanism?.role === mechanism?.role &&
@@ -6813,7 +6921,7 @@ index d197c5c..f8ff01e 100644
          this.emit('foreground-mechanism-changed');
      }
  
-@@ -828,8 +880,15 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -829,8 +881,15 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          }
      }
  
@@ -6830,7 +6938,7 @@ index d197c5c..f8ff01e 100644
              return UNIFIED_AUTH_SERVICE_NAME;
  
          const definition = DiscreteServiceMechanismDefinitions.find(
-@@ -841,6 +900,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -842,6 +901,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const oldDefaultService = this._defaultService;
          this._defaultService = this._getDetectedDefaultService();
  
@@ -6840,7 +6948,7 @@ index d197c5c..f8ff01e 100644
          if (!this._defaultService) {
              log('no authentication service is enabled, using password authentication');
              this._defaultService = PASSWORD_SERVICE_NAME;
-@@ -866,6 +928,14 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -867,6 +929,14 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              }
          } catch (e) {
              this._activeServices.delete(serviceName);
@@ -6855,7 +6963,7 @@ index d197c5c..f8ff01e 100644
              if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
                  return;
              if (!this.serviceIsForeground(serviceName)) {
-@@ -897,21 +967,25 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -898,21 +968,25 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      _startMechanismFromUnifiedService(mechanism) {
          const unifiedService = this._unifiedAuthServices.get(mechanism.protocol);
@@ -6888,7 +6996,7 @@ index d197c5c..f8ff01e 100644
      }
  
      _shouldStartBackgroundService(serviceName) {
-@@ -961,6 +1035,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -962,6 +1036,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      _beginVerification() {
          const foregroundService = this._getForegroundService();
  
@@ -6897,7 +7005,7 @@ index d197c5c..f8ff01e 100644
          this._mechanismsListChangedSignalId =
              this.connect('mechanisms-list-changed',
                  (_, ...args) => this._onMechanismsListChanged(...args));
-@@ -979,7 +1055,27 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -980,7 +1056,43 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this.emit('show-choice-list', serviceName, promptMessage, list.deepUnpack());
      }
  
@@ -6923,22 +7031,6 @@ index d197c5c..f8ff01e 100644
 +    }
 +
 +    _startQuestionLogin(serviceName, mechanismId) {
-         const mechanisms = this._publishedMechanisms.get(serviceName);
- 
-         if (!mechanisms)
-@@ -989,12 +1085,28 @@ export class ShellUserVerifier extends Signals.EventEmitter {
-             return;
- 
-         const {prompt, role} = mechanisms[mechanismId];
-+        const secret = role !== Const.PLAIN_TEXT_ROLE_NAME;
- 
-         this._pendingMechanisms.set(role, mechanismId);
--        this.emit('ask-question', serviceName, prompt, true);
-+        this.emit('ask-question', serviceName, prompt, secret);
-     }
- 
--    async _replyWithAuthSelectionResponse(serviceName, role, response) {
-+    _startMessageLogin(serviceName, mechanismId) {
 +        const mechanisms = this._publishedMechanisms.get(serviceName);
 +
 +        if (!mechanisms)
@@ -6948,16 +7040,30 @@ index d197c5c..f8ff01e 100644
 +            return;
 +
 +        const {prompt, role} = mechanisms[mechanismId];
++        const secret = role !== Const.PLAIN_TEXT_ROLE_NAME;
 +
 +        this._pendingMechanisms.set(role, mechanismId);
-+        this.emit('show-waiting-message', serviceName, prompt);
++        this.emit('ask-question', serviceName, prompt, secret);
 +    }
 +
++    _startMessageLogin(serviceName, mechanismId) {
+         const mechanisms = this._publishedMechanisms.get(serviceName);
+ 
+         if (!mechanisms)
+@@ -992,10 +1104,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         const {prompt, role} = mechanisms[mechanismId];
+ 
+         this._pendingMechanisms.set(role, mechanismId);
+-        this.emit('ask-question', serviceName, prompt, true);
++        this.emit('show-waiting-message', serviceName, prompt);
+     }
+ 
+-    async _replyWithAuthSelectionResponse(serviceName, role, response) {
 +    _replyWithAuthSelectionResponse(serviceName, role, response) {
          const mechanism = this._getPendingMechanismForRole(role);
          if (!mechanism)
              return;
-@@ -1005,21 +1117,25 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1006,23 +1118,31 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          if (!authService)
              throw new Error(`No authentication service for protocol ${mechanism.protocol}`);
  
@@ -6989,17 +7095,62 @@ index d197c5c..f8ff01e 100644
 +            return;
 +        }
  
-         const {init_prompt: initPrompt, link_prompt: linkPrompt, uri, code, role, timeout} = mechanisms[mechanismId];
+-        const {init_prompt: initPrompt, link_prompt: linkPrompt, uri, code, role, timeout} = mechanisms[mechanismId];
++        const {
++            init_prompt: initPrompt,
++            link_prompt: linkPrompt,
++            uri, code, role, timeout, autoAck, customButton,
++        } = mechanisms[mechanismId];
  
-@@ -1059,7 +1175,6 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         if (!linkPrompt || !uri)
+             return;
+@@ -1037,7 +1157,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         }
+ 
+         this._pendingMechanisms.set(role, mechanismId);
+-        this.emit('web-login', serviceName, initPrompt, linkPrompt, uri, code);
++        this.emit('web-login', serviceName, initPrompt, linkPrompt, uri, code, autoAck, customButton);
+     }
+ 
+     _clearWebLoginTimeout() {
+@@ -1059,14 +1179,35 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this._clearWebLoginTimeout();
  
          const mechanism = this._getPendingMechanismForRole(WEB_LOGIN_ROLE_NAME);
++        if (mechanism?.autoAck)
++            return;
++        const authService = this._unifiedAuthServices.get(mechanism?.protocol);
++        if (!authService)
++            return;
++
++        this._replyWithAuthSelectionResponse(serviceName, WEB_LOGIN_ROLE_NAME, {});
++    }
++
++    webLoginOpened(serviceName) {
++        const mechanism = this._getPendingMechanismForRole(WEB_LOGIN_ROLE_NAME);
++        if (!mechanism?.autoAck)
++            return;
          const authService = this._unifiedAuthServices.get(mechanism?.protocol);
 -        log('Found auth service', authService);
          if (!authService)
              return;
  
-@@ -1090,17 +1205,28 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this._replyWithAuthSelectionResponse(serviceName, WEB_LOGIN_ROLE_NAME, {});
+     }
+ 
++    waitMessageShown(serviceName) {
++        const mechanism = this._getPendingMechanismForRole(Const.MESSAGE_ROLE_NAME);
++        const authService = this._unifiedAuthServices.get(mechanism?.protocol);
++        if (!authService)
++            return;
++
++        this._replyWithAuthSelectionResponse(serviceName, Const.MESSAGE_ROLE_NAME, {});
++    }
++
+     _filterAuthMechanisms(mechanismsList, filterFunc) {
+         return mechanismsList.filter(mechanism => {
+             const mapping = DiscreteServiceMechanismDefinitions.find(m =>
+@@ -1091,17 +1232,28 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _onCustomJSONRequest(client, serviceName, protocol, version, json) {
@@ -7034,7 +7185,7 @@ index d197c5c..f8ff01e 100644
      }
  
      _onInfo(client, serviceName, info) {
-@@ -1222,6 +1348,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1223,6 +1375,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._activeServices.clear();
          this._unavailableServices.clear();
          this._activeServices.clear();
@@ -7043,7 +7194,7 @@ index d197c5c..f8ff01e 100644
              this.disconnect(this._mechanismsListChangedSignalId);
              this._mechanismsListChangedSignalId = 0;
 diff --git a/js/gdm/webLogin.js b/js/gdm/webLogin.js
-index 029950d..fe36e94 100644
+index 029950d..8bbf5ac 100644
 --- a/js/gdm/webLogin.js
 +++ b/js/gdm/webLogin.js
 @@ -7,6 +7,7 @@ import Clutter from 'gi://Clutter';
@@ -7065,6 +7216,67 @@ index 029950d..fe36e94 100644
          this.add_child(this._urlTitleLabel);
  
          this._qrCode = new QrCode({iconSize, url});
+@@ -157,6 +162,9 @@ class WebLoginPrompt extends St.BoxLayout {
+         const http = 'http://';
+         const https = 'https://';
+ 
++        if (url.endsWith('/'))
++            url = url.substring(0, url.length-1);
++
+         if (url.startsWith(http))
+             return url.substring(http.length);
+ 
+@@ -174,10 +182,12 @@ export const WebLoginDialog = GObject.registerClass({
+     },
+ }, class WebLoginDialog extends ModalDialog.ModalDialog {
+     _init(params) {
+-        const {message, url, code} = Params.parse(params, {
++        const {message, url, code, autoAck, customButton} = Params.parse(params, {
+             message: null,
+             url: null,
+             code: null,
++            autoAck: false,
++            customButton: null,
+         });
+ 
+         super._init({
+@@ -193,7 +203,7 @@ export const WebLoginDialog = GObject.registerClass({
+         this.contentLayout.reactive = false;
+         this.contentLayout.can_focus = false;
+         this.contentLayout.add_child(this._webLoginPrompt);
+-        this._updateButtons();
++        this._updateButtons(autoAck, customButton);
+ 
+         this._contentOverlay = new St.Widget({
+             layout_manager: new Clutter.BinLayout(),
+@@ -233,18 +243,25 @@ export const WebLoginDialog = GObject.registerClass({
+         this.emit('done');
+     }
+ 
+-    _updateButtons() {
++    _updateButtons(autoAck, customButton) {
+         this.clearButtons();
+ 
+         this._cancelButton = this.addButton({
+             action: this.cancel.bind(this),
+             label: _('Cancel'),
+             key: Clutter.KEY_Escape,
++            default: !autoAck && !customButton?.default,
+         });
+ 
++        if (customButton)
++            this.addButton(customButton);
++
++        if (autoAck)
++            return;
++
+         this._doneButton = this.addButton({
+             action: this.done.bind(this),
+-            default: true,
++            default: !customButton?.default,
+             label: _('Done'),
+         });
+     }
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
 index 0df340e..6aa47ad 100644
 --- a/js/js-resources.gresource.xml
@@ -7089,10 +7301,10 @@ index 0df340e..6aa47ad 100644
      <file>extensions/sharedInternals.js</file>
  
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index 587195a..239b127 100644
+index 5418f53..50f15dd 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
-@@ -828,6 +828,7 @@ export const UnlockDialog = GObject.registerClass({
+@@ -834,6 +834,7 @@ export const UnlockDialog = GObject.registerClass({
          const activeMechanism = this._loginOptionsButton.getActiveItem();
  
          this._loginOptionsButton.clearItems({serviceName});

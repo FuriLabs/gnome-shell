@@ -22,10 +22,10 @@ It will be used later when Web Login support is added.
  create mode 100644 js/gdm/authNotification.js
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index e2c2dd4..347930e 100644
+index e690ec2..2482b2d 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-@@ -356,6 +356,19 @@ $_gdm_dialog_width: 25em;
+@@ -361,6 +361,19 @@ $_gdm_dialog_width: 25em;
    }
  }
  
@@ -116,7 +116,7 @@ index 0000000..fc24cb6
 +    }
 +});
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index e17fe8b..4bd48ea 100644
+index beebc60..fe12820 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -1,6 +1,7 @@
@@ -139,7 +139,7 @@ index e17fe8b..4bd48ea 100644
  import * as Params from '../misc/params.js';
  import * as ShellEntry from '../ui/shellEntry.js';
  import * as UserWidget from '../ui/userWidget.js';
-@@ -630,6 +634,30 @@ export const AuthPrompt = GObject.registerClass({
+@@ -632,6 +636,30 @@ export const AuthPrompt = GObject.registerClass({
          this._userVerifier.setForegroundMechanism(mechanism);
      }
  

@@ -8,10 +8,10 @@ Subject: unlockDialog: Add Login Options menu button
  2 files changed, 67 insertions(+), 14 deletions(-)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 5718b29..56e044e 100644
+index ff6c028..02f979e8 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -887,7 +887,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -888,7 +888,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      _generateMechanismsFromDiscreteServices() {
          for (const definition of DiscreteServiceMechanismDefinitions) {
@@ -21,7 +21,7 @@ index 5718b29..56e044e 100644
  
              let mechanismsList = [];
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index 562a623..f3365ec 100644
+index 5378e59..1bc3a2a 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
 @@ -17,6 +17,7 @@ import * as Main from './main.js';
@@ -32,7 +32,7 @@ index 562a623..f3365ec 100644
  import * as AuthPrompt from '../gdm/authPrompt.js';
  
  // The timeout before going back automatically to the lock screen (in seconds)
-@@ -390,12 +391,12 @@ class UnlockDialogClock extends St.BoxLayout {
+@@ -396,12 +397,12 @@ class UnlockDialogClock extends St.BoxLayout {
  
  const UnlockDialogLayout = GObject.registerClass(
  class UnlockDialogLayout extends Clutter.LayoutManager {
@@ -47,7 +47,7 @@ index 562a623..f3365ec 100644
      }
  
      vfunc_get_preferred_width(container, forHeight) {
-@@ -447,22 +448,22 @@ class UnlockDialogLayout extends Clutter.LayoutManager {
+@@ -453,22 +454,22 @@ class UnlockDialogLayout extends Clutter.LayoutManager {
  
          this._stack.allocate(actorBox);
  
@@ -77,7 +77,7 @@ index 562a623..f3365ec 100644
          }
      }
  });
-@@ -567,19 +568,42 @@ export const UnlockDialog = GObject.registerClass({
+@@ -573,19 +574,42 @@ export const UnlockDialog = GObject.registerClass({
          this._notificationsBox = new NotificationsBox();
          this._notificationsBox.connect('wake-up-screen', () => this.emit('wake-up-screen'));
  
@@ -121,7 +121,7 @@ index 562a623..f3365ec 100644
  
          this._screenSaverSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.screensaver'});
  
-@@ -602,11 +626,11 @@ export const UnlockDialog = GObject.registerClass({
+@@ -608,11 +632,11 @@ export const UnlockDialog = GObject.registerClass({
          mainBox.add_constraint(new Layout.MonitorConstraint({primary: true}));
          mainBox.add_child(this._stack);
          mainBox.add_child(this._notificationsBox);
@@ -135,7 +135,7 @@ index 562a623..f3365ec 100644
          this.add_child(mainBox);
  
          this._idleMonitor = global.backend.get_core_idle_monitor();
-@@ -700,6 +724,7 @@ export const UnlockDialog = GObject.registerClass({
+@@ -706,6 +730,7 @@ export const UnlockDialog = GObject.registerClass({
              this._authPrompt.connect('failed', this._fail.bind(this));
              this._authPrompt.connect('cancelled', this._fail.bind(this));
              this._authPrompt.connect('reset', this._onReset.bind(this));
@@ -143,7 +143,7 @@ index 562a623..f3365ec 100644
              this._promptBox.add_child(this._authPrompt);
          }
  
-@@ -772,7 +797,7 @@ export const UnlockDialog = GObject.registerClass({
+@@ -778,7 +803,7 @@ export const UnlockDialog = GObject.registerClass({
              translation_y: -FADE_OUT_TRANSLATION * progress * scaleFactor,
          });
  
@@ -152,7 +152,7 @@ index 562a623..f3365ec 100644
              opacity: 255 * progress,
              scale_x: FADE_OUT_SCALE + (1 - FADE_OUT_SCALE) * progress,
              scale_y: FADE_OUT_SCALE + (1 - FADE_OUT_SCALE) * progress,
-@@ -796,6 +821,34 @@ export const UnlockDialog = GObject.registerClass({
+@@ -802,6 +827,34 @@ export const UnlockDialog = GObject.registerClass({
          this._authPrompt.begin({userName});
      }
  

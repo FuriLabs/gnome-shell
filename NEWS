@@ -1,3 +1,85 @@
+46.3.1
+======
+* Fix including gvc source in tarball [Florian; !3164]
+
+Contributors:
+  Florian Müllner
+
+46.3
+====
+* Fix rendering artifacts of some rounded borders [Jonas D.; !3354]
+* Fix overview animation glitch when windows overlap workspaces [Keyu; !3378]
+* Fix overview animation glitch when windows overlap workspaces [Sundeep; !3386]
+* Misc. bug fixes and cleanups [Bilal, Georges, Florian, Mister, Philip,
+  Jonas Å., Jonas D., Balló, Alessandro, Sam; !3344, !3347, !3350, !3349, !3351,
+  !3352, !3353, !3307, !3370, !3361, !3368, !3291, !3311, !3376, !3377, !3362,
+  !3398]
+
+Contributors:
+  Jonas Ådahl, Alessandro Bono, Jonas Dreßler, Bilal Elmoussaoui, Balló György,
+  Sam Hewitt, Sundeep Mediratta, Florian Müllner, Georges Basile Stavracas Neto,
+  Mister Smör, Keyu Tao, Philip Withnall
+
+Translators:
+  Jose Riha [sk]
+
+46.2
+====
+* Fix size of workspace switcher OSD [Jakub; !3282]
+* Fix handling of invalid TLS certs in portal handler [Sebastian K.; !3284]
+* Exclude override-redirect windows from workspace animation [Marco; !3285]
+* Also center time on lock screen when using 12h format [pesader; !3290]
+* Use absolute tray icon position in root event coordinates [Marco; !3283]
+* Fix displaying info messages on login screen [Ray; !3298]
+* Correct expected bus name for streams [Simon; !3303]
+* Fix notifications on lock screen [Florian; !3308]
+* notifications: Only apply special styling to symbolic icons [Florian; !3296]
+* Fix number of search results with Large Text option [Sam; !3312]
+* Fix showing keyboard layouts with variants [Sebastian K.; !3324]
+* Tweak font sizes in calendar [Sam; !3313]
+* automountManager: Fix re-asking password for TCRYPT devices [segfault; !3300]
+* Fix stuck unlock prompt when animations are disabled [Florian; !3317]
+* Fix possible hang on startup during ibus-daemon launch [Marco; !3293]
+* Misc. bug fixes and cleanups [Sebastian W., Gabriel, Sebastian K., Florian,
+  Jonas, Sam, Ray; !3267, !3281, !3288, !3295, !3299, !3310, !3315, !3326,
+  !3321, !3319, !3329, !3331, !3245, !3340]
+
+Contributors:
+  Jonas Ådahl, Sam Hewitt, Sebastian Keller, Simon McVittie, Florian Müllner,
+  Gabriel Nagy, pesader, segfault, Jakub Steiner, Ray Strode,
+  Marco Trevisan (Treviño), Sebastian Wick
+
+Translators:
+  Andika Triwidada [id], Rachida SACI [kab], Hugo Carvalho [pt],
+  Scrambled 777 [hi], Jose Riha [sk], Balázs Úr [hu], Quentin PAGÈS [oc]
+
+46.1
+====
+* Improve notification of conflicting session [Joan; !3235]
+* Add shift level to Korean OSK layout [Carlos; !3222]
+* Fix markup support in notifications [Sebastian; !3247]
+* extensions-app: Fix empty rows with '&' in extension name [Florian; !3266]
+* extensions-app: Improve HIG compliance [Automeris; !3269, !3271]
+* Omit expand buttons in notification banners [Julian; !3249]
+* Misc. bug fixes and cleanups [dcz, Totto16, Sebastian, Florian;
+  !3262, !3253, !3260, !3234]
+
+Contributors:
+  dcz, Carlos Garnacho, Sebastian Keller, Robert Mader, Florian Müllner,
+  Automeris naranja, Julian Sparber, Joan Torres, Totto16, Sebastian Wick
+
+Translators:
+  Danial Behzadi [fa], Baurzhan Muftakhidinov [kk], Anders Jonsson [sv],
+  Aurimas Černius [lt], Yuri Chornoivan [uk], Daniel Rusek [cs],
+  Ekaterine Papava [ka], Asier Sarasua Garmendia [eu], Jiri Grönroos [fi],
+  Piotr Drąg [pl], Yaron Shahrabani [he], Brage Fuglseth [nb], A S Alam [pa],
+  Christian Kirbach [de], Milo Casagrande [it], Fran Dieguez [gl],
+  Jordi Mas i Hernandez [ca], Jordi Mas [ca], Sabri Ünal [tr],
+  Boyuan Yang [zh_CN], Athmane MOKRAOUI [kab], Vincent Chatelain [fr],
+  Милош Поповић [sr, sr@latin], Martin [sl], Nathan Follens [nl], Artur S0 [ru],
+  Juliano de Souza Camargo [pt_BR], Changwoo Ryu [ko], Jose Riha [sk],
+  Fabio Tomat [fur], Peter Vágner [sk], Andi Chandler [en_GB]
+
 46.0
 ====
 * Fix model selection in on-screen keyboard [Jonas; !3230]

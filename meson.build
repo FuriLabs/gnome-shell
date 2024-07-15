@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '46.0',
+  version: '46.3.1',
   meson_version: '>= 0.58.0',
   license: 'GPLv2+'
 )
@@ -22,14 +22,13 @@ libmutter_test_pc = 'libmutter-test-' + mutter_api_version
 ecal_req = '>= 3.33.1'
 eds_req = '>= 3.33.1'
 gcr_req = '>= 3.90.0'
-gio_req = '>= 2.56.0'
+gio_req = '>= 2.79.2'
 gi_req = '>= 1.49.1'
 gjs_req = '>= 1.73.1'
 gtk_req = '>= 4.0'
 mutter_req = '>= 46.0'
 polkit_req = '>= 0.100'
 schemas_req = '>= 46.beta'
-startup_req = '>= 0.11'
 systemd_req = '>= 246'
 ibus_req = '>= 1.5.19'
 gnome_desktop_req = '>= 40'
@@ -74,7 +73,6 @@ atk_bridge_dep = dependency('atk-bridge-2.0')
 ecal_dep = dependency('libecal-2.0', version: ecal_req)
 eds_dep = dependency('libedataserver-1.2', version: eds_req)
 gcr_dep = dependency('gcr-4', version: gcr_req)
-gdk_x11_dep = dependency('gdk-x11-3.0')
 gdk_pixbuf_dep = dependency('gdk-pixbuf-2.0')
 gi_dep = dependency('gobject-introspection-1.0', version: gi_req)
 gio_dep = dependency('gio-2.0', version: gio_req)
@@ -88,7 +86,6 @@ cogl_dep = dependency(cogl_pc, version: mutter_req)
 cogl_pango_dep = dependency(cogl_pango_pc, version: mutter_req)
 mutter_dep = dependency(libmutter_pc, version: mutter_req)
 polkit_dep = dependency('polkit-agent-1', version: polkit_req)
-startup_dep = dependency('libstartup-notification-1.0', version: startup_req)
 ibus_dep = dependency('ibus-1.0', version: ibus_req)
 x11_dep = dependency('x11')
 schemas_dep = dependency('gsettings-desktop-schemas', version: schemas_req)
@@ -149,11 +146,6 @@ cdata.set('HAVE_NETWORKMANAGER', have_networkmanager)
 cdata.set('HAVE_PIPEWIRE', have_pipewire)
 cdata.set('HAVE_SYSTEMD', have_systemd)
 
-# New API added in glib-2.57.2
-cdata.set('HAVE_GIO_DESKTOP_LAUNCH_URIS_WITH_FDS',
-          cc.has_function('g_desktop_app_info_launch_uris_as_manager_with_fds',
-                          dependencies : gio_dep)
-)
 cdata.set('HAVE_FDWALK', cc.has_function('fdwalk'))
 cdata.set('HAVE_MALLINFO', cc.has_function('mallinfo'))
 cdata.set('HAVE_MALLINFO2', cc.has_function('mallinfo2'))
@@ -291,6 +283,7 @@ if get_option('tests')
   common_test_env = environment()
   common_test_env.set('GSETTINGS_SCHEMA_DIR', meson.project_build_root() / 'data')
   common_test_env.set('GSETTINGS_BACKEND', 'memory')
+  common_test_env.set('XDG_CURRENT_DESKTOP', '')
 
   add_test_setup('default',
     is_default: true,

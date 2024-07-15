@@ -9,7 +9,6 @@
 #include <meta/display.h>
 #include <meta/meta-context.h>
 #include <meta/meta-workspace-manager.h>
-#include <meta/meta-x11-display.h>
 
 #include "shell-app-private.h"
 #include "shell-enum-types.h"
@@ -1236,38 +1235,10 @@ static void
 child_context_setup (gpointer user_data)
 {
   ShellGlobal *shell_global = user_data;
-  MetaContext *meta_context;
+  MetaContext *meta_context = shell_global_get_context (shell_global);
 
-  g_object_get (shell_global, "context", &meta_context, NULL);
   meta_context_restore_rlimit_nofile (meta_context, NULL);
 }
-
-#if !defined(HAVE_GIO_DESKTOP_LAUNCH_URIS_WITH_FDS) && defined(HAVE_SYSTEMD)
-/* This sets up the launched application to log to the journal
- * using its own identifier, instead of just "gnome-session".
- */
-static void
-app_child_setup (gpointer user_data)
-{
-  const char *appid = user_data;
-  int res;
-  int journalfd = sd_journal_stream_fd (appid, LOG_INFO, FALSE);
-  ShellGlobal *shell_global = shell_global_get ();
-
-  if (journalfd >= 0)
-    {
-      do
-        res = dup2 (journalfd, 1);
-      while (G_UNLIKELY (res == -1 && errno == EINTR));
-      do
-        res = dup2 (journalfd, 2);
-      while (G_UNLIKELY (res == -1 && errno == EINTR));
-      (void) close (journalfd);
-    }
-
-  child_context_setup (shell_global);
-}
-#endif
 
 static void
 wait_pid (GDesktopAppInfo *appinfo,
@@ -1382,7 +1353,6 @@ shell_app_launch (ShellApp           *app,
   flags = G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD |
           G_SPAWN_LEAVE_DESCRIPTORS_OPEN;
 
-#ifdef HAVE_GIO_DESKTOP_LAUNCH_URIS_WITH_FDS
   /* Optimized spawn path, avoiding a child_setup function */
   {
     int journalfd = -1;
@@ -1404,18 +1374,6 @@ shell_app_launch (ShellApp           *app,
     if (journalfd >= 0)
       (void) close (journalfd);
   }
-#else /* !HAVE_GIO_DESKTOP_LAUNCH_URIS_WITH_FDS */
-  ret = g_desktop_app_info_launch_uris_as_manager (app->info, NULL,
-                                                   context,
-                                                   flags,
-#ifdef HAVE_SYSTEMD
-                                                   app_child_setup, (gpointer)shell_app_get_id (app),
-#else
-                                                   child_context_setup, shell_global,
-#endif
-                                                   wait_pid, NULL,
-                                                   error);
-#endif /* HAVE_GIO_DESKTOP_LAUNCH_URIS_WITH_FDS */
   g_object_unref (context);
 
   return ret;
