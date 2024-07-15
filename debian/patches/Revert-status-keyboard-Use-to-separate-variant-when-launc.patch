@@ -1,0 +1,23 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Mon, 15 Jul 2024 15:50:36 +0200
+Subject: Revert "status/keyboard: Use '+' to separate variant when launching
+ tecla"
+
+This reverts commit 20623458aebbacec0822366601185dd7ff92e929.
+---
+ js/ui/status/keyboard.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/status/keyboard.js b/js/ui/status/keyboard.js
+index 872602a..cfc0a01 100644
+--- a/js/ui/status/keyboard.js
++++ b/js/ui/status/keyboard.js
+@@ -1129,7 +1129,7 @@ class InputSourceIndicator extends PanelMenu.Button {
+ 
+         let description = xkbLayout;
+         if (xkbVariant.length > 0)
+-            description = `${description}+${xkbVariant}`;
++            description = `${description}\t${xkbVariant}`;
+ 
+         Util.spawn(['tecla', description]);
+     }

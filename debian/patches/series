@@ -1,5 +1,6 @@
 debian/gnome-shell-extension-prefs-Give-Debian-specific-advice.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
+Revert-status-keyboard-Use-to-separate-variant-when-launc.patch
 Revert-keyboard-Spawn-tecla-to-show-keyboard-map.patch
 build-Add-explicit-dependency-on-Xfixes.patch
 tray-na-xembed-Use-XShape-to-remove-input-on-socket-windo.patch
