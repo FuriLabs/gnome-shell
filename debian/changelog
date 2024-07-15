@@ -1,4 +1,4 @@
-gnome-shell (46.3.1-1ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (46.3.1-1ubuntu1) oracular; urgency=medium
 
   * Merge with Debian
   * debian/patches: Refresh
@@ -16,7 +16,7 @@ gnome-shell (46.3.1-1ubuntu1) UNRELEASED; urgency=medium
     Make possible to use key-navigation automatically when such views are
     shown (LP: #2072716)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 11 Jul 2024 03:06:34 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 15 Jul 2024 15:08:36 +0200
 
 gnome-shell (46.3.1-1) experimental; urgency=medium
 
