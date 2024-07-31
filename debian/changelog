@@ -1,3 +1,12 @@
+gnome-shell (46.0-0ubuntu6~24.04.2) noble; urgency=medium
+
+  * Add st-theme-node-Forget-properties-cache-on-stylesheet-chang.patch
+    to fix crashes that occur when locking the screen from within the overview.
+    But more generally can occur whenever any extension that modifies
+    stylesheets (like ubuntu-dock or dash-to-dock) is unloaded (LP: #2069559).
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 31 Jul 2024 16:12:06 +0800
+
 gnome-shell (46.0-0ubuntu6~24.04.1) noble; urgency=medium
 
   * debian: Prepare for noble branching
