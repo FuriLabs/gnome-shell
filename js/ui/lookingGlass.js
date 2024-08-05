@@ -387,6 +387,8 @@ const ObjInspector = GObject.registerClass(
 class ObjInspector extends St.ScrollView {
     _init(lookingGlass) {
         super._init({
+            name: 'LookingGlassPropertyInspector',
+            style_class: 'lg-dialog',
             pivot_point: new Graphene.Point({x: 0.5, y: 0.5}),
         });
 
@@ -396,8 +398,6 @@ class ObjInspector extends St.ScrollView {
         this._parentList = [];
 
         this._container = new St.BoxLayout({
-            name: 'LookingGlassPropertyInspector',
-            style_class: 'lg-dialog',
             vertical: true,
             x_expand: true,
             y_expand: true,
@@ -1296,11 +1296,6 @@ class LookingGlass extends St.BoxLayout {
         // Sort of magic, but...eh.
         this._maxItems = 150;
 
-        this._interfaceSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.interface'});
-        this._interfaceSettings.connect('changed::monospace-font-name',
-            this._updateFont.bind(this));
-        this._updateFont();
-
         // We want it to appear to slide out from underneath the panel
         Main.uiGroup.add_child(this);
         Main.uiGroup.set_child_below_sibling(this,
@@ -1436,18 +1431,6 @@ class LookingGlass extends St.BoxLayout {
             return Clutter.EVENT_STOP;
 
         return Clutter.EVENT_PROPAGATE;
-    }
-
-    _updateFont() {
-        let fontName = this._interfaceSettings.get_string('monospace-font-name');
-        let fontDesc = Pango.FontDescription.from_string(fontName);
-        // We ignore everything but size and style; you'd be crazy to set your system-wide
-        // monospace font to be bold/oblique/etc. Could easily be added here.
-        let size = fontDesc.get_size() / 1024.;
-        let unit = fontDesc.get_size_is_absolute() ? 'px' : 'pt';
-        this.style = `
-            font-size: ${size}${unit};
-            font-family: "${fontDesc.get_family()}";`;
     }
 
     setBorderPaintTarget(obj) {

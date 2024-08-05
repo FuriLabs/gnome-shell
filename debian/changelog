@@ -1,3 +1,45 @@
+gnome-shell (46.4-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sun, 04 Aug 2024 16:35:07 -0400
+
+gnome-shell (46.3.1-4) unstable; urgency=medium
+
+  * Skip the shell tests on riscv64
+  * Bump Standards-Version to 4.7.0
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 01 Aug 2024 21:40:18 -0400
+
+gnome-shell (46.3.1-3) unstable; urgency=medium
+
+  [ Jeremy Bícha ]
+  * Switch gnome-control-center from Recommends to Depends
+  * Remove Recommends: gnome-backgrounds (Closes: #1077738)
+  * Revert "Skip shell build tests for now since they are flaky"
+
+  [ Simon McVittie ]
+  * d/control: Explicitly version various dependencies as per meson.build:
+    GLib 2.80, Gcr 3.90, NM 1.10.4, Pipewire 0.3.49
+  * d/control: Remove version constraints unnecessary since bullseye
+    (oldstable)
+  * d/control: Remove obsolete Breaks/Replaces on pre-3.36 versions,
+    unnecessary since bullseye (oldstable)
+  * Make the source package cross-compilable:
+    - d/control: Explicitly depend on gir1.2-*-dev where required
+    - d/control: Build-Depend on gobject-introspection (>= 1.80)
+      instead of libgirepository1.0-dev
+    - d/rules: Opt-in to cross-friendly gobject-introspection
+      (workaround for #1060838)
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 01 Aug 2024 13:55:54 -0400
+
+gnome-shell (46.3.1-2) unstable; urgency=medium
+
+  * Release to unstable
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 12 Jul 2024 18:29:07 -0400
+
 gnome-shell (46.3.1-1ubuntu1) oracular; urgency=medium
 
   * Merge with Debian
@@ -324,6 +366,19 @@ gnome-shell (45.3-1ubuntu1) noble; urgency=medium
   * Refresh patches
 
  -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 09 Jan 2024 15:28:52 -0500
+
+gnome-shell (44.9-2) unstable; urgency=high
+
+  * Team upload
+  * d/p/screencast-Correct-expected-bus-name-for-streams.patch:
+    Avoid screencast regression after fixing CVE-2024-34397.
+    Previously, screencasting expected signals to come from the wrong
+    D-Bus name, which only worked because there was a vulnerability in
+    GLib that resulted in the sender being ignored.
+  * Set urgency=high because this fixes a regression triggered by a
+    security fix.
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 06 May 2024 22:41:00 +0100
 
 gnome-shell (44.9-1) unstable; urgency=medium
 
