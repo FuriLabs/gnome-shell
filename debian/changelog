@@ -1,3 +1,20 @@
+gnome-shell (46.4-1ubuntu1) oracular; urgency=medium
+
+  * Merge with Debian. Remaining changes:
+    - Add Build-Depends: terser (for authd)
+    - Add Depends: ubuntu-wallpapers
+    - Add Recommends:
+      + ubuntu-session (| gnome-session) to have the ubuntu session available
+      + xserver-xorg-legacy
+      + yaru-theme-gnome-shell for the default ubuntu theming
+    - Move from Recommends to Suggests: chrome-gnome-shell
+    - debian/gnome-shell-common.alternatives: Install tweaked GDM theme
+    - Add debian/ubuntu-session-mods/ubuntu.json & install it with
+      gnome-shell-common
+    - Add many patches
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 05 Aug 2024 11:27:44 -0400
+
 gnome-shell (46.4-1) unstable; urgency=medium
 
   * New upstream release
