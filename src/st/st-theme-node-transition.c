@@ -50,7 +50,7 @@ struct _StThemeNodeTransitionPrivate {
   CoglFramebuffer *old_offscreen;
   CoglFramebuffer *new_offscreen;
 
-  CoglPipeline *material;
+  CoglPipeline *pipeline;
 
   ClutterTimeline *timeline;
 
@@ -244,16 +244,21 @@ st_theme_node_transition_get_paint_box (StThemeNodeTransition *transition,
 
 static gboolean
 setup_framebuffers (StThemeNodeTransition *transition,
+                    ClutterPaintContext   *paint_context,
+                    ClutterPaintNode      *node,
                     const ClutterActorBox *allocation,
                     float                  resource_scale)
 {
   StThemeNodeTransitionPrivate *priv = transition->priv;
+  g_autoptr (ClutterPaintNode) old_layer_node = NULL;
+  g_autoptr (ClutterPaintNode) new_layer_node = NULL;
+  CoglPipeline *noop_pipeline;
   CoglContext *ctx;
   guint width, height;
   GError *catch_error = NULL;
 
-  /* template material to avoid unnecessary shader compilation */
-  static CoglPipeline *material_template = NULL;
+  /* template pipeline to avoid unnecessary shader compilation */
+  static CoglPipeline *pipeline_template = NULL;
 
   ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
   width  = ceilf ((priv->offscreen_box.x2 - priv->offscreen_box.x1) * resource_scale);
@@ -292,65 +297,75 @@ setup_framebuffers (StThemeNodeTransition *transition,
       return FALSE;
     }
 
-  if (priv->material == NULL)
+  if (priv->pipeline == NULL)
     {
-      if (G_UNLIKELY (material_template == NULL))
+      if (G_UNLIKELY (pipeline_template == NULL))
         {
           CoglContext *ctx =
             clutter_backend_get_cogl_context (clutter_get_default_backend ());
-          material_template = cogl_pipeline_new (ctx);
+          pipeline_template = cogl_pipeline_new (ctx);
 
-          cogl_pipeline_set_layer_combine (material_template, 0,
+          cogl_pipeline_set_layer_combine (pipeline_template, 0,
                                            "RGBA = REPLACE (TEXTURE)",
                                            NULL);
-          cogl_pipeline_set_layer_combine (material_template, 1,
+          cogl_pipeline_set_layer_combine (pipeline_template, 1,
                                            "RGBA = INTERPOLATE (PREVIOUS, "
                                                                "TEXTURE, "
                                                                "CONSTANT[A])",
                                            NULL);
-          cogl_pipeline_set_layer_combine (material_template, 2,
+          cogl_pipeline_set_layer_combine (pipeline_template, 2,
                                            "RGBA = MODULATE (PREVIOUS, "
                                                             "PRIMARY)",
                                            NULL);
         }
-      priv->material = cogl_pipeline_copy (material_template);
+      priv->pipeline = cogl_pipeline_copy (pipeline_template);
     }
 
-  cogl_pipeline_set_layer_texture (priv->material, 0, priv->new_texture);
-  cogl_pipeline_set_layer_texture (priv->material, 1, priv->old_texture);
+  cogl_pipeline_set_layer_texture (priv->pipeline, 0, priv->new_texture);
+  cogl_pipeline_set_layer_texture (priv->pipeline, 1, priv->old_texture);
 
-  cogl_framebuffer_clear4f (priv->old_offscreen, COGL_BUFFER_BIT_COLOR,
-                            0, 0, 0, 0);
+  noop_pipeline = cogl_pipeline_new (ctx);
   cogl_framebuffer_orthographic (priv->old_offscreen,
                                  priv->offscreen_box.x1,
                                  priv->offscreen_box.y1,
                                  priv->offscreen_box.x2,
                                  priv->offscreen_box.y2, 0.0, 1.0);
 
-  st_theme_node_paint (priv->old_theme_node, &priv->old_paint_state,
-                       priv->old_offscreen, allocation, 255, resource_scale);
+  old_layer_node = clutter_layer_node_new_to_framebuffer (priv->old_offscreen,
+                                                          noop_pipeline);
+  clutter_paint_node_add_child (node, old_layer_node);
 
-  cogl_framebuffer_clear4f (priv->new_offscreen, COGL_BUFFER_BIT_COLOR,
-                            0, 0, 0, 0);
+  st_theme_node_paint (priv->old_theme_node, &priv->old_paint_state,
+                       paint_context,
+                       old_layer_node, allocation, 255, resource_scale);
+
+  new_layer_node = clutter_layer_node_new_to_framebuffer (priv->new_offscreen,
+                                                          noop_pipeline);
+  clutter_paint_node_add_child (node, new_layer_node);
   cogl_framebuffer_orthographic (priv->new_offscreen,
                                  priv->offscreen_box.x1,
                                  priv->offscreen_box.y1,
                                  priv->offscreen_box.x2,
                                  priv->offscreen_box.y2, 0.0, 1.0);
   st_theme_node_paint (priv->new_theme_node, &priv->new_paint_state,
-                       priv->new_offscreen, allocation, 255, resource_scale);
+                       paint_context,
+                       new_layer_node, allocation, 255, resource_scale);
+
+  g_clear_object (&noop_pipeline);
 
   return TRUE;
 }
 
 void
 st_theme_node_transition_paint (StThemeNodeTransition *transition,
-                                CoglFramebuffer       *framebuffer,
+                                ClutterPaintContext   *paint_context,
+                                ClutterPaintNode      *node,
                                 ClutterActorBox       *allocation,
                                 guint8                 paint_opacity,
                                 float                  resource_scale)
 {
   StThemeNodeTransitionPrivate *priv = transition->priv;
+  g_autoptr (ClutterPaintNode) pipeline_node = NULL;
 
   CoglColor constant, pipeline_color;
   float tex_coords[] = {
@@ -370,7 +385,10 @@ st_theme_node_transition_paint (StThemeNodeTransition *transition,
 
       calculate_offscreen_box (transition, allocation);
       priv->needs_setup = clutter_actor_box_get_area (&priv->offscreen_box) == 0 ||
-                          !setup_framebuffers (transition, allocation,
+                          !setup_framebuffers (transition,
+                                               paint_context,
+                                               node,
+                                               allocation,
                                                resource_scale);
 
       if (priv->needs_setup) /* setting up framebuffers failed */
@@ -379,20 +397,19 @@ st_theme_node_transition_paint (StThemeNodeTransition *transition,
 
   cogl_color_init_from_4f (&constant, 0., 0., 0.,
                            clutter_timeline_get_progress (priv->timeline));
-  cogl_pipeline_set_layer_combine_constant (priv->material, 1, &constant);
+  cogl_pipeline_set_layer_combine_constant (priv->pipeline, 1, &constant);
 
   cogl_color_init_from_4f (&pipeline_color,
                            paint_opacity / 255.0, paint_opacity / 255.0,
                            paint_opacity / 255.0, paint_opacity / 255.0);
-  cogl_pipeline_set_color (priv->material, &pipeline_color);
+  cogl_pipeline_set_color (priv->pipeline, &pipeline_color);
 
-  cogl_framebuffer_draw_multitextured_rectangle (framebuffer,
-                                                 priv->material,
-                                                 priv->offscreen_box.x1,
-                                                 priv->offscreen_box.y1,
-                                                 priv->offscreen_box.x2,
-                                                 priv->offscreen_box.y2,
-                                                 tex_coords, 8);
+  pipeline_node = clutter_pipeline_node_new (priv->pipeline);
+  clutter_paint_node_add_child (node, pipeline_node);
+  clutter_paint_node_add_multitexture_rectangle (pipeline_node,
+                                                 &priv->offscreen_box,
+                                                 tex_coords,
+                                                 8);
 }
 
 static void
@@ -409,7 +426,7 @@ st_theme_node_transition_dispose (GObject *object)
   g_clear_object (&priv->old_offscreen);
   g_clear_object (&priv->new_offscreen);
 
-  g_clear_object (&priv->material);
+  g_clear_object (&priv->pipeline);
 
   if (priv->timeline)
     {

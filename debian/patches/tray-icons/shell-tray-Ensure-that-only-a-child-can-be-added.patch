@@ -1,0 +1,22 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 1 May 2024 04:19:34 +0200
+Subject: shell-tray: Ensure that only a child can be added
+
+Origin: https://gitlab.gnome.org/3v1n0/gnome-shell/-/commits/tray-offscreen-xwindows
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2012388
+---
+ src/shell-tray-icon.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/shell-tray-icon.c b/src/shell-tray-icon.c
+index e1ff1cd..b242533 100644
+--- a/src/shell-tray-icon.c
++++ b/src/shell-tray-icon.c
+@@ -245,6 +245,7 @@ shell_tray_icon_set_child (ShellTrayIcon *tray_icon,
+   MetaDisplay *display = shell_global_get_display (shell_global_get ());
+ 
+   g_return_if_fail (tray_icon != NULL);
++  g_return_if_fail (tray_icon->tray_child == NULL);
+   g_return_if_fail (tray_child != NULL);
+ 
+   /* We do all this now rather than computing it on the fly later,

@@ -1,5 +1,3 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
@@ -58,7 +56,10 @@ class Dialog extends St.Widget {
         this._dialog.add_child(this.contentLayout);
 
         this.buttonLayout = new St.Widget({
-            layout_manager: new Clutter.BoxLayout({homogeneous: true}),
+            layout_manager: new Clutter.BoxLayout({
+                spacing: 12,
+                homogeneous: true,
+            }),
         });
         this._dialog.add_child(this.buttonLayout);
     }

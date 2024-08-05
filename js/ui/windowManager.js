@@ -1,6 +1,5 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-
 import Clutter from 'gi://Clutter';
+import Cogl from 'gi://Cogl';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
@@ -149,7 +148,12 @@ class WindowDimmer extends Clutter.BrightnessContrastEffect {
 
     setDimmed(dimmed, animate) {
         let val = 127 * (1 + (dimmed ? 1 : 0) * DIM_BRIGHTNESS);
-        let color = Clutter.Color.new(val, val, val, 255);
+        const color = new Cogl.Color({
+            red: val,
+            green: val,
+            blue: val,
+            alpha: 255,
+        });
 
         this.actor.ease_property(`@effects.${this.name}.brightness`, color, {
             mode: Clutter.AnimationMode.LINEAR,

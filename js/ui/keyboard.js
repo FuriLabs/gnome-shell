@@ -1,4 +1,3 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
@@ -1787,6 +1786,8 @@ export const Keyboard = GObject.registerClass({
     }
 
     _animateShow() {
+        Meta.disable_unredirect_for_display(global.display);
+
         if (this._focusWindow)
             this._animateWindow(this._focusWindow, true);
 
@@ -1841,6 +1842,7 @@ export const Keyboard = GObject.registerClass({
 
     _animateHideComplete() {
         Main.layoutManager.keyboardBox.hide();
+        Meta.enable_unredirect_for_display(global.display);
     }
 
     gestureProgress(delta) {

@@ -78,7 +78,8 @@ G_DEFINE_TYPE_WITH_PRIVATE (StIcon, st_icon, ST_TYPE_WIDGET)
 
 static void st_icon_update               (StIcon *icon);
 static gboolean st_icon_update_icon_size (StIcon *icon);
-static void st_icon_update_shadow_pipeline (StIcon *icon);
+static void st_icon_update_shadow_pipeline (StIcon              *icon,
+                                            ClutterPaintContext *paint_context);
 static void st_icon_clear_shadow_pipeline (StIcon *icon);
 
 static GIcon *default_gicon = NULL;
@@ -200,33 +201,30 @@ st_icon_dispose (GObject *gobject)
 }
 
 static void
-st_icon_paint (ClutterActor        *actor,
-               ClutterPaintContext *paint_context)
+st_icon_paint_node (ClutterActor        *actor,
+                    ClutterPaintNode    *node,
+                    ClutterPaintContext *paint_context)
 {
   StIcon *icon = ST_ICON (actor);
   StIconPrivate *priv = icon->priv;
 
-  st_widget_paint_background (ST_WIDGET (actor), paint_context);
+  st_widget_paint_background (ST_WIDGET (actor), node, paint_context);
 
   if (priv->icon_texture)
     {
-      st_icon_update_shadow_pipeline (icon);
+      st_icon_update_shadow_pipeline (icon, paint_context);
 
       if (priv->shadow_pipeline)
         {
           ClutterActorBox allocation;
-          CoglFramebuffer *framebuffer;
 
           clutter_actor_get_allocation_box (priv->icon_texture, &allocation);
-          framebuffer = clutter_paint_context_get_framebuffer (paint_context);
           _st_paint_shadow_with_opacity (priv->shadow_spec,
-                                         framebuffer,
+                                         node,
                                          priv->shadow_pipeline,
                                          &allocation,
                                          clutter_actor_get_paint_opacity (priv->icon_texture));
         }
-
-      clutter_actor_paint (priv->icon_texture, paint_context);
     }
 }
 
@@ -300,7 +298,7 @@ st_icon_class_init (StIconClass *klass)
   object_class->set_property = st_icon_set_property;
   object_class->dispose = st_icon_dispose;
 
-  actor_class->paint = st_icon_paint;
+  actor_class->paint_node = st_icon_paint_node;
 
   widget_class->style_changed = st_icon_style_changed;
   actor_class->resource_scale_changed = st_icon_resource_scale_changed;
@@ -419,7 +417,8 @@ st_icon_clear_shadow_pipeline (StIcon *icon)
 }
 
 static void
-st_icon_update_shadow_pipeline (StIcon *icon)
+st_icon_update_shadow_pipeline (StIcon              *icon,
+                                ClutterPaintContext *paint_context)
 {
   StIconPrivate *priv = icon->priv;
 
@@ -440,7 +439,8 @@ st_icon_update_shadow_pipeline (StIcon *icon)
 
           priv->shadow_pipeline =
             _st_create_shadow_pipeline_from_actor (priv->shadow_spec,
-                                                   priv->icon_texture);
+                                                   priv->icon_texture,
+                                                   paint_context);
 
           if (priv->shadow_pipeline)
             graphene_size_init (&priv->shadow_size, width, height);

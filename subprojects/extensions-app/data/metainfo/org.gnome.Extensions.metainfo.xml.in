@@ -54,24 +54,8 @@
   </description>
 
   <releases>
-    <release version="46.4" date="2024-08-03"/>
-    <release version="46.3.1" date="2024-06-29"/>
-    <release version="46.3" date="2024-06-29"/>
-    <release version="46.2" date="2024-05-25"/>
-    <release version="46.1" date="2024-04-20">
-      <description>
-        <p>Make sure all icon-only buttons have tooltips.</p>
-        <p>Fix empty rows for extensions with &quot;&amp;&quot; in their name.</p>
-      </description>
-    </release>
-    <release version="46.0" date="2024-03-16">
-      <description>
-        <p>Streamline layout to be fully adaptive on mobile.</p>
-        <p>Improve handling of extensions in error state.</p>
-        <p>Remember window state.</p>
-        <p>Use adaptive dialogs.</p>
-      </description>
-    </release>
+    <release version="47.beta" date="2024-08-03" type="development"/>
+    <release version="47.alpha" date="2024-06-29" type="development"/>
   </releases>
 
   <screenshots>

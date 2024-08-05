@@ -1,6 +1,5 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-
 import Clutter from 'gi://Clutter';
+import Cogl from 'gi://Cogl';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
 import Gio from 'gi://Gio';
@@ -54,8 +53,8 @@ const DRAG_PAGE_SWITCH_REPEAT_TIMEOUT = 1000;
 
 const DELAYED_MOVE_TIMEOUT = 200;
 
-const DIALOG_SHADE_NORMAL = Clutter.Color.from_pixel(0x000000cc);
-const DIALOG_SHADE_HIGHLIGHT = Clutter.Color.from_pixel(0x00000055);
+const DIALOG_SHADE_NORMAL = new Cogl.Color({red: 0, green: 0, blue: 0, alpha: 204});
+const DIALOG_SHADE_HIGHLIGHT = new Cogl.Color({red: 0, green: 0, blue: 0, alpha: 85});
 
 const DEFAULT_FOLDERS = {
     'Utilities': {
@@ -173,13 +172,8 @@ export const AppGrid = GObject.registerClass({
 
     _updatePadding() {
         const node = this.get_theme_node();
-        const {rowSpacing, columnSpacing} = this.layoutManager;
 
         const padding = this._indicatorsPadding.copy();
-        padding.left += rowSpacing;
-        padding.right += rowSpacing;
-        padding.top += columnSpacing;
-        padding.bottom += columnSpacing;
         ['top', 'right', 'bottom', 'left'].forEach(side => {
             padding[side] += node.get_length(`page-padding-${side}`);
         });
@@ -2738,7 +2732,7 @@ export const AppFolderDialog = GObject.registerClass({
             this.child.get_transformed_position();
 
         this.ease({
-            background_color: Clutter.Color.from_pixel(0x00000000),
+            background_color: new Cogl.Color({red: 0, green: 0, blue: 0, alpha: 0}),
             duration: FOLDER_DIALOG_ANIMATION_TIME,
             mode: Clutter.AnimationMode.EASE_OUT_QUAD,
         });

@@ -6,11 +6,13 @@
 #include <stdlib.h>
 
 #include <meta/display.h>
-#include <meta/group.h>
 #include <meta/util.h>
 #include <meta/window.h>
 #include <meta/meta-workspace-manager.h>
 #include <meta/meta-startup-notification.h>
+#ifdef HAVE_X11_CLIENT
+#include <meta/meta-x11-group.h>
+#endif
 
 #include "shell-window-tracker-private.h"
 #include "shell-app-private.h"
@@ -164,31 +166,26 @@ get_app_from_window_wmclass (MetaWindow  *window)
      much of the complexity here comes from the desire to support
      Chrome apps.
 
-     From https://bugzilla.gnome.org/show_bug.cgi?id=673657#c13
+     Currently Chrome sets WM_CLASS to "Google-chrome" and Chromium sets
+     it to "Chromium-browser". That happens for the normal browser window, as
+     well as for its shortcut windows (which can be created through Save and
+     share -> Create shortcut...)
 
-     Currently chrome sets WM_CLASS as follows (the first string is the 'instance',
-     the second one is the 'class':
+     The .desktop file names are formatted like so:
+     ${APPLICATION_ID}.flextop.chrome-${WEBSITE_ID}-${PROFILE}.desktop
+     This file has a matching StartupWMClass, which is formatted like so:
+     crx_${WEBSITE_ID}
 
-     For the normal browser:
-     WM_CLASS(STRING) = "chromium", "Chromium"
+     e.g. the .desktop file for a Chromium shortcut to https://handbook.gnome.org
+     would be located at:
 
-     For a bookmarked page (through 'Tools -> Create application shortcuts')
-     WM_CLASS(STRING) = "wiki.gnome.org__GnomeShell_ApplicationBased", "Chromium"
-
-     For an application from the chrome store (with a .desktop file created through
-     right click, "Create shortcuts" from Chrome's apps overview)
-     WM_CLASS(STRING) = "crx_blpcfgokakmgnkcojhhkbfbldkacnbeo", "Chromium"
-
-     The .desktop file has a matching StartupWMClass, but the name differs, e.g. for
-     the store app (youtube) there is
-
-     .local/share/applications/chrome-blpcfgokakmgnkcojhhkbfbldkacnbeo-Default.desktop
+     .local/share/applications/org.chromium.Chromium.flextop.chrome-bmfccmnckbnljdcnoglodbceoplecbkl-Default.desktop
 
      with
 
-     StartupWMClass=crx_blpcfgokakmgnkcojhhkbfbldkacnbeo
+     StartupWMClass=crx_bmfccmnckbnljdcnoglodbceoplecbkl
 
-     Note that chromium (but not google-chrome!) includes a StartupWMClass=chromium
+     Note that Chromium (but not Chrome!) includes a StartupWMClass=chromium-browser
      in their .desktop file, so we must match the instance first.
 
      Also note that in the good case (regular gtk+ app without hacks), instance and
@@ -308,10 +305,14 @@ static ShellApp*
 get_app_from_window_group (ShellWindowTracker  *tracker,
                            MetaWindow          *window)
 {
+#ifdef HAVE_X11_CLIENT
   ShellApp *result;
   GSList *group_windows;
   MetaGroup *group;
   GSList *iter;
+
+  if (meta_window_get_client_type (window) != META_WINDOW_CLIENT_TYPE_X11)
+    return NULL;
 
   group = meta_window_x11_get_group (window);
   if (group == NULL)
@@ -340,6 +341,9 @@ get_app_from_window_group (ShellWindowTracker  *tracker,
     g_object_ref (result);
 
   return result;
+#else
+  return NULL;
+#endif
 }
 
 /*
@@ -463,7 +467,7 @@ get_app_for_window (ShellWindowTracker    *tracker,
   /* If we didn't get a startup-notification match, see if we matched
    * any other windows in the group.
    */
-  if (result == NULL && meta_window_get_client_type (window) == META_WINDOW_CLIENT_TYPE_X11)
+  if (result == NULL)
     result = get_app_from_window_group (tracker, window);
 
   /* Our last resort - we create a fake app from the window */

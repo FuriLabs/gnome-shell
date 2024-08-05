@@ -1,4 +1,3 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Gst from 'gi://Gst?version=1.0';
@@ -31,6 +30,28 @@ const DEFAULT_DRAW_CURSOR = true;
 const PIPELINE_BLOCKLIST_FILENAME = 'gnome-shell-screencast-pipeline-blocklist';
 
 const PIPELINES = [
+    {
+        id: 'hwenc-dmabuf-h264-vaapi-lp',
+        fileExtension: 'mp4',
+        pipelineString:
+            'capsfilter caps=video/x-raw(memory:DMABuf),format=DMA_DRM,max-framerate=%F/1 ! \
+             vapostproc ! \
+             vah264lpenc ! \
+             queue ! \
+             h264parse ! \
+             mp4mux fragment-duration=500 fragment-mode=first-moov-then-finalise',
+    },
+    {
+        id: 'hwenc-dmabuf-h264-vaapi',
+        fileExtension: 'mp4',
+        pipelineString:
+            'capsfilter caps=video/x-raw(memory:DMABuf),format=DMA_DRM,max-framerate=%F/1 ! \
+             vapostproc ! \
+             vah264enc ! \
+             queue ! \
+             h264parse ! \
+             mp4mux fragment-duration=500 fragment-mode=first-moov-then-finalise',
+    },
     {
         id: 'swenc-dmabuf-h264-openh264',
         fileExtension: 'mp4',

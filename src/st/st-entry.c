@@ -107,7 +107,7 @@ struct _StEntryPrivate
 
   StShadow     *shadow_spec;
 
-  CoglPipeline *text_shadow_material;
+  CoglPipeline *text_shadow_pipeline;
   gfloat        shadow_width;
   gfloat        shadow_height;
 };
@@ -216,7 +216,7 @@ st_entry_dispose (GObject *object)
   StEntry *entry = ST_ENTRY (object);
   StEntryPrivate *priv = ST_ENTRY_PRIV (entry);
 
-  g_clear_object (&priv->text_shadow_material);
+  g_clear_object (&priv->text_shadow_pipeline);
 
   G_OBJECT_CLASS (st_entry_parent_class)->dispose (object);
 }
@@ -245,7 +245,7 @@ st_entry_style_changed (StWidget *self)
   StEntryPrivate *priv = ST_ENTRY_PRIV (self);
   StThemeNode *theme_node;
   StShadow *shadow_spec;
-  ClutterColor color;
+  CoglColor color;
   gdouble size;
 
   theme_node = st_widget_get_theme_node (self);
@@ -254,7 +254,7 @@ st_entry_style_changed (StWidget *self)
   if (!priv->shadow_spec || !shadow_spec ||
       !st_shadow_equal (shadow_spec, priv->shadow_spec))
     {
-      g_clear_object (&priv->text_shadow_material);
+      g_clear_object (&priv->text_shadow_pipeline);
 
       g_clear_pointer (&priv->shadow_spec, st_shadow_unref);
       if (shadow_spec)
@@ -555,7 +555,7 @@ clutter_text_cursor_changed (ClutterText *text,
 
   st_entry_update_hint_visibility (entry);
 
-  g_clear_object (&priv->text_shadow_material);
+  g_clear_object (&priv->text_shadow_pipeline);
 }
 
 static void
@@ -569,7 +569,7 @@ clutter_text_changed_cb (GObject    *object,
   st_entry_update_hint_visibility (entry);
 
   /* Since the text changed, force a regen of the shadow texture */
-  g_clear_object (&priv->text_shadow_material);
+  g_clear_object (&priv->text_shadow_pipeline);
 
   g_object_notify_by_pspec (G_OBJECT (entry), props[PROP_TEXT]);
 }
@@ -581,7 +581,7 @@ invalidate_shadow_pipeline (GObject    *object,
 {
   StEntryPrivate *priv = ST_ENTRY_PRIV (entry);
 
-  g_clear_object (&priv->text_shadow_material);
+  g_clear_object (&priv->text_shadow_pipeline);
 }
 
 static void
@@ -817,13 +817,13 @@ st_entry_leave_event (ClutterActor *actor,
 }
 
 static void
-st_entry_paint (ClutterActor        *actor,
-                ClutterPaintContext *paint_context)
+st_entry_paint_node (ClutterActor        *actor,
+                     ClutterPaintNode    *node,
+                     ClutterPaintContext *paint_context)
 {
   StEntryPrivate *priv = ST_ENTRY_PRIV (actor);
-  ClutterActorClass *parent_class;
 
-  st_widget_paint_background (ST_WIDGET (actor), paint_context);
+  st_widget_paint_background (ST_WIDGET (actor), node, paint_context);
 
   if (priv->shadow_spec)
     {
@@ -833,41 +833,32 @@ st_entry_paint (ClutterActor        *actor,
       clutter_actor_get_allocation_box (priv->entry, &allocation);
       clutter_actor_box_get_size (&allocation, &width, &height);
 
-      if (priv->text_shadow_material == NULL ||
+      if (priv->text_shadow_pipeline == NULL ||
           width != priv->shadow_width ||
           height != priv->shadow_height)
         {
-          CoglPipeline *material;
+          CoglPipeline *pipeline;
 
-          g_clear_object (&priv->text_shadow_material);
+          g_clear_object (&priv->text_shadow_pipeline);
 
-          material = _st_create_shadow_pipeline_from_actor (priv->shadow_spec,
-                                                            priv->entry);
+          pipeline = _st_create_shadow_pipeline_from_actor (priv->shadow_spec,
+                                                            priv->entry,
+                                                            paint_context);
 
           priv->shadow_width = width;
           priv->shadow_height = height;
-          priv->text_shadow_material = material;
+          priv->text_shadow_pipeline = pipeline;
         }
 
-      if (priv->text_shadow_material != NULL)
+      if (priv->text_shadow_pipeline != NULL)
         {
-          CoglFramebuffer *framebuffer =
-            clutter_paint_context_get_framebuffer (paint_context);
-
           _st_paint_shadow_with_opacity (priv->shadow_spec,
-                                         framebuffer,
-                                         priv->text_shadow_material,
+                                         node,
+                                         priv->text_shadow_pipeline,
                                          &allocation,
                                          clutter_actor_get_paint_opacity (priv->entry));
         }
     }
-
-  /* Since we paint the background ourselves, chain to the parent class
-   * of StWidget, to avoid painting it twice.
-   * This is needed as we still want to paint children.
-   */
-  parent_class = g_type_class_peek_parent (st_entry_parent_class);
-  parent_class->paint (actor, paint_context);
 }
 
 static void
@@ -901,7 +892,7 @@ st_entry_class_init (StEntryClass *klass)
   actor_class->get_preferred_width = st_entry_get_preferred_width;
   actor_class->get_preferred_height = st_entry_get_preferred_height;
   actor_class->allocate = st_entry_allocate;
-  actor_class->paint = st_entry_paint;
+  actor_class->paint_node = st_entry_paint_node;
   actor_class->unmap = st_entry_unmap;
   actor_class->get_paint_volume = st_entry_get_paint_volume;
 
@@ -1104,7 +1095,7 @@ st_entry_init (StEntry *entry)
 
   priv->spacing = 6.0f;
 
-  priv->text_shadow_material = NULL;
+  priv->text_shadow_pipeline = NULL;
   priv->shadow_width = -1.;
   priv->shadow_height = -1.;
 

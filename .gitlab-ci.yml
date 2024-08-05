@@ -4,6 +4,15 @@ include:
   - remote: 'https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/bc70242ffb8402243e934659ecc1a2d1c89eca2b/templates/ci-fairy.yml'
   - project: 'Infrastructure/openshift-images/gnome-release-service'
     file: '/ci-templates/release-module.yml'
+  - component: gitlab.gnome.org/GNOME/citemplates/gnomeos-build-sysext@1.0.0-alpha
+    inputs:
+      meson-options:
+        -Dextensions_app=false
+        -Dextensions-tool:bash_completion=disabled
+
+build-sysext:
+  before_script:
+    - .gitlab-ci/install-gnomeos-sysext-dependencies.sh $CI_PROJECT_DIR/extension
 
 stages:
   - pre_review
@@ -29,7 +38,7 @@ default:
       - 'api_failure'
 
 variables:
-  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/40:x86_64-2024-04-29.0
+  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/40:x86_64-2024-07-16.0
   FDO_UPSTREAM_REPO: GNOME/gnome-shell
   BUNDLE: "extensions-git.flatpak"
   LINT_LOG: "eslint-report.xml"
@@ -204,6 +213,7 @@ build:
       - mutter
       - build
       - subprojects/gvc
+      - subprojects/jasmine-gjs
 
 test:
   stage: test
@@ -214,8 +224,9 @@ test:
   before_script:
     - sudo meson install -C mutter/build
     - mkdir -m 700 $XDG_RUNTIME_DIR
+    - mkdir -m 1777 /tmp/.X11-unix
   script:
-    - dbus-run-session -- xvfb-run meson test -C build --no-rebuild --timeout-multiplier 5
+    - dbus-run-session -- meson test -C build --no-rebuild --timeout-multiplier 5
   artifacts:
     expire_in: 1 day
     paths:
@@ -262,6 +273,8 @@ flatpak:
 
 nightly:
   extends: '.publish_nightly'
+  needs:
+    - flatpak
 
 distinfo:
   stage: deploy
@@ -286,8 +299,9 @@ dist:
   before_script:
     - sudo meson install -C mutter/build
     - mkdir -m 700 $XDG_RUNTIME_DIR
+    - mkdir -m 1777 /tmp/.X11-unix
   script:
-    - dbus-run-session xvfb-run meson dist -C build --include-subprojects
+    - dbus-run-session meson dist -C build --include-subprojects
   rules:
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
       changes:

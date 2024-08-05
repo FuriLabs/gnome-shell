@@ -1,5 +1,3 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*
-
 import Clutter from 'gi://Clutter';
 import Meta from 'gi://Meta';
 import St from 'gi://St';
@@ -96,12 +94,6 @@ export class WindowMenu extends PopupMenu.PopupMenu {
         });
         if (!window.allows_resize())
             item.setSensitive(false);
-
-        if (!window.titlebar_is_onscreen() && type !== Meta.WindowType.DOCK && type !== Meta.WindowType.DESKTOP) {
-            this.addAction(_('Move Titlebar Onscreen'), () => {
-                window.shove_titlebar_onscreen();
-            });
-        }
 
         item = this.addAction(_('Always on Top'), () => {
             if (window.is_above())

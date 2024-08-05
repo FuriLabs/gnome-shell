@@ -1,5 +1,3 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-
 import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
 import Pango from 'gi://Pango';
@@ -173,7 +171,7 @@ class CapsLockWarning extends St.Label {
             ...params,
         });
 
-        this.text = _('Caps lock is on.');
+        this.text = _('Caps lock is on');
 
         this.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
         this.clutter_text.line_wrap = true;

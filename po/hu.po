@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-shell master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-shell/issues/\n"
-"POT-Creation-Date: 2024-05-08 12:46+0000\n"
-"PO-Revision-Date: 2024-05-19 10:18+0200\n"
+"POT-Creation-Date: 2024-05-09 12:59+0000\n"
+"PO-Revision-Date: 2024-05-19 10:26+0200\n"
 "Last-Translator: Balázs Úr <ur.balazs at fsf dot hu>\n"
 "Language-Team: Hungarian <openscope at fsf dot hu>\n"
 "Language: hu\n"
@@ -122,7 +122,7 @@ msgstr "Képernyőkép készítése egy ablakról"
 msgid "Record a screencast interactively"
 msgstr "Képernyőfelvétel rögzítése interaktívan"
 
-#: data/50-gnome-shell-system.xml:6 js/ui/messageTray.js:1294
+#: data/50-gnome-shell-system.xml:6 js/ui/messageTray.js:1295
 msgid "System"
 msgstr "Rendszer"
 
@@ -654,12 +654,15 @@ msgid "Session Already Running"
 msgstr "Egy munkamenet már fut"
 
 #: js/gdm/loginDialog.js:454
+#| msgid ""
+#| "Force stopping will quit any running apps and processes, and could result "
+#| "in data loss."
 msgid ""
 "Force stopping will quit any running apps and processes, and could result in "
-"data loss."
+"data loss"
 msgstr ""
 "A kényszerített leállítás kilépteti az összes futó alkalmazást és "
-"folyamatot, és adatvesztést eredményezhet."
+"folyamatot, és adatvesztést eredményezhet"
 
 #: js/gdm/loginDialog.js:474
 msgid "Force Stop"
@@ -1157,16 +1160,20 @@ msgstr "Összes értesítés törlése"
 #. Translators: %s is an application name
 #: js/ui/closeDialog.js:44
 #, javascript-format
-msgid "“%s” is not responding."
-msgstr "„%s” nem válaszol."
+#| msgid "“%s” is not responding."
+msgid "“%s” Is Not Responding"
+msgstr "A(z) „%s” nem válaszol"
 
 #: js/ui/closeDialog.js:45
+#| msgid ""
+#| "You may choose to wait a short while for it to continue or force the app "
+#| "to quit entirely."
 msgid ""
 "You may choose to wait a short while for it to continue or force the app to "
-"quit entirely."
+"quit entirely"
 msgstr ""
 "Várhat egy kicsit a folytatódására, vagy kikényszerítheti az alkalmazás "
-"teljes kilépését."
+"teljes kilépését"
 
 #: js/ui/closeDialog.js:73
 msgid "Force Quit"
@@ -1198,9 +1205,12 @@ msgid "Open with %s"
 msgstr "Megnyitás ezzel: %s"
 
 #: js/ui/components/networkAgent.js:97
+#| msgid ""
+#| "Alternatively you can connect by pushing the “WPS” button on your router."
 msgid ""
-"Alternatively you can connect by pushing the “WPS” button on your router."
-msgstr "Alternatívaként kapcsolódhat a „WPS” gomb megnyomásával az eszközön."
+"Alternatively you can connect by pushing the “WPS” button on your router"
+msgstr ""
+"Alternatívaként kapcsolódhat az útválasztón lévő „WPS” gomb megnyomásával"
 
 #: js/ui/components/networkAgent.js:109 js/ui/status/bluetooth.js:246
 #: js/ui/status/network.js:360 js/ui/status/network.js:444
@@ -1230,12 +1240,14 @@ msgstr "Hitelesítés szükséges"
 
 #: js/ui/components/networkAgent.js:373 js/ui/components/networkAgent.js:752
 #, javascript-format
+#| msgid ""
+#| "Passwords or encryption keys are required to access the wireless network "
+#| "“%s”."
 msgid ""
-"Passwords or encryption keys are required to access the wireless network "
-"“%s”."
+"Passwords or encryption keys are required to access the wireless network “%s”"
 msgstr ""
 "Jelszavak vagy titkosítási kulcsok szükségesek a(z) „%s” vezeték nélküli "
-"hálózat eléréséhez."
+"hálózat eléréséhez"
 
 #: js/ui/components/networkAgent.js:377 js/ui/components/networkAgent.js:756
 msgid "Wired 802.1X authentication"
@@ -1265,8 +1277,9 @@ msgstr "PIN"
 #: js/ui/components/networkAgent.js:761 js/ui/components/networkAgent.js:773
 #: js/ui/components/networkAgent.js:777
 #, javascript-format
-msgid "A password is required to connect to “%s”."
-msgstr "Jelszó szükséges a kapcsolódáshoz a következőhöz: „%s”."
+#| msgid "A password is required to connect to “%s”."
+msgid "A password is required to connect to “%s”"
+msgstr "Jelszó szükséges a következőhöz történő kapcsolódáshoz: „%s”"
 
 #: js/ui/components/networkAgent.js:776
 msgid "VPN password"
@@ -1364,7 +1377,8 @@ msgid "No Events"
 msgstr "Nincsenek események"
 
 #: js/ui/dateMenu.js:413
-msgid "Add world clocks…"
+#| msgid "Add world clocks…"
+msgid "Add World Clocks…"
 msgstr "Világórák hozzáadása…"
 
 #: js/ui/dateMenu.js:414
@@ -1376,19 +1390,22 @@ msgid "Loading…"
 msgstr "Betöltés…"
 
 #: js/ui/dateMenu.js:714
-msgid "Go online for weather information"
+#| msgid "Go online for weather information"
+msgid "Go Online for Weather Information"
 msgstr "Időjárás-információkért kapcsolódjon az internetre"
 
 #: js/ui/dateMenu.js:716
-msgid "Weather information is currently unavailable"
-msgstr "Az időjárás-információk jelenleg nem érhetőek el"
+#| msgid "Weather information is currently unavailable"
+msgid "Weather Information Unavailable"
+msgstr "Az időjárás-információk nem érhetőek el"
 
 #: js/ui/dateMenu.js:726
 msgid "Weather"
 msgstr "Időjárás"
 
 #: js/ui/dateMenu.js:728
-msgid "Select weather location…"
+#| msgid "Select weather location…"
+msgid "Select Weather Location…"
 msgstr "Válasszon időjárási helyet…"
 
 #: js/ui/endSessionDialog.js:48
@@ -1404,17 +1421,21 @@ msgstr "Kijelentkezés"
 
 #: js/ui/endSessionDialog.js:52
 #, javascript-format
-msgid "%s will be logged out automatically in %d second."
-msgid_plural "%s will be logged out automatically in %d seconds."
-msgstr[0] "%s automatikusan ki fog jelentkezni %d másodperc múlva."
-msgstr[1] "%s automatikusan ki fog jelentkezni %d másodperc múlva."
+#| msgid "%s will be logged out automatically in %d second."
+#| msgid_plural "%s will be logged out automatically in %d seconds."
+msgid "%s will be logged out automatically in %d second"
+msgid_plural "%s will be logged out automatically in %d seconds"
+msgstr[0] "%s automatikusan ki fog jelentkezni %d másodperc múlva"
+msgstr[1] "%s automatikusan ki fog jelentkezni %d másodperc múlva"
 
 #: js/ui/endSessionDialog.js:58
 #, javascript-format
-msgid "You will be logged out automatically in %d second."
-msgid_plural "You will be logged out automatically in %d seconds."
-msgstr[0] "Automatikusan ki fog jelentkezni %d másodperc múlva."
-msgstr[1] "Automatikusan ki fog jelentkezni %d másodperc múlva."
+#| msgid "You will be logged out automatically in %d second."
+#| msgid_plural "You will be logged out automatically in %d seconds."
+msgid "You will be logged out automatically in %d second"
+msgid_plural "You will be logged out automatically in %d seconds"
+msgstr[0] "Automatikusan ki fog jelentkezni %d másodperc múlva"
+msgstr[1] "Automatikusan ki fog jelentkezni %d másodperc múlva"
 
 #: js/ui/endSessionDialog.js:65
 msgctxt "button"
@@ -1433,10 +1454,12 @@ msgstr "Frissítések telepítése és kikapcsolás"
 
 #: js/ui/endSessionDialog.js:75
 #, javascript-format
-msgid "The system will power off automatically in %d second."
-msgid_plural "The system will power off automatically in %d seconds."
-msgstr[0] "A rendszer automatikusan kikapcsol %d másodperc múlva."
-msgstr[1] "A rendszer automatikusan kikapcsol %d másodperc múlva."
+#| msgid "The system will power off automatically in %d second."
+#| msgid_plural "The system will power off automatically in %d seconds."
+msgid "The system will power off automatically in %d second"
+msgid_plural "The system will power off automatically in %d seconds"
+msgstr[0] "A rendszer automatikusan kikapcsol %d másodperc múlva"
+msgstr[1] "A rendszer automatikusan kikapcsol %d másodperc múlva"
 
 #: js/ui/endSessionDialog.js:79 js/ui/endSessionDialog.js:98
 msgctxt "checkbox"
@@ -1460,10 +1483,12 @@ msgstr "Frissítések telepítése és újraindítás"
 
 #: js/ui/endSessionDialog.js:94
 #, javascript-format
-msgid "The system will restart automatically in %d second."
-msgid_plural "The system will restart automatically in %d seconds."
-msgstr[0] "A rendszer automatikusan újraindul %d másodperc múlva."
-msgstr[1] "A rendszer automatikusan újraindul %d másodperc múlva."
+#| msgid "The system will restart automatically in %d second."
+#| msgid_plural "The system will restart automatically in %d seconds."
+msgid "The system will restart automatically in %d second"
+msgid_plural "The system will restart automatically in %d seconds"
+msgstr[0] "A rendszer automatikusan újraindul %d másodperc múlva"
+msgstr[1] "A rendszer automatikusan újraindul %d másodperc múlva"
 
 #: js/ui/endSessionDialog.js:102
 msgctxt "button"
@@ -1477,15 +1502,19 @@ msgstr "Újraindítás és frissítések telepítése"
 
 #: js/ui/endSessionDialog.js:113
 #, javascript-format
-msgid "The system will automatically restart and install updates in %d second."
+#| msgid ""
+#| "The system will automatically restart and install updates in %d second."
+#| msgid_plural ""
+#| "The system will automatically restart and install updates in %d seconds."
+msgid "The system will automatically restart and install updates in %d second"
 msgid_plural ""
-"The system will automatically restart and install updates in %d seconds."
+"The system will automatically restart and install updates in %d seconds"
 msgstr[0] ""
 "A rendszer %d másodperc múlva automatikusan újraindul és telepíti a "
-"frissítéseket."
+"frissítéseket"
 msgstr[1] ""
 "A rendszer %d másodperc múlva automatikusan újraindul és telepíti a "
-"frissítéseket."
+"frissítéseket"
 
 #: js/ui/endSessionDialog.js:120 js/ui/endSessionDialog.js:141
 msgctxt "button"
@@ -1521,10 +1550,11 @@ msgstr ""
 "mentést, valamint a számítógép be van-e dugva."
 
 #: js/ui/endSessionDialog.js:284
-msgid "Low battery power: please plug in before installing updates."
+#| msgid "Low battery power: please plug in before installing updates."
+msgid "Low battery power: please plug in before installing updates"
 msgstr ""
 "Alacsony telepfeszültség: a frissítések telepítése előtt dugja be eszközét a "
-"konnektorba."
+"konnektorba"
 
 #: js/ui/endSessionDialog.js:293
 msgid "Some applications are busy or have unsaved work"
@@ -1570,8 +1600,9 @@ msgid "Extension Updates Available"
 msgstr "Kiterjesztés-frissítések érhetők el"
 
 #: js/ui/extensionSystem.js:355
-msgid "Extension updates are ready to be installed."
-msgstr "A kiterjesztés-frissítések telepítésre készek."
+#| msgid "Extension updates are ready to be installed."
+msgid "Extension updates are ready to be installed"
+msgstr "A kiterjesztés-frissítések telepítésre készek"
 
 #: js/ui/inhibitShortcutsDialog.js:70
 msgid "Allow inhibiting shortcuts"
@@ -1590,8 +1621,9 @@ msgstr "Egy alkalmazás meg akarja gátolni a gyorsbillentyűk használatát"
 #. Translators: %s is a keyboard shortcut like "Super+x"
 #: js/ui/inhibitShortcutsDialog.js:81
 #, javascript-format
-msgid "You can restore shortcuts by pressing %s."
-msgstr "A(z) %s megnyomásával visszaállíthatja a gyorsbillentyűket."
+#| msgid "You can restore shortcuts by pressing %s."
+msgid "You can restore shortcuts by pressing %s"
+msgstr "A(z) %s megnyomásával visszaállíthatja a gyorsbillentyűket"
 
 #: js/ui/kbdA11yDialog.js:34
 msgid "Slow Keys Turned On"
@@ -1662,8 +1694,9 @@ msgstr "Nincsenek kiterjesztések telepítve"
 #. Translators: argument is an extension UUID.
 #: js/ui/lookingGlass.js:785
 #, javascript-format
-msgid "%s has not emitted any errors."
-msgstr "%s nem adott hibát."
+#| msgid "%s has not emitted any errors."
+msgid "%s has not emitted any errors"
+msgstr "%s nem adott hibát"
 
 #: js/ui/lookingGlass.js:791
 msgid "Hide Errors"
@@ -1738,8 +1771,9 @@ msgid "Screen Lock disabled"
 msgstr "Képernyőzárolás letiltva"
 
 #: js/ui/main.js:390
-msgid "Screen Locking requires the GNOME display manager."
-msgstr "A képernyőzároláshoz a GNOME kijelzőkezelő szükséges."
+#| msgid "Screen Locking requires the GNOME display manager."
+msgid "Screen Locking requires the GNOME display manager"
+msgstr "A képernyőzároláshoz a GNOME kijelzőkezelő szükséges"
 
 #. Translators: this is the string displayed in the header when a message
 #. source doesn't have a name
@@ -1994,8 +2028,9 @@ msgid "Searching…"
 msgstr "Keresés…"
 
 #: js/ui/search.js:833
-msgid "No results."
-msgstr "Nincs találat."
+#| msgid "No results."
+msgid "No results"
+msgstr "Nincs találat"
 
 #: js/ui/search.js:964
 #, javascript-format
@@ -2026,8 +2061,9 @@ msgid "Hide Text"
 msgstr "Szöveg elrejtése"
 
 #: js/ui/shellEntry.js:176
-msgid "Caps lock is on."
-msgstr "A Caps Lock be van kapcsolva."
+#| msgid "Caps lock is on."
+msgid "Caps lock is on"
+msgstr "A Caps Lock be van kapcsolva"
 
 #: js/ui/shellMountOperation.js:288
 msgid "Hidden Volume"
@@ -2044,19 +2080,24 @@ msgstr "Kulcsfájlokat használ"
 #. Translators: %s is the Disks application
 #: js/ui/shellMountOperation.js:302
 #, javascript-format
+#| msgid ""
+#| "To unlock a volume that uses keyfiles, use the <i>%s</i> utility instead."
 msgid ""
-"To unlock a volume that uses keyfiles, use the <i>%s</i> utility instead."
+"To unlock a volume that uses keyfiles, use the <i>%s</i> utility instead"
 msgstr ""
 "A kulcsfájlokat használó kötetek feloldásához használja inkább a(z) <i>%s</"
-"i> segédprogramot."
+"i> segédprogramot"
 
 #: js/ui/shellMountOperation.js:306
+#| msgid ""
+#| "You need an external utility like <i>Disks</i> to unlock a volume that "
+#| "uses keyfiles."
 msgid ""
 "You need an external utility like <i>Disks</i> to unlock a volume that uses "
-"keyfiles."
+"keyfiles"
 msgstr ""
 "Külső segédprogramra, például a <i>Lemezekre</i> van szüksége egy "
-"kulcsfájlokat használó kötet feloldásához."
+"kulcsfájlokat használó kötet feloldásához"
 
 #: js/ui/shellMountOperation.js:314
 msgid "PIM Number"
@@ -2077,8 +2118,9 @@ msgid "Open %s"
 msgstr "%s megnyitása"
 
 #: js/ui/shellMountOperation.js:438
-msgid "The PIM must be a number or empty."
-msgstr "A PIM-nek számnak vagy üresnek kell lennie."
+#| msgid "The PIM must be a number or empty."
+msgid "The PIM must be a number or empty"
+msgstr "A PIM-nek számnak vagy üresnek kell lennie"
 
 #: js/ui/status/accessibility.js:36
 msgid "Accessibility"
@@ -2247,9 +2289,11 @@ msgid "The app %s wants to access your location"
 msgstr "A(z) %s alkalmazás el szeretné érni a helyadatait"
 
 #: js/ui/status/location.js:351
-msgid "Location access can be changed at any time from the privacy settings."
+#| msgid ""
+#| "Location access can be changed at any time from the privacy settings."
+msgid "Location access can be changed at any time from the privacy settings"
 msgstr ""
-"A helyadatok elérése bármikor megváltoztatható az adatvédelmi beállításokban."
+"A helyadatok elérése bármikor megváltoztatható az adatvédelmi beállításokban"
 
 #: js/ui/status/location.js:359
 msgid "Deny Access"
@@ -2447,10 +2491,13 @@ msgid "Unauthorized Thunderbolt device"
 msgstr "Jogosulatlan Thunderbolt eszköz"
 
 #: js/ui/status/thunderbolt.js:315
+#| msgid ""
+#| "New device has been detected and needs to be authorized by an "
+#| "administrator."
 msgid ""
-"New device has been detected and needs to be authorized by an administrator."
+"New device has been detected and needs to be authorized by an administrator"
 msgstr ""
-"Új eszköz lett észlelve, de egy rendszergazdának hitelesítenie szükséges."
+"Új eszköz lett észlelve, de egy rendszergazdának hitelesítenie szükséges"
 
 #: js/ui/status/thunderbolt.js:321
 msgid "Thunderbolt authorization error"
@@ -2515,23 +2562,23 @@ msgstr "Csak a beépített"
 
 #. Translators: This is a time format for a date in
 #. long format
-#: js/ui/unlockDialog.js:374
+#: js/ui/unlockDialog.js:380
 msgid "%A %B %-d"
 msgstr "%B %-d. %A"
 
-#: js/ui/unlockDialog.js:380
+#: js/ui/unlockDialog.js:386
 msgid "Swipe up to unlock"
 msgstr "Húzza felfelé a feloldáshoz"
 
-#: js/ui/unlockDialog.js:381
+#: js/ui/unlockDialog.js:387
 msgid "Click or press a key to unlock"
 msgstr "Kattintson vagy nyomjon meg egy billentyűt a feloldáshoz"
 
-#: js/ui/unlockDialog.js:564
+#: js/ui/unlockDialog.js:570
 msgid "Unlock Window"
 msgstr "Ablak feloldása"
 
-#: js/ui/unlockDialog.js:573
+#: js/ui/unlockDialog.js:579
 msgid "Log in as another user"
 msgstr "Bejelentkezés más felhasználóként"
 
@@ -2546,8 +2593,9 @@ msgid "Welcome to %s"
 msgstr "Üdvözli a %s"
 
 #: js/ui/welcomeDialog.js:54
-msgid "If you want to learn your way around, check out the tour."
-msgstr "Ha szeretné kiismerni, hogy mi merre van, nézze meg a bemutatót."
+#| msgid "If you want to learn your way around, check out the tour."
+msgid "If you want to learn your way around, check out the tour"
+msgstr "Ha szeretné kiismerni, hogy mi merre van, nézze meg a bemutatót"
 
 #: js/ui/welcomeDialog.js:63
 msgid "Skip"
@@ -2689,8 +2737,9 @@ msgid "Failed to launch “%s”"
 msgstr "„%s” indítása meghiúsult"
 
 #: src/shell-keyring-prompt.c:764
-msgid "Passwords do not match."
-msgstr "A jelszavak nem egyeznek."
+#| msgid "Passwords do not match."
+msgid "Passwords do not match"
+msgstr "A jelszavak nem egyeznek"
 
 #: src/shell-keyring-prompt.c:772
 msgid "Password cannot be blank"
@@ -2896,8 +2945,9 @@ msgid "No Results Found"
 msgstr "Nincs találat"
 
 #: subprojects/extensions-app/data/ui/extensions-window.ui:253
-msgid "Try a different search."
-msgstr "Próbálkozzon egy másik kereséssel."
+#| msgid "Try a different search."
+msgid "Try a different search"
+msgstr "Próbáljon egy másik keresést"
 
 #: subprojects/extensions-app/data/ui/extensions-window.ui:264
 msgid "No Installed Extensions"

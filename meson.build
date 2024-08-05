@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '46.4',
+  version: '47.beta',
   meson_version: '>= 0.58.0',
   license: 'GPLv2+'
 )
@@ -10,7 +10,7 @@ split_version = meson.project_version().split('.')
 # the Cogl and Clutter libraries also use this API version.
 # The API version is increased each development cycle,
 # starting with 0 in 3.23.x
-mutter_api_version = '14'
+mutter_api_version = '15'
 
 clutter_pc = 'mutter-clutter-' + mutter_api_version
 cogl_pc = 'mutter-cogl-' + mutter_api_version
@@ -26,9 +26,9 @@ gio_req = '>= 2.79.2'
 gi_req = '>= 1.49.1'
 gjs_req = '>= 1.73.1'
 gtk_req = '>= 4.0'
-mutter_req = '>= 46.0'
+mutter_req = '>= 47.beta'
 polkit_req = '>= 0.100'
-schemas_req = '>= 46.beta'
+schemas_req = '>= 47.alpha'
 systemd_req = '>= 246'
 ibus_req = '>= 1.5.19'
 gnome_desktop_req = '>= 40'
@@ -87,9 +87,15 @@ cogl_pango_dep = dependency(cogl_pango_pc, version: mutter_req)
 mutter_dep = dependency(libmutter_pc, version: mutter_req)
 polkit_dep = dependency('polkit-agent-1', version: polkit_req)
 ibus_dep = dependency('ibus-1.0', version: ibus_req)
-x11_dep = dependency('x11')
 schemas_dep = dependency('gsettings-desktop-schemas', version: schemas_req)
 gnome_desktop_dep = dependency('gnome-desktop-4', version: gnome_desktop_req)
+
+have_x11 = mutter_dep.get_variable('have_x11') == 'true'
+have_x11_client = mutter_dep.get_variable('have_x11_client') == 'true'
+if have_x11_client or have_x11
+  x11_dep = dependency('x11')
+endif
+
 
 nm_deps = []
 if get_option('networkmanager')
@@ -99,6 +105,11 @@ if get_option('networkmanager')
   have_networkmanager = true
 else
   have_networkmanager = false
+endif
+
+have_portal_helper = get_option('portal_helper')
+if have_portal_helper and not have_networkmanager
+  error('Portal helper requires networkmanager support')
 endif
 
 if get_option('camera_monitor')
@@ -145,6 +156,8 @@ cdata.set_quoted('PACKAGE_VERSION', meson.project_version())
 cdata.set('HAVE_NETWORKMANAGER', have_networkmanager)
 cdata.set('HAVE_PIPEWIRE', have_pipewire)
 cdata.set('HAVE_SYSTEMD', have_systemd)
+cdata.set('HAVE_X11', have_x11)
+cdata.set('HAVE_X11_CLIENT', have_x11_client)
 
 cdata.set('HAVE_FDWALK', cc.has_function('fdwalk'))
 cdata.set('HAVE_MALLINFO', cc.has_function('mallinfo'))
@@ -285,6 +298,8 @@ if get_option('tests')
   common_test_env.set('GSETTINGS_BACKEND', 'memory')
   common_test_env.set('XDG_CURRENT_DESKTOP', '')
 
+  jasmine = find_program('jasmine')
+
   add_test_setup('default',
     is_default: true,
     env: common_test_env,
@@ -298,7 +313,7 @@ subdir('src')
 subdir('po')
 subdir('data')
 
-if get_option('tests')
+if get_option('tests') and have_x11_client
   subdir('tests')
 endif
 
@@ -316,6 +331,8 @@ meson.add_dist_script('meson/generate-stylesheets.py')
 meson.add_dist_script('meson/check-version.py', meson.project_version(), 'NEWS')
 
 summary_options = {
+  'x11': have_x11,
+  'x11_client': have_x11_client,
   'camera_monitor': get_option('camera_monitor'),
   'networkmanager': get_option('networkmanager'),
   'systemd': get_option('systemd'),

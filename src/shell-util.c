@@ -23,7 +23,9 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <meta/meta-context.h>
 #include <meta/display.h>
+#ifdef HAVE_X11_CLIENT
 #include <meta/meta-x11-display.h>
+#endif
 
 #include <locale.h>
 #ifdef HAVE__NL_TIME_FIRST_WEEKDAY
@@ -617,6 +619,7 @@ shell_util_systemd_call (const char           *command,
                          gpointer              user_data)
 {
   g_autoptr (GTask) task = g_task_new (NULL, cancellable, callback, user_data);
+  g_autoptr (GVariant) params_owned = g_variant_ref_sink (g_steal_pointer (&params));
 
 #ifdef HAVE_SYSTEMD
   g_autoptr (GDBusConnection) connection = NULL;
@@ -693,7 +696,7 @@ shell_util_systemd_call (const char           *command,
                           "/org/freedesktop/systemd1",
                           "org.freedesktop.systemd1.Manager",
                           command,
-                          params,
+                          params_owned,
                           G_VARIANT_TYPE ("(o)"),
                           G_DBUS_CALL_FLAGS_NONE,
                           -1, cancellable,
@@ -786,6 +789,7 @@ gboolean
 shell_util_has_x11_display_extension (MetaDisplay *display,
                                       const char  *extension)
 {
+#ifdef HAVE_X11_CLIENT
   MetaX11Display *x11_display;
   Display *xdisplay;
   int op, event, error;
@@ -796,6 +800,9 @@ shell_util_has_x11_display_extension (MetaDisplay *display,
 
   xdisplay = meta_x11_display_get_xdisplay (x11_display);
   return XQueryExtension (xdisplay, extension, &op, &event, &error);
+#else
+  return FALSE;
+#endif
 }
 
 /**

@@ -1,5 +1,3 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
@@ -147,7 +145,7 @@ class Spinner extends AnimatedIcon {
         this.connect('style-changed', () => {
             const themeNode = this.get_theme_node();
             const textColor = themeNode.get_foreground_color();
-            const [, luminance] = textColor.to_hls();
+            const [, , luminance] = textColor.to_hsl();
             const file = luminance > 0.5
                 ? this._fileDark
                 : this._fileLight;

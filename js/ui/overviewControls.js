@@ -1,5 +1,3 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-
 import GLib from 'gi://GLib';
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
@@ -20,7 +18,10 @@ import * as WorkspaceThumbnail from './workspaceThumbnail.js';
 import * as WorkspacesView from './workspacesView.js';
 
 export const SMALL_WORKSPACE_RATIO = 0.15;
-const DASH_MAX_HEIGHT_RATIO = 0.15;
+const DASH_MAX_HEIGHT_RATIO = 0.16;
+const VERTICAL_SPACING_RATIO = 0.02;
+const THUMBNAILS_SPACING_ADJUSTMENT_TOP = 0.6;
+const THUMBNAILS_SPACING_ADJUSTMENT_BOTTOM = 0.4;
 
 const A11Y_SCHEMA = 'org.gnome.desktop.a11y.keyboard';
 
@@ -46,8 +47,6 @@ class ControlsManagerLayout extends Clutter.LayoutManager {
         this._searchEntry = searchEntry;
         this._searchController = searchController;
         this._dash = dash;
-
-        this._spacing = 0;
 
         this._cachedWorkspaceBoxes = new Map();
         this._postAllocationCallbacks = [];
@@ -76,7 +75,7 @@ class ControlsManagerLayout extends Clutter.LayoutManager {
         this._workAreaBox.set_size(workArea.width, workArea.height);
     }
 
-    _computeWorkspacesBoxForState(state, box, searchHeight, dashHeight, thumbnailsHeight) {
+    _computeWorkspacesBoxForState(state, box, searchHeight, dashHeight, thumbnailsHeight, spacing) {
         const workspaceBox = box.copy();
         const [width, height] = workspaceBox.get_size();
         const {y1: startY} = this._workAreaBox;
@@ -89,16 +88,16 @@ class ControlsManagerLayout extends Clutter.LayoutManager {
             break;
         case ControlsState.WINDOW_PICKER:
             workspaceBox.set_origin(0,
-                startY + searchHeight + this._spacing +
-                thumbnailsHeight + this._spacing * expandFraction);
+                startY + searchHeight + Math.round(spacing * THUMBNAILS_SPACING_ADJUSTMENT_TOP) +
+                thumbnailsHeight + Math.round(spacing * THUMBNAILS_SPACING_ADJUSTMENT_BOTTOM) * expandFraction);
             workspaceBox.set_size(width,
                 height -
-                dashHeight - this._spacing -
-                searchHeight - this._spacing -
-                thumbnailsHeight - this._spacing * expandFraction);
+                dashHeight - spacing -
+                searchHeight - Math.round(spacing * THUMBNAILS_SPACING_ADJUSTMENT_TOP) -
+                thumbnailsHeight - Math.round(spacing * THUMBNAILS_SPACING_ADJUSTMENT_BOTTOM) * expandFraction);
             break;
         case ControlsState.APP_GRID:
-            workspaceBox.set_origin(0, startY + searchHeight + this._spacing);
+            workspaceBox.set_origin(0, startY + searchHeight + spacing);
             workspaceBox.set_size(
                 width,
                 Math.round(height * SMALL_WORKSPACE_RATIO));
@@ -108,7 +107,7 @@ class ControlsManagerLayout extends Clutter.LayoutManager {
         return workspaceBox;
     }
 
-    _getAppDisplayBoxForState(state, box, searchHeight, dashHeight, appGridBox) {
+    _getAppDisplayBoxForState(state, box, searchHeight, dashHeight, workspacesBox, spacing) {
         const [width, height] = box.get_size();
         const {y1: startY} = this._workAreaBox;
         const appDisplayBox = new Clutter.ActorBox();
@@ -120,15 +119,15 @@ class ControlsManagerLayout extends Clutter.LayoutManager {
             break;
         case ControlsState.APP_GRID:
             appDisplayBox.set_origin(0,
-                startY + searchHeight + this._spacing + appGridBox.get_height());
+                startY + searchHeight + spacing + workspacesBox.get_height() + spacing);
             break;
         }
 
         appDisplayBox.set_size(width,
             height -
-            searchHeight - this._spacing -
-            appGridBox.get_height() - this._spacing -
-            dashHeight);
+            searchHeight - spacing -
+            workspacesBox.get_height() - spacing -
+            dashHeight - spacing);
 
         return appDisplayBox;
     }
@@ -139,20 +138,6 @@ class ControlsManagerLayout extends Clutter.LayoutManager {
 
         this._postAllocationCallbacks.forEach(cb => cb());
         this._postAllocationCallbacks = [];
-    }
-
-    vfunc_set_container(container) {
-        this._container?.disconnectObject(this);
-        this._container = container;
-        this._container?.connectObject('style-changed',
-            () => {
-                const node = this._container.get_theme_node();
-                const spacing = node.get_length('spacing');
-                if (this._spacing !== spacing) {
-                    this._spacing = spacing;
-                    this.layout_changed();
-                }
-            }, this);
     }
 
     vfunc_get_preferred_width(_container, _forHeight) {
@@ -171,6 +156,7 @@ class ControlsManagerLayout extends Clutter.LayoutManager {
         const startY = this._workAreaBox.y1;
         box.y1 += startY;
         const [width, height] = box.get_size();
+        const spacing = Math.round(height * VERTICAL_SPACING_RATIO);
         let availableHeight = height;
 
         // Search entry
@@ -179,7 +165,7 @@ class ControlsManagerLayout extends Clutter.LayoutManager {
         childBox.set_size(width, searchHeight);
         this._searchEntry.allocate(childBox);
 
-        availableHeight -= searchHeight + this._spacing;
+        availableHeight -= searchHeight + spacing;
 
         // Dash
         const maxDashHeight = Math.round(box.get_height() * DASH_MAX_HEIGHT_RATIO);
@@ -191,7 +177,7 @@ class ControlsManagerLayout extends Clutter.LayoutManager {
         childBox.set_size(width, dashHeight);
         this._dash.allocate(childBox);
 
-        availableHeight -= dashHeight + this._spacing;
+        availableHeight -= dashHeight + spacing;
 
         // Workspace Thumbnails
         let thumbnailsHeight = 0;
@@ -202,13 +188,13 @@ class ControlsManagerLayout extends Clutter.LayoutManager {
             thumbnailsHeight = Math.min(
                 thumbnailsHeight * expandFraction,
                 height * this._workspacesThumbnails.maxThumbnailScale);
-            childBox.set_origin(0, startY + searchHeight + this._spacing);
+            childBox.set_origin(0, startY + searchHeight + Math.round(spacing * THUMBNAILS_SPACING_ADJUSTMENT_TOP));
             childBox.set_size(width, thumbnailsHeight);
             this._workspacesThumbnails.allocate(childBox);
         }
 
         // Workspaces
-        let params = [box, searchHeight, dashHeight, thumbnailsHeight];
+        let params = [box, searchHeight, dashHeight, thumbnailsHeight, spacing];
         const transitionParams = this._stateAdjustment.getStateTransitionParams();
 
         // Update cached boxes
@@ -233,7 +219,7 @@ class ControlsManagerLayout extends Clutter.LayoutManager {
             const workspaceAppGridBox =
                 this._cachedWorkspaceBoxes.get(ControlsState.APP_GRID);
 
-            params = [box, searchHeight, dashHeight, workspaceAppGridBox];
+            params = [box, searchHeight, dashHeight, workspaceAppGridBox, spacing];
             let appDisplayBox;
             if (!transitionParams.transitioning) {
                 appDisplayBox =
@@ -251,7 +237,7 @@ class ControlsManagerLayout extends Clutter.LayoutManager {
         }
 
         // Search
-        childBox.set_origin(0, startY + searchHeight + this._spacing);
+        childBox.set_origin(0, startY + searchHeight + spacing);
         childBox.set_size(width, availableHeight);
 
         this._searchController.allocate(childBox);
@@ -573,7 +559,12 @@ class ControlsManager extends St.Widget {
             opacity: searchActive ? 0 : opacity,
             duration: animate ? SIDE_CONTROLS_ANIMATION_TIME : 0,
             mode: Clutter.AnimationMode.EASE_OUT_QUAD,
-            onComplete: () => (this._thumbnailsBox.visible = thumbnailsBoxVisible),
+            onComplete: () => {
+                this._thumbnailsBox.set({
+                    visible: thumbnailsBoxVisible,
+                    expandFraction: thumbnailsBoxVisible ? 1.0 : 0.0,
+                });
+            },
         };
 
         if (!searchActive) {

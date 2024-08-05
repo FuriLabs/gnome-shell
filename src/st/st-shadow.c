@@ -50,7 +50,7 @@ G_DEFINE_BOXED_TYPE (StShadowHelper, st_shadow_helper, st_shadow_helper_copy, st
  * Returns: the newly allocated shadow. Use st_shadow_free() when done
  */
 StShadow *
-st_shadow_new (ClutterColor *color,
+st_shadow_new (CoglColor    *color,
                gdouble       xoffset,
                gdouble       yoffset,
                gdouble       blur,
@@ -130,7 +130,7 @@ st_shadow_equal (StShadow *shadow,
    * that a few false negatives are mostly harmless.
    */
 
-  return (clutter_color_equal (&shadow->color, &other->color) &&
+  return (cogl_color_equal (&shadow->color, &other->color) &&
           shadow->xoffset == other->xoffset &&
           shadow->yoffset == other->yoffset &&
           shadow->blur == other->blur &&
@@ -218,12 +218,14 @@ st_shadow_helper_new (StShadow     *shadow)
  * st_shadow_helper_update:
  * @helper: a #StShadowHelper
  * @source: a #ClutterActor
+ * @paint_context: a #ClutterPaintContext
  *
  * Update @helper from @source.
  */
 void
-st_shadow_helper_update (StShadowHelper *helper,
-                         ClutterActor   *source)
+st_shadow_helper_update (StShadowHelper      *helper,
+                         ClutterActor        *source,
+                         ClutterPaintContext *paint_context)
 {
   gfloat width, height;
 
@@ -236,7 +238,9 @@ st_shadow_helper_update (StShadowHelper *helper,
       if (helper->pipeline)
         g_object_unref (helper->pipeline);
 
-      helper->pipeline = _st_create_shadow_pipeline_from_actor (helper->shadow, source);
+      helper->pipeline = _st_create_shadow_pipeline_from_actor (helper->shadow,
+                                                                source,
+                                                                paint_context);
       helper->width = width;
       helper->height = height;
     }
@@ -281,7 +285,7 @@ st_shadow_helper_free (StShadowHelper *helper)
 /**
  * st_shadow_helper_paint:
  * @helper: a #StShadowHelper
- * @framebuffer: a #CoglFramebuffer
+ * @node: a #ClutterPaintNode
  * @actor_box: the bounding box of the shadow
  * @paint_opacity: the opacity at which the shadow is painted
  *
@@ -289,13 +293,13 @@ st_shadow_helper_free (StShadowHelper *helper)
  * be called from the implementation of ClutterActor::paint().
  */
 void
-st_shadow_helper_paint (StShadowHelper  *helper,
-                        CoglFramebuffer *framebuffer,
-                        ClutterActorBox *actor_box,
-                        guint8           paint_opacity)
+st_shadow_helper_paint (StShadowHelper   *helper,
+                        ClutterPaintNode *node,
+                        ClutterActorBox  *actor_box,
+                        uint8_t           paint_opacity)
 {
   _st_paint_shadow_with_opacity (helper->shadow,
-                                 framebuffer,
+                                 node,
                                  helper->pipeline,
                                  actor_box,
                                  paint_opacity);

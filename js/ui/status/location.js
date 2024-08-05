@@ -1,5 +1,3 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
@@ -348,7 +346,7 @@ export const GeolocationDialog = GObject.registerClass({
         content.add_child(reasonLabel);
 
         let infoLabel = new St.Label({
-            text: _('Location access can be changed at any time from the privacy settings.'),
+            text: _('Location access can be changed at any time from the privacy settings'),
             style_class: 'message-dialog-description',
         });
         content.add_child(infoLabel);

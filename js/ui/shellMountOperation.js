@@ -1,5 +1,3 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
@@ -299,11 +297,11 @@ const ShellMountPasswordDialog = GObject.registerClass({
             if (disksApp) {
                 this._keyfilesLabel.clutter_text.set_markup(
                     /* Translators: %s is the Disks application */
-                    _('To unlock a volume that uses keyfiles, use the <i>%s</i> utility instead.')
+                    _('To unlock a volume that uses keyfiles, use the <i>%s</i> utility instead')
                    .format(disksApp.get_name()));
             } else {
                 this._keyfilesLabel.clutter_text.set_markup(
-                    _('You need an external utility like <i>Disks</i> to unlock a volume that uses keyfiles.'));
+                    _('You need an external utility like <i>Disks</i> to unlock a volume that uses keyfiles'));
             }
             this._keyfilesLabel.clutter_text.ellipsize = Pango.EllipsizeMode.NONE;
             this._keyfilesLabel.clutter_text.line_wrap = true;
@@ -435,7 +433,7 @@ const ShellMountPasswordDialog = GObject.registerClass({
 
             if (isNaN(pim)) {
                 this._pimEntry.set_text('');
-                this._errorMessageLabel.text = _('The PIM must be a number or empty.');
+                this._errorMessageLabel.text = _('The PIM must be a number or empty');
                 this._errorMessageLabel.opacity = 255;
                 return;
             }

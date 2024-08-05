@@ -1,5 +1,3 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-
 // the following is a modified version of bolt/contrib/js/client.js
 
 import Gio from 'gi://Gio';
@@ -312,7 +310,7 @@ class Indicator extends SystemIndicator {
             this._notify(title, body);
         } else {
             const title = _('Unauthorized Thunderbolt device');
-            const body = _('New device has been detected and needs to be authorized by an administrator.');
+            const body = _('New device has been detected and needs to be authorized by an administrator');
             this._notify(title, body);
         }
     }

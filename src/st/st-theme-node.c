@@ -34,11 +34,11 @@
 static void st_theme_node_dispose           (GObject                 *object);
 static void st_theme_node_finalize          (GObject                 *object);
 
-static const ClutterColor BLACK_COLOR = { 0, 0, 0, 0xff };
-static const ClutterColor TRANSPARENT_COLOR = { 0, 0, 0, 0 };
-static const ClutterColor DEFAULT_SUCCESS_COLOR = { 0x4e, 0x9a, 0x06, 0xff };
-static const ClutterColor DEFAULT_WARNING_COLOR = { 0xf5, 0x79, 0x3e, 0xff };
-static const ClutterColor DEFAULT_ERROR_COLOR = { 0xcc, 0x00, 0x00, 0xff };
+static const CoglColor BLACK_COLOR = { 0, 0, 0, 0xff };
+static const CoglColor TRANSPARENT_COLOR = { 0, 0, 0, 0 };
+static const CoglColor DEFAULT_SUCCESS_COLOR = { 0x4e, 0x9a, 0x06, 0xff };
+static const CoglColor DEFAULT_WARNING_COLOR = { 0xf5, 0x79, 0x3e, 0xff };
+static const CoglColor DEFAULT_ERROR_COLOR = { 0xcc, 0x00, 0x00, 0xff };
 
 G_DEFINE_TYPE (StThemeNode, st_theme_node, G_TYPE_OBJECT)
 
@@ -132,7 +132,6 @@ st_theme_node_finalize (GObject *object)
   g_clear_object (&node->background_shadow_pipeline);
   g_clear_object (&node->border_slices_texture);
   g_clear_object (&node->border_slices_pipeline);
-  g_clear_object (&node->color_pipeline);
 
   G_OBJECT_CLASS (st_theme_node_parent_class)->finalize (object);
 }
@@ -503,6 +502,20 @@ term_is_transparent (CRTerm *term)
           strcmp (term->content.str->stryng->str, "transparent") == 0);
 }
 
+static gboolean
+term_is_accent_color (CRTerm *term)
+{
+  return (term->type == TERM_IDENT &&
+          strcmp (term->content.str->stryng->str, "-st-accent-color") == 0);
+}
+
+static gboolean
+term_is_accent_fg_color (CRTerm *term)
+{
+  return (term->type == TERM_IDENT &&
+          strcmp (term->content.str->stryng->str, "-st-accent-fg-color") == 0);
+}
+
 static int
 color_component_from_double (double component)
 {
@@ -517,8 +530,8 @@ color_component_from_double (double component)
 }
 
 static GetFromTermResult
-get_color_from_rgba_term (CRTerm       *term,
-                          ClutterColor *color)
+get_color_from_rgba_term (CRTerm    *term,
+                          CoglColor *color)
 {
   CRTerm *arg = term->ext_content.func_param;
   CRNum *num;
@@ -595,10 +608,203 @@ get_color_from_rgba_term (CRTerm       *term,
   return VALUE_FOUND;
 }
 
+static GetFromTermResult get_color_from_term (StThemeNode *node,
+                                              CRTerm      *term,
+                                              CoglColor   *color);
+
+static GetFromTermResult
+get_color_from_transparentize_term (StThemeNode *node,
+                                    CRTerm      *term,
+                                    CoglColor   *color)
+{
+  CRTerm *color_arg, *amount_arg;
+  CoglColor base_color;
+  CRNum *amount_num;
+  double amount;
+
+  color_arg = term->ext_content.func_param;
+  if (!color_arg)
+    return VALUE_NOT_FOUND;
+
+  amount_arg = color_arg->next;
+  if (!amount_arg)
+    return VALUE_NOT_FOUND;
+
+  if (get_color_from_term (node, color_arg, &base_color) != VALUE_FOUND)
+    return VALUE_NOT_FOUND;
+
+  if (amount_arg->type != TERM_NUMBER)
+    return VALUE_NOT_FOUND;
+
+  amount_num = amount_arg->content.num;
+
+  if (amount_num->type == NUM_PERCENTAGE)
+    amount = amount_num->val / 100;
+  else if (amount_num->type == NUM_GENERIC)
+    amount = amount_num->val;
+  else
+    return VALUE_NOT_FOUND;
+
+  color->red = base_color.red;
+  color->green = base_color.green;
+  color->blue = base_color.blue;
+  color->alpha = CLAMP (base_color.alpha - amount * 255, 0, 255);
+
+  return VALUE_FOUND;
+}
+
+#define LERP(a, b, t) (a + (b - a) * t)
+
+static GetFromTermResult
+get_color_from_mix_term (StThemeNode *node,
+                         CRTerm      *term,
+                         CoglColor   *color)
+{
+  CRTerm *color1_arg, *color2_arg, *factor_arg;
+  CoglColor color1, color2;
+  CRNum *factor_num;
+  double factor;
+
+  color1_arg = term->ext_content.func_param;
+  if (!color1_arg)
+    return VALUE_NOT_FOUND;
+
+  color2_arg = color1_arg->next;
+  if (!color2_arg)
+    return VALUE_NOT_FOUND;
+
+  factor_arg = color2_arg->next;
+  if (!factor_arg)
+    return VALUE_NOT_FOUND;
+
+  if (get_color_from_term (node, color1_arg, &color1) != VALUE_FOUND ||
+      get_color_from_term (node, color2_arg, &color2) != VALUE_FOUND)
+    return VALUE_NOT_FOUND;
+
+  if (factor_arg->type != TERM_NUMBER)
+    return VALUE_NOT_FOUND;
+
+  factor_num = factor_arg->content.num;
+
+  if (factor_num->type == NUM_PERCENTAGE)
+    factor = factor_num->val / 100;
+  else if (factor_num->type == NUM_GENERIC)
+    factor = factor_num->val;
+  else
+    return VALUE_NOT_FOUND;
+
+  /* SCSS mix() inverts the factor for some reason */
+  factor = 1 - factor;
+
+  color->alpha = CLAMP (LERP (color1.alpha, color2.alpha, factor), 0, 255);
+
+  if (color->alpha == 0)
+    {
+      color->red = color->green = color->blue = 0;
+    }
+  else
+    {
+      color->red   = CLAMP (LERP (color1.red   * color1.alpha, color2.red   * color2.alpha, factor) / color->alpha, 0, 255);
+      color->green = CLAMP (LERP (color1.green * color1.alpha, color2.green * color2.alpha, factor) / color->alpha, 0, 255);
+      color->blue  = CLAMP (LERP (color1.blue  * color1.alpha, color2.blue  * color2.alpha, factor) / color->alpha, 0, 255);
+    }
+
+  return VALUE_FOUND;
+}
+
+static GetFromTermResult
+get_color_from_lighten_term (StThemeNode *node,
+                             CRTerm      *term,
+                             CoglColor   *color)
+{
+  CRTerm *color_arg, *factor_arg;
+  CoglColor base_color;
+  CRNum *factor_num;
+  double factor;
+  float hue, luminance, saturation;
+
+  color_arg = term->ext_content.func_param;
+  if (!color_arg)
+    return VALUE_NOT_FOUND;
+
+  factor_arg = color_arg->next;
+  if (!factor_arg)
+    return VALUE_NOT_FOUND;
+
+  if (get_color_from_term (node, color_arg, &base_color) != VALUE_FOUND)
+    return VALUE_NOT_FOUND;
+
+  if (factor_arg->type != TERM_NUMBER)
+    return VALUE_NOT_FOUND;
+
+  factor_num = factor_arg->content.num;
+
+  if (factor_num->type == NUM_PERCENTAGE)
+    factor = factor_num->val / 100;
+  else if (factor_num->type == NUM_GENERIC)
+    factor = factor_num->val;
+  else
+    return VALUE_NOT_FOUND;
+
+  cogl_color_to_hsl (&base_color, &hue, &saturation, &luminance);
+
+  luminance = CLAMP (luminance + factor, 0, 1);
+
+  cogl_color_init_from_hsl (color, hue, saturation, luminance);
+  color->alpha = base_color.alpha;
+
+  return VALUE_FOUND;
+}
+
+static GetFromTermResult
+get_color_from_darken_term (StThemeNode *node,
+                            CRTerm      *term,
+                            CoglColor   *color)
+{
+  CRTerm *color_arg, *factor_arg;
+  CoglColor base_color;
+  CRNum *factor_num;
+  double factor;
+  float hue, luminance, saturation;
+
+  color_arg = term->ext_content.func_param;
+  if (!color_arg)
+    return VALUE_NOT_FOUND;
+
+  factor_arg = color_arg->next;
+  if (!factor_arg)
+    return VALUE_NOT_FOUND;
+
+  if (get_color_from_term (node, color_arg, &base_color) != VALUE_FOUND)
+    return VALUE_NOT_FOUND;
+
+  if (factor_arg->type != TERM_NUMBER)
+    return VALUE_NOT_FOUND;
+
+  factor_num = factor_arg->content.num;
+
+  if (factor_num->type == NUM_PERCENTAGE)
+    factor = factor_num->val / 100;
+  else if (factor_num->type == NUM_GENERIC)
+    factor = factor_num->val;
+  else
+    return VALUE_NOT_FOUND;
+
+  cogl_color_to_hsl (&base_color, &hue, &saturation, &luminance);
+  color->alpha = base_color.alpha;
+
+  luminance = CLAMP (luminance - factor, 0, 1);
+
+  cogl_color_init_from_hsl (color, hue, saturation, luminance);
+  color->alpha = base_color.alpha;
+
+  return VALUE_FOUND;
+}
+
 static GetFromTermResult
 get_color_from_term (StThemeNode  *node,
                      CRTerm       *term,
-                     ClutterColor *color)
+                     CoglColor    *color)
 {
   CRRgb rgb;
   enum CRStatus status;
@@ -615,6 +821,18 @@ get_color_from_term (StThemeNode  *node,
       *color = TRANSPARENT_COLOR;
       return VALUE_FOUND;
     }
+  /* St-specific extension: -st-accent-color */
+  else if (term_is_accent_color (term))
+    {
+      st_theme_context_get_accent_color (node->context, color, NULL);
+      return VALUE_FOUND;
+    }
+  /* St-specific extension: -st-accent-fg-color */
+  else if (term_is_accent_fg_color (term))
+    {
+      st_theme_context_get_accent_color (node->context, NULL, color);
+      return VALUE_FOUND;
+    }
   /* rgba () colors - a CSS3 addition, are not supported by libcroco,
    * but they are parsed as a "function", so we can emulate the
    * functionality.
@@ -626,6 +844,42 @@ get_color_from_term (StThemeNode  *node,
            strcmp (term->content.str->stryng->str, "rgba") == 0)
     {
       return get_color_from_rgba_term (term, color);
+    }
+  /* St-specific extension: st-transparentize() */
+  else if (term->type == TERM_FUNCTION &&
+           term->content.str &&
+           term->content.str->stryng &&
+           term->content.str->stryng->str &&
+           strcmp (term->content.str->stryng->str, "st-transparentize") == 0)
+    {
+      return get_color_from_transparentize_term (node, term, color);
+    }
+  /* St-specific extension: st-mix() */
+  else if (term->type == TERM_FUNCTION &&
+           term->content.str &&
+           term->content.str->stryng &&
+           term->content.str->stryng->str &&
+           strcmp (term->content.str->stryng->str, "st-mix") == 0)
+    {
+      return get_color_from_mix_term (node, term, color);
+    }
+  /* St-specific extension: st-lighten() */
+  else if (term->type == TERM_FUNCTION &&
+           term->content.str &&
+           term->content.str->stryng &&
+           term->content.str->stryng->str &&
+           strcmp (term->content.str->stryng->str, "st-lighten") == 0)
+    {
+      return get_color_from_lighten_term (node, term, color);
+    }
+  /* St-specific extension: st-darken() */
+  else if (term->type == TERM_FUNCTION &&
+           term->content.str &&
+           term->content.str->stryng &&
+           term->content.str->stryng->str &&
+           strcmp (term->content.str->stryng->str, "st-darken") == 0)
+    {
+      return get_color_from_darken_term (node, term, color);
     }
 
   status = cr_rgb_set_from_term (&rgb, term);
@@ -670,7 +924,7 @@ gboolean
 st_theme_node_lookup_color (StThemeNode  *node,
                             const char   *property_name,
                             gboolean      inherit,
-                            ClutterColor *color)
+                            CoglColor    *color)
 {
 
   int i;
@@ -729,12 +983,12 @@ st_theme_node_lookup_color (StThemeNode  *node,
 void
 st_theme_node_get_color (StThemeNode  *node,
                          const char   *property_name,
-                         ClutterColor *color)
+                         CoglColor    *color)
 {
   if (!st_theme_node_lookup_color (node, property_name, FALSE, color))
     {
       g_warning ("Did not find color property '%s'", property_name);
-      memset (color, 0, sizeof (ClutterColor));
+      memset (color, 0, sizeof (CoglColor));
     }
 }
 
@@ -1353,7 +1607,7 @@ do_border_property (StThemeNode   *node,
 {
   const char *property_name = decl->property->stryng->str + 6; /* Skip 'border' */
   StSide side = (StSide)-1;
-  ClutterColor color;
+  CoglColor color;
   gboolean color_set = FALSE;
   int width = 0; /* suppress warning */
   gboolean width_set = FALSE;
@@ -1486,7 +1740,7 @@ do_outline_property (StThemeNode   *node,
                      CRDeclaration *decl)
 {
   const char *property_name = decl->property->stryng->str + 7; /* Skip 'outline' */
-  ClutterColor color;
+  CoglColor color;
   gboolean color_set = FALSE;
   int width = 0; /* suppress warning */
   gboolean width_set = FALSE;
@@ -1920,8 +2174,8 @@ st_theme_node_get_outline_width (StThemeNode  *node)
  * Gets the color of @node's outline.
  */
 void
-st_theme_node_get_outline_color (StThemeNode  *node,
-                                 ClutterColor *color)
+st_theme_node_get_outline_color (StThemeNode *node,
+                                 CoglColor   *color)
 {
   g_return_if_fail (ST_IS_THEME_NODE (node));
 
@@ -2269,8 +2523,8 @@ _st_theme_node_ensure_background (StThemeNode *node)
  * Gets @node's background color.
  */
 void
-st_theme_node_get_background_color (StThemeNode  *node,
-                                    ClutterColor *color)
+st_theme_node_get_background_color (StThemeNode *node,
+                                    CoglColor   *color)
 {
   g_return_if_fail (ST_IS_THEME_NODE (node));
 
@@ -2304,7 +2558,7 @@ st_theme_node_get_background_image (StThemeNode *node)
  */
 void
 st_theme_node_get_foreground_color (StThemeNode  *node,
-                                    ClutterColor *color)
+                                    CoglColor    *color)
 {
   g_return_if_fail (ST_IS_THEME_NODE (node));
 
@@ -2353,8 +2607,8 @@ st_theme_node_get_foreground_color (StThemeNode  *node,
 void
 st_theme_node_get_background_gradient (StThemeNode    *node,
                                        StGradientType *type,
-                                       ClutterColor   *start,
-                                       ClutterColor   *end)
+                                       CoglColor      *start,
+                                       CoglColor      *end)
 {
   g_return_if_fail (ST_IS_THEME_NODE (node));
 
@@ -2379,7 +2633,7 @@ st_theme_node_get_background_gradient (StThemeNode    *node,
 void
 st_theme_node_get_border_color (StThemeNode  *node,
                                 StSide        side,
-                                ClutterColor *color)
+                                CoglColor    *color)
 {
   g_return_if_fail (ST_IS_THEME_NODE (node));
   g_return_if_fail (side >= ST_SIDE_TOP && side <= ST_SIDE_LEFT);
@@ -3382,7 +3636,7 @@ _st_theme_node_apply_margins (StThemeNode *node,
 static GetFromTermResult
 parse_shadow_property (StThemeNode       *node,
                        CRDeclaration     *decl,
-                       ClutterColor      *color,
+                       CoglColor         *color,
                        gdouble           *xoffset,
                        gdouble           *yoffset,
                        gdouble           *blur,
@@ -3526,7 +3780,7 @@ st_theme_node_lookup_shadow (StThemeNode  *node,
                              gboolean      inherit,
                              StShadow    **shadow)
 {
-  ClutterColor color = { 0., };
+  CoglColor color = { 0., };
   gdouble xoffset = 0.;
   gdouble yoffset = 0.;
   gdouble blur = 0.;
@@ -3769,7 +4023,7 @@ st_theme_node_get_icon_colors (StThemeNode *node)
 
   gboolean shared_with_parent;
   int i;
-  ClutterColor color = { 0, };
+  CoglColor color = { 0, };
 
   guint still_need = FOREGROUND | WARNING | ERROR | SUCCESS;
 
@@ -4220,14 +4474,14 @@ st_theme_node_paint_equal (StThemeNode *node,
   _st_theme_node_ensure_background (node);
   _st_theme_node_ensure_background (other);
 
-  if (!clutter_color_equal (&node->background_color, &other->background_color))
+  if (!cogl_color_equal (&node->background_color, &other->background_color))
     return FALSE;
 
   if (node->background_gradient_type != other->background_gradient_type)
     return FALSE;
 
   if (node->background_gradient_type != ST_GRADIENT_NONE &&
-      !clutter_color_equal (&node->background_gradient_end, &other->background_gradient_end))
+      !cogl_color_equal (&node->background_gradient_end, &other->background_gradient_end))
     return FALSE;
 
   if ((node->background_image != NULL) &&
@@ -4244,7 +4498,7 @@ st_theme_node_paint_equal (StThemeNode *node,
         return FALSE;
 
       if (node->border_width[i] > 0 &&
-          !clutter_color_equal (&node->border_color[i], &other->border_color[i]))
+          !cogl_color_equal (&node->border_color[i], &other->border_color[i]))
         return FALSE;
 
       if (node->border_radius[i] != other->border_radius[i])
@@ -4255,7 +4509,7 @@ st_theme_node_paint_equal (StThemeNode *node,
     return FALSE;
 
   if (node->outline_width > 0 &&
-      !clutter_color_equal (&node->outline_color, &other->outline_color))
+      !cogl_color_equal (&node->outline_color, &other->outline_color))
     return FALSE;
 
   border_image = st_theme_node_get_border_image (node);

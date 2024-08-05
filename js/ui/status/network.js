@@ -1,5 +1,3 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-
 import Atk from 'gi://Atk';
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
@@ -10,10 +8,12 @@ import Polkit from 'gi://Polkit';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 
+import * as Config from '../../misc/config.js';
 import * as Main from '../main.js';
 import * as PopupMenu from '../popupMenu.js';
 import * as MessageTray from '../messageTray.js';
 import * as ModemManager from '../../misc/modemManager.js';
+import * as Signals from '../../misc/signals.js';
 import * as Util from '../../misc/util.js';
 
 import {Spinner} from '../animation.js';
@@ -1944,12 +1944,118 @@ class NMModemToggle extends NMDeviceToggle {
     }
 });
 
+class CaptivePortalHandler extends Signals.EventEmitter {
+    constructor(checkUri) {
+        super();
+
+        this._checkUri = checkUri;
+        this._connectivityQueue = new Set();
+        this._notifications = new Map();
+        this._portalHelperProxy = null;
+    }
+
+    addConnection(name, path) {
+        if (this._connectivityQueue.has(path) || this._notifications.has(path))
+            return;
+
+        const source = MessageTray.getSystemSource();
+
+        const notification = new MessageTray.Notification({
+            title: _('Sign Into Wi–Fi Network'),
+            body: name,
+            source,
+        });
+        notification.connect('activated',
+            () => this._onNotificationActivated(path));
+        notification.connect('destroy',
+            () => this._notifications.delete(path));
+        this._notifications.set(path, notification);
+        source.addNotification(notification);
+    }
+
+
+    removeConnection(path) {
+        if (this._connectivityQueue.delete(path))
+            this._portalHelperProxy?.CloseAsync(path);
+        this._notifications.get(path)?.destroy(
+            MessageTray.NotificationDestroyedReason.SOURCE_CLOSED);
+        this._notifications.delete(path);
+    }
+
+    _onNotificationActivated(path) {
+        const context = global.create_app_launch_context(
+            global.get_current_time(), -1);
+
+        if (Config.HAVE_PORTAL_HELPER)
+            this._launchPortalHelper(path, context).catch(logError);
+        else
+            Gio.AppInfo.launch_default_for_uri(this._checkUri, context);
+
+        Main.overview.hide();
+        Main.panel.closeCalendar();
+    }
+
+    _portalHelperDone(parameters) {
+        const [path, result] = parameters;
+
+        if (result === PortalHelperResult.CANCELLED) {
+            // Keep the connection in the queue, so the user is not
+            // spammed with more logins until we next flush the queue,
+            // which will happen once they choose a better connection
+            // or we get to full connectivity through other means
+        } else if (result === PortalHelperResult.COMPLETED) {
+            this.removeConnection(path);
+        } else if (result === PortalHelperResult.RECHECK) {
+            this.emit('recheck', path);
+        } else {
+            log(`Invalid result from portal helper: ${result}`);
+        }
+    }
+
+    async _launchPortalHelper(path, context) {
+        if (!this._portalHelperProxy) {
+            this._portalHelperProxy = new Gio.DBusProxy({
+                g_connection: Gio.DBus.session,
+                g_name: 'org.gnome.Shell.PortalHelper',
+                g_object_path: '/org/gnome/Shell/PortalHelper',
+                g_interface_name: PortalHelperInfo.name,
+                g_interface_info: PortalHelperInfo,
+            });
+            this._portalHelperProxy.connectSignal('Done',
+                (proxy, emitter, params) => {
+                    this._portalHelperDone(params);
+                });
+
+            try {
+                await this._portalHelperProxy.init_async(
+                    GLib.PRIORITY_DEFAULT, null);
+            } catch (e) {
+                console.error(`Error launching the portal helper: ${e.message}`);
+            }
+        }
+
+        const {timestamp} = context;
+        this._portalHelperProxy?.AuthenticateAsync(path, this._checkUri, timestamp).catch(logError);
+        this._connectivityQueue.add(path);
+    }
+
+    clear() {
+        for (const item of this._connectivityQueue)
+            this._portalHelperProxy?.CloseAsync(item);
+        this._connectivityQueue.clear();
+
+        for (const n of this._notifications.values())
+            n.destroy(MessageTray.NotificationDestroyedReason.SOURCE_CLOSED);
+        this._notifications.clear();
+    }
+}
+
 export const Indicator = GObject.registerClass(
 class Indicator extends SystemIndicator {
     _init() {
         super._init();
 
-        this._connectivityQueue = new Set();
+        this._portalHandler = null;
 
         this._mainConnection = null;
 
@@ -2003,6 +2109,16 @@ class Indicator extends SystemIndicator {
         this._client.bind_property('nm-running',
             this, 'visible',
             GObject.BindingFlags.SYNC_CREATE);
+
+        const {connectivityCheckUri} = this._client;
+        this._portalHandler = new CaptivePortalHandler(connectivityCheckUri);
+        this._portalHandler.connect('recheck', async (o, path) => {
+            try {
+                const state = await this._client.check_connectivity_async(null);
+                if (state >= NM.ConnectivityState.FULL)
+                    this._portalHandler.removeConnection(path);
+            } catch (e) { }
+        });
 
         this._client.connectObject(
             'notify::primary-connection', () => this._syncMainConnection(),
@@ -2066,42 +2182,10 @@ class Indicator extends SystemIndicator {
             this._notification?.destroy();
     }
 
-    _flushConnectivityQueue() {
-        for (let item of this._connectivityQueue)
-            this._portalHelperProxy?.CloseAsync(item);
-        this._connectivityQueue.clear();
-    }
-
-    _closeConnectivityCheck(path) {
-        if (this._connectivityQueue.delete(path))
-            this._portalHelperProxy?.CloseAsync(path);
-    }
-
-    async _portalHelperDone(parameters) {
-        let [path, result] = parameters;
-
-        if (result === PortalHelperResult.CANCELLED) {
-            // Keep the connection in the queue, so the user is not
-            // spammed with more logins until we next flush the queue,
-            // which will happen once they choose a better connection
-            // or we get to full connectivity through other means
-        } else if (result === PortalHelperResult.COMPLETED) {
-            this._closeConnectivityCheck(path);
-        } else if (result === PortalHelperResult.RECHECK) {
-            try {
-                const state = await this._client.check_connectivity_async(null);
-                if (state >= NM.ConnectivityState.FULL)
-                    this._closeConnectivityCheck(path);
-            } catch (e) { }
-        } else {
-            log(`Invalid result from portal helper: ${result}`);
-        }
-    }
-
-    async _syncConnectivity() {
+    _syncConnectivity() {
         if (this._mainConnection == null ||
             this._mainConnection.state !== NM.ActiveConnectionState.ACTIVATED) {
-            this._flushConnectivityQueue();
+            this._portalHandler.clear();
             return;
         }
 
@@ -2116,35 +2200,9 @@ class Indicator extends SystemIndicator {
         if (!isPortal || Main.sessionMode.isGreeter)
             return;
 
-        let path = this._mainConnection.get_path();
-        if (this._connectivityQueue.has(path))
-            return;
-
-        let timestamp = global.get_current_time();
-        if (!this._portalHelperProxy) {
-            this._portalHelperProxy = new Gio.DBusProxy({
-                g_connection: Gio.DBus.session,
-                g_name: 'org.gnome.Shell.PortalHelper',
-                g_object_path: '/org/gnome/Shell/PortalHelper',
-                g_interface_name: PortalHelperInfo.name,
-                g_interface_info: PortalHelperInfo,
-            });
-            this._portalHelperProxy.connectSignal('Done',
-                (proxy, emitter, params) => {
-                    this._portalHelperDone(params).catch(logError);
-                });
-
-            try {
-                await this._portalHelperProxy.init_async(
-                    GLib.PRIORITY_DEFAULT, null);
-            } catch (e) {
-                console.error(`Error launching the portal helper: ${e.message}`);
-            }
-        }
-
-        this._portalHelperProxy?.AuthenticateAsync(path, this._client.connectivity_check_uri, timestamp).catch(logError);
-
-        this._connectivityQueue.add(path);
+        this._portalHandler.addConnection(
+            this._mainConnection.get_id(),
+            this._mainConnection.get_path());
     }
 
     _updateIcon() {

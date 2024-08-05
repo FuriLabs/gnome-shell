@@ -1,5 +1,3 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
@@ -387,7 +385,7 @@ async function _handleLockScreenWarning() {
 
         notify(
             _('Screen Lock disabled'),
-            _('Screen Locking requires the GNOME display manager.'));
+            _('Screen Locking requires the GNOME display manager'));
     }
 }
 

@@ -1,5 +1,3 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-
 import Clutter from 'gi://Clutter';
 import Cogl from 'gi://Cogl';
 import Gio from 'gi://Gio';
@@ -1998,9 +1996,9 @@ export const ScreenshotUI = GObject.registerClass({
                     _('Screencasts'),
                     /* Translators: this is a filename used for screencast
                      * recording, where "%d" and "%t" date and time, e.g.
-                     * "Screencast from 07-17-2013 10:00:46 PM" */
+                     * "Screencast From 07-17-2013 10:00:46 PM" */
                     /* xgettext:no-c-format */
-                    _('Screencast from %d %t'),
+                    _('Screencast From %d %t'),
                 ]),
                 {'draw-cursor': new GLib.Variant('b', drawCursor)});
 
@@ -2286,7 +2284,7 @@ function _storeScreenshot(bytes, pixbuf) {
         const timestamp = time.format('%Y-%m-%d %H-%M-%S');
         // Translators: this is the name of the file that the screenshot is
         // saved to. The placeholder is a timestamp, e.g. "2017-05-21 12-24-03".
-        const name = _('Screenshot from %s').format(timestamp);
+        const name = _('Screenshot From %s').format(timestamp);
 
         // If the target file already exists, try appending a suffix with an
         // increasing number to it.
@@ -2877,11 +2875,11 @@ const RecolorEffect = GObject.registerClass({
         color: GObject.ParamSpec.boxed(
             'color', 'color', 'replacement color',
             GObject.ParamFlags.WRITABLE,
-            Clutter.Color.$gtype),
+            Cogl.Color.$gtype),
         chroma: GObject.ParamSpec.boxed(
             'chroma', 'chroma', 'color to replace',
             GObject.ParamFlags.WRITABLE,
-            Clutter.Color.$gtype),
+            Cogl.Color.$gtype),
         threshold: GObject.ParamSpec.float(
             'threshold', 'threshold', 'threshold',
             GObject.ParamFlags.WRITABLE,
@@ -2893,8 +2891,8 @@ const RecolorEffect = GObject.registerClass({
     },
 }, class RecolorEffect extends Shell.GLSLEffect {
     _init(params) {
-        this._color = new Clutter.Color();
-        this._chroma = new Clutter.Color();
+        this._color = new Cogl.Color();
+        this._chroma = new Cogl.Color();
         this._threshold = 0;
         this._smoothing = 0;
 
@@ -3031,7 +3029,7 @@ class PickPixel extends St.Widget {
         this.add_action(action);
 
         this._recolorEffect = new RecolorEffect({
-            chroma: new Clutter.Color({
+            chroma: new Cogl.Color({
                 red: 80,
                 green: 219,
                 blue: 181,

@@ -1,0 +1,33 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 1 May 2024 20:54:46 +0200
+Subject: tray/na-tray-manager: Remove outdated comment and return value
+
+Origin: https://gitlab.gnome.org/3v1n0/gnome-shell/-/commits/tray-offscreen-xwindows
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2012388
+---
+ src/tray/na-tray-manager.c | 5 +----
+ 1 file changed, 1 insertion(+), 4 deletions(-)
+
+diff --git a/src/tray/na-tray-manager.c b/src/tray/na-tray-manager.c
+index 2f36bf2..dde82f4 100644
+--- a/src/tray/na-tray-manager.c
++++ b/src/tray/na-tray-manager.c
+@@ -246,7 +246,7 @@ na_tray_manager_new (MetaX11Display *x11_display)
+                        NULL);
+ }
+ 
+-static gboolean
++static void
+ na_tray_manager_plug_removed (NaTrayChild   *tray_child,
+                               NaTrayManager *manager)
+ {
+@@ -257,9 +257,6 @@ na_tray_manager_plug_removed (NaTrayChild   *tray_child,
+   g_hash_table_remove (manager->children,
+                        GINT_TO_POINTER (icon_window));
+   g_signal_emit (manager, manager_signals[TRAY_ICON_REMOVED], 0, tray_child);
+-
+-  /* This destroys the socket. */
+-  return FALSE;
+ }
+ 
+ static void

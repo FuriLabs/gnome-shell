@@ -1,5 +1,3 @@
-// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-
 import Adw from 'gi://Adw?version=1';
 import Gdk from 'gi://Gdk?version=4.0';
 import Gio from 'gi://Gio';
@@ -38,7 +36,7 @@ export const ExtensionPrefsDialog = GObject.registerClass({
         const prefsObj = new prefsModule.default({...metadata, dir, path});
         this._extension.stateObj = prefsObj;
 
-        prefsObj.fillPreferencesWindow(this);
+        await prefsObj.fillPreferencesWindow(this);
 
         if (!this.visible_page)
             throw new Error('Extension did not provide any UI');
