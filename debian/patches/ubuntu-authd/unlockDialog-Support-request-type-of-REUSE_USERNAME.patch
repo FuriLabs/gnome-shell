@@ -9,10 +9,10 @@ to do so. This commit fixes that.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index f741b20..5378e59 100644
+index e0437ae..755c5a4 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
-@@ -792,7 +792,7 @@ export const UnlockDialog = GObject.registerClass({
+@@ -790,7 +790,7 @@ export const UnlockDialog = GObject.registerClass({
  
      _onReset(authPrompt, beginRequest) {
          let userName;

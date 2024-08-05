@@ -16,10 +16,10 @@ Forwarded: not-needed
  1 file changed, 12 insertions(+), 1 deletion(-)
 
 diff --git a/js/ui/background.js b/js/ui/background.js
-index 8301330..328b1b4 100644
+index b0bf4a2..c02f344 100644
 --- a/js/ui/background.js
 +++ b/js/ui/background.js
-@@ -101,8 +101,10 @@ import GObject from 'gi://GObject';
+@@ -100,8 +100,10 @@ import GObject from 'gi://GObject';
  import GnomeBG from 'gi://GnomeBG';
  import GnomeDesktop from 'gi://GnomeDesktop';
  import Meta from 'gi://Meta';
@@ -30,7 +30,7 @@ index 8301330..328b1b4 100644
  import * as LoginManager from '../misc/loginManager.js';
  import * as Main from './main.js';
  import * as Params from '../misc/params.js';
-@@ -538,7 +540,16 @@ export const SystemBackground = GObject.registerClass({
+@@ -537,7 +539,16 @@ export const SystemBackground = GObject.registerClass({
      _init() {
          if (_systemBackground == null) {
              _systemBackground = new Meta.Background({meta_display: global.display});

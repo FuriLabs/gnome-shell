@@ -94,7 +94,7 @@ index 0000000..ee8b3a2
 +  </schema>
 +</schemalist>
 diff --git a/data/meson.build b/data/meson.build
-index 0307613..9fb1c94 100644
+index ed13b6b..3b47968 100644
 --- a/data/meson.build
 +++ b/data/meson.build
 @@ -96,6 +96,12 @@ schema = configure_file(
@@ -110,7 +110,7 @@ index 0307613..9fb1c94 100644
  install_data('00_org.gnome.shell.gschema.override', install_dir: schemadir)
  
  if have_systemd
-@@ -124,7 +130,7 @@ endif
+@@ -139,7 +145,7 @@ endif
  
  # for unit tests - gnome.compile_schemas() only looks in srcdir
  custom_target('compile-schemas',
@@ -120,10 +120,10 @@ index 0307613..9fb1c94 100644
    command: [find_program('glib-compile-schemas'), '--strict', data_builddir],
    build_by_default: true)
 diff --git a/js/ui/background.js b/js/ui/background.js
-index 328b1b4..70d7bcc 100644
+index c02f344..ad0abca 100644
 --- a/js/ui/background.js
 +++ b/js/ui/background.js
-@@ -543,7 +543,11 @@ export const SystemBackground = GObject.registerClass({
+@@ -542,7 +542,11 @@ export const SystemBackground = GObject.registerClass({
  
              let backgroundColor = DEFAULT_BACKGROUND_COLOR;
              if (Desktop.is('ubuntu')) {
@@ -136,10 +136,10 @@ index 328b1b4..70d7bcc 100644
                  backgroundColor = dummyBgActor.get_theme_node().get_background_color();
                  dummyBgActor.destroy();
 diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js
-index 6e42de4..33086e5 100644
+index 89b1a94..217f941 100644
 --- a/js/ui/screenShield.js
 +++ b/js/ui/screenShield.js
-@@ -33,6 +33,12 @@ const DISABLE_LOCK_KEY = 'disable-lock-screen';
+@@ -31,6 +31,12 @@ const DISABLE_LOCK_KEY = 'disable-lock-screen';
  
  const LOCKED_STATE_STR = 'screenShield.locked';
  
@@ -152,7 +152,7 @@ index 6e42de4..33086e5 100644
  // ScreenShield animation time
  // - STANDARD_FADE_TIME is used when the session goes idle
  // - MANUAL_FADE_TIME is used for lowering the shield when asked by the user,
-@@ -116,6 +122,16 @@ export class ScreenShield extends Signals.EventEmitter {
+@@ -114,6 +120,16 @@ export class ScreenShield extends Signals.EventEmitter {
          this._lockSettings = new Gio.Settings({schema_id: LOCKDOWN_SCHEMA});
          this._lockSettings.connect(`changed::${DISABLE_LOCK_KEY}`, this._syncInhibitor.bind(this));
  
@@ -169,7 +169,7 @@ index 6e42de4..33086e5 100644
          this._isModal = false;
          this._isGreeter = false;
          this._isActive = false;
-@@ -216,6 +232,31 @@ export class ScreenShield extends Signals.EventEmitter {
+@@ -214,6 +230,31 @@ export class ScreenShield extends Signals.EventEmitter {
          return this._isModal;
      }
  
@@ -201,7 +201,7 @@ index 6e42de4..33086e5 100644
      async _syncInhibitor() {
          const lockEnabled = this._settings.get_boolean(LOCK_ENABLED_KEY) ||
                              this._settings.get_boolean(SUSPEND_LOCK_ENABLED_KEY);
-@@ -429,6 +470,7 @@ export class ScreenShield extends Signals.EventEmitter {
+@@ -427,6 +468,7 @@ export class ScreenShield extends Signals.EventEmitter {
              }
  
              this._dialog = new constructor(this._lockDialogGroup);

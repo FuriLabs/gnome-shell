@@ -28,10 +28,10 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/1878998
  2 files changed, 28 insertions(+), 6 deletions(-)
 
 diff --git a/src/st/st-entry.c b/src/st/st-entry.c
-index 52fbdb7..ea48bce 100644
+index b16b3ac..f1f8738 100644
 --- a/src/st/st-entry.c
 +++ b/src/st/st-entry.c
-@@ -1101,6 +1101,8 @@ st_entry_init (StEntry *entry)
+@@ -1092,6 +1092,8 @@ st_entry_init (StEntry *entry)
    g_signal_connect (priv->entry, "notify::line-alignment",
                      G_CALLBACK (invalidate_shadow_pipeline), entry);
  
@@ -41,7 +41,7 @@ index 52fbdb7..ea48bce 100644
    priv->spacing = 6.0f;
  
 diff --git a/src/st/st-private.c b/src/st/st-private.c
-index e310bdb..1ca9aac 100644
+index b997fa1..474dc52 100644
 --- a/src/st/st-private.c
 +++ b/src/st/st-private.c
 @@ -115,22 +115,42 @@ _st_set_text_from_style (ClutterText *text,
@@ -69,11 +69,11 @@ index e310bdb..1ca9aac 100644
 +
 +  if (clutter_text_get_editable (text))
 +    {
-+      ClutterColor selected_color;
++      CoglColor selected_color;
 +
 +      if (st_theme_node_lookup_color (theme_node, "selected-color",
 +                                      TRUE, &selected_color) &&
-+          !clutter_color_equal (&selected_color, &color))
++          !cogl_color_equal (&selected_color, &color))
 +        {
 +          clutter_text_set_color (text, &color);
 +          clutter_text_set_cursor_color (text, &color);

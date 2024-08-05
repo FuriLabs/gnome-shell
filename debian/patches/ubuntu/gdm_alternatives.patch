@@ -16,22 +16,22 @@ Last-Update: 2017-09-08
  2 files changed, 3 insertions(+)
 
 diff --git a/data/gnome-shell-theme.gresource.xml b/data/gnome-shell-theme.gresource.xml
-index 4501c31..cd6b3e6 100644
+index db1f4e9..375bae7 100644
 --- a/data/gnome-shell-theme.gresource.xml
 +++ b/data/gnome-shell-theme.gresource.xml
-@@ -9,6 +9,7 @@
-     <file>checkbox-off-focused.svg</file>
-     <file>checkbox-off-light.svg</file>
-     <file>checkbox-off.svg</file>
+@@ -3,6 +3,7 @@
+   <gresource prefix="/org/gnome/shell/theme">
+     <file>calendar-today.svg</file>
+     <file>calendar-today-light.svg</file>
 +    <file alias="gdm.css">gnome-shell-dark.css</file>
      <file>gnome-shell-dark.css</file>
      <file>gnome-shell-light.css</file>
      <file>gnome-shell-high-contrast.css</file>
 diff --git a/js/ui/sessionMode.js b/js/ui/sessionMode.js
-index 895b507..4bd1fa3 100644
+index e284b90..2cdf338 100644
 --- a/js/ui/sessionMode.js
 +++ b/js/ui/sessionMode.js
-@@ -52,6 +52,8 @@ const _modes = {
+@@ -50,6 +50,8 @@ const _modes = {
  
      'gdm': {
          hasNotifications: true,

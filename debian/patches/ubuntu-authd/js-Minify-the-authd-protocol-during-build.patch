@@ -55,7 +55,7 @@ index 6aa47ad..a10ccf3 100644
      <file>extensions/extension.js</file>
      <file>extensions/sharedInternals.js</file>
 diff --git a/js/meson.build b/js/meson.build
-index 4809f82..8f1fce5 100644
+index e594e23..5dcd50b 100644
 --- a/js/meson.build
 +++ b/js/meson.build
 @@ -1,11 +1,12 @@
@@ -71,4 +71,4 @@ index 4809f82..8f1fce5 100644
 +  dependencies: [config_js, minified_authd_proto_js]
  )
  
- portal_resources = gnome.compile_resources(
+ if have_portal_helper

@@ -27,10 +27,10 @@ index 0000000..ad854ca
 +export const SMARTCARD_ROLE_NAME = 'smartcard';
 +export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index c7d23be..505e388 100644
+index fe9f854..a00c78e 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -1029,11 +1029,11 @@ export const LoginDialog = GObject.registerClass({
+@@ -1028,11 +1028,11 @@ export const LoginDialog = GObject.registerClass({
  
          mechanisms.sort((a, b) => a.name.localeCompare(b.name));
  
@@ -180,10 +180,10 @@ index 0000000..059d161
 +    }
 +}
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index a55db79..69f83ae 100644
+index 9b04f75..ad7a0c3 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -13,6 +13,8 @@ import * as Main from '../ui/main.js';
+@@ -11,6 +11,8 @@ import * as Main from '../ui/main.js';
  import {loadInterfaceXML} from '../misc/fileUtils.js';
  import * as Params from '../misc/params.js';
  import * as SmartcardManager from '../misc/smartcardManager.js';
@@ -192,7 +192,7 @@ index a55db79..69f83ae 100644
  
  const FprintManagerInfo = Gio.DBusInterfaceInfo.new_for_xml(
      loadInterfaceXML('net.reactivated.Fprint.Manager'));
-@@ -31,12 +33,15 @@ export const FINGERPRINT_SERVICE_NAME = 'gdm-fingerprint';
+@@ -29,12 +31,15 @@ export const FINGERPRINT_SERVICE_NAME = 'gdm-fingerprint';
  export const SMARTCARD_SERVICE_NAME = 'gdm-smartcard';
  const CLONE_FADE_ANIMATION_TIME = 250;
  
@@ -214,7 +214,7 @@ index a55db79..69f83ae 100644
  
  export const LOGIN_SCREEN_SCHEMA = 'org.gnome.login-screen';
  export const UNIFIED_AUTHENTICATION_KEY = 'enable-unified-authentication';
-@@ -51,13 +56,6 @@ export const ALLOWED_FAILURES_KEY = 'allowed-failures';
+@@ -49,13 +54,6 @@ export const ALLOWED_FAILURES_KEY = 'allowed-failures';
  export const LOGO_KEY = 'logo';
  export const DISABLE_USER_LIST_KEY = 'disable-user-list';
  
@@ -228,7 +228,7 @@ index a55db79..69f83ae 100644
  // Give user 48ms to read each character of a PAM message
  const USER_READ_TIME = 48;
  const FINGERPRINT_SERVICE_PROXY_TIMEOUT = 5000;
-@@ -67,6 +65,7 @@ const FINGERPRINT_ERROR_TIMEOUT_WAIT = 15;
+@@ -65,6 +63,7 @@ const FINGERPRINT_ERROR_TIMEOUT_WAIT = 15;
  const DiscreteServiceMechanismDefinitions = [
      {
          serviceName: PASSWORD_SERVICE_NAME,
@@ -236,7 +236,7 @@ index a55db79..69f83ae 100644
          mechanismId: 'password',
          mechanismName: _('Password'),
          setting: PASSWORD_AUTHENTICATION_KEY,
-@@ -76,6 +75,7 @@ const DiscreteServiceMechanismDefinitions = [
+@@ -74,6 +73,7 @@ const DiscreteServiceMechanismDefinitions = [
  
      {
          serviceName: SMARTCARD_SERVICE_NAME,
@@ -244,7 +244,7 @@ index a55db79..69f83ae 100644
          mechanismId: 'smartcard',
          mechanismName: _('Smartcard'),
          setting: SMARTCARD_AUTHENTICATION_KEY,
-@@ -85,6 +85,7 @@ const DiscreteServiceMechanismDefinitions = [
+@@ -83,6 +83,7 @@ const DiscreteServiceMechanismDefinitions = [
  
      {
          serviceName: FINGERPRINT_SERVICE_NAME,
@@ -252,7 +252,7 @@ index a55db79..69f83ae 100644
          mechanismId: 'fingerprint',
          mechanismName: _('Fingerprint'),
          setting: FINGERPRINT_AUTHENTICATION_KEY,
-@@ -169,6 +170,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -167,6 +168,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._publishedMechanisms = new Map();
          this._pendingMechanisms = new Map();
  
@@ -262,7 +262,7 @@ index a55db79..69f83ae 100644
          this._credentialManagers = {};
  
          this.reauthenticating = false;
-@@ -183,6 +187,48 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -181,6 +185,48 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this.addCredentialManager(Vmware.SERVICE_NAME, Vmware.getVmwareCredentialsManager());
      }
  
@@ -311,7 +311,7 @@ index a55db79..69f83ae 100644
      addCredentialManager(serviceName, credentialManager) {
          if (this._credentialManagers[serviceName])
              return;
-@@ -284,6 +330,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -282,6 +328,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._smartcardManager = null;
  
          this._fingerprintManager = null;
@@ -320,7 +320,7 @@ index a55db79..69f83ae 100644
  
          for (let service in this._credentialManagers)
              this.removeCredentialManager(service);
-@@ -849,6 +897,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -847,6 +895,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _startMechanismFromUnifiedService(mechanism) {
@@ -334,7 +334,7 @@ index a55db79..69f83ae 100644
          const roleHandlers = {
              [WEB_LOGIN_ROLE_NAME]: this._startWebLogin.bind(this),
              [PASSWORD_ROLE_NAME]: this._startPasswordLogin.bind(this),
-@@ -941,16 +996,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -939,16 +994,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      async _replyWithAuthSelectionResponse(serviceName, role, response) {
@@ -360,7 +360,7 @@ index a55db79..69f83ae 100644
          await this.replyWithJSON(serviceName, JSON.stringify(reply));
      }
  
-@@ -958,10 +1015,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -956,10 +1013,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const mechanisms = this._publishedMechanisms.get(serviceName);
  
          if (!mechanisms)
@@ -375,7 +375,7 @@ index a55db79..69f83ae 100644
  
          const {init_prompt: initPrompt, link_prompt: linkPrompt, uri, code, role, timeout} = mechanisms[mechanismId];
  
-@@ -988,8 +1047,23 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -986,8 +1045,23 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          }
      }
  
@@ -399,7 +399,7 @@ index a55db79..69f83ae 100644
          this._replyWithAuthSelectionResponse(serviceName, WEB_LOGIN_ROLE_NAME, {});
      }
  
-@@ -1016,74 +1090,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1014,74 +1088,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          });
      }
  
@@ -480,7 +480,7 @@ index a55db79..69f83ae 100644
      }
  
      _onInfo(client, serviceName, info) {
-@@ -1181,8 +1199,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1179,8 +1197,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const unifiedAuthAvailable = this._activeServices.has(UNIFIED_AUTH_SERVICE_NAME) && !this._unavailableServices.has(UNIFIED_AUTH_SERVICE_NAME);
          for (const definition of DiscreteServiceMechanismDefinitions) {
              const enabled = this._isDiscreteServiceEnabled(definition);
@@ -513,10 +513,10 @@ index 3c88ab5..0df340e 100644
  
      <file>extensions/extension.js</file>
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index cba9a2f..5418f53 100644
+index 3312384..f1f517a 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
-@@ -841,11 +841,11 @@ export const UnlockDialog = GObject.registerClass({
+@@ -839,11 +839,11 @@ export const UnlockDialog = GObject.registerClass({
  
          mechanisms.sort((a, b) => a.name.localeCompare(b.name));
  

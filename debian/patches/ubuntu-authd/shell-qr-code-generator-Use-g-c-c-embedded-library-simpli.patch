@@ -17,10 +17,10 @@ Subject: shell-qr-code-generator: Use g-c-c embedded library,
  create mode 100644 src/qrcodegen.h
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index 42f0b4f..07c5a9e 100644
+index a9ee297..08cd09f 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-@@ -449,8 +449,16 @@ $_gdm_dialog_width: 25em;
+@@ -450,8 +450,16 @@ $_gdm_dialog_width: 25em;
  
  // QR Code
  .qr-code {
@@ -137,7 +137,7 @@ index fafed7c..029950d 100644
  });
  
 diff --git a/meson.build b/meson.build
-index bf61817..6269433 100644
+index f2f223d..6612185 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -33,7 +33,6 @@ systemd_req = '>= 246'
@@ -148,29 +148,29 @@ index bf61817..6269433 100644
  
  nm_req = '>= 1.10.4'
  secret_req = '>= 0.18'
-@@ -93,7 +92,6 @@ xext_dep = dependency('xext')
- xfixes_dep = dependency('xfixes')
+@@ -90,7 +89,6 @@ polkit_dep = dependency('polkit-agent-1', version: polkit_req)
+ ibus_dep = dependency('ibus-1.0', version: ibus_req)
  schemas_dep = dependency('gsettings-desktop-schemas', version: schemas_req)
  gnome_desktop_dep = dependency('gnome-desktop-4', version: gnome_desktop_req)
 -qrencode_dep = dependency('libqrencode', version: qrencode_req)
  
- nm_deps = []
- if get_option('networkmanager')
+ have_x11 = mutter_dep.get_variable('have_x11') == 'true'
+ have_x11_client = mutter_dep.get_variable('have_x11_client') == 'true'
 diff --git a/src/meson.build b/src/meson.build
-index 0dd7fed..0e2c5c2 100644
+index 85b97f0..d699cf0 100644
 --- a/src/meson.build
 +++ b/src/meson.build
-@@ -73,7 +73,6 @@ gnome_shell_deps = [
+@@ -79,7 +79,6 @@ gnome_shell_deps = [
+   gcr_dep,
    libsystemd_dep,
    libpipewire_dep,
-   x11_dep,
 -  qrencode_dep
  ]
  
- gnome_shell_deps += nm_deps
-@@ -174,6 +173,10 @@ libshell_sources = [
-   'shell-workspace-background.c'
- ]
+ if have_x11_client
+@@ -199,6 +198,10 @@ if have_x11_client
+   ]
+ endif
  
 +libshell_sources += [
 +  'qrcodegen.c',
@@ -1633,8 +1633,8 @@ index c069227..5f52552 100644
    char *url;
    size_t width;
    size_t height;
-+  ClutterColor *bg_color;
-+  ClutterColor *fg_color;
++  CoglColor *bg_color;
++  CoglColor *fg_color;
    GTask *image_task;
    GTask *icon_task;
  };
@@ -1642,8 +1642,8 @@ index c069227..5f52552 100644
  {
    ShellQrCodeGenerator *self = SHELL_QR_CODE_GENERATOR (object);
    g_clear_pointer (&self->priv->url, g_free);
-+  g_clear_pointer (&self->priv->bg_color, clutter_color_free);
-+  g_clear_pointer (&self->priv->fg_color, clutter_color_free);
++  g_clear_pointer (&self->priv->bg_color, cogl_color_free);
++  g_clear_pointer (&self->priv->fg_color, cogl_color_free);
  }
  
  static void
@@ -1653,7 +1653,7 @@ index c069227..5f52552 100644
  
 +static void
 +fill_pixel (GByteArray         *array,
-+            const ClutterColor *color,
++            const CoglColor *color,
 +            CoglPixelFormat     pixel_format,
 +            int                 pixel_size)
 +{
@@ -1678,8 +1678,8 @@ index c069227..5f52552 100644
 -               GError      **error)
 +generate_icon (const char          *url,
 +               size_t               size,
-+               const ClutterColor  *bg_color,
-+               const ClutterColor  *fg_color,
++               const CoglColor  *bg_color,
++               const CoglColor  *fg_color,
 +               size_t              *out_size,
 +               CoglPixelFormat     *out_pixel_format,
 +               GCancellable        *cancellable,
@@ -1708,8 +1708,8 @@ index c069227..5f52552 100644
 +  g_autoptr (GByteArray) qr_matrix = NULL;
 +  uint8_t qr_code[qrcodegen_BUFFER_LEN_FOR_VERSION (qrcodegen_VERSION_MAX)];
 +  uint8_t temp_buf[qrcodegen_BUFFER_LEN_FOR_VERSION (qrcodegen_VERSION_MAX)];
-+  static const ClutterColor white_color = CLUTTER_COLOR_INIT (255, 255, 255, 255);
-+  static const ClutterColor black_color = CLUTTER_COLOR_INIT (0, 0, 0, 255);
++  static const CoglColor white_color = COGL_COLOR_INIT (255, 255, 255, 255);
++  static const CoglColor black_color = COGL_COLOR_INIT (0, 0, 0, 255);
 +  CoglPixelFormat pixel_format;
 +  gint pixel_size, qr_size, total_size;
 +  gint column, row, i;
@@ -1942,8 +1942,8 @@ index c069227..5f52552 100644
                                            const char           *url,
                                            size_t                width,
                                            size_t                height,
-+                                          const ClutterColor   *bg_color,
-+                                          const ClutterColor   *fg_color,
++                                          const CoglColor   *bg_color,
++                                          const CoglColor   *fg_color,
 +                                          GCancellable         *cancellable,
                                            GAsyncReadyCallback   callback,
                                            gpointer              user_data)
@@ -1974,8 +1974,8 @@ index c069227..5f52552 100644
    priv->url = g_strdup (url);
    priv->width = width;
    priv->height = height;
-+  priv->bg_color = clutter_color_copy (bg_color);
-+  priv->fg_color = clutter_color_copy (fg_color);
++  priv->bg_color = cogl_color_copy (bg_color);
++  priv->fg_color = cogl_color_copy (fg_color);
  
 -  priv->icon_task = g_task_new (self, NULL, callback, user_data);
 +  priv->icon_task = g_task_new (self, cancellable, callback, user_data);
@@ -2011,8 +2011,8 @@ index c069227..5f52552 100644
                                                    shell_qr_code_generator_generate_qr_code),
                          NULL);
 +  g_clear_pointer (&self->priv->url, g_free);
-+  g_clear_pointer (&self->priv->bg_color, clutter_color_free);
-+  g_clear_pointer (&self->priv->fg_color, clutter_color_free);
++  g_clear_pointer (&self->priv->bg_color, cogl_color_free);
++  g_clear_pointer (&self->priv->fg_color, cogl_color_free);
    return g_task_propagate_pointer (G_TASK (result), error);
  }
  
@@ -2029,8 +2029,8 @@ index a12ce22..07b6375 100644
                                                              const char             *url,
                                                              size_t                  width,
                                                              size_t                  height,
-+                                                            const ClutterColor     *bg_color,
-+                                                            const ClutterColor     *fg_color,
++                                                            const CoglColor        *bg_color,
++                                                            const CoglColor        *fg_color,
 +                                                            GCancellable           *cancellable,
                                                              GAsyncReadyCallback     callback,
                                                              gpointer                user_data);
