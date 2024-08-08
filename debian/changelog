@@ -1,4 +1,4 @@
-gnome-shell (47~beta-1ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (47~beta-1ubuntu1) oracular; urgency=medium
 
   * Merge with Debian. Remaining changes:
     - Add Build-Depends: terser (for authd)
@@ -12,8 +12,10 @@ gnome-shell (47~beta-1ubuntu1) UNRELEASED; urgency=medium
     - Add debian/ubuntu-session-mods/ubuntu.json & install it with
       gnome-shell-common
     - Add many patches
+  * Refresh patches
+  * Disable Yaru accent color patches
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 05 Aug 2024 12:48:04 -0400
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 07 Aug 2024 20:30:40 -0400
 
 gnome-shell (47~beta-1) experimental; urgency=medium
 
