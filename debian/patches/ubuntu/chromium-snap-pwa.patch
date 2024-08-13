@@ -1,0 +1,28 @@
+Description: Fix Chromium's progressive web application tab and dock grouping.
+Author: Nathan Pratta Teodosio <nathan.teodosio@canonical.com>
+Bug-Ubuntu: https://launchpad.net/bugs/2007652
+Forwarded: not-needed
+--- a/src/shell-window-tracker.c
++++ b/src/shell-window-tracker.c
+@@ -155,11 +155,20 @@ get_app_from_window_wmclass (MetaWindow  *window)
+   const char *wm_instance;
+   const char *sandbox_id;
+   g_autofree char *app_prefix = NULL;
++  gboolean is_sandboxed_chromium;
+ 
+   appsys = shell_app_system_get_default ();
+ 
+   sandbox_id = meta_window_get_sandboxed_app_id (window);
+-  if (sandbox_id)
++
++  /* Progressive web application tab and dock grouping needs
++   * to be excepted from the special sandboxed logic to work properly
++   * in the Chromium snap (LP:2007652).
++   */
++  is_sandboxed_chromium = g_str_has_prefix (sandbox_id, "chromium_") &&
++                          g_str_has_suffix (sandbox_id, "_chromium");
++
++  if (sandbox_id && !is_sandboxed_chromium)
+     app_prefix = g_strdup_printf ("%s.", sandbox_id);
+ 
+   /* Notes on the heuristics used here:
