@@ -1,3 +1,12 @@
+gnome-shell (3.36.9-0ubuntu0.20.04.4) focal-security; urgency=medium
+
+  * SECURITY UPDATE: resource consumption via portal helper
+    - debian/patches/CVE-2024-36472.patch: show notification when detecting
+      captive portal in js/ui/status/network.js.
+    - CVE-2024-36472
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 14 Aug 2024 09:57:00 -0400
+
 gnome-shell (3.36.9-0ubuntu0.20.04.3) focal; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
