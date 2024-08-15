@@ -1,0 +1,61 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 15 Aug 2024 05:56:11 -0400
+Subject: main: Add support for playing a startup sound if enabled in settings
+
+---
+ data/org.gnome.shell.ubuntu.gschema.xml.in |  7 +++++++
+ js/ui/main.js                              | 17 +++++++++++++++++
+ 2 files changed, 24 insertions(+)
+
+diff --git a/data/org.gnome.shell.ubuntu.gschema.xml.in b/data/org.gnome.shell.ubuntu.gschema.xml.in
+index 6f9cc62..e668c17 100644
+--- a/data/org.gnome.shell.ubuntu.gschema.xml.in
++++ b/data/org.gnome.shell.ubuntu.gschema.xml.in
+@@ -13,5 +13,12 @@
+         The preferred color scheme for the shell user interface. Valid values are “default”, “prefer-dark”, “prefer-light”.
+       </description>
+     </key>
++    <key name="startup-sound" type="s">
++      <default>'warty-startup'</default>
++      <summary>Startup sound</summary>
++      <description>
++        The startup sound file name for the current sound theme or a file path.
++      </description>
++    </key>
+   </schema>
+ </schemalist>
+diff --git a/js/ui/main.js b/js/ui/main.js
+index 8679a36..c2c7615 100644
+--- a/js/ui/main.js
++++ b/js/ui/main.js
+@@ -11,6 +11,7 @@ import * as AudioDeviceSelection from './audioDeviceSelection.js';
+ import * as Config from '../misc/config.js';
+ import * as Components from './components.js';
+ import * as CtrlAltTab from './ctrlAltTab.js';
++import * as Desktop from '../misc/desktop.js';
+ import * as EndSessionDialog from './endSessionDialog.js';
+ import * as ExtensionSystem from './extensionSystem.js';
+ import * as ExtensionDownloader from './extensionDownloader.js';
+@@ -362,6 +363,22 @@ async function _initializeUI() {
+             let perfOutput = GLib.getenv('SHELL_PERF_OUTPUT');
+             Scripting.runPerfScript(perfModule, perfOutput);
+         }
++
++        if (!screenShield?.locked && Desktop.is('ubuntu')) {
++            const settings = new Gio.Settings({
++                schema_id: 'org.gnome.shell.ubuntu',
++            });
++            const startupSound = settings.get_string('startup-sound');
++            if (startupSound?.length) {
++                const player = global.display.get_sound_player();
++                if (startupSound.startsWith('/')) {
++                    player.play_from_file(
++                        Gio.File.new_for_path(startupSound), _('Startup sound'), null);
++                } else {
++                    player.play_from_theme(startupSound, _('Startup sound'), null);
++                }
++            }
++        }
+     });
+ }
+ 
