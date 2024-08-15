@@ -1605,7 +1605,7 @@ index 0000000..edbb6c0
 +}
 +#endif
 diff --git a/src/shell-qr-code-generator.c b/src/shell-qr-code-generator.c
-index c069227..5f52552 100644
+index c069227..4eb55df 100644
 --- a/src/shell-qr-code-generator.c
 +++ b/src/shell-qr-code-generator.c
 @@ -7,14 +7,17 @@
@@ -2017,7 +2017,7 @@ index c069227..5f52552 100644
  }
  
 diff --git a/src/shell-qr-code-generator.h b/src/shell-qr-code-generator.h
-index a12ce22..07b6375 100644
+index a12ce22..0aed569 100644
 --- a/src/shell-qr-code-generator.h
 +++ b/src/shell-qr-code-generator.h
 @@ -15,13 +15,16 @@ G_DECLARE_FINAL_TYPE (ShellQrCodeGenerator, shell_qr_code_generator,

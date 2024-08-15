@@ -4,11 +4,11 @@ Subject: darkMode: Add support to Yaru theme color variants
 
 Support switching to dark mode when using the Yaru theme color accents.
 ---
- js/ui/status/darkMode.js | 42 +++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 41 insertions(+), 1 deletion(-)
+ js/ui/status/darkMode.js | 38 ++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 38 insertions(+)
 
 diff --git a/js/ui/status/darkMode.js b/js/ui/status/darkMode.js
-index 4e68a74..321a88b 100644
+index 4e68a74..3e10eaf 100644
 --- a/js/ui/status/darkMode.js
 +++ b/js/ui/status/darkMode.js
 @@ -1,5 +1,6 @@
@@ -23,33 +23,34 @@ index 4e68a74..321a88b 100644
              () => this._sync());
  
 +        St.Settings.get().connect('notify::gtk-theme', () => this._sync());
-+        St.Settings.get().connect('notify::gtk-theme-variant', () => this._sync());
++        St.Settings.get().connect('notify::accent-color', () => this._sync());
 +
          this.connectObject(
              'destroy', () => this._settings.run_dispose(),
              'clicked', () => this._toggleMode(),
-@@ -28,13 +32,49 @@ class DarkModeToggle extends QuickToggle {
+@@ -28,8 +32,42 @@ class DarkModeToggle extends QuickToggle {
  
      _toggleMode() {
          Main.layoutManager.screenTransition.run();
 +        const preferDark = !this.checked;
-+        const {gtkTheme, gtkThemeVariant} = St.Settings.get();
-+        const themeVariant = gtkThemeVariant?.toLowerCase();
++        const {gtkTheme} = St.Settings.get();
          this._settings.set_string('color-scheme',
              this.checked ? 'default' : 'prefer-dark');
 +
 +        if (gtkTheme === 'Yaru')
-+            this._setYaruSettings(themeVariant, preferDark);
++            this._setYaruSettings(preferDark);
 +    }
 +
-+    _setYaruSettings(themeVariant, preferDark) {
-+        const currentlyDark = themeVariant === 'dark' || themeVariant?.endsWith('-dark');
-+        if (currentlyDark)
-+            themeVariant = themeVariant.slice(0, -'-dark'.length);
++    _setYaruSettings(preferDark) {
++        const colorScheme = this._settings.get_string('color-scheme');
++        const currentlyDark =
++            this._settings.get_string('gtk-theme').endsWith('-dark') &&
++            this._settings.get_string('icon-theme').endsWith('-dark');
 +
 +        if (currentlyDark !== preferDark) {
++            const themeVariant = Main.getYaruVariantFromAccent();
 +            const newTheme = `Yaru${
-+                themeVariant ? `-${themeVariant}` : ''}${
++                themeVariant !== 'default' ? `-${themeVariant}` : ''}${
 +                preferDark ? '-dark' : ''}`;
 +
 +            this._settings.set_string('gtk-theme', newTheme);
@@ -70,12 +71,3 @@ index 4e68a74..321a88b 100644
      }
  
      _sync() {
-         const colorScheme = this._settings.get_string('color-scheme');
--        const checked = colorScheme === 'prefer-dark';
-+        const {gtkTheme, gtkThemeVariant} = St.Settings.get();
-+        let checked = colorScheme === 'prefer-dark';
-+        if (gtkTheme === 'Yaru' && !gtkThemeVariant?.endsWith('dark'))
-+            checked = false;
-         if (this.checked !== checked)
-             this.set({checked});
-     }
