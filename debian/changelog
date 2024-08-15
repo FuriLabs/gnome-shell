@@ -1,11 +1,17 @@
-gnome-shell (47~beta-1ubuntu2) UNRELEASED; urgency=medium
+gnome-shell (47~beta-1ubuntu2) oracular; urgency=medium
 
+  [ Marco Trevisan (Treviño) ]
   * d/p: Update accent color patches to support new accent-color key
   * d/p/ubuntu: Add support for brown accent color
   * d/p/ubuntu: Add support for playing a startup sound
   * debian/control: Bump dependency on desktop schemas 47~beta-1ubuntu2
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 15 Aug 2024 08:45:48 -0400
+  [ Jeremy Bícha ]
+  * Disable the portal helper popup window and use the notification/browser
+    method instead. Hardening related to CVE-2024-36472
+  * Drop now unused Depends: gir1.2-webkit-6.0
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 15 Aug 2024 09:48:11 -0400
 
 gnome-shell (47~beta-1ubuntu1) oracular; urgency=medium
 
