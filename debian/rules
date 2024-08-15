@@ -27,6 +27,7 @@ endif
 override_dh_auto_configure:
 	dh_auto_configure -- \
 		--libdir=/usr/lib \
+		-Dportal_helper=false \
 		-Dextensions-tool:bash_completion=enabled \
 		$(CONFFLAGS)
 
