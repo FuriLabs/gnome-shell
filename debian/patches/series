@@ -58,3 +58,7 @@ tray-na-xembed-Use-XShape-to-remove-input-on-socket-windo.patch
 shell-tray-icon-Use-available-space-when-that-s-defined.patch
 shell-tray-icon-Trigger-a-relayout-when-the-underneath-xe.patch
 tray-na-xembed-Destroy-socket-window-when-ending-the-embe.patch
+CVE-2024-36472-1.patch
+CVE-2024-36472-2.patch
+CVE-2024-36472-3.patch
+CVE-2024-36472-4.patch

@@ -1,3 +1,23 @@
+gnome-shell (46.0-0ubuntu6~24.04.3) noble-security; urgency=medium
+
+  * SECURITY UPDATE: resource consumption via portal helper
+    - debian/patches/CVE-2024-36472-1.patch: use default_size instead of
+      set_size_request for size in js/portalHelper/main.js.
+    - debian/patches/CVE-2024-36472-2.patch: split out CaptivePortalHandler
+      class in js/ui/status/network.js.
+    - debian/patches/CVE-2024-36472-3.patch: show notification when
+      detecting captive portal in js/ui/status/network.js.
+    - debian/patches/CVE-2024-36472-4.patch: add option to disable
+      portal-helper in data/icons/meson.build, data/meson.build,
+      js/meson.build, js/misc/config.js.in, js/misc/meson.build,
+      js/ui/status/network.js, meson.build, meson_options.txt,
+      src/meson.build.
+    - debian/rules: build with portal_helper=false to use the default
+      browser instead of the embedded webkit2gtk browser.
+    - CVE-2024-36472
+
+ -- Marc Deslauriers <marc.deslauriers@ubuntu.com>  Wed, 14 Aug 2024 08:27:56 -0400
+
 gnome-shell (46.0-0ubuntu6~24.04.1) noble; urgency=medium
 
   * debian: Prepare for noble branching

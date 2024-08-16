@@ -11,7 +11,8 @@ CONFFLAGS =
 ifeq ($(DEB_HOST_ARCH_OS),linux)
 CONFFLAGS += \
 	-Dnetworkmanager=true \
-	-Dsystemd=true
+	-Dsystemd=true \
+	-Dportal_helper=false
 endif
 
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
