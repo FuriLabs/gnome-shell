@@ -1767,14 +1767,32 @@ shell_app_dispose (GObject *object)
 {
   ShellApp *app = SHELL_APP (object);
 
-  g_clear_object (&app->info);
   g_clear_object (&app->fallback_icon);
 
   while (app->running_state)
     _shell_app_remove_window (app, app->running_state->windows->data);
 
-  /* We should have been transitioned when we removed all of our windows */
-  g_assert (app->state == SHELL_APP_STATE_STOPPED);
+  if (app->state != SHELL_APP_STATE_STOPPED && app->info)
+    {
+      const char *name = g_desktop_app_info_get_generic_name (app->info);
+      const char *file_name = g_desktop_app_info_get_filename (app->info);
+
+      if (!name)
+        name = "(name unknown)";
+
+      if (!file_name)
+        file_name = "(filename unknown)";
+
+      g_warning ("App \"%s\" (%s) claims to still be %s when being disposed. "
+                 "Please ask the app developer to check if StartupNotify=true "
+                 "in the .desktop file is properly implemented.",
+                 name,
+                 file_name,
+                 app->state == SHELL_APP_STATE_STARTING ? "starting" :
+                                                          "running");
+    }
+
+  g_clear_object (&app->info);
   g_assert (app->running_state == NULL);
 
   G_OBJECT_CLASS(shell_app_parent_class)->dispose (object);
