@@ -1,3 +1,20 @@
+gnome-shell (47~rc-3ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge with Debian. Remaining changes:
+    - Add Build-Depends: terser (for authd)
+    - Add Depends: ubuntu-wallpapers
+    - Add Recommends:
+      + ubuntu-session (| gnome-session) to have the Ubuntu session available
+      + xserver-xorg-legacy
+      + yaru-theme-gnome-shell for the default Ubuntu theming
+    - Move from Recommends to Suggests: chrome-gnome-shell
+    - debian/gnome-shell-common.alternatives: Install tweaked GDM theme
+    - Add debian/ubuntu-session-mods/ubuntu.json & install it with
+      gnome-shell-common
+    - Add many patches
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 06 Sep 2024 14:19:07 -0400
+
 gnome-shell (47~rc-3) experimental; urgency=medium
 
   * Disable the portal helper popup window and use the notification/browser
