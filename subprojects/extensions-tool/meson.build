@@ -1,5 +1,5 @@
 project('gnome-extensions-tool', 'c',
-  version: '47.beta',
+  version: '47.rc',
   meson_version: '>= 0.58.0',
   license: 'GPLv2+'
 )
@@ -47,12 +47,8 @@ if bash_completion.found()
 endif
 
 if get_option('man')
-  if fs.exists('man/gnome-extensions.1')
-    install_man('man/gnome-extensions.1')
-  else
-    a2x = find_program('a2x')
-    subdir('man')
-  endif
+  rst2man = find_program('rst2man')
+  subdir('man')
 endif
 
 if not meson.is_subproject()

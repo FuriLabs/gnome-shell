@@ -4,7 +4,7 @@ include:
   - remote: 'https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/bc70242ffb8402243e934659ecc1a2d1c89eca2b/templates/ci-fairy.yml'
   - project: 'Infrastructure/openshift-images/gnome-release-service'
     file: '/ci-templates/release-module.yml'
-  - component: gitlab.gnome.org/GNOME/citemplates/gnomeos-build-sysext@1.0.0-alpha
+  - component: gitlab.gnome.org/GNOME/citemplates/gnomeos-build-sysext@1.0.0-alpha.1
     inputs:
       meson-options:
         -Dextensions_app=false
@@ -38,7 +38,7 @@ default:
       - 'api_failure'
 
 variables:
-  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/40:x86_64-2024-07-16.0
+  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/40:x86_64-2024-08-29.2
   FDO_UPSTREAM_REPO: GNOME/gnome-shell
   BUNDLE: "extensions-git.flatpak"
   LINT_LOG: "eslint-report.xml"
@@ -80,7 +80,7 @@ workflow:
       npm install -g eslint@^8.0.0 eslint-plugin-jsdoc@^46.0.0 &&
 
       ./.gitlab-ci/install-meson-project.sh \
-        https://gitlab.gnome.org/fmuellner/gjs-ci-tools.git \
+        https://gitlab.gnome.org/World/javascript/gjs-ci-tools.git \
         main &&
 
       ./.gitlab-ci/install-meson-project.sh \

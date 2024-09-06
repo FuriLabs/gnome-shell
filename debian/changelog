@@ -1,3 +1,27 @@
+gnome-shell (47~rc-3) experimental; urgency=medium
+
+  * Disable the portal helper popup window and use the notification/browser
+    method instead. Hardening related to CVE-2024-36472 (Closes: #1072124)
+  * Drop now unused Depends: gir1.2-webkit-6.0
+  * Bump minimum gsettings-desktop-schemas
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 06 Sep 2024 14:08:52 -0400
+
+gnome-shell (47~rc-1) experimental; urgency=medium
+
+  [ Jeremy Bícha ]
+  * New upstream release
+  * Transitional gnome-shell-extensions-prefs tool is no longer provided
+  * Build with mutter 47 RC
+  * Add Build-Depends: pipewire for build tests
+  * Manpages are built with rst2man instead of a2x
+  * Refresh patches
+
+  [ Daniel van Vugt ]
+  * debian/control: Don't depend on exact versions of gnome-shell-common
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 06 Sep 2024 12:07:18 -0400
+
 gnome-shell (47~beta-1ubuntu2) oracular; urgency=medium
 
   [ Marco Trevisan (Treviño) ]

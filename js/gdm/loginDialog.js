@@ -414,9 +414,10 @@ export const ConflictingSessionDialog = GObject.registerClass({
         'force-stop': {},
     },
 }, class ConflictingSessionDialog extends ModalDialog.ModalDialog {
-    _init(conflictingSession, greeterSession, userName) {
+    _init(conflictingSession, greeterSession) {
         super._init();
 
+        const userName = conflictingSession.Name;
         let bannerText;
         if (greeterSession.Remote && conflictingSession.Remote)
             /* Translators: is running for <username> */
@@ -1091,8 +1092,7 @@ export const LoginDialog = GObject.registerClass({
 
     _showConflictingSessionDialog(serviceName, conflictingSession) {
         let conflictingSessionDialog = new ConflictingSessionDialog(conflictingSession,
-            this._greeterSessionProxy,
-            this._user.get_user_name());
+            this._greeterSessionProxy);
 
         conflictingSessionDialog.connect('cancel', () => {
             this._authPrompt.reset();
@@ -1137,15 +1137,15 @@ export const LoginDialog = GObject.registerClass({
         });
     }
 
-    async _findConflictingSession(ignoreSessionId) {
-        const userName = this._user.get_user_name();
+    async _findConflictingSession(startingSessionId) {
         const loginManager = LoginManager.getLoginManager();
         const sessions = await loginManager.listSessions();
+        const [, , startingSessionOwner, ,] = sessions.find(([id, , , ,]) => id === startingSessionId);
         for (const session of sessions.map(([id, , user, , path]) => ({id, user, path}))) {
-            if (ignoreSessionId === session.id)
+            if (startingSessionId === session.id)
                 continue;
 
-            if (userName !== session.user)
+            if (startingSessionOwner !== session.user)
                 continue;
 
             const sessionProxy = loginManager.getSession(session.path);
@@ -1163,15 +1163,20 @@ export const LoginDialog = GObject.registerClass({
     }
 
     async _onSessionOpened(client, serviceName, sessionId) {
-        if (sessionId) {
-            const conflictingSession = await this._findConflictingSession(sessionId);
-            if (conflictingSession) {
-                this._showConflictingSessionDialog(serviceName, conflictingSession);
-                return;
+        try {
+            if (sessionId) {
+                const conflictingSession = await this._findConflictingSession(sessionId);
+                if (conflictingSession) {
+                    this._showConflictingSessionDialog(serviceName, conflictingSession);
+                    return;
+                }
             }
-        }
 
-        this._authPrompt.finish(() => this._startSession(serviceName));
+            this._authPrompt.finish(() => this._startSession(serviceName));
+        } catch (error) {
+            logError(error, `Failed to start session '${sessionId}'`);
+            this._authPrompt.reset();
+        }
     }
 
     _waitForItemForUser(userName) {

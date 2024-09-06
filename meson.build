@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '47.beta',
+  version: '47.rc',
   meson_version: '>= 0.58.0',
   license: 'GPLv2+'
 )
@@ -26,7 +26,7 @@ gio_req = '>= 2.79.2'
 gi_req = '>= 1.49.1'
 gjs_req = '>= 1.73.1'
 gtk_req = '>= 4.0'
-mutter_req = '>= 47.beta'
+mutter_req = '>= 47.rc'
 polkit_req = '>= 0.100'
 schemas_req = '>= 47.alpha'
 systemd_req = '>= 246'
@@ -132,12 +132,8 @@ else
 endif
 
 if get_option('man')
-  if fs.exists('man/gnome-shell.1')
-    install_man('man/gnome-shell.1')
-  else
-    a2x = find_program('a2x')
-    subdir('man')
-  endif
+  rst2man = find_program('rst2man')
+  subdir('man')
 endif
 
 mutter_typelibdir = mutter_dep.get_variable('typelibdir')
@@ -326,7 +322,6 @@ gnome.post_install(
   gtk_update_icon_cache: true
 )
 
-meson.add_dist_script('meson/generate-manpages.py')
 meson.add_dist_script('meson/generate-stylesheets.py')
 meson.add_dist_script('meson/check-version.py', meson.project_version(), 'NEWS')
 

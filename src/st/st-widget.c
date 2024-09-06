@@ -76,12 +76,9 @@ struct _StWidgetPrivate
   gulong texture_file_changed_id;
   guint update_child_styles_id;
 
-  AtkObject *accessible;
-  AtkRole accessible_role;
   AtkStateSet *local_state_set;
 
   ClutterActor *label_actor;
-  gchar        *accessible_name;
 
   StWidget *last_visible_child;
   StWidget *first_visible_child;
@@ -112,8 +109,6 @@ enum
   PROP_HOVER,
   PROP_CAN_FOCUS,
   PROP_LABEL_ACTOR,
-  PROP_ACCESSIBLE_ROLE,
-  PROP_ACCESSIBLE_NAME,
 
   N_PROPS
 };
@@ -139,8 +134,8 @@ static gboolean st_widget_real_navigate_focus (StWidget         *widget,
                                                ClutterActor     *from,
                                                StDirectionType   direction);
 
-static AtkObject * st_widget_get_accessible (ClutterActor *actor);
-static gboolean    st_widget_has_accessible (ClutterActor *actor);
+static void check_pseudo_class (StWidget *widget);
+static void check_labels (StWidget *widget);
 
 static void
 st_widget_update_insensitive (StWidget *widget)
@@ -189,14 +184,6 @@ st_widget_set_property (GObject      *gobject,
       st_widget_set_label_actor (actor, g_value_get_object (value));
       break;
 
-    case PROP_ACCESSIBLE_ROLE:
-      st_widget_set_accessible_role (actor, g_value_get_enum (value));
-      break;
-
-    case PROP_ACCESSIBLE_NAME:
-      st_widget_set_accessible_name (actor, g_value_get_string (value));
-      break;
-
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (gobject, prop_id, pspec);
       break;
@@ -209,7 +196,6 @@ st_widget_get_property (GObject    *gobject,
                         GValue     *value,
                         GParamSpec *pspec)
 {
-  StWidget *actor = ST_WIDGET (gobject);
   StWidgetPrivate *priv = st_widget_get_instance_private (ST_WIDGET (gobject));
 
   switch (prop_id)
@@ -240,14 +226,6 @@ st_widget_get_property (GObject    *gobject,
 
     case PROP_LABEL_ACTOR:
       g_value_set_object (value, priv->label_actor);
-      break;
-
-    case PROP_ACCESSIBLE_ROLE:
-      g_value_set_enum (value, st_widget_get_accessible_role (actor));
-      break;
-
-    case PROP_ACCESSIBLE_NAME:
-      g_value_set_string (value, priv->accessible_name);
       break;
 
     default:
@@ -345,7 +323,6 @@ st_widget_finalize (GObject *gobject)
   g_free (priv->style_class);
   g_free (priv->pseudo_class);
   g_object_unref (priv->local_state_set);
-  g_free (priv->accessible_name);
   g_free (priv->inline_style);
 
   for (i = 0; i < G_N_ELEMENTS (priv->paint_states); i++)
@@ -888,6 +865,7 @@ st_widget_class_init (StWidgetClass *klass)
   gobject_class->dispose = st_widget_dispose;
   gobject_class->finalize = st_widget_finalize;
 
+  actor_class->get_accessible_type = st_widget_accessible_get_type;
   actor_class->get_preferred_width = st_widget_get_preferred_width;
   actor_class->get_preferred_height = st_widget_get_preferred_height;
   actor_class->allocate = st_widget_allocate;
@@ -903,14 +881,10 @@ st_widget_class_init (StWidgetClass *klass)
   actor_class->key_focus_out = st_widget_key_focus_out;
   actor_class->key_press_event = st_widget_key_press_event;
 
-  actor_class->get_accessible = st_widget_get_accessible;
-  actor_class->has_accessible = st_widget_has_accessible;
-
   actor_class->resource_scale_changed = st_widget_resource_scale_changed;
 
   klass->style_changed = st_widget_real_style_changed;
   klass->navigate_focus = st_widget_real_navigate_focus;
-  klass->get_accessible_type = st_widget_accessible_get_type;
   klass->get_focus_chain = st_widget_real_get_focus_chain;
 
   /**
@@ -1003,31 +977,6 @@ st_widget_class_init (StWidgetClass *klass)
                           "Label",
                           "Label that identifies this widget",
                           CLUTTER_TYPE_ACTOR,
-                          ST_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
-
-  /**
-   * StWidget:accessible-role:
-   *
-   * The accessible role of this object
-   */
-  props[PROP_ACCESSIBLE_ROLE] =
-     g_param_spec_enum ("accessible-role",
-                        "Accessible Role",
-                        "The accessible role of this object",
-                        ATK_TYPE_ROLE,
-                        ATK_ROLE_INVALID,
-                        ST_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
-
-  /**
-   * StWidget:accessible-name:
-   *
-   * Object instance's name for assistive technology access.
-   */
-  props[PROP_ACCESSIBLE_NAME] =
-     g_param_spec_string ("accessible-name",
-                          "Accessible name",
-                          "Object instance's name for assistive technology access.",
-                          NULL,
                           ST_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
   g_object_class_install_properties (gobject_class, N_PROPS, props);
@@ -1348,6 +1297,7 @@ st_widget_set_style_pseudo_class (StWidget    *actor,
     {
       st_widget_style_changed (actor);
       g_object_notify_by_pspec (G_OBJECT (actor), props[PROP_PSEUDO_CLASS]);
+      check_pseudo_class (actor);
     }
 }
 
@@ -1375,6 +1325,7 @@ st_widget_add_style_pseudo_class (StWidget    *actor,
     {
       st_widget_style_changed (actor);
       g_object_notify_by_pspec (G_OBJECT (actor), props[PROP_PSEUDO_CLASS]);
+      check_pseudo_class (actor);
     }
 }
 
@@ -1401,6 +1352,7 @@ st_widget_remove_style_pseudo_class (StWidget    *actor,
     {
       st_widget_style_changed (actor);
       g_object_notify_by_pspec (G_OBJECT (actor), props[PROP_PSEUDO_CLASS]);
+      check_pseudo_class (actor);
     }
 }
 
@@ -1943,6 +1895,7 @@ st_widget_set_can_focus (StWidget *widget,
                          gboolean  can_focus)
 {
   StWidgetPrivate *priv;
+  AtkObject *accessible;
 
   g_return_if_fail (ST_IS_WIDGET (widget));
 
@@ -1951,7 +1904,13 @@ st_widget_set_can_focus (StWidget *widget,
   if (priv->can_focus != can_focus)
     {
       priv->can_focus = can_focus;
+      accessible = clutter_actor_get_accessible (CLUTTER_ACTOR (widget));
       g_object_notify_by_pspec (G_OBJECT (widget), props[PROP_CAN_FOCUS]);
+
+      if (accessible)
+          atk_object_notify_state_change (accessible,
+                                          ATK_STATE_FOCUSABLE,
+                                          priv->can_focus);
     }
 }
 
@@ -2425,128 +2384,8 @@ st_widget_set_label_actor (StWidget     *widget,
         priv->label_actor = NULL;
 
       g_object_notify_by_pspec (G_OBJECT (widget), props[PROP_LABEL_ACTOR]);
+      check_labels (widget);
     }
-}
-
-/**
- * st_widget_set_accessible_name:
- * @widget: widget to set the accessible name for
- * @name: (nullable): a character string to be set as the accessible name
- *
- * This method sets @name as the accessible name for @widget.
- *
- * Usually you will have no need to set the accessible name for an
- * object, as usually there is a label for most of the interface
- * elements. So in general it is better to just use
- * @st_widget_set_label_actor. This method is only required when you
- * need to set an accessible name and there is no available label
- * object.
- *
- */
-void
-st_widget_set_accessible_name (StWidget    *widget,
-                               const gchar *name)
-{
-  StWidgetPrivate *priv;
-
-  g_return_if_fail (ST_IS_WIDGET (widget));
-
-  priv = st_widget_get_instance_private (widget);
-
-  if (g_strcmp0 (name, priv->accessible_name) == 0)
-    return;
-
-  if (priv->accessible_name != NULL)
-    g_free (priv->accessible_name);
-
-  priv->accessible_name = g_strdup (name);
-  g_object_notify_by_pspec (G_OBJECT (widget), props[PROP_ACCESSIBLE_NAME]);
-}
-
-/**
- * st_widget_get_accessible_name:
- * @widget: widget to get the accessible name for
- *
- * Gets the accessible name for this widget. See
- * st_widget_set_accessible_name() for more information.
- *
- * Returns: a character string representing the accessible name
- * of the widget.
- */
-const gchar *
-st_widget_get_accessible_name (StWidget    *widget)
-{
-  g_return_val_if_fail (ST_IS_WIDGET (widget), NULL);
-
-  return ST_WIDGET_PRIVATE (widget)->accessible_name;
-}
-
-/**
- * st_widget_set_accessible_role:
- * @widget: widget to set the accessible role for
- * @role: The role to use
- *
- * This method sets @role as the accessible role for @widget. This
- * role describes what kind of user interface element @widget is and
- * is provided so that assistive technologies know how to present
- * @widget to the user.
- *
- * Usually you will have no need to set the accessible role for an
- * object, as this information is extracted from the context of the
- * object (ie: a #StButton has by default a push button role). This
- * method is only required when you need to redefine the role
- * currently associated with the widget, for instance if it is being
- * used in an unusual way (ie: a #StButton used as a togglebutton), or
- * if a generic object is used directly (ie: a container as a menu
- * item).
- *
- * If @role is #ATK_ROLE_INVALID, the role will not be changed
- * and the accessible's default role will be used instead.
- */
-void
-st_widget_set_accessible_role (StWidget *widget,
-                               AtkRole   role)
-{
-  StWidgetPrivate *priv;
-
-  g_return_if_fail (ST_IS_WIDGET (widget));
-
-  priv = st_widget_get_instance_private (widget);
-
-  if (priv->accessible_role == role)
-    return;
-
-  priv->accessible_role = role;
-
-  g_object_notify_by_pspec (G_OBJECT (widget), props[PROP_ACCESSIBLE_ROLE]);
-}
-
-
-/**
- * st_widget_get_accessible_role:
- * @widget: widget to get the accessible role for
- *
- * Gets the #AtkRole for this widget. See
- * st_widget_set_accessible_role() for more information.
- *
- * Returns: accessible #AtkRole for this widget
- */
-AtkRole
-st_widget_get_accessible_role (StWidget *widget)
-{
-  StWidgetPrivate *priv;
-  AtkRole role = ATK_ROLE_INVALID;
-
-  g_return_val_if_fail (ST_IS_WIDGET (widget), ATK_ROLE_INVALID);
-
-  priv = st_widget_get_instance_private (widget);
-
-  if (priv->accessible_role != ATK_ROLE_INVALID)
-    role = priv->accessible_role;
-  else if (priv->accessible != NULL)
-    role = atk_object_get_role (priv->accessible);
-
-  return role;
 }
 
 static void
@@ -2554,10 +2393,11 @@ notify_accessible_state_change (StWidget     *widget,
                                 AtkStateType  state,
                                 gboolean      value)
 {
-  StWidgetPrivate *priv = st_widget_get_instance_private (widget);
+  AtkObject *accessible =
+    clutter_actor_get_accessible (CLUTTER_ACTOR (widget));
 
-  if (priv->accessible != NULL)
-    atk_object_notify_state_change (priv->accessible, state, value);
+  if (accessible != NULL)
+    atk_object_notify_state_change (accessible, state, value);
 }
 
 /**
@@ -2628,22 +2468,6 @@ static void st_widget_accessible_dispose    (GObject *gobject);
 static AtkStateSet *st_widget_accessible_ref_state_set (AtkObject *obj);
 static void         st_widget_accessible_initialize    (AtkObject *obj,
                                                         gpointer   data);
-static AtkRole      st_widget_accessible_get_role      (AtkObject *obj);
-
-/* Private methods */
-static void on_pseudo_class_notify (GObject    *gobject,
-                                    GParamSpec *pspec,
-                                    gpointer    data);
-static void on_can_focus_notify    (GObject    *gobject,
-                                    GParamSpec *pspec,
-                                    gpointer    data);
-static void on_label_notify        (GObject    *gobject,
-                                    GParamSpec *pspec,
-                                    gpointer    data);
-static void check_pseudo_class     (StWidgetAccessible *self,
-                                    StWidget *widget);
-static void check_labels           (StWidgetAccessible *self,
-                                    StWidget *widget);
 
 struct _StWidgetAccessiblePrivate
 {
@@ -2657,130 +2481,7 @@ struct _StWidgetAccessiblePrivate
   AtkObject *current_label;
 };
 
-G_DEFINE_TYPE_WITH_PRIVATE (StWidgetAccessible, st_widget_accessible, CALLY_TYPE_ACTOR)
-
-static gboolean
-st_widget_has_accessible (ClutterActor *actor)
-{
-  StWidget *widget;
-  StWidgetPrivate *priv;
-
-  g_return_val_if_fail (ST_IS_WIDGET (actor), FALSE);
-
-  widget = ST_WIDGET (actor);
-  priv = st_widget_get_instance_private (widget);
-
-  return priv->accessible != NULL;
-}
-
-static AtkObject *
-st_widget_get_accessible (ClutterActor *actor)
-{
-  StWidget *widget = NULL;
-  StWidgetPrivate *priv;
-
-  g_return_val_if_fail (ST_IS_WIDGET (actor), NULL);
-
-  widget = ST_WIDGET (actor);
-  priv = st_widget_get_instance_private (widget);
-
-  if (priv->accessible == NULL)
-    {
-      priv->accessible =
-        g_object_new (ST_WIDGET_GET_CLASS (widget)->get_accessible_type (),
-                      NULL);
-
-      atk_object_initialize (priv->accessible, actor);
-
-      /* AtkGObjectAccessible, which StWidgetAccessible derives from, clears
-       * the back reference to the object in a weak notify for the object;
-       * weak-ref notification, which occurs during g_object_real_dispose(),
-       * is then the optimal time to clear the forward reference. We
-       * can't clear the reference in dispose() before chaining up, since
-       * clutter_actor_dispose() causes notifications to be sent out, which
-       * will result in a new accessible object being created.
-       */
-      g_object_add_weak_pointer (G_OBJECT (actor),
-                                 (gpointer *)&priv->accessible);
-    }
-
-  return priv->accessible;
-}
-
-/**
- * st_widget_set_accessible:
- * @widget: A #StWidget
- * @accessible: an accessible (#AtkObject)
- *
- * This method allows to set a customly created accessible object to
- * this widget. For example if you define a new subclass of
- * #StWidgetAccessible at the javascript code.
- *
- * NULL is a valid value for @accessible. That contemplates the
- * hypothetical case of not needing anymore a custom accessible object
- * for the widget. Next call of st_widget_get_accessible() would
- * create and return a default accessible.
- *
- * It assumes that the call to atk_object_initialize that bound the
- * gobject with the custom accessible object was already called, so
- * not a responsibility of this method.
- *
- */
-void
-st_widget_set_accessible (StWidget    *widget,
-                          AtkObject   *accessible)
-{
-  StWidgetPrivate *priv;
-
-  g_return_if_fail (ST_IS_WIDGET (widget));
-  g_return_if_fail (accessible == NULL || ATK_IS_GOBJECT_ACCESSIBLE (accessible));
-
-  priv = st_widget_get_instance_private (widget);
-
-  if (priv->accessible != accessible)
-    {
-      if (priv->accessible)
-        {
-          g_object_remove_weak_pointer (G_OBJECT (widget),
-                                        (gpointer *)&priv->accessible);
-          g_object_unref (priv->accessible);
-          priv->accessible = NULL;
-        }
-
-      if (accessible)
-        {
-          priv->accessible =  g_object_ref (accessible);
-          /* See note in st_widget_get_accessible() */
-          g_object_add_weak_pointer (G_OBJECT (widget),
-                                     (gpointer *)&priv->accessible);
-        }
-      else
-        priv->accessible = NULL;
-    }
-}
-
-static const gchar *
-st_widget_accessible_get_name (AtkObject *obj)
-{
-  const gchar* name = NULL;
-
-  g_return_val_if_fail (ST_IS_WIDGET_ACCESSIBLE (obj), NULL);
-
-  name = ATK_OBJECT_CLASS (st_widget_accessible_parent_class)->get_name (obj);
-  if (name == NULL)
-    {
-      StWidget *widget = NULL;
-
-      widget = ST_WIDGET (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (obj)));
-
-      if (widget == NULL)
-        name = NULL;
-      else
-        name = st_widget_get_accessible_name (widget);
-    }
-
-  return name;
-}
+G_DEFINE_TYPE_WITH_PRIVATE (StWidgetAccessible, st_widget_accessible, CLUTTER_TYPE_ACTOR_ACCESSIBLE)
 
 static void
 st_widget_accessible_class_init (StWidgetAccessibleClass *klass)
@@ -2792,8 +2493,6 @@ st_widget_accessible_class_init (StWidgetAccessibleClass *klass)
 
   atk_class->ref_state_set = st_widget_accessible_ref_state_set;
   atk_class->initialize = st_widget_accessible_initialize;
-  atk_class->get_role = st_widget_accessible_get_role;
-  atk_class->get_name = st_widget_accessible_get_name;
 }
 
 static void
@@ -2819,41 +2518,17 @@ st_widget_accessible_dispose (GObject *gobject)
 }
 
 static void
-on_accessible_name_notify (GObject    *gobject,
-                           GParamSpec *pspec,
-                           AtkObject  *accessible)
-{
-  g_object_notify (G_OBJECT (accessible), "accessible-name");
-}
-
-static void
 st_widget_accessible_initialize (AtkObject *obj,
                                  gpointer   data)
 {
   ATK_OBJECT_CLASS (st_widget_accessible_parent_class)->initialize (obj, data);
 
-  g_signal_connect (data, "notify::pseudo-class",
-                    G_CALLBACK (on_pseudo_class_notify),
-                    obj);
-
-  g_signal_connect (data, "notify::can-focus",
-                    G_CALLBACK (on_can_focus_notify),
-                    obj);
-
-  g_signal_connect (data, "notify::label-actor",
-                    G_CALLBACK (on_label_notify),
-                    obj);
-
-  g_signal_connect (data, "notify::accessible-name",
-                    G_CALLBACK (on_accessible_name_notify),
-                    obj);
-
   /* Check the cached selected state and notify the first selection.
    * Ie: it is required to ensure a first notification when Alt+Tab
    * popup appears
    */
-  check_pseudo_class (ST_WIDGET_ACCESSIBLE (obj), ST_WIDGET (data));
-  check_labels (ST_WIDGET_ACCESSIBLE (obj), ST_WIDGET (data));
+  check_pseudo_class (ST_WIDGET (data));
+  check_labels (ST_WIDGET (data));
 }
 
 static AtkStateSet *
@@ -2909,35 +2584,6 @@ st_widget_accessible_ref_state_set (AtkObject *obj)
   return result;
 }
 
-static AtkRole
-st_widget_accessible_get_role (AtkObject *obj)
-{
-  StWidget *widget = NULL;
-  StWidgetPrivate *priv;
-
-  g_return_val_if_fail (ST_IS_WIDGET_ACCESSIBLE (obj), ATK_ROLE_INVALID);
-
-  widget = ST_WIDGET (atk_gobject_accessible_get_object (ATK_GOBJECT_ACCESSIBLE (obj)));
-
-  if (widget == NULL)
-    return ATK_ROLE_INVALID;
-
-  priv = st_widget_get_instance_private (widget);
-  if (priv->accessible_role != ATK_ROLE_INVALID)
-    return priv->accessible_role;
-
-  return ATK_OBJECT_CLASS (st_widget_accessible_parent_class)->get_role (obj);
-}
-
-static void
-on_pseudo_class_notify (GObject    *gobject,
-                        GParamSpec *pspec,
-                        gpointer    data)
-{
-  check_pseudo_class (ST_WIDGET_ACCESSIBLE (data),
-                      ST_WIDGET (gobject));
-}
-
 /*
  * In some cases the only way to check some states are checking the
  * pseudo-class. Like if the object is selected (see bug 637830) or if
@@ -2956,74 +2602,68 @@ on_pseudo_class_notify (GObject    *gobject,
  * if required.
  */
 static void
-check_pseudo_class (StWidgetAccessible *self,
-                    StWidget *widget)
+check_pseudo_class (StWidget *widget)
 {
   gboolean found = FALSE;
+  AtkObject *accessible =
+    clutter_actor_get_accessible (CLUTTER_ACTOR (widget));
+  StWidgetAccessiblePrivate *priv;
 
+  if (!accessible)
+    return;
+
+  priv = ST_WIDGET_ACCESSIBLE (accessible)->priv;
   found = st_widget_has_style_pseudo_class (widget,
                                             "selected");
 
-  if (found != self->priv->selected)
+  if (found != priv->selected)
     {
-      self->priv->selected = found;
-      atk_object_notify_state_change (ATK_OBJECT (self),
+      priv->selected = found;
+      atk_object_notify_state_change (accessible,
                                       ATK_STATE_SELECTED,
                                       found);
     }
 
   found = st_widget_has_style_pseudo_class (widget,
                                             "checked");
-  if (found != self->priv->checked)
+  if (found != priv->checked)
     {
-      self->priv->checked = found;
-      atk_object_notify_state_change (ATK_OBJECT (self),
+      priv->checked = found;
+      atk_object_notify_state_change (accessible,
                                       ATK_STATE_CHECKED,
                                       found);
     }
 }
 
 static void
-on_can_focus_notify (GObject    *gobject,
-                     GParamSpec *pspec,
-                     gpointer    data)
+check_labels (StWidget *widget)
 {
-  gboolean can_focus = st_widget_get_can_focus (ST_WIDGET (gobject));
-
-  atk_object_notify_state_change (ATK_OBJECT (data),
-                                  ATK_STATE_FOCUSABLE, can_focus);
-}
-
-static void
-on_label_notify (GObject    *gobject,
-                 GParamSpec *pspec,
-                 gpointer    data)
-{
-  check_labels (ST_WIDGET_ACCESSIBLE (data), ST_WIDGET (gobject));
-}
-
-static void
-check_labels (StWidgetAccessible *widget_accessible,
-              StWidget           *widget)
-{
+  AtkObject *accessible =
+    clutter_actor_get_accessible (CLUTTER_ACTOR (widget));
+  StWidgetAccessiblePrivate *priv;
   ClutterActor *label = NULL;
   AtkObject *label_accessible = NULL;
+
+  if (!accessible)
+    return;
+
+  priv = ST_WIDGET_ACCESSIBLE (accessible)->priv;
 
   /* We only call this method at startup, and when the label changes,
    * so it is fine to remove the previous relationships if we have the
    * current_label by default
    */
-  if (widget_accessible->priv->current_label != NULL)
+  if (priv->current_label != NULL)
     {
-      AtkObject *previous_label = widget_accessible->priv->current_label;
+      AtkObject *previous_label = priv->current_label;
 
-      atk_object_remove_relationship (ATK_OBJECT (widget_accessible),
+      atk_object_remove_relationship (accessible,
                                       ATK_RELATION_LABELLED_BY,
                                       previous_label);
 
       atk_object_remove_relationship (previous_label,
                                       ATK_RELATION_LABEL_FOR,
-                                      ATK_OBJECT (widget_accessible));
+                                      accessible);
 
       g_object_unref (previous_label);
     }
@@ -3031,20 +2671,20 @@ check_labels (StWidgetAccessible *widget_accessible,
   label = st_widget_get_label_actor (widget);
   if (label == NULL)
     {
-      widget_accessible->priv->current_label = NULL;
+      priv->current_label = NULL;
     }
   else
     {
       label_accessible = clutter_actor_get_accessible (label);
-      widget_accessible->priv->current_label = g_object_ref (label_accessible);
+      priv->current_label = g_object_ref (label_accessible);
 
-      atk_object_add_relationship (ATK_OBJECT (widget_accessible),
+      atk_object_add_relationship (accessible,
                                    ATK_RELATION_LABELLED_BY,
                                    label_accessible);
 
       atk_object_add_relationship (label_accessible,
                                    ATK_RELATION_LABEL_FOR,
-                                   ATK_OBJECT (widget_accessible));
+                                   accessible);
     }
 }
 
