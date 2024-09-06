@@ -137,7 +137,7 @@ index fafed7c..029950d 100644
  });
  
 diff --git a/meson.build b/meson.build
-index f2f223d..6612185 100644
+index c46cfea..d417904 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -33,7 +33,6 @@ systemd_req = '>= 246'
@@ -157,10 +157,10 @@ index f2f223d..6612185 100644
  have_x11 = mutter_dep.get_variable('have_x11') == 'true'
  have_x11_client = mutter_dep.get_variable('have_x11_client') == 'true'
 diff --git a/src/meson.build b/src/meson.build
-index 85b97f0..d699cf0 100644
+index c975720..bfd0b6b 100644
 --- a/src/meson.build
 +++ b/src/meson.build
-@@ -79,7 +79,6 @@ gnome_shell_deps = [
+@@ -75,7 +75,6 @@ gnome_shell_deps = [
    gcr_dep,
    libsystemd_dep,
    libpipewire_dep,
@@ -168,7 +168,7 @@ index 85b97f0..d699cf0 100644
  ]
  
  if have_x11_client
-@@ -199,6 +198,10 @@ if have_x11_client
+@@ -195,6 +194,10 @@ if have_x11_client
    ]
  endif
  

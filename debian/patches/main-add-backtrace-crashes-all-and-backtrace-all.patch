@@ -15,10 +15,10 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  2 files changed, 9 insertions(+)
 
 diff --git a/src/main.c b/src/main.c
-index 84e2776..2ccc789 100644
+index d8b856c..8f2452c 100644
 --- a/src/main.c
 +++ b/src/main.c
-@@ -59,6 +59,13 @@ static const GDebugKey SHELL_DEBUG_KEYS[] = {
+@@ -58,6 +58,13 @@ static const GDebugKey SHELL_DEBUG_KEYS[] = {
    { "backtrace-segfaults",   SHELL_DEBUG_BACKTRACE_SEGFAULTS },
    { "backtrace-aborts",      SHELL_DEBUG_BACKTRACE_ABORTS },
    { "backtrace-math-errors", SHELL_DEBUG_BACKTRACE_FPE },

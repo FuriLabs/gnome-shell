@@ -6603,10 +6603,10 @@ index ad854ca..0000000
 -export const SMARTCARD_ROLE_NAME = 'smartcard';
 -export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index a00c78e..ead970f 100644
+index 54c4524..e058c63 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -535,6 +535,8 @@ export const LoginDialog = GObject.registerClass({
+@@ -536,6 +536,8 @@ export const LoginDialog = GObject.registerClass({
          this._authPrompt.connect('prompted', this._onPrompted.bind(this));
          this._authPrompt.connect('reset', this._onReset.bind(this));
          this._authPrompt.connect('mechanisms-changed', this._onMechanismsChanged.bind(this));
@@ -6615,7 +6615,7 @@ index a00c78e..ead970f 100644
          this._authPrompt.hide();
          this.add_child(this._authPrompt);
  
-@@ -1021,6 +1023,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1022,6 +1024,7 @@ export const LoginDialog = GObject.registerClass({
          const activeMechanism = this._loginOptionsButton.getActiveItem();
  
          this._loginOptionsButton.clearItems({serviceName});
@@ -6623,7 +6623,7 @@ index a00c78e..ead970f 100644
          if (mechanisms.length === 0)
              return;
  
-@@ -1101,9 +1104,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1102,9 +1105,7 @@ export const LoginDialog = GObject.registerClass({
                  this._user = this._userManager.get_user(answer);
                  this._authPrompt.clear();
                  this._beginVerification({userName: answer});

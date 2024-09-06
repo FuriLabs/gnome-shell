@@ -28,7 +28,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/1878998
  2 files changed, 28 insertions(+), 6 deletions(-)
 
 diff --git a/src/st/st-entry.c b/src/st/st-entry.c
-index b16b3ac..f1f8738 100644
+index 6255813..af50210 100644
 --- a/src/st/st-entry.c
 +++ b/src/st/st-entry.c
 @@ -1092,6 +1092,8 @@ st_entry_init (StEntry *entry)
