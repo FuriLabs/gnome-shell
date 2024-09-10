@@ -63,3 +63,4 @@ CVE-2024-36472-2.patch
 CVE-2024-36472-3.patch
 CVE-2024-36472-4.patch
 st-theme-node-Forget-properties-cache-on-stylesheet-chang.patch
+shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
