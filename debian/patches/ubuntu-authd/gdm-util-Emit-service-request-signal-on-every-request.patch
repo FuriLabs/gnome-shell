@@ -16,7 +16,7 @@ a dialog used for Web Login)
  1 file changed, 10 insertions(+)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 9ea762f..c89ca97 100644
+index 9f5a2c2..9140d64 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -913,6 +913,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {

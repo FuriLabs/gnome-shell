@@ -1,0 +1,28 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 11 Sep 2024 00:22:57 +0200
+Subject: gdm: Actually wait for pending messages being notified on failures
+
+We had code to ensure that all the queued messages sent by a PAM module
+were shown by waiting some time to give the user time to read them, but
+due to a typo this code never executed.
+
+Fixes commit dd97a2589b8b686f273550f3e9e6ce370b25c10d
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3466
+---
+ js/gdm/util.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index 07cc17a..7a52737 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -864,7 +864,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     _handlePendingMessages() {
+-        if (!this.hasPendingMessage)
++        if (!this.hasPendingMessages)
+             return Promise.resolve();
+ 
+         const cancellable = this._cancellable;

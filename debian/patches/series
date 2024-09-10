@@ -19,6 +19,7 @@ main-increase-the-granularity-of-backtraces-in-SHELL_DEBU.patch
 main-add-backtrace-crashes-all-and-backtrace-all.patch
 sessionMode-add-support-for-debugFlags-parameter.patch
 magnifier-Show-cursor-when-magnifier-is-enabled-and-scale.patch
+gdm-Actually-wait-for-pending-messages-being-notified-on-.patch
 ubuntu/search-call-XUbuntuCancel-method-on-providers-when-no-dat.patch
 ubuntu/resolve_alternate_theme_path.patch
 ubuntu/secure_mode_extension.patch
