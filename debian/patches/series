@@ -33,6 +33,7 @@ ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch
 ubuntu/st-Add-support-for-brown-accent-color.patch
 ubuntu/shell-global-util-Do-not-move-snap-apps-to-gnome-apps-sco.patch
 ubuntu/main-Add-support-for-playing-a-startup-sound-if-enabled-i.patch
+gdm-Actually-wait-for-pending-messages-being-notified-on-.patch
 ubuntu-authd/animation-Allow-spinner-to-be-sizes-other-than-16x16-pixe.patch
 ubuntu-authd/authPrompt-Right-align-cancel-button.patch
 ubuntu-authd/unlockDialog-Support-request-type-of-REUSE_USERNAME.patch

@@ -7,7 +7,7 @@ Subject: gdm/util: Catch errors on re-authentication
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 709d290..9b04f75 100644
+index 4231cd6..8a02e5a 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -228,7 +228,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {

@@ -14,7 +14,7 @@ long if/else if code that was there before
  1 file changed, 18 insertions(+), 7 deletions(-)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index be3cb6c..11a957b 100644
+index 7e6c7e1..1f9a85c 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -60,6 +60,7 @@ const USER_READ_TIME = 48;

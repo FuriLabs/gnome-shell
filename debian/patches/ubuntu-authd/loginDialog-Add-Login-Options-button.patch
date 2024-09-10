@@ -184,7 +184,7 @@ index 9c6e910..0de2871 100644
          this._setUserListExpanded(true);
          this._notListedButton.show();
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index cbb99b1..011fcea 100644
+index 1e0154f..4c1a70d 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -28,6 +28,10 @@ export const FINGERPRINT_SERVICE_NAME = 'gdm-fingerprint';

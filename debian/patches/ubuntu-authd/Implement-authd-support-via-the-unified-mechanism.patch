@@ -6731,7 +6731,7 @@ index 059d161..a2b6890 100644
          if (!mechanisms)
              return;
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index ad7a0c3..20567ee 100644
+index 97676a1..bb55a46 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -4,6 +4,7 @@ import Gio from 'gi://Gio';

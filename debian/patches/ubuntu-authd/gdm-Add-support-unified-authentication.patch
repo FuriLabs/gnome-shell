@@ -35,7 +35,7 @@ index 0de2871..431a4b5 100644
          }
  
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 25a78cb..be3cb6c 100644
+index d3d79ee..7e6c7e1 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -23,6 +23,7 @@ Gio._promisify(Gdm.UserVerifierProxy.prototype,
