@@ -1,5 +1,6 @@
 gnome-shell (47~rc-3ubuntu1) UNRELEASED; urgency=medium
 
+  [ Jeremy Bícha ]
   * Merge with Debian. Remaining changes:
     - Add Build-Depends: terser (for authd)
     - Add Depends: ubuntu-wallpapers
@@ -13,7 +14,22 @@ gnome-shell (47~rc-3ubuntu1) UNRELEASED; urgency=medium
       gnome-shell-common
     - Add many patches
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 06 Sep 2024 14:19:07 -0400
+  [ Marco Trevisan (Treviño) ]
+  * d/p: Ensure PAM messages are fully notified on failures
+  * d/p/ubuntu-authd: Improve notification of authentication error messages.
+    Ensure that messages are visible enough time for the user being able to
+    read them.
+  * d/p/ubuntu-authd: Cleanup patches so that they're split more correctly.
+    No final content change
+  * d/p/ubuntu-authd: Improve theming and consistence of the login auth list
+    items
+
+  [ Daniel van Vugt ]
+  * Add shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
+    to avoid crashing the shell if an app misbehaves coincidentally close
+    to a garbage collection run (LP: #2037055)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 11 Sep 2024 03:43:30 +0200
 
 gnome-shell (47~rc-3) experimental; urgency=medium
 
