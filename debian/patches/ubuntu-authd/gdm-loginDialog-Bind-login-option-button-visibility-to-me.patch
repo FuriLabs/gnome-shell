@@ -1,0 +1,33 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 11 Sep 2024 02:09:30 +0200
+Subject: gdm/loginDialog: Bind login option button visibility to mechanisms
+
+---
+ js/gdm/loginDialog.js | 1 +
+ js/ui/unlockDialog.js | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
+index 54c4524..42fa89f 100644
+--- a/js/gdm/loginDialog.js
++++ b/js/gdm/loginDialog.js
+@@ -1022,6 +1022,7 @@ export const LoginDialog = GObject.registerClass({
+         const activeMechanism = this._loginOptionsButton.getActiveItem();
+ 
+         this._loginOptionsButton.clearItems({serviceName});
++        this._loginOptionsButton.updateSensitivity(mechanisms.length !== 0);
+         if (mechanisms.length === 0)
+             return;
+ 
+diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
+index f1f517a..e65e586 100644
+--- a/js/ui/unlockDialog.js
++++ b/js/ui/unlockDialog.js
+@@ -832,6 +832,7 @@ export const UnlockDialog = GObject.registerClass({
+         const activeMechanism = this._loginOptionsButton.getActiveItem();
+ 
+         this._loginOptionsButton.clearItems({serviceName});
++        this._loginOptionsButton.updateSensitivity(mechanisms.length !== 0);
+         if (mechanisms.length === 0)
+             return;
+ 

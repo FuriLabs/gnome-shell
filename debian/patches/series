@@ -54,6 +54,12 @@ ubuntu-authd/gdm-util-Add-new-background-message-type.patch
 ubuntu-authd/gdm-util-Catch-errors-on-re-authentication.patch
 ubuntu-authd/shell-qr-code-generator-Use-g-c-c-embedded-library-simpli.patch
 ubuntu-authd/start-abstracting-the-unified-mechanism-handler.patch
+ubuntu-authd/gdm-loginDialog-Bind-login-option-button-visibility-to-me.patch
+ubuntu-authd/gdm-loginDialog-Fix-cancel-button-visibility.patch
+ubuntu-authd/gdm-Improve-detection-of-unavailable-services.patch
+ubuntu-authd/gdm-Support-more-authentication-mechanism-UIs.patch
+ubuntu-authd/gdm-webLogin-Support-custom-buttons-and-auto-ack.patch
+ubuntu-authd/gdm-webLogin-Improve-label-rendering.patch
 ubuntu-authd/Implement-authd-support-via-the-unified-mechanism.patch
 ubuntu-authd/js-Minify-the-authd-protocol-during-build.patch
 ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch

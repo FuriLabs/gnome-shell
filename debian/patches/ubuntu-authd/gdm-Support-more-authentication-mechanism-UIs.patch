@@ -1,0 +1,166 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 11 Sep 2024 02:23:15 +0200
+Subject: gdm: Support more authentication mechanism UIs
+
+---
+ js/gdm/authPrompt.js | 21 ++++++++++++++++++
+ js/gdm/util.js       | 60 ++++++++++++++++++++++++++++++++++++++++++++++++++--
+ 2 files changed, 79 insertions(+), 2 deletions(-)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 2ca17c6..9994591 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -90,9 +90,11 @@ export const AuthPrompt = GObject.registerClass({
+ 
+         this._userVerifier.connect('ask-question', this._onAskQuestion.bind(this));
+         this._userVerifier.connect('show-message', this._onShowMessage.bind(this));
++        this._userVerifier.connect('show-waiting-message', this._onWaitingMessage.bind(this));
+         this._userVerifier.connect('show-choice-list', this._onShowChoiceList.bind(this));
+         this._userVerifier.connect('mechanisms-list-changed', this._onAuthMechanismsListChanged.bind(this));
+         this._userVerifier.connect('foreground-mechanism-changed', this._onForegroundMechanismChanged.bind(this));
++        this._userVerifier.connect('choice-list-selected', (_, ...args) => this._onChoiceListSelected(...args));
+         this._userVerifier.connect('web-login', this._onWebLogin.bind(this));
+         this._userVerifier.connect('web-login-time-out', this._onWebLoginTimeOut.bind(this));
+         this._userVerifier.connect('verification-failed', this._onVerificationFailed.bind(this));
+@@ -356,6 +358,20 @@ export const AuthPrompt = GObject.registerClass({
+         this.emit('prompted');
+     }
+ 
++    _onWaitingMessage(verifier, serviceName, info) {
++        if (this._queryingService)
++            this.clear();
++
++        this._queryingService = serviceName;
++        this._entry.visible = false;
++        this._message.grab_key_focus();
++        this.setMessage(info, GdmUtil.MessageType.INFO);
++        this.startSpinning();
++        this.emit('prompted');
++
++        this._userVerifier.waitMessageShown(serviceName);
++    }
++
+     _onShowChoiceList(userVerifier, serviceName, promptMessage, choiceList) {
+         if (this._queryingService)
+             this.clear();
+@@ -375,6 +391,11 @@ export const AuthPrompt = GObject.registerClass({
+         this.emit('mechanisms-changed', serviceName);
+     }
+ 
++    _onChoiceListSelected(service, key) {
++        if (this._authList?.visible)
++            this._authList.emit('activate', key);
++    }
++
+     _onWebLogin(userVerifier, serviceName, introMessage, linkMessage, uri, code) {
+         const introAlreadyUp = this._queryingService === serviceName;
+ 
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index 5b6f29b..1c43765 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -363,6 +363,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     selectChoice(serviceName, key) {
++        if (serviceName === UNIFIED_AUTH_SERVICE_NAME &&
++            this._pendingMechanisms.has(Const.CHOICE_LIST_ROLE_NAME)) {
++            this._replyWithAuthSelectionResponse(serviceName, Const.CHOICE_LIST_ROLE_NAME, key);
++            return;
++        }
++
+         this._userVerifierChoiceList.call_select_choice(serviceName, key, this._cancellable, null);
+     }
+ 
+@@ -371,6 +377,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             await this._handlePendingMessages();
+             if (this._pendingMechanisms.has(PASSWORD_ROLE_NAME))
+                 this._replyWithAuthSelectionResponse(serviceName, PASSWORD_ROLE_NAME, {password: answer});
++            else if (this._pendingMechanisms.has(Const.PLAIN_TEXT_ROLE_NAME))
++                this._replyWithAuthSelectionResponse(serviceName, Const.PLAIN_TEXT_ROLE_NAME, {text: answer});
+             else
+                 this._userVerifier.call_answer_query(serviceName, answer, this._cancellable, null);
+         } catch (e) {
+@@ -974,6 +982,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         const roleHandlers = {
+             [WEB_LOGIN_ROLE_NAME]: this._startWebLogin,
+             [PASSWORD_ROLE_NAME]: this._startQuestionLogin,
++            [Const.PLAIN_TEXT_ROLE_NAME]: this._startQuestionLogin,
++            [Const.CHOICE_LIST_ROLE_NAME]: this._startChoiceListSelection,
++            [Const.MESSAGE_ROLE_NAME]: this._startMessageLogin,
+         };
+ 
+         const handler = roleHandlers[mechanism.role];
+@@ -1048,7 +1059,27 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this.emit('show-choice-list', serviceName, promptMessage, list.deepUnpack());
+     }
+ 
+-    _startPasswordLogin(serviceName, mechanismId) {
++    _startChoiceListSelection(serviceName, mechanismId) {
++        const mechanisms = this._publishedMechanisms.get(serviceName);
++
++        if (!mechanisms) {
++            logError(new Error(`Impossible to find mechanisms for ${serviceName}`));
++            return;
++        }
++
++        const mechanism = mechanisms[mechanismId];
++        if (!mechanism) {
++            logError(new Error(`Impossible to find mechanism for ${mechanismId}`));
++            return;
++        }
++
++        const {prompt, choices, role} = mechanism;
++
++        this._pendingMechanisms.set(role, mechanismId);
++        this.emit('show-choice-list', serviceName, prompt, choices);
++    }
++
++    _startQuestionLogin(serviceName, mechanismId) {
+         const mechanisms = this._publishedMechanisms.get(serviceName);
+ 
+         if (!mechanisms)
+@@ -1058,9 +1089,25 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             return;
+ 
+         const {prompt, role} = mechanisms[mechanismId];
++        const secret = role !== Const.PLAIN_TEXT_ROLE_NAME;
+ 
+         this._pendingMechanisms.set(role, mechanismId);
+-        this.emit('ask-question', serviceName, prompt, true);
++        this.emit('ask-question', serviceName, prompt, secret);
++    }
++
++    _startMessageLogin(serviceName, mechanismId) {
++        const mechanisms = this._publishedMechanisms.get(serviceName);
++
++        if (!mechanisms)
++            return;
++
++        if (!mechanisms[mechanismId])
++            return;
++
++        const {prompt, role} = mechanisms[mechanismId];
++
++        this._pendingMechanisms.set(role, mechanismId);
++        this.emit('show-waiting-message', serviceName, prompt);
+     }
+ 
+     _replyWithAuthSelectionResponse(serviceName, role, response) {
+@@ -1138,6 +1185,15 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this._replyWithAuthSelectionResponse(serviceName, WEB_LOGIN_ROLE_NAME, {});
+     }
+ 
++    waitMessageShown(serviceName) {
++        const mechanism = this._getPendingMechanismForRole(Const.MESSAGE_ROLE_NAME);
++        const authService = this._unifiedAuthServices.get(mechanism?.protocol);
++        if (!authService)
++            return;
++
++        this._replyWithAuthSelectionResponse(serviceName, Const.MESSAGE_ROLE_NAME, {});
++    }
++
+     _filterAuthMechanisms(mechanismsList, filterFunc) {
+         return mechanismsList.filter(mechanism => {
+             const mapping = DiscreteServiceMechanismDefinitions.find(m =>
