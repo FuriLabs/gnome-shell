@@ -1,0 +1,41 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 11 Sep 2024 02:26:23 +0200
+Subject: gdm/webLogin: Improve label rendering
+
+---
+ js/gdm/webLogin.js | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/js/gdm/webLogin.js b/js/gdm/webLogin.js
+index 16a53d6..8bbf5ac 100644
+--- a/js/gdm/webLogin.js
++++ b/js/gdm/webLogin.js
+@@ -7,6 +7,7 @@ import Clutter from 'gi://Clutter';
+ import GObject from 'gi://GObject';
+ import Gio from 'gi://Gio';
+ import Shell from 'gi://Shell';
++import Pango from 'gi://Pango';
+ import St from 'gi://St';
+ import {Spinner} from '../ui/animation.js';
+ import * as ModalDialog from '../ui/modalDialog.js';
+@@ -120,6 +121,10 @@ class WebLoginPrompt extends St.BoxLayout {
+             text: message,
+             style_class: 'web-login-title-label',
+         });
++        this._urlTitleLabel.clutterText.set({
++            lineWrap: true,
++            ellipsize: Pango.EllipsizeMode.NONE,
++        });
+         this.add_child(this._urlTitleLabel);
+ 
+         this._qrCode = new QrCode({iconSize, url});
+@@ -157,6 +162,9 @@ class WebLoginPrompt extends St.BoxLayout {
+         const http = 'http://';
+         const https = 'https://';
+ 
++        if (url.endsWith('/'))
++            url = url.substring(0, url.length-1);
++
+         if (url.startsWith(http))
+             return url.substring(http.length);
+ 

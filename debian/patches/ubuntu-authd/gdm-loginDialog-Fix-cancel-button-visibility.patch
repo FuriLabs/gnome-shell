@@ -1,0 +1,57 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 11 Sep 2024 02:09:57 +0200
+Subject: gdm/loginDialog: Fix cancel button visibility
+
+---
+ js/gdm/authPrompt.js  | 7 +++++++
+ js/gdm/loginDialog.js | 4 ++--
+ 2 files changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 2f8eb15..9b067f6 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -59,6 +59,12 @@ export const AuthPrompt = GObject.registerClass({
+         'mechanisms-changed': {param_types: [GObject.TYPE_STRING]},
+         'reset': {param_types: [GObject.TYPE_UINT]},
+     },
++    Properties: {
++        'verification-status': GObject.ParamSpec.uint(
++            'verification-status', 'verification-status', 'verification-status',
++            GObject.ParamFlags.READWRITE,
++            AuthPromptStatus.NOT_VERIFYING, AuthPromptStatus.VERIFICATION_IN_PROGRESS, 0),
++    },
+ }, class AuthPrompt extends St.BoxLayout {
+     _init(gdmClient, mode) {
+         super._init({
+@@ -807,6 +813,7 @@ export const AuthPrompt = GObject.registerClass({
+         this.cancelButton.reactive = this._hasCancelButton;
+         this.cancelButton.can_focus = this._hasCancelButton;
+         this._preemptiveAnswer = null;
++        this.cancelButton.opacity = this._hasCancelButton ? 255 : 0;
+ 
+         if (this._userVerifier)
+             this._userVerifier.cancel();
+diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
+index 9bc916a..bcb3dc9 100644
+--- a/js/gdm/loginDialog.js
++++ b/js/gdm/loginDialog.js
+@@ -536,6 +536,8 @@ export const LoginDialog = GObject.registerClass({
+         this._authPrompt.connect('prompted', this._onPrompted.bind(this));
+         this._authPrompt.connect('reset', this._onReset.bind(this));
+         this._authPrompt.connect('mechanisms-changed', this._onMechanismsChanged.bind(this));
++        this._authPrompt.connectObject('notify::verification-status',
++            () => this._updateCancelButton(), this);
+         this._authPrompt.hide();
+         this.add_child(this._authPrompt);
+ 
+@@ -1103,9 +1105,7 @@ export const LoginDialog = GObject.registerClass({
+                 this._user = this._userManager.get_user(answer);
+                 this._authPrompt.clear();
+                 this._beginVerification({userName: answer});
+-                this._updateCancelButton();
+             });
+-        this._updateCancelButton();
+ 
+         this._sessionMenuButton.updateSensitivity(false);
+         this._authPrompt.updateSensitivity(true);

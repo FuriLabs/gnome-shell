@@ -1,0 +1,196 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 11 Sep 2024 02:25:28 +0200
+Subject: gdm/webLogin: Support custom buttons and auto-ack
+
+---
+ js/gdm/authPrompt.js | 41 +++++++++++++++++++++++------------------
+ js/gdm/util.js       | 21 +++++++++++++++++++--
+ js/gdm/webLogin.js   | 17 +++++++++++++----
+ 3 files changed, 55 insertions(+), 24 deletions(-)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 5e4a786..aa1074a 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -398,7 +398,7 @@ export const AuthPrompt = GObject.registerClass({
+             this._authList.emit('activate', key);
+     }
+ 
+-    _onWebLogin(userVerifier, serviceName, introMessage, linkMessage, uri, code) {
++    _onWebLogin(userVerifier, serviceName, introMessage, linkMessage, uri, code, autoAck, customButton) {
+         const introAlreadyUp = this._queryingService === serviceName;
+ 
+         if (this._queryingService)
+@@ -426,14 +426,14 @@ export const AuthPrompt = GObject.registerClass({
+                 if (this._webLoginTimedOut)
+                     this._refreshWebLogin(serviceName);
+                 else
+-                    this._openWebLoginDialog(userVerifier, serviceName, linkMessage, uri, code);
++                    this._openWebLoginDialog(userVerifier, serviceName, linkMessage, uri, code, autoAck, customButton);
+             });
+             this._webLoginPromptWell.add_child(this._webLoginIntro);
+             this._webLoginPromptWell.visible = true;
+ 
+             this.updateSensitivity(true);
+         } else {
+-            this._openWebLoginDialog(userVerifier, serviceName, linkMessage, uri, code);
++            this._openWebLoginDialog(userVerifier, serviceName, linkMessage, uri, code, autoAck, customButton);
+         }
+ 
+         this._webLoginTimedOut = false;
+@@ -464,7 +464,7 @@ export const AuthPrompt = GObject.registerClass({
+         this._webLoginDialog = null;
+     }
+ 
+-    _openWebLoginDialog(userVerifier, serviceName, message, url, code) {
++    _openWebLoginDialog(userVerifier, serviceName, message, url, code, autoAck, customButton) {
+         if (this._queryingService)
+             this.clear();
+ 
+@@ -474,26 +474,31 @@ export const AuthPrompt = GObject.registerClass({
+ 
+         this._webLoginPromptWell.remove_all_children();
+ 
+-        this._webLoginDialog = new WebLogin.WebLoginDialog({message, url, code});
+-        this._webLoginDialog.open(global.get_current_time());
++        this._webLoginDialog = new WebLogin.WebLoginDialog({message, url, code, autoAck, customButton});
+         this._webLoginDialog.connect('cancel', () => {
++            if (userVerifier.cancelRequested()) {
++                this._closeWebLoginDialog();
++                return;
++            }
+             if (this.verificationStatus !== AuthPromptStatus.VERIFICATION_SUCCEEDED)
+                 this.reset();
+         });
+-        this._webLoginDialog.connect('done', () => {
+-            userVerifier.connectObject(
+-                `service-request::${serviceName}`, this._closeWebLoginDialog.bind(this),
++        this._webLoginDialog.connect('done', () =>
++            userVerifier.webLoginDone(serviceName))
++        this._webLoginDialog.connect('opened', () =>
++            userVerifier.webLoginOpened(serviceName))
+ 
+-                'verification-complete', this._closeWebLoginDialog.bind(this),
++        this._webLoginDialog.open(global.get_current_time());
+ 
+-                'verification-failed', () => {
+-                    this._closeWebLoginDialog();
+-                    this.showLoginFailedNotification();
+-                    this.reset();
+-                },
+-                this);
+-            userVerifier.webLoginDone(serviceName);
+-        });
++        userVerifier.connectObject(
++            `service-request::${serviceName}`, this._closeWebLoginDialog.bind(this),
++            'verification-complete', this._closeWebLoginDialog.bind(this),
++            'verification-failed', () => {
++                this._closeWebLoginDialog();
++                this.showLoginFailedNotification();
++                this.reset();
++            },
++            this._webLoginDialog);
+ 
+         if (this._spinner)
+             this._spinner.stop();
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index c7ab984..36ccf18 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -1143,7 +1143,11 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             return;
+         }
+ 
+-        const {init_prompt: initPrompt, link_prompt: linkPrompt, uri, code, role, timeout} = mechanisms[mechanismId];
++        const {
++            init_prompt: initPrompt,
++            link_prompt: linkPrompt,
++            uri, code, role, timeout, autoAck, customButton,
++        } = mechanisms[mechanismId];
+ 
+         if (!linkPrompt || !uri)
+             return;
+@@ -1158,7 +1162,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         }
+ 
+         this._pendingMechanisms.set(role, mechanismId);
+-        this.emit('web-login', serviceName, initPrompt, linkPrompt, uri, code);
++        this.emit('web-login', serviceName, initPrompt, linkPrompt, uri, code, autoAck, customButton);
+     }
+ 
+     _clearWebLoginTimeout() {
+@@ -1180,6 +1184,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this._clearWebLoginTimeout();
+ 
+         const mechanism = this._getPendingMechanismForRole(WEB_LOGIN_ROLE_NAME);
++        if (mechanism?.autoAck)
++            return;
++        const authService = this._unifiedAuthServices.get(mechanism?.protocol);
++        if (!authService)
++            return;
++
++        this._replyWithAuthSelectionResponse(serviceName, WEB_LOGIN_ROLE_NAME, {});
++    }
++
++    webLoginOpened(serviceName) {
++        const mechanism = this._getPendingMechanismForRole(WEB_LOGIN_ROLE_NAME);
++        if (!mechanism?.autoAck)
++            return;
+         const authService = this._unifiedAuthServices.get(mechanism?.protocol);
+         if (!authService)
+             return;
+diff --git a/js/gdm/webLogin.js b/js/gdm/webLogin.js
+index 029950d..16a53d6 100644
+--- a/js/gdm/webLogin.js
++++ b/js/gdm/webLogin.js
+@@ -174,10 +174,12 @@ export const WebLoginDialog = GObject.registerClass({
+     },
+ }, class WebLoginDialog extends ModalDialog.ModalDialog {
+     _init(params) {
+-        const {message, url, code} = Params.parse(params, {
++        const {message, url, code, autoAck, customButton} = Params.parse(params, {
+             message: null,
+             url: null,
+             code: null,
++            autoAck: false,
++            customButton: null,
+         });
+ 
+         super._init({
+@@ -193,7 +195,7 @@ export const WebLoginDialog = GObject.registerClass({
+         this.contentLayout.reactive = false;
+         this.contentLayout.can_focus = false;
+         this.contentLayout.add_child(this._webLoginPrompt);
+-        this._updateButtons();
++        this._updateButtons(autoAck, customButton);
+ 
+         this._contentOverlay = new St.Widget({
+             layout_manager: new Clutter.BinLayout(),
+@@ -233,18 +235,25 @@ export const WebLoginDialog = GObject.registerClass({
+         this.emit('done');
+     }
+ 
+-    _updateButtons() {
++    _updateButtons(autoAck, customButton) {
+         this.clearButtons();
+ 
+         this._cancelButton = this.addButton({
+             action: this.cancel.bind(this),
+             label: _('Cancel'),
+             key: Clutter.KEY_Escape,
++            default: !autoAck && !customButton?.default,
+         });
+ 
++        if (customButton)
++            this.addButton(customButton);
++
++        if (autoAck)
++            return;
++
+         this._doneButton = this.addButton({
+             action: this.done.bind(this),
+-            default: true,
++            default: !customButton?.default,
+             label: _('Done'),
+         });
+     }

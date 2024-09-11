@@ -4,21 +4,56 @@ Subject: start abstracting the unified mechanism handler
 
 As we may have different protocols under the hood.
 ---
- js/gdm/consts.js              |   6 ++
+ js/gdm/authPrompt.js          |  11 +-
+ js/gdm/const.js               |   6 +
  js/gdm/loginDialog.js         |   4 +-
- js/gdm/unifiedMechanism.js    | 129 ++++++++++++++++++++++++++++
- js/gdm/util.js                | 192 +++++++++++++++++++++++-------------------
+ js/gdm/unifiedMechanism.js    | 145 +++++++++++++++++++++
+ js/gdm/util.js                | 285 ++++++++++++++++++++++++++++--------------
  js/js-resources.gresource.xml |   2 +
  js/ui/unlockDialog.js         |   4 +-
- 6 files changed, 247 insertions(+), 90 deletions(-)
- create mode 100644 js/gdm/consts.js
+ 7 files changed, 355 insertions(+), 102 deletions(-)
+ create mode 100644 js/gdm/const.js
  create mode 100644 js/gdm/unifiedMechanism.js
 
-diff --git a/js/gdm/consts.js b/js/gdm/consts.js
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index b959198..2f8eb15 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -146,12 +146,19 @@ export const AuthPrompt = GObject.registerClass({
+ 
+     on_key_press_event(event) {
+         if (event.get_key_symbol() === Clutter.KEY_Escape) {
+-            this.cancel();
++            this._handleCancel();
+             return Clutter.EVENT_STOP;
+         }
+         return Clutter.EVENT_PROPAGATE;
+     }
+ 
++    _handleCancel() {
++        if (this._userVerifier.cancelRequested())
++            return;
++
++        this.cancel();
++    }
++
+     _initInputRow() {
+         this._mainBox = new St.BoxLayout({
+             style_class: 'login-dialog-button-box',
+@@ -170,7 +177,7 @@ export const AuthPrompt = GObject.registerClass({
+             icon_name: 'go-previous-symbolic',
+         });
+         if (this._hasCancelButton)
+-            this.cancelButton.connect('clicked', () => this.cancel());
++            this.cancelButton.connect('clicked', () => this._handleCancel());
+         else
+             this.cancelButton.opacity = 0;
+         this._mainBox.add_child(this.cancelButton);
+diff --git a/js/gdm/const.js b/js/gdm/const.js
 new file mode 100644
 index 0000000..ad854ca
 --- /dev/null
-+++ b/js/gdm/consts.js
++++ b/js/gdm/const.js
 @@ -0,0 +1,6 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
@@ -46,10 +81,10 @@ index c7d23be..505e388 100644
              const wasActive = activeMechanism?.id === id;
 diff --git a/js/gdm/unifiedMechanism.js b/js/gdm/unifiedMechanism.js
 new file mode 100644
-index 0000000..059d161
+index 0000000..77ba705
 --- /dev/null
 +++ b/js/gdm/unifiedMechanism.js
-@@ -0,0 +1,129 @@
+@@ -0,0 +1,145 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import GObject from 'gi://GObject';
@@ -57,7 +92,7 @@ index 0000000..059d161
 +import {
 +    PASSWORD_ROLE_NAME,
 +    WEB_LOGIN_ROLE_NAME
-+} from './consts.js';
++} from './const.js';
 +
 +export const MECHANISM_PROTOCOL = 'auth-mechanisms';
 +
@@ -70,17 +105,19 @@ index 0000000..059d161
 +
 +export class UnifiedAuthService extends Signals.EventEmitter {
 +    // FIXME USE GObject so we have proper signal definitions
-+    // 'mechanisms-changed'
++    // signals:
++    // : 'mechanisms-changed'
++    // : 'proto-request-handled'
++    // : 'clear-message-queue'
++    // : 'queue-message'
++    // : 'reset'
++    // : 'service-request'
++    // : 'cancel'
 +
 +    get protocolName() {
 +        throw new GObject.NotImplementedError(
 +            `protocolName in ${this.constructor.name}`);
 +    }
-+
-+    // get serviceName() {
-+    //     throw new GObject.NotImplementedError(
-+    //         `protocolName in ${this.constructor.name}`);
-+    // }
 +
 +    getSupportedRoles() {
 +        throw new GObject.NotImplementedError(
@@ -101,10 +138,34 @@ index 0000000..059d161
 +        return false;
 +    }
 +
-+    getProtocolResponse(_mechanism) {
++    handleAuthSelectionResponse(_mechanism, _role, _response) {
++        return false;
++    }
++
++    handleProblem(problem) {
++        return false;
++    }
++
++    sendProtocolResponse(reply, params={}) {
++        this.emit('protocol-request-handled', reply, params);
++    }
++
++    getProtocolResponse(_mechanism, _role, _response) {
 +        throw new GObject.NotImplementedError(
 +            `getMechanisms in ${this.constructor.name}`);
 +    }
++
++    setForegroundMechanism(_mechanism) {
++        return false;
++    }
++
++    cancelRequested() {
++        return false;
++    }
++
++    cancel() {}
++
++    reset() {}
 +}
 +
 +export class UnifiedMechanismProtocolHandler extends  UnifiedAuthService/* Signals.EventEmitter */ {
@@ -116,18 +177,8 @@ index 0000000..059d161
 +        return SUPPORTED_ROLES;
 +    }
 +
-+    _startMechanismFromUnifiedService(mechanism) {
-+        const roleHandlers = {
-+            [WEB_LOGIN_ROLE_NAME]: 'start-web-login',
-+            [PASSWORD_ROLE_NAME]: 'start-password-login',
-+        };
-+
-+        const handler = roleHandlers[mechanism.role];
-+        if (handler)
-+            this.emit(handler);
-+    }
-+
 +    handleProtocolRequest(_protocol, _version, json) {
++        this.emit(`service-request`);
 +        let requestObject;
 +
 +        try {
@@ -180,7 +231,7 @@ index 0000000..059d161
 +    }
 +}
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 43799cc..33bc41c 100644
+index 43799cc..e79024a 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -13,6 +13,8 @@ import * as Main from '../ui/main.js';
@@ -188,11 +239,11 @@ index 43799cc..33bc41c 100644
  import * as Params from '../misc/params.js';
  import * as SmartcardManager from '../misc/smartcardManager.js';
 +import * as UnifiedMechanism from './unifiedMechanism.js';
-+import * as Consts from './consts.js';
++import * as Const from './const.js';
  
  const FprintManagerInfo = Gio.DBusInterfaceInfo.new_for_xml(
      loadInterfaceXML('net.reactivated.Fprint.Manager'));
-@@ -31,12 +33,15 @@ export const FINGERPRINT_SERVICE_NAME = 'gdm-fingerprint';
+@@ -31,12 +33,10 @@ export const FINGERPRINT_SERVICE_NAME = 'gdm-fingerprint';
  export const SMARTCARD_SERVICE_NAME = 'gdm-smartcard';
  const CLONE_FADE_ANIMATION_TIME = 250;
  
@@ -202,19 +253,14 @@ index 43799cc..33bc41c 100644
 -export const WEB_LOGIN_ROLE_NAME = 'eidp';
 -
 -export const AUTH_MECHANISM_PROTOCOL = 'auth-mechanisms';
-+export const PASSWORD_ROLE_NAME = Consts.PASSWORD_ROLE_NAME;
-+export const SMARTCARD_ROLE_NAME = Consts.SMARTCARD_ROLE_NAME;
-+export const FINGERPRINT_ROLE_NAME = Consts.FINGERPRINT_ROLE_NAME;
-+export const WEB_LOGIN_ROLE_NAME = Consts.WEB_LOGIN_ROLE_NAME;
-+const AUTH_MECHANISM_PROTOCOL = UnifiedMechanism.MECHANISM_PROTOCOL;
-+// export const WEB_LOGIN_ROLE_NAME = 'eidp';
-+// export const PASSWORD_ROLE_NAME = 'password';
-+// export const SMARTCARD_ROLE_NAME = 'smartcard';
-+// export const FINGERPRINT_ROLE_NAME = 'fingerprint';
++export const PASSWORD_ROLE_NAME = Const.PASSWORD_ROLE_NAME;
++export const SMARTCARD_ROLE_NAME = Const.SMARTCARD_ROLE_NAME;
++export const FINGERPRINT_ROLE_NAME = Const.FINGERPRINT_ROLE_NAME;
++export const WEB_LOGIN_ROLE_NAME = Const.WEB_LOGIN_ROLE_NAME;
  
  export const LOGIN_SCREEN_SCHEMA = 'org.gnome.login-screen';
  export const UNIFIED_AUTHENTICATION_KEY = 'enable-unified-authentication';
-@@ -51,13 +56,6 @@ export const ALLOWED_FAILURES_KEY = 'allowed-failures';
+@@ -51,13 +51,6 @@ export const ALLOWED_FAILURES_KEY = 'allowed-failures';
  export const LOGO_KEY = 'logo';
  export const DISABLE_USER_LIST_KEY = 'disable-user-list';
  
@@ -228,7 +274,7 @@ index 43799cc..33bc41c 100644
  // Give user 48ms to read each character of a PAM message
  const USER_READ_TIME = 48;
  const FINGERPRINT_SERVICE_PROXY_TIMEOUT = 5000;
-@@ -67,6 +65,7 @@ const FINGERPRINT_ERROR_TIMEOUT_WAIT = 15;
+@@ -67,6 +60,7 @@ const FINGERPRINT_ERROR_TIMEOUT_WAIT = 15;
  const DiscreteServiceMechanismDefinitions = [
      {
          serviceName: PASSWORD_SERVICE_NAME,
@@ -236,7 +282,7 @@ index 43799cc..33bc41c 100644
          mechanismId: 'password',
          mechanismName: _('Password'),
          setting: PASSWORD_AUTHENTICATION_KEY,
-@@ -76,6 +75,7 @@ const DiscreteServiceMechanismDefinitions = [
+@@ -76,6 +70,7 @@ const DiscreteServiceMechanismDefinitions = [
  
      {
          serviceName: SMARTCARD_SERVICE_NAME,
@@ -244,7 +290,7 @@ index 43799cc..33bc41c 100644
          mechanismId: 'smartcard',
          mechanismName: _('Smartcard'),
          setting: SMARTCARD_AUTHENTICATION_KEY,
-@@ -85,6 +85,7 @@ const DiscreteServiceMechanismDefinitions = [
+@@ -85,6 +80,7 @@ const DiscreteServiceMechanismDefinitions = [
  
      {
          serviceName: FINGERPRINT_SERVICE_NAME,
@@ -252,7 +298,7 @@ index 43799cc..33bc41c 100644
          mechanismId: 'fingerprint',
          mechanismName: _('Fingerprint'),
          setting: FINGERPRINT_AUTHENTICATION_KEY,
-@@ -169,6 +170,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -169,6 +165,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._publishedMechanisms = new Map();
          this._pendingMechanisms = new Map();
  
@@ -262,7 +308,7 @@ index 43799cc..33bc41c 100644
          this._credentialManagers = {};
  
          this.reauthenticating = false;
-@@ -183,6 +187,48 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -183,6 +182,69 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this.addCredentialManager(Vmware.SERVICE_NAME, Vmware.getVmwareCredentialsManager());
      }
  
@@ -280,8 +326,8 @@ index 43799cc..33bc41c 100644
 +    }
 +
 +    _monitorUnifiedServiceMechanisms(unifiedService) {
++        const serviceName = UNIFIED_AUTH_SERVICE_NAME;
 +        unifiedService.connectObject('mechanisms-changed', (_, mechanisms) => {
-+            const serviceName = UNIFIED_AUTH_SERVICE_NAME;
 +            let mechanismsList = [];
 +            for (const id of Object.keys(mechanisms)) {
 +                const name = mechanisms[id].name;
@@ -301,17 +347,51 @@ index 43799cc..33bc41c 100644
 +                delete mechanisms[m.id];
 +            });
 +
-+            log('newly published mechanisms:', mechanisms);
-+            this._publishedMechanisms.set(serviceName, mechanisms);
++            if (unifiedService.sortMechanisms)
++                mechanismsList = mechanismsList.sort((a, b) =>
++                    unifiedService.sortMechanisms(a, b));
 +
++            this._publishedMechanisms.set(serviceName, mechanisms);
 +            this.emit('mechanisms-list-changed', serviceName, mechanismsList);
 +        }, this);
++
++        unifiedService.connectObject('start-mechanism',
++            (_, ...args) => this._startMechanismFromUnifiedService(...args), this);
++        unifiedService.connectObject('choice-list-selected',
++            (_, ...args) => this.emit('choice-list-selected', serviceName, ...args), this);
++        unifiedService.connectObject('queue-message',
++            (_, ...args) => this._queueMessage(serviceName, ...args), this);
++        unifiedService.connectObject('queue-priority-message',
++            (_, ...args) => this._queuePriorityMessage(serviceName, ...args), this);
++        unifiedService.connectObject('clear-message-queue',
++            (_, ...args) => this._clearMessageQueue(...args), this);
++        unifiedService.connectObject('verification-complete',
++            () => this._onVerificationComplete(serviceName), this);
++        unifiedService.connectObject('verification-failed',
++            (_, shouldRetry) => this._verificationFailed(serviceName, shouldRetry).catch(logError), this);
++        unifiedService.connectObject('service-request',
++            (_, ...args) => this.emit(`service-request::${serviceName}`, ...args), this);
++        unifiedService.connectObject('reset', () => this.emit('reset'), this);
++        unifiedService.connectObject('cancel', () => this.cancel(), this);
 +    }
 +
      addCredentialManager(serviceName, credentialManager) {
          if (this._credentialManagers[serviceName])
              return;
-@@ -284,6 +330,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -239,6 +301,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         if (this._cancellable)
+             this._cancellable.cancel();
+ 
++        [...this._unifiedAuthServices.values()].forEach(s => s.cancel());
++        if (this._mechanismsListChangedSignalId) {
++            this.disconnect(this._mechanismsListChangedSignalId);
++            this._mechanismsListChangedSignalId = 0;
++        }
++
+         if (this._userVerifier) {
+             this._userVerifier.call_cancel_sync(null);
+             this.clear();
+@@ -284,11 +352,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._smartcardManager = null;
  
          this._fingerprintManager = null;
@@ -320,25 +400,120 @@ index 43799cc..33bc41c 100644
  
          for (let service in this._credentialManagers)
              this.removeCredentialManager(service);
-@@ -849,6 +897,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
++    cancelRequested() {
++        return [...this._unifiedAuthServices.values()].some(service =>
++            service.cancelRequested());
++    }
++
+     selectChoice(serviceName, key) {
+         this._userVerifierChoiceList.call_select_choice(serviceName, key, this._cancellable, null);
+     }
+@@ -306,10 +381,23 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         }
+     }
+ 
+-    async replyWithJSON(serviceName, json) {
++    async _replyWithJSON(serviceName, json, params) {
++        const cancellable = this._cancellable;
+         try {
+-            await this._handlePendingMessages();
+-            this._userVerifierCustomJSON.call_reply(serviceName, json, this._cancellable, null);
++            if (!params.ignoreMessageWait)
++                await this._handlePendingMessages();
++        } catch (e) {
++            if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
++                return;
++
++            logError(e);
++            this._userVerifierCustomJSON.call_report_error(serviceName,
++                `Unexpected error: ${e}`, cancellable, null);
++            return;
++        }
++
++        try {
++            this._userVerifierCustomJSON.call_reply(serviceName, json, cancellable, null);
+         } catch (e) {
+             if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+                 logError(e);
+@@ -690,9 +778,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             if (!definition)
+                 return null;
+ 
+-            const {mechanismName, mechanismId, role, serviceName} = definition;
++            const {mechanismName, mechanismId, role, serviceName, protocol} = definition;
+ 
+-            return {name: mechanismName, id: mechanismId, role, serviceName};
++            return {name: mechanismName, id: mechanismId, role, serviceName, protocol};
+         }
+ 
+         return null;
+@@ -707,10 +795,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             return;
+ 
+         if (foregroundMechanism?.role === mechanism?.role &&
++            foregroundMechanism?.id === mechanism?.id &&
+             foregroundMechanism?.mechanismName === mechanism?.mechanismName &&
+             foregroundMechanism?.serviceName === mechanism?.serviceName)
+             return;
+ 
++        if (mechanism.serviceName === UNIFIED_AUTH_SERVICE_NAME) {
++            const unifiedService = this._unifiedAuthServices.get(mechanism.protocol);
++            if (unifiedService.setForegroundMechanism(mechanism)) {
++                this._foregroundMechanism = mechanism;
++                return;
++            }
++        }
++
+         this.emit('foreground-mechanism-changed');
+     }
+ 
+@@ -849,15 +946,23 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _startMechanismFromUnifiedService(mechanism) {
 +        const unifiedService = this._unifiedAuthServices.get(mechanism.protocol);
-+        if (!unifiedService)
-+            throw new Error(`No unified services found for protocol ${mechanism.protocol}`);
++        if (!unifiedService) {
++            logError(new Error(`No unified services found for protocol ${mechanism.protocol}`));
++            return;
++        }
 +
 +        if (unifiedService.handleMechanism(mechanism))
 +            return;
 +
          const roleHandlers = {
-             [WEB_LOGIN_ROLE_NAME]: this._startWebLogin.bind(this),
-             [PASSWORD_ROLE_NAME]: this._startPasswordLogin.bind(this),
-@@ -941,16 +996,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+-            [WEB_LOGIN_ROLE_NAME]: this._startWebLogin.bind(this),
+-            [PASSWORD_ROLE_NAME]: this._startPasswordLogin.bind(this),
++            [WEB_LOGIN_ROLE_NAME]: this._startWebLogin,
++            [PASSWORD_ROLE_NAME]: this._startQuestionLogin,
+         };
+ 
+-        let handler = roleHandlers[mechanism.role];
+-
++        const handler = roleHandlers[mechanism.role];
+         if (handler)
+-            handler(mechanism.serviceName, mechanism.id);
++            handler.call(this, mechanism.serviceName, mechanism.id);
      }
  
-     async _replyWithAuthSelectionResponse(serviceName, role, response) {
+     _shouldStartBackgroundService(serviceName) {
+@@ -907,6 +1012,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     _beginVerification() {
+         const foregroundService = this._getForegroundService();
+ 
++        if (this._mechanismsListChangedSignalId)
++            this.disconnect(this._mechanismsListChangedSignalId);
+         this._mechanismsListChangedSignalId =
+             this.connect('mechanisms-list-changed',
+                 (_, ...args) => this._onMechanismsListChanged(...args));
+@@ -940,28 +1047,36 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this.emit('ask-question', serviceName, prompt, true);
+     }
+ 
+-    async _replyWithAuthSelectionResponse(serviceName, role, response) {
 -        const mechanismId = this._pendingMechanisms.get(role);
++    _replyWithAuthSelectionResponse(serviceName, role, response) {
 +        const mechanism = this._getPendingMechanismForRole(role);
 +        if (!mechanism)
 +            return;
@@ -355,27 +530,32 @@ index 43799cc..33bc41c 100644
 +        if (!authService)
 +            throw new Error(`No authentication service for protocol ${mechanism.protocol}`);
  
+-        await this.replyWithJSON(serviceName, JSON.stringify(reply));
++        if (authService.handleAuthSelectionResponse(mechanism, role, response))
++            return;
++
 +        const reply = authService.getProtocolResponse(mechanism, role, response);
-+        log('Sending back via JSON...', reply);
-         await this.replyWithJSON(serviceName, JSON.stringify(reply));
++        authService.sendProtocolResponse(reply);
      }
  
-@@ -958,10 +1015,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     _startWebLogin(serviceName, mechanismId) {
          const mechanisms = this._publishedMechanisms.get(serviceName);
  
-         if (!mechanisms)
--            return;
-+            throw new Error(`No mechanisms found for ${serviceName}`);
-+            // return;
+-        if (!mechanisms)
++        if (!mechanisms) {
++            logError(new Error(`No mechanisms found for ${serviceName}`));
+             return;
++        }
  
-         if (!mechanisms[mechanismId])
--            return;
-+            throw new Error(`No mechanisms found for ID ${mechanismId}`);
-+            // return;
+-        if (!mechanisms[mechanismId])
++        if (!mechanisms[mechanismId]) {
++            logError(new Error(`No mechanisms found for ID ${mechanismId}`));
+             return;
++        }
  
          const {init_prompt: initPrompt, link_prompt: linkPrompt, uri, code, role, timeout} = mechanisms[mechanismId];
  
-@@ -988,8 +1047,23 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -988,8 +1103,22 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          }
      }
  
@@ -392,23 +572,28 @@ index 43799cc..33bc41c 100644
 +
 +        const mechanism = this._getPendingMechanismForRole(WEB_LOGIN_ROLE_NAME);
 +        const authService = this._unifiedAuthServices.get(mechanism?.protocol);
-+        log('Found auth service', authService);
 +        if (!authService)
 +            return;
 +
          this._replyWithAuthSelectionResponse(serviceName, WEB_LOGIN_ROLE_NAME, {});
      }
  
-@@ -1016,74 +1090,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1016,73 +1145,29 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          });
      }
  
 -    _handleAuthSelection(serviceName, authSelection) {
 -        let mechanisms = authSelection.mechanisms;
 -        const priorityList = authSelection.priority;
--
++    _onCustomJSONRequest(client, serviceName, protocol, version, json) {
++        const authService = this._unifiedAuthServices.get(protocol);
++        if (!authService) {
++            console.log(`Got a request using protocol ${protocol} v${version} but it was ignored`);
+ 
 -        if (!mechanisms)
--            return;
++            this._userVerifierCustomJSON.call_report_error(serviceName,
++                `Unsupported Protocol: ${protocol} ${version}`, this._cancellable, null);
+             return;
 -
 -        const ids = Object.keys(mechanisms);
 -        ids.sort((a, b) => {
@@ -437,12 +622,16 @@ index 43799cc..33bc41c 100644
 -
 -            const selectable = mechanisms[id].selectable;
 -            mechanismsList.push({id, name, role, serviceName, selectable});
--        }
--
+         }
+ 
 -        mechanismsList = this._filterAuthMechanisms(mechanismsList, mechanism => {
 -            delete mechanisms[mechanism.id];
--        });
--
++        const id = authService.connect('protocol-request-handled', (_, reply, params) => {
++            authService.disconnect(id);
++            this._replyWithJSON(serviceName, JSON.stringify(reply), params).catch(
++                logError);
+         });
+ 
 -        log(`newly published mechanisms: ${JSON.stringify(mechanisms)}`);
 -        this._publishedMechanisms.set(serviceName, mechanisms);
 -
@@ -456,31 +645,42 @@ index 43799cc..33bc41c 100644
 -            this._handleAuthSelection(serviceName, authSelection);
 -    }
 -
-     _onCustomJSONRequest(client, serviceName, protocol, version, json) {
-         this.emit(`service-request::${serviceName}`);
- 
+-    _onCustomJSONRequest(client, serviceName, protocol, version, json) {
+-        this.emit(`service-request::${serviceName}`);
+-
 -        if (protocol === AUTH_MECHANISM_PROTOCOL) {
 -            let requestObject;
- 
+-
 -            try {
 -                requestObject = JSON.parse(json);
 -            } catch (e) {
 -                logError(e);
 -                return;
 -            }
++        try {
++            authService.handleProtocolRequest(protocol, version, json);
++        } catch (e) {
++            logError(e);
  
 -            this._handleAuthMechanismsRequest(serviceName, requestObject);
-+        // FIXME: ? use {protocol,version} as key?!
-+        const authService = this._unifiedAuthServices.get(protocol);
-+        if (!authService) {
-+            console.log(`Got a request using protocol ${protocol} v${version} but it was ignored`);
-+            return;
++            this._userVerifierCustomJSON?.call_report_error(serviceName,
++                e.toString(), this._cancellable, null);
          }
-+        authService.handleProtocolRequest(protocol, version, json);
      }
  
-     _onInfo(client, serviceName, info) {
-@@ -1181,8 +1199,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1112,6 +1197,11 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     _onProblem(client, serviceName, problem) {
+         this.emit(`service-request::${serviceName}`);
+ 
++        if (serviceName === UNIFIED_AUTH_SERVICE_NAME) {
++            [...this._unifiedAuthServices.values()].some(service =>
++                service.handleProblem(problem))
++        }
++
+         const isFingerprint = this.serviceIsFingerprint(serviceName);
+ 
+         if (!this.serviceIsForeground(serviceName) && !isFingerprint)
+@@ -1181,8 +1271,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const unifiedAuthAvailable = this._activeServices.has(UNIFIED_AUTH_SERVICE_NAME) && !this._unavailableServices.has(UNIFIED_AUTH_SERVICE_NAME);
          for (const definition of DiscreteServiceMechanismDefinitions) {
              const enabled = this._isDiscreteServiceEnabled(definition);
@@ -493,15 +693,23 @@ index 43799cc..33bc41c 100644
  
              const mechanismsList = [];
              if (enabled && available && !supportedByUnifiedAuth) {
+@@ -1203,6 +1295,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this._activeServices.clear();
+         this._unavailableServices.clear();
+         this._activeServices.clear();
++        [...this._unifiedAuthServices.values()].forEach(s => s.reset());
+         if (this._mechanismsListChangedSignalId) {
+             this.disconnect(this._mechanismsListChangedSignalId);
+             this._mechanismsListChangedSignalId = 0;
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 3c88ab5..0df340e 100644
+index 3c88ab5..f80b44d 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
 @@ -6,12 +6,14 @@
      <file>gdm/authMenuButton.js</file>
      <file>gdm/authPrompt.js</file>
      <file>gdm/batch.js</file>
-+    <file>gdm/consts.js</file>
++    <file>gdm/const.js</file>
      <file>gdm/credentialManager.js</file>
      <file>gdm/loginDialog.js</file>
      <file>gdm/oVirt.js</file>

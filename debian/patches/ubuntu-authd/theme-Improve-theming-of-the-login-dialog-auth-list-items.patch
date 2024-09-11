@@ -1,0 +1,50 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 11 Sep 2024 03:03:17 +0200
+Subject: theme: Improve theming of the login dialog auth list items
+
+Render them as buttons, like we do with users
+---
+ .../gnome-shell-sass/widgets/_login-lock.scss      | 27 ++++++++++++++++------
+ 1 file changed, 20 insertions(+), 7 deletions(-)
+
+diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
+index 07c5a9e..cdd8dfd 100644
+--- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
++++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
+@@ -148,16 +148,29 @@ $_gdm_dialog_width: 25em;
+ 
+ .login-dialog-auth-list-title {
+   margin-left: 2em;
++  padding-bottom: $base_padding;
+ }
+ 
+-.login-dialog-auth-list-item {
+-  border-radius: $base_border_radius * 2;
+-  padding: $base_margin;
+-  color: darken($_gdm_fg,30%);
++.login-dialog {
++  .login-dialog-auth-list-item {
++    @extend %button_common;
++    @include button(normal, $tc:$_gdm_fg, $c:$system_base_color, $always_dark: true);
++    &:selected,
++    &:focus { @include button(focus, $tc:$_gdm_fg, $c:$system_base_color, $always_dark: true);}
++    &:hover { @include button(hover, $tc:$_gdm_fg, $c:$system_base_color, $always_dark: true);}
++    &:active { @include button(active, $tc:$_gdm_fg, $c:$system_base_color, $always_dark: true)};
+ 
+-  &:focus, &:selected {
+-    background-color: $selected_bg_color;
+-    color: $selected_fg_color;
++    border-radius: $modal_radius;
++    padding: $base_padding * 1.2;
++  }
++}
++
++.unlock-dialog {
++  .login-dialog-auth-list-item {
++    @extend %lockscreen_button;
++
++    border-radius: $modal_radius;
++    padding: $base_padding * 1.2;
+   }
+ }
+ 
