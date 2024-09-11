@@ -71,8 +71,8 @@ Standards-Version: 4.6.2
 Homepage: https://wiki.gnome.org/Projects/GnomeShell
 XS-Debian-Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git
 XS-Debian-Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell
-Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git -b ubuntu/noble
-Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell/tree/ubuntu/noble
+Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git -b ubuntu/noble-authd
+Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell/tree/ubuntu/noble-authd
 
 Package: gnome-shell
 Architecture: linux-any
