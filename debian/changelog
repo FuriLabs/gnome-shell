@@ -1,4 +1,4 @@
-gnome-shell (47~rc-3ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (47~rc-3ubuntu1) oracular; urgency=medium
 
   [ Jeremy Bícha ]
   * Merge with Debian. Remaining changes:
@@ -29,7 +29,7 @@ gnome-shell (47~rc-3ubuntu1) UNRELEASED; urgency=medium
     to avoid crashing the shell if an app misbehaves coincidentally close
     to a garbage collection run (LP: #2037055)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 11 Sep 2024 03:43:30 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 11 Sep 2024 03:47:31 +0200
 
 gnome-shell (47~rc-3) experimental; urgency=medium
 
