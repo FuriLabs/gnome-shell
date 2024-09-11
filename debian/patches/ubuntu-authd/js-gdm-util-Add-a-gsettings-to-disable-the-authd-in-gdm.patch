@@ -28,7 +28,7 @@ index ee8b3a2..136d67a 100644
    </schema>
  </schemalist>
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 18691d7..17a02e4 100644
+index 16cf956..1ecf12f 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -47,6 +47,9 @@ export const BANNER_MESSAGE_KEY = 'banner-message-enable';

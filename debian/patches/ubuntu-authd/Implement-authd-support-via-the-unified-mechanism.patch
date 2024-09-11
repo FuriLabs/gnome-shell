@@ -6405,7 +6405,7 @@ index ad854ca..b6ed4cd 100644
  export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 +export const CHOICE_LIST_ROLE_NAME = 'choice-list';
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 3bb85b4..18691d7 100644
+index 3bb85b4..16cf956 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -4,6 +4,7 @@ import Gio from 'gi://Gio';
@@ -6421,7 +6421,7 @@ index 3bb85b4..18691d7 100644
  Gio._promisify(Gdm.UserVerifierProxy.prototype, 'call_begin_verification');
  
 -export const UNIFIED_AUTH_SERVICE_NAME = 'gdm-unified-auth';
-+export const UNIFIED_AUTH_SERVICE_NAME = 'gdm-authd';
++export const UNIFIED_AUTH_SERVICE_NAME = Authd.SERVICE_NAME;
  export const PASSWORD_SERVICE_NAME = 'gdm-password';
  export const FINGERPRINT_SERVICE_NAME = 'gdm-fingerprint';
  export const SMARTCARD_SERVICE_NAME = 'gdm-smartcard';
