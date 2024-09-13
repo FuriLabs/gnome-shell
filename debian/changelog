@@ -1,3 +1,11 @@
+gnome-shell (46.0-0ubuntu6~24.04.5) noble; urgency=medium
+
+  * Add shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
+    to avoid crashing the shell if an app misbehaves coincidentally close
+    to a garbage collection run (LP: #2037055)
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Fri, 13 Sep 2024 17:09:18 +0800
+
 gnome-shell (46.0-0ubuntu6~24.04.4) noble; urgency=medium
 
   * Add st-theme-node-Forget-properties-cache-on-stylesheet-chang.patch
