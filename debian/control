@@ -172,7 +172,7 @@ Depends: gir1.2-adw-1,
          ${misc:Depends},
          ${shlibs:Depends}
 Provides: gnome-extensions-app
-Recommends: chrome-gnome-shell
+Recommends: gnome-browser-connector
 Description: tool to enable / disable GNOME Shell extensions
  This package contains a tool which users who use Shell extensions can use to
  toggle them on and off, and access their preferences.
