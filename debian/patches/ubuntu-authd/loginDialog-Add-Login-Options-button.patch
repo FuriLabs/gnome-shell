@@ -15,7 +15,7 @@ https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/login-
  3 files changed, 189 insertions(+), 9 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 22df404..d599875 100644
+index 3f5bbd5..9fedfd5 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -49,6 +49,7 @@ export const AuthPrompt = GObject.registerClass({
@@ -43,7 +43,7 @@ index 22df404..d599875 100644
  
          this._userWell = new St.Bin({
              x_expand: true,
-@@ -336,6 +340,11 @@ export const AuthPrompt = GObject.registerClass({
+@@ -340,6 +344,11 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('prompted');
      }
  
@@ -55,7 +55,7 @@ index 22df404..d599875 100644
      _onCredentialManagerAuthenticated() {
          if (this.verificationStatus !== AuthPromptStatus.VERIFICATION_SUCCEEDED)
              this.reset();
-@@ -361,6 +370,11 @@ export const AuthPrompt = GObject.registerClass({
+@@ -365,6 +374,11 @@ export const AuthPrompt = GObject.registerClass({
              this.reset();
      }
  
@@ -67,7 +67,7 @@ index 22df404..d599875 100644
      _onShowMessage(_userVerifier, serviceName, message, type) {
          let wiggleParameters = {duration: 0};
  
-@@ -611,6 +625,11 @@ export const AuthPrompt = GObject.registerClass({
+@@ -615,6 +629,11 @@ export const AuthPrompt = GObject.registerClass({
              this._updateEntry(false);
      }
  

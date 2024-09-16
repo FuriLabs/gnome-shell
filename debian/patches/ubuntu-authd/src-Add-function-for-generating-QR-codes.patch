@@ -35,7 +35,7 @@ index e5f9449..353ad43 100644
 +  border-width: 1em;
 +}
 diff --git a/meson.build b/meson.build
-index d417904..c46cfea 100644
+index 87192f4..12b7c86 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -33,6 +33,7 @@ systemd_req = '>= 246'

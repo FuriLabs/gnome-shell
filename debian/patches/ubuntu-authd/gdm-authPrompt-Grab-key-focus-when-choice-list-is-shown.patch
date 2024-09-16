@@ -8,10 +8,10 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2072716
  1 file changed, 1 insertion(+)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index b315e6b..e4eb105 100644
+index f27d9ab..7f6693a 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -697,6 +697,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -701,6 +701,7 @@ export const AuthPrompt = GObject.registerClass({
      setChoiceList(promptMessage, choiceList) {
          this._authList.clear();
          this._authList.label.text = promptMessage;

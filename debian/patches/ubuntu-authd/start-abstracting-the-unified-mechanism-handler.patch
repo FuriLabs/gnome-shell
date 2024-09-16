@@ -16,10 +16,10 @@ As we may have different protocols under the hood.
  create mode 100644 js/gdm/unifiedMechanism.js
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 7cd89e6..73630f2 100644
+index 8fd1d0c..647e80a 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -144,12 +144,19 @@ export const AuthPrompt = GObject.registerClass({
+@@ -148,12 +148,19 @@ export const AuthPrompt = GObject.registerClass({
  
      on_key_press_event(event) {
          if (event.get_key_symbol() === Clutter.KEY_Escape) {
@@ -40,7 +40,7 @@ index 7cd89e6..73630f2 100644
      _initInputRow() {
          this._mainBox = new St.BoxLayout({
              style_class: 'login-dialog-button-box',
-@@ -168,7 +175,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -172,7 +179,7 @@ export const AuthPrompt = GObject.registerClass({
              icon_name: 'go-previous-symbolic',
          });
          if (this._hasCancelButton)

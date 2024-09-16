@@ -11,10 +11,10 @@ This commit fixes that.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 58b1c3c..9b0a28b 100644
+index 0e0d62a..25def51 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -152,7 +152,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -156,7 +156,7 @@ export const AuthPrompt = GObject.registerClass({
              button_mask: St.ButtonMask.ONE | St.ButtonMask.THREE,
              reactive: this._hasCancelButton,
              can_focus: this._hasCancelButton,

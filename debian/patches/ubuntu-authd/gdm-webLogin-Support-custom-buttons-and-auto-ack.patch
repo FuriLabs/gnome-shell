@@ -9,10 +9,10 @@ Subject: gdm/webLogin: Support custom buttons and auto-ack
  3 files changed, 55 insertions(+), 24 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 9994591..b315e6b 100644
+index a71cf61..f27d9ab 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -396,7 +396,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -400,7 +400,7 @@ export const AuthPrompt = GObject.registerClass({
              this._authList.emit('activate', key);
      }
  
@@ -21,7 +21,7 @@ index 9994591..b315e6b 100644
          const introAlreadyUp = this._queryingService === serviceName;
  
          if (this._queryingService)
-@@ -424,14 +424,14 @@ export const AuthPrompt = GObject.registerClass({
+@@ -428,14 +428,14 @@ export const AuthPrompt = GObject.registerClass({
                  if (this._webLoginTimedOut)
                      this._refreshWebLogin(serviceName);
                  else
@@ -38,7 +38,7 @@ index 9994591..b315e6b 100644
          }
  
          this._webLoginTimedOut = false;
-@@ -462,7 +462,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -466,7 +466,7 @@ export const AuthPrompt = GObject.registerClass({
          this._webLoginDialog = null;
      }
  
@@ -47,7 +47,7 @@ index 9994591..b315e6b 100644
          if (this._queryingService)
              this.clear();
  
-@@ -472,26 +472,31 @@ export const AuthPrompt = GObject.registerClass({
+@@ -476,26 +476,31 @@ export const AuthPrompt = GObject.registerClass({
  
          this._webLoginPromptWell.remove_all_children();
  
