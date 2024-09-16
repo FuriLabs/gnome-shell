@@ -90,24 +90,30 @@ function _getPropertyTarget(actor, propName) {
 }
 
 function _easeActor(actor, params) {
+    params = {
+        repeatCount: 0,
+        autoReverse: false,
+        animationRequired: false,
+        ...params,
+    };
+
     actor.save_easing_state();
 
+    const animationRequired = params.animationRequired;
+    delete params.animationRequired;
+
     if (params.duration !== undefined)
-        actor.set_easing_duration(params.duration);
+        actor.set_easing_duration(params.duration, {animationRequired});
     delete params.duration;
 
     if (params.delay !== undefined)
-        actor.set_easing_delay(params.delay);
+        actor.set_easing_delay(params.delay, {animationRequired});
     delete params.delay;
 
-    let repeatCount = 0;
-    if (params.repeatCount !== undefined)
-        repeatCount = params.repeatCount;
+    const repeatCount = params.repeatCount;
     delete params.repeatCount;
 
-    let autoReverse = false;
-    if (params.autoReverse !== undefined)
-        autoReverse = params.autoReverse;
+    const autoReverse = params.autoReverse;
     delete params.autoReverse;
 
     // repeatCount doesn't include the initial iteration
@@ -157,23 +163,32 @@ function _easeActor(actor, params) {
 }
 
 function _easeActorProperty(actor, propName, target, params) {
+    params = {
+        repeatCount: 0,
+        autoReverse: false,
+        animationRequired: false,
+        ...params,
+    };
+
     // Avoid pointless difference with ease()
     if (params.mode)
         params.progress_mode = params.mode;
     delete params.mode;
 
+    const animationRequired = params.animationRequired;
+    delete params.animationRequired;
+
     if (params.duration)
-        params.duration = adjustAnimationTime(params.duration);
+        params.duration = adjustAnimationTime(params.duration, {animationRequired});
     let duration = Math.floor(params.duration || 0);
 
-    let repeatCount = 0;
-    if (params.repeatCount !== undefined)
-        repeatCount = params.repeatCount;
+    if (params.delay)
+        params.delay = adjustAnimationTime(params.delay, {animationRequired});
+
+    const repeatCount = params.repeatCount;
     delete params.repeatCount;
 
-    let autoReverse = false;
-    if (params.autoReverse !== undefined)
-        autoReverse = params.autoReverse;
+    const autoReverse = params.autoReverse;
     delete params.autoReverse;
 
     // repeatCount doesn't include the initial iteration
@@ -275,12 +290,12 @@ _patchLayoutClass(Clutter.GridLayout, {
 _patchLayoutClass(Clutter.BoxLayout, {spacing: 'spacing'});
 
 const origSetEasingDuration = Clutter.Actor.prototype.set_easing_duration;
-Clutter.Actor.prototype.set_easing_duration = function (msecs) {
-    origSetEasingDuration.call(this, adjustAnimationTime(msecs));
+Clutter.Actor.prototype.set_easing_duration = function (msecs, params = {}) {
+    origSetEasingDuration.call(this, adjustAnimationTime(msecs, params));
 };
 const origSetEasingDelay = Clutter.Actor.prototype.set_easing_delay;
-Clutter.Actor.prototype.set_easing_delay = function (msecs) {
-    origSetEasingDelay.call(this, adjustAnimationTime(msecs));
+Clutter.Actor.prototype.set_easing_delay = function (msecs, params = {}) {
+    origSetEasingDelay.call(this, adjustAnimationTime(msecs, params));
 };
 
 Clutter.Actor.prototype.ease = function (props) {

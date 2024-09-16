@@ -275,15 +275,12 @@ class IBusManager extends Signals.EventEmitter {
         return this._engines.get(id);
     }
 
-    async _setEngine(id, callback) {
+    async _setEngine(id) {
         // Send id even if id == this._currentEngineName
         // because 'properties-registered' signal can be emitted
         // while this._ibusSources == null on a lock screen.
-        if (!this._ready) {
-            if (callback)
-                callback();
+        if (!this._ready)
             return;
-        }
 
         try {
             await this._ibus.set_global_engine_async(id,
@@ -293,23 +290,25 @@ class IBusManager extends Signals.EventEmitter {
             if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
                 logError(e);
         }
-
-        if (callback)
-            callback();
     }
 
-    async setEngine(id, callback) {
+    async setEngine(id) {
         if (this._oskCompletion)
-            this._preOskEngine = id;
+            await this._maybeUpdateCompletion(id);
+        else
+            await this._setEngine(id);
+    }
 
-        const isXkb = id.startsWith('xkb:');
-        if (this._oskCompletion && isXkb)
+    async _maybeUpdateCompletion(id) {
+        if (!this._oskCompletion)
             return;
 
-        if (this._oskCompletion)
-            this.setCompletionEnabled(false, callback);
-        else
-            await this._setEngine(id, callback);
+        this._preOskEngine = id;
+        const isXkb = id.startsWith('xkb:');
+
+        /* Non xkb engines conflict with completion */
+        if (!isXkb)
+            await this.setCompletionEnabled(false);
     }
 
     preloadEngines(ids) {
@@ -339,7 +338,12 @@ class IBusManager extends Signals.EventEmitter {
                 });
     }
 
-    setCompletionEnabled(enabled, callback) {
+    /**
+     * @param {boolean} enabled - whether completion should be enabled
+     *
+     * @returns {boolean} - whether completion are enabled
+     */
+    async setCompletionEnabled(enabled) {
         /* Needs typing-booster available */
         if (enabled && !this._engines.has(TYPING_BOOSTER_ENGINE))
             return false;
@@ -348,17 +352,17 @@ class IBusManager extends Signals.EventEmitter {
             return false;
 
         if (this._oskCompletion === enabled)
-            return true;
+            return enabled;
 
         this._oskCompletion = enabled;
 
         if (enabled) {
             this._preOskEngine = this._currentEngineName;
-            this._setEngine(TYPING_BOOSTER_ENGINE, callback);
+            await this._setEngine(TYPING_BOOSTER_ENGINE);
         } else if (this._preOskEngine) {
-            this._setEngine(this._preOskEngine, callback);
+            await this._setEngine(this._preOskEngine);
             delete this._preOskEngine;
         }
-        return true;
+        return this._oskCompletion;
     }
 }

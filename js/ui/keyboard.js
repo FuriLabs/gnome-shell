@@ -1259,7 +1259,7 @@ export const Keyboard = GObject.registerClass({
 
         this._clearShowIdle();
 
-        this._keyboardController.oskCompletion = false;
+        this._keyboardController.setOskCompletion(false);
         this._keyboardController.destroy();
 
         Main.layoutManager.untrackChrome(this);
@@ -1723,7 +1723,7 @@ export const Keyboard = GObject.registerClass({
             return;
         }
 
-        this._keyboardController.oskCompletion = true;
+        this._keyboardController.setOskCompletion(true);
         this._clearKeyboardRestTimer();
 
         if (immediate) {
@@ -1758,7 +1758,7 @@ export const Keyboard = GObject.registerClass({
         if (!this._keyboardVisible)
             return;
 
-        this._keyboardController.oskCompletion = false;
+        this._keyboardController.setOskCompletion(false);
         this._clearKeyboardRestTimer();
 
         if (immediate) {
@@ -2105,12 +2105,14 @@ class KeyboardController extends Signals.EventEmitter {
         Main.inputMethod.commit(str);
     }
 
-    set oskCompletion(enabled) {
+    async setOskCompletion(enabled) {
         if (this._oskCompletionEnabled === enabled)
             return;
 
         this._oskCompletionEnabled =
-            IBusManager.getIBusManager().setCompletionEnabled(enabled, () => Main.inputMethod.update());
+            await IBusManager.getIBusManager().setCompletionEnabled(enabled);
+
+        Main.inputMethod.update();
     }
 
     keyvalPress(keyval) {

@@ -1,3 +1,16 @@
+gnome-shell (47.0-1) experimental; urgency=medium
+
+  [ Jeremy Bícha ]
+  * New upstream release
+  * Bump minimum mutter and gnome-settings-daemon
+
+  [ Daniel van Vugt ]
+  * Add shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
+    to avoid crashing the shell if an app misbehaves coincidentally close
+    to a garbage collection run (LP: #2037055)
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sat, 14 Sep 2024 21:16:08 -0400
+
 gnome-shell (47~rc-3ubuntu2) oracular; urgency=medium
 
   [ Marco Trevisan (Treviño) ]

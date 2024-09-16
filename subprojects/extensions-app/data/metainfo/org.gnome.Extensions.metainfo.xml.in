@@ -10,6 +10,7 @@
 
   <url type="homepage">https://apps.gnome.org/Extensions/</url>
   <url type="bugtracker">https://gitlab.gnome.org/GNOME/gnome-shell/issues</url>
+  <url type="contribute">https://welcome.gnome.org/app/Extensions/</url>
   <url type="donation">https://www.gnome.org/donate/</url>
   <url type="translate">https://l10n.gnome.org/module/gnome-shell/</url>
   <url type="vcs-browser">https://gitlab.gnome.org/GNOME/gnome-shell/-/tree/HEAD/subprojects/extensions-app</url>
@@ -54,9 +55,7 @@
   </description>
 
   <releases>
-    <release version="47.rc" date="2024-08-31" type="development"/>
-    <release version="47.beta" date="2024-08-03" type="development"/>
-    <release version="47.alpha" date="2024-06-29" type="development"/>
+    <release version="47.0" date="2024-09-14"/>
   </releases>
 
   <screenshots>
