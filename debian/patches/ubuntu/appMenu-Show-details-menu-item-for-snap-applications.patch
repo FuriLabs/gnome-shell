@@ -1,0 +1,76 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Mon, 16 Sep 2024 23:28:45 +0200
+Subject: appMenu: Show details menu item for snap applications
+
+If a snap application is installed we can still show the details menu
+pointing to the snap-store instead of to GNOME Software
+
+Forwarded: Not-needed
+---
+ js/ui/appMenu.js | 31 +++++++++++++++++++++++++++++++
+ 1 file changed, 31 insertions(+)
+
+diff --git a/js/ui/appMenu.js b/js/ui/appMenu.js
+index f23ae60..5393332 100644
+--- a/js/ui/appMenu.js
++++ b/js/ui/appMenu.js
+@@ -9,6 +9,7 @@ import * as AppFavorites from './appFavorites.js';
+ import * as Main from './main.js';
+ import * as ParentalControlsManager from '../misc/parentalControlsManager.js';
+ import * as PopupMenu from './popupMenu.js';
++import * as Util from '../misc/util.js';
+ 
+ export class AppMenu extends PopupMenu.PopupMenu {
+     /**
+@@ -82,6 +83,22 @@ export class AppMenu extends PopupMenu.PopupMenu {
+         this.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+ 
+         this._detailsItem = this.addAction(_('App Details'), async () => {
++            const snapName = this._getSnapName();
++            if (snapName) {
++                // FIXME: Add application action to snap store!
++                const snapStore = this._getSnapStore();
++                if (!snapStore) {
++                    logError(new Error('Snap store is not installed!'))
++                    return;
++                }
++
++                Util.spawnApp([
++                    ...snapStore.appInfo.get_commandline().split(' '), snapName,
++                ]);
++                Main.overview.hide();
++                return;
++            }
++
+             const id = this._app.get_id();
+             const args = GLib.Variant.new('(ss)', [id, '']);
+             const bus = await Gio.DBus.get(Gio.BusType.SESSION, null);
+@@ -179,7 +196,20 @@ export class AppMenu extends PopupMenu.PopupMenu {
+             : _('Launch using Discrete Graphics Card');
+     }
+ 
++    _getSnapStore() {
++        return this._appSystem.lookup_app('snap-store_snap-store.desktop');
++    }
++
++    _getSnapName() {
++        return this._app?.appInfo?.get_string('X-SnapInstanceName');
++    }
++
+     _updateDetailsVisibility() {
++        if (this._getSnapName()) {
++            this._detailsItem.visible = !!this._getSnapStore();
++            return;
++        }
++
+         const sw = this._appSystem.lookup_app('org.gnome.Software.desktop');
+         this._detailsItem.visible = sw !== null;
+     }
+@@ -245,6 +275,7 @@ export class AppMenu extends PopupMenu.PopupMenu {
+         this._updateNewWindowItem();
+         this._updateFavoriteItem();
+         this._updateGpuItem();
++        this._updateDetailsVisibility();
+     }
+ 
+     _queueUpdateWindowsSection() {
