@@ -1,3 +1,20 @@
+gnome-shell (47.0-1ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge with Debian. Remaining changes:
+    - Add Build-Depends: terser (for authd)
+    - Add Depends: ubuntu-wallpapers
+    - Add Recommends:
+      + ubuntu-session (| gnome-session) to have the Ubuntu session available
+      + xserver-xorg-legacy
+      + yaru-theme-gnome-shell for the default Ubuntu theming
+    - Move from Recommends to Suggests: chrome-gnome-shell
+    - debian/gnome-shell-common.alternatives: Install tweaked GDM theme
+    - Add debian/ubuntu-session-mods/ubuntu.json & install it with
+      gnome-shell-common
+    - Add many patches
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 16 Sep 2024 07:40:56 -0400
+
 gnome-shell (47.0-1) experimental; urgency=medium
 
   [ Jeremy Bícha ]
