@@ -1,3 +1,11 @@
+gnome-shell (47.0-2) experimental; urgency=medium
+
+  * Update gnome-browser-connector binary package name
+  * Cherry-pick proposed patch to fix login screen crash if
+    on-screen keyboard is enabled (Closes: #1082297)
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 20 Sep 2024 08:46:12 -0400
+
 gnome-shell (47.0-1ubuntu2) oracular; urgency=medium
 
   * d/p: Show app details menu for snap applications
