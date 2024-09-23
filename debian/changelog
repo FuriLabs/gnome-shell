@@ -1,3 +1,20 @@
+gnome-shell (47.0-2ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge with Debian (LP: #2081646). Remaining changes:
+    - Add Build-Depends: terser (for authd)
+    - Add Depends: ubuntu-wallpapers
+    - Add Recommends:
+      + ubuntu-session (| gnome-session) to have the Ubuntu session available
+      + xserver-xorg-legacy
+      + yaru-theme-gnome-shell for the default Ubuntu theming
+    - Move from Recommends to Suggests: gnome-browser-connector
+    - debian/gnome-shell-common.alternatives: Install tweaked GDM theme
+    - Add debian/ubuntu-session-mods/ubuntu.json & install it with
+      gnome-shell-common
+    - Add many patches
+
+ -- Alessandro Astone <alessandro.astone@canonical.com>  Mon, 23 Sep 2024 11:00:18 +0200
+
 gnome-shell (47.0-2) experimental; urgency=medium
 
   * Update gnome-browser-connector binary package name
