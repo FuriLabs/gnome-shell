@@ -231,7 +231,7 @@ index 0000000..77ba705
 +    }
 +}
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 8a02e5a..36beecb 100644
+index 2f76a4e..ee818b7 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -11,6 +11,8 @@ import * as Main from '../ui/main.js';
