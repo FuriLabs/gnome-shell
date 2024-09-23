@@ -7,11 +7,11 @@ pointing to the snap-store instead of to GNOME Software
 
 Forwarded: Not-needed
 ---
- js/ui/appMenu.js | 31 +++++++++++++++++++++++++++++++
- 1 file changed, 31 insertions(+)
+ js/ui/appMenu.js | 33 ++++++++++++++++++++++++++++++++-
+ 1 file changed, 32 insertions(+), 1 deletion(-)
 
 diff --git a/js/ui/appMenu.js b/js/ui/appMenu.js
-index f23ae60..5393332 100644
+index f23ae60..c179f74 100644
 --- a/js/ui/appMenu.js
 +++ b/js/ui/appMenu.js
 @@ -9,6 +9,7 @@ import * as AppFavorites from './appFavorites.js';
@@ -22,19 +22,21 @@ index f23ae60..5393332 100644
  
  export class AppMenu extends PopupMenu.PopupMenu {
      /**
-@@ -82,6 +83,22 @@ export class AppMenu extends PopupMenu.PopupMenu {
+@@ -81,7 +82,23 @@ export class AppMenu extends PopupMenu.PopupMenu {
+ 
          this.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
  
-         this._detailsItem = this.addAction(_('App Details'), async () => {
+-        this._detailsItem = this.addAction(_('App Details'), async () => {
++        this._detailsItem = this.addAction(_('App Details'), async event => {
 +            const snapName = this._getSnapName();
 +            if (snapName) {
-+                // FIXME: Add application action to snap store!
 +                const snapStore = this._getSnapStore();
 +                if (!snapStore) {
 +                    logError(new Error('Snap store is not installed!'))
 +                    return;
 +                }
 +
++                snapStore.activate_full(-1, event.get_time());
 +                Util.spawnApp([
 +                    ...snapStore.appInfo.get_commandline().split(' '), snapName,
 +                ]);
