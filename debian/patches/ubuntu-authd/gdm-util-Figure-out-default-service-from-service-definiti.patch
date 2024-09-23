@@ -14,7 +14,7 @@ long if/else if code that was there before
  1 file changed, 18 insertions(+), 7 deletions(-)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 6e1842a..9f5a2c2 100644
+index 6e1842a..6a7f1cc 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -62,6 +62,7 @@ const USER_READ_TIME = 48;
@@ -31,9 +31,9 @@ index 6e1842a..9f5a2c2 100644
  
 +    _isDiscreteServiceEnabled(definition) {
 +        switch (definition.serviceName) {
-+        case PASSWORD_AUTHENTICATION_KEY:
++        case PASSWORD_SERVICE_NAME:
 +            return this._settings.get_boolean(definition.setting);
-+        case FINGERPRINT_AUTHENTICATION_KEY:
++        case FINGERPRINT_SERVICE_NAME:
 +            return this._fingerprintReaderType !== FingerprintReaderType.NONE;
 +        case SMARTCARD_SERVICE_NAME:
 +            return !!this._smartcardManager;
@@ -54,7 +54,7 @@ index 6e1842a..9f5a2c2 100644
 -        return null;
 +
 +        const definition = DiscreteServiceMechanismDefinitions.find(
-+            def => this._isDiscreteServiceEnabled(def.setting));
++            def => this._isDiscreteServiceEnabled(def));
 +        return definition?.serviceName ?? null;
      }
  

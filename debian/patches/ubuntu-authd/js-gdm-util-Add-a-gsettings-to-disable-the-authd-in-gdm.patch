@@ -28,7 +28,7 @@ index ee8b3a2..136d67a 100644
    </schema>
  </schemalist>
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 9da3755..b7a6ce3 100644
+index d59dc19..5b2f912 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -49,6 +49,9 @@ export const BANNER_MESSAGE_KEY = 'banner-message-enable';
@@ -59,5 +59,5 @@ index 9da3755..b7a6ce3 100644
 +            return UNIFIED_AUTH_SERVICE_NAME;
 +
          const definition = DiscreteServiceMechanismDefinitions.find(
-             def => this._isDiscreteServiceEnabled(def.setting));
+             def => this._isDiscreteServiceEnabled(def));
          return definition?.serviceName ?? null;

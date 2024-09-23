@@ -6405,7 +6405,7 @@ index ad854ca..b6ed4cd 100644
  export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 +export const CHOICE_LIST_ROLE_NAME = 'choice-list';
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 36ccf18..9da3755 100644
+index 6d0a42d..d59dc19 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -6,6 +6,7 @@ import Gio from 'gi://Gio';
