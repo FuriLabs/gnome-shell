@@ -307,7 +307,7 @@ index 4bd48ea..bb46762 100644
  
          let hold = params.hold;
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 4102861..fc35540 100644
+index 0504aba..6442f5b 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -41,6 +41,7 @@ export const AUTH_MECHANISM_PROTOCOL = 'auth-mechanisms';

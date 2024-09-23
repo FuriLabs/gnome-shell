@@ -19,7 +19,7 @@ commits will add support for mechanisms that support other authentication
  3 files changed, 254 insertions(+), 14 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index b81d22d..bfde7af 100644
+index ec341fa..d33649c 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -498,7 +498,10 @@ export const LoginDialog = GObject.registerClass({
