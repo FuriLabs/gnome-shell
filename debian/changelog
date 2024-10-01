@@ -1,4 +1,4 @@
-gnome-shell (47.0-2ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (47.0-2ubuntu1) oracular; urgency=medium
 
   [ Alessandro Astone ]
   * Merge with Debian (LP: #2081646). Remaining changes:
@@ -22,7 +22,7 @@ gnome-shell (47.0-2ubuntu1) UNRELEASED; urgency=medium
   * d/p/appMenu-snap-store-details: Activate snap store app on click
     (LP: #2081716)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 02 Oct 2024 01:52:01 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 02 Oct 2024 01:58:19 +0200
 
 gnome-shell (47.0-2) experimental; urgency=medium
 
