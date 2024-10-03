@@ -54,7 +54,7 @@ index 53fd928..2576839 100644
              version: extension.metadata.version,
          };
 diff --git a/js/ui/extensionSystem.js b/js/ui/extensionSystem.js
-index bc80437..9100fc9 100644
+index bc80437..1b2bebd 100644
 --- a/js/ui/extensionSystem.js
 +++ b/js/ui/extensionSystem.js
 @@ -6,6 +6,7 @@ import Shell from 'gi://Shell';
@@ -82,7 +82,7 @@ index bc80437..9100fc9 100644
                  : ExtensionType.SYSTEM;
 +            if (Desktop.is('ubuntu') && this.isModeExtension(uuid) && type === ExtensionType.PER_USER) {
 +                log(`Found user extension ${uuid}, but not loading from ${dir.get_path()} directory as part of session mode.`);
-+                return;
++                return null;
 +            }
              try {
                  extension = this.createExtensionObject(uuid, dir, type);
