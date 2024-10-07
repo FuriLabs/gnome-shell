@@ -12,7 +12,7 @@ _beginVerification, that can be easily augmented later.
  1 file changed, 15 insertions(+), 4 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 5ee67d3..ecda99c 100644
+index 211dc26..5e8121f 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -38,6 +38,7 @@ import * as LoginManager from '../misc/loginManager.js';

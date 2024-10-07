@@ -6495,7 +6495,7 @@ index ad854ca..0000000
 -export const SMARTCARD_ROLE_NAME = 'smartcard';
 -export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 17f7b3a..93c5bef 100644
+index ef67811..c1d288d 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -536,6 +536,8 @@ export const LoginDialog = GObject.registerClass({
