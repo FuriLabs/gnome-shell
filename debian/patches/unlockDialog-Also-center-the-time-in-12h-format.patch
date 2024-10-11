@@ -1,0 +1,34 @@
+From: pesader <pedro.saderazevedo@pm.me>
+Date: Sun, 28 Apr 2024 17:40:59 -0300
+Subject: unlockDialog: Also center the time in 12h format
+
+Since the time string uses a space to pad single-digit numbers, the
+centered label looks off-center. Fix this by applying the trim()
+function to get rid of whitespaces.
+
+The drawback of this approach is that the label will change position
+slightly when the time changes, but for the lockscreen that's okay.
+
+Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6193
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3290>
+(cherry picked from commit ccdd46c0d9372d8587809eb11add08ee87200b67)
+(cherry picked from commit 3502d04b1845961fbbd23a0c21281f9109c55f46)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2084276
+---
+ js/ui/unlockDialog.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
+index 239b127..d0466e3 100644
+--- a/js/ui/unlockDialog.js
++++ b/js/ui/unlockDialog.js
+@@ -367,7 +367,7 @@ class UnlockDialogClock extends St.BoxLayout {
+     }
+ 
+     _updateClock() {
+-        this._time.text = this._wallClock.clock;
++        this._time.text = this._wallClock.clock.trim();
+ 
+         let date = new Date();
+         /* Translators: This is a time format for a date in
