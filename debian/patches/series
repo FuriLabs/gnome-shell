@@ -86,3 +86,6 @@ notificationDaemon-Use-correct-property-name-to-enable-ma.patch
 st-icon-Add-is-symbolic-property.patch
 messageList-Only-apply-special-styling-to-symbolic-icons.patch
 style-Don-t-force-symbolic-notification-icons.patch
+messageTray-Notify-count-when-adding-a-notification.patch
+messageTray-Ensure-_updateDatetimeId-idle-callback-is-can.patch
+unlockDialog-Bind-source-titles.patch

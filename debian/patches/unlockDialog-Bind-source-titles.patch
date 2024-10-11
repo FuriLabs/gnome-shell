@@ -1,0 +1,51 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Thu, 9 May 2024 14:01:26 +0200
+Subject: unlockDialog: Bind source titles
+
+After the recent notification changes, the title may still be null
+when the source is originally added. Handle that case and make sure
+we pick up later title changes by setting up a property binding.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3308>
+(cherry picked from commit fe24de3ef2b96ce82f3eddd2fc7ec87d6ea70ed2)
+(cherry picked from commit 69db43af406af950068816e0858c8c114cbb181b)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2084302
+---
+ js/ui/unlockDialog.js | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
+index d0466e3..50f15dd 100644
+--- a/js/ui/unlockDialog.js
++++ b/js/ui/unlockDialog.js
+@@ -97,11 +97,13 @@ const NotificationsBox = GObject.registerClass({
+         box.add_child(textBox);
+ 
+         let title = new St.Label({
+-            text: source.title,
+             style_class: 'unlock-dialog-notification-label',
+             x_expand: true,
+             x_align: Clutter.ActorAlign.START,
+         });
++        source.bind_property('title',
++            title, 'text',
++            GObject.BindingFlags.SYNC_CREATE);
+         textBox.add_child(title);
+ 
+         let count = source.unseenCount;
+@@ -128,9 +130,13 @@ const NotificationsBox = GObject.registerClass({
+         box.add_child(textBox);
+ 
+         let title = new St.Label({
+-            text: source.title.replace(/\n/g, ' '),
+             style_class: 'unlock-dialog-notification-label',
+         });
++        source.bind_property_full('title',
++            title, 'text',
++            GObject.BindingFlags.SYNC_CREATE,
++            (bind, sourceVal) => [true, sourceVal?.replace(/\n/g, ' ') ?? ''],
++            null);
+         textBox.add_child(title);
+ 
+         let visible = false;

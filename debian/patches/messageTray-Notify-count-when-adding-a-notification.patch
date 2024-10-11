@@ -1,0 +1,32 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Thu, 9 May 2024 13:47:24 +0200
+Subject: messageTray: Notify count when adding a notification
+
+Adding a notification clearly constitutes a count change, but
+the notify call was accidentally dropped during the overhaul
+of the notification API.
+
+Fixes: 34f05b075b ("messageTray: Let the tray decide whether to show a
+banner")
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3308>
+(cherry picked from commit 2c432255758d873bac0aa16dc62a8e9fe9e96b49)
+(cherry picked from commit 6dde8b947124b41e1d34c065bb47c96f7268426b)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2084302
+---
+ js/ui/messageTray.js | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/js/ui/messageTray.js b/js/ui/messageTray.js
+index 1a9ac66..951bd5c 100644
+--- a/js/ui/messageTray.js
++++ b/js/ui/messageTray.js
+@@ -572,6 +572,7 @@ export const Source = GObject.registerClass({
+ 
+         this.emit('notification-added', notification);
+         this.emit('notification-request-banner', notification);
++        this.countUpdated();
+     }
+ 
+     destroy(reason) {

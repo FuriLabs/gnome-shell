@@ -1,0 +1,37 @@
+From: Philip Withnall <pwithnall@gnome.org>
+Date: Tue, 28 May 2024 18:05:10 +0100
+Subject: messageTray: Ensure _updateDatetimeId idle callback is cancelled
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+If the idle callback is not explicitly removed when the notification is
+destroyed, it may be invoked after destruction, and try to modify the
+notification after it’s been freed.
+
+Signed-off-by: Philip Withnall <pwithnall@gnome.org>
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3352>
+(cherry picked from commit 8176d6b51c743621d5aab0fb52a121017fd4c7a7)
+(cherry picked from commit ebd10437acbb672135d40adb4d469d42efeac2c8)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2084302
+---
+ js/ui/messageTray.js | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/js/ui/messageTray.js b/js/ui/messageTray.js
+index 951bd5c..cd90eda 100644
+--- a/js/ui/messageTray.js
++++ b/js/ui/messageTray.js
+@@ -475,6 +475,11 @@ export class Notification extends GObject.Object {
+ 
+     destroy(reason = NotificationDestroyedReason.DISMISSED) {
+         this.emit('destroy', reason);
++
++        if (this._updateDatetimeId)
++            GLib.source_remove(this._updateDatetimeId);
++        delete this._updateDatetimeId;
++
+         this.run_dispose();
+     }
+ }
