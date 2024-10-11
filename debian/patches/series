@@ -70,3 +70,9 @@ loginDialog-Don-t-assume-this._user-is-always-defined.patch
 unlockDialog-Also-center-the-time-in-12h-format.patch
 workspaceAnimation-Do-not-create-clones-for-override-redi.patch
 automountManager-Fix-password-not-re-asked-for-TCRYPT-dev.patch
+environment-Make-more-explicit-what-are-the-default-value.patch
+environment-Adjust-optional-delay-parameter.patch
+animationUtils-Allow-marking-animations-as-required.patch
+environment-Allow-marking-animations-as-required.patch
+ripples-Allow-to-specify-whether-the-ripple-is-required.patch
+locatePointer-Mark-the-animation-as-required.patch

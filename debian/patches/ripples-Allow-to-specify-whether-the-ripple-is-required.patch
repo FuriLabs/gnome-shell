@@ -1,0 +1,59 @@
+From: Alessandro Bono <alessandro.bono369@gmail.com>
+Date: Fri, 20 Oct 2023 22:00:55 +0200
+Subject: ripples: Allow to specify whether the ripple is required
+
+The ripples are used both for the "Hot Corner" animation and for the
+"Locate Pointer" animation. The latter one is an accessibility feature
+and should always work, even when animations are disabled. Take this
+into account.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2986>
+(cherry picked from commit fc7e2bc65bf8016fb1c01b819be6412695448fde)
+(cherry picked from commit c7040158bdfa801f54ea838e73bf69e4a95c7ded)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2039801
+---
+ js/ui/ripples.js | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/js/ui/ripples.js b/js/ui/ripples.js
+index 6cc5888..bc8678a 100644
+--- a/js/ui/ripples.js
++++ b/js/ui/ripples.js
+@@ -5,12 +5,13 @@ import St from 'gi://St';
+ 
+ // Shamelessly copied from the layout "hotcorner" ripples implementation
+ export class Ripples {
+-    constructor(px, py, styleClass) {
++    constructor(px, py, styleClass, animationRequired = false) {
+         this._x = 0;
+         this._y = 0;
+ 
+         this._px = px;
+         this._py = py;
++        this._animationRequired = animationRequired;
+ 
+         this._ripple1 = new St.BoxLayout({
+             style_class: styleClass,
+@@ -60,11 +61,13 @@ export class Ripples {
+         ripple.opacity = 255 * Math.sqrt(startOpacity);
+         ripple.scale_x = ripple.scale_y = startScale;
+         ripple.set_translation(-this._px * ripple.width, -this._py * ripple.height, 0.0);
++        const animationRequired = this._animationRequired;
+ 
+         ripple.ease({
+             opacity: 0,
+             delay,
+             duration,
++            animationRequired,
+             mode: Clutter.AnimationMode.EASE_IN_QUAD,
+         });
+         ripple.ease({
+@@ -72,6 +75,7 @@ export class Ripples {
+             scale_y: finalScale,
+             delay,
+             duration,
++            animationRequired,
+             mode: Clutter.AnimationMode.LINEAR,
+             onComplete: () => (ripple.visible = false),
+         });

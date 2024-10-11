@@ -1,0 +1,31 @@
+From: Alessandro Bono <alessandro.bono369@gmail.com>
+Date: Fri, 6 Sep 2024 10:47:25 +0200
+Subject: environment: Adjust optional delay parameter
+
+All timing parameters should take the `slow-down-factor` and
+`enable-animations` settings into account, but the delay parameter
+of property/adjustment animations was forgotten.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2986>
+(cherry picked from commit a52a931fb1efb87b4902b4f770345fb0e34c8161)
+(cherry picked from commit 38c2e7f82df97cb20ab696c1003afaa98872c5f2)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2039801
+---
+ js/ui/environment.js | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/js/ui/environment.js b/js/ui/environment.js
+index 784a452..ccad8c7 100644
+--- a/js/ui/environment.js
++++ b/js/ui/environment.js
+@@ -174,6 +174,9 @@ function _easeActorProperty(actor, propName, target, params) {
+         params.duration = adjustAnimationTime(params.duration);
+     let duration = Math.floor(params.duration || 0);
+ 
++    if (params.delay)
++        params.delay = adjustAnimationTime(params.delay);
++
+     const repeatCount = params.repeatCount;
+     delete params.repeatCount;
+ 
