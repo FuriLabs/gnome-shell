@@ -1,0 +1,40 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 26 Apr 2024 19:23:58 +0200
+Subject: workspaceAnimation: Do not create clones for override redirect
+ windows
+
+Override redirect windows manage their own positioning and size alone
+and are always sticky, so we're not covering them either with the
+animation MonitorsGroup, and thus there's no need to clone them or we'd
+end up having two windows painted.
+
+This was causing the shell tray icon window actors (that have no opacity
+by default but that are override redirect) to show up during the
+animation as their clone animation is not 0.
+
+The other option would be hide them during the animation phase, but
+there's no need for this.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3285>
+(cherry picked from commit 3a34c16eca56bfa364d3415e777e309317de3c83)
+(cherry picked from commit 9e44219304f4ba53a905fbf28701cc1911d92e8c)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2039543
+---
+ js/ui/workspaceAnimation.js | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/js/ui/workspaceAnimation.js b/js/ui/workspaceAnimation.js
+index c830014..b278113 100644
+--- a/js/ui/workspaceAnimation.js
++++ b/js/ui/workspaceAnimation.js
+@@ -58,6 +58,9 @@ class WorkspaceGroup extends Clutter.Actor {
+         if (!window.showing_on_its_workspace() || this._isDesktopWindow(window))
+             return false;
+ 
++        if (window.is_override_redirect())
++            return false;
++
+         if (!this._windowIsOnThisMonitor(window))
+             return false;
+ 
