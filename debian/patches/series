@@ -69,3 +69,4 @@ shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
 loginDialog-Don-t-assume-this._user-is-always-defined.patch
 unlockDialog-Also-center-the-time-in-12h-format.patch
 workspaceAnimation-Do-not-create-clones-for-override-redi.patch
+automountManager-Fix-password-not-re-asked-for-TCRYPT-dev.patch
