@@ -15,7 +15,7 @@ Subject: Implement authd support via the unified mechanism
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..0fe6f8c
+index 0000000..73f3d7e
 --- /dev/null
 +++ b/js/gdm/authd.js
 @@ -0,0 +1,712 @@
@@ -398,8 +398,7 @@ index 0000000..0fe6f8c
 +        if (!this._stage ||
 +            this._stage === AuthdPam.Stage.brokerSelection ||
 +            this._stage === AuthdPam.Stage.userSelection) {
-+            this.emit('reset');
-+            return true;
++            return false;
 +        }
 +
 +        this._selectedAuthMode = null;
@@ -527,6 +526,7 @@ index 0000000..0fe6f8c
 +    }
 +
 +    cancel() {
++        this._stage = undefined;
 +        this._uiLayout = null;
 +        this._pendingNewChallenge = null;
 +        this._selectedAuthMode = null;
