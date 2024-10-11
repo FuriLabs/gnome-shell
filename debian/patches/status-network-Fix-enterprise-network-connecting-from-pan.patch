@@ -1,0 +1,37 @@
+From: Tuomas Nurmi <tuomas.nurmi@opinsys.fi>
+Date: Thu, 25 Jul 2024 07:14:22 +0000
+Subject: status/network: Fix enterprise network connecting from panel
+
+Use the right variable. A static WirelessNetwork._securityTypes
+variable does exist, but the correct variable when checking
+autoconnect possibility is this._securityType; this._securityTypes
+is undefined, causing clicking an enterprise network name in panel
+network selector do nothing instead of properly opening GNOME
+Settings panel.
+
+Closes https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7698
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3426>
+(cherry picked from commit a21558d67f37b0c9161f3df21678c165004a02a5)
+(cherry picked from commit 51bcf829391e054d2e64cb02f417d386bedc2463)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2084286
+---
+ js/ui/status/network.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/js/ui/status/network.js b/js/ui/status/network.js
+index cdc9ba8..6f206ac 100644
+--- a/js/ui/status/network.js
++++ b/js/ui/status/network.js
+@@ -936,8 +936,8 @@ const WirelessNetwork = GObject.registerClass({
+ 
+     canAutoconnect() {
+         const canAutoconnect =
+-            this._securityTypes !== NM.UtilsSecurityType.WPA_ENTERPRISE &&
+-            this._securityTypes !== NM.UtilsSecurityType.WPA2_ENTERPRISE;
++            this._securityType !== NM.UtilsSecurityType.WPA_ENTERPRISE &&
++            this._securityType !== NM.UtilsSecurityType.WPA2_ENTERPRISE;
+         return canAutoconnect;
+     }
+ 
