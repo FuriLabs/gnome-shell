@@ -1,0 +1,30 @@
+From: Sebastian Keller <skeller@gnome.org>
+Date: Tue, 19 Mar 2024 12:47:50 +0100
+Subject: notificationDaemon: Use correct property name to enable markup
+
+The property is named useBodyMarkup, not bannerMarkup. This was causing
+markup to be disabled for FDO notifications.
+
+Fixes: cc60ce7f94 ("notification: Stop using 'update()' from MessageTray.Notification")
+Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7495
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3247>
+(cherry picked from commit 7f476e051cce72ec92c8c041eef485f82108eb0f)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2084293
+---
+ js/ui/notificationDaemon.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/notificationDaemon.js b/js/ui/notificationDaemon.js
+index 318f147..71d8e6c 100644
+--- a/js/ui/notificationDaemon.js
++++ b/js/ui/notificationDaemon.js
+@@ -204,7 +204,7 @@ class FdoNotificationDaemon {
+             title: summary,
+             body,
+             gicon,
+-            bannerMarkup: true,
++            useBodyMarkup: true,
+             sound: new MessageTray.Sound(soundFile, hints['sound-name']),
+             acknowledged: false,
+         });
