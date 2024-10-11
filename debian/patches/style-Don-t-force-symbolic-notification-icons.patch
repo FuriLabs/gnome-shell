@@ -1,0 +1,34 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Thu, 2 May 2024 19:54:20 +0200
+Subject: style: Don't force symbolic notification icons
+
+With the addition of notification headers, we no longer include
+an icon with every notification, but only when the notification
+explicitly specifies an icon (other than the app icon).
+
+After those changes, it makes more sense to use the icon as
+provided by the app than forcing the symbolic style (which
+only works for themed icons anyway).
+
+Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7620
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3296>
+(cherry picked from commit 676503ff27e5cda3fde47e64c9504fbe7b2d1210)
+(cherry picked from commit 268fb63e815ce17ad5dfe2665a88804cdc65b45e)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2084301
+---
+ data/theme/gnome-shell-sass/widgets/_message-list.scss | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/data/theme/gnome-shell-sass/widgets/_message-list.scss b/data/theme/gnome-shell-sass/widgets/_message-list.scss
+index 2b3fd61..6cdc040 100644
+--- a/data/theme/gnome-shell-sass/widgets/_message-list.scss
++++ b/data/theme/gnome-shell-sass/widgets/_message-list.scss
+@@ -143,7 +143,6 @@
+ 
+       // icon size and color
+       icon-size: $base_icon_size * 3; // 48px
+-      -st-icon-style: symbolic;
+ 
+       &.message-themed-icon {
+         border-radius: $forced_circular_radius; // is circular

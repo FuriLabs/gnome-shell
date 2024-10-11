@@ -83,3 +83,6 @@ status-network-Fix-enterprise-network-connecting-from-pan.patch
 status-network-Add-user-permissions-to-new-wifi-connectio.patch
 gdm-Actually-wait-for-pending-messages-being-notified-on-.patch
 notificationDaemon-Use-correct-property-name-to-enable-ma.patch
+st-icon-Add-is-symbolic-property.patch
+messageList-Only-apply-special-styling-to-symbolic-icons.patch
+style-Don-t-force-symbolic-notification-icons.patch
