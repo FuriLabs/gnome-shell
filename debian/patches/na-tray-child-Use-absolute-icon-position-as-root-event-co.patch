@@ -1,0 +1,94 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 25 Apr 2024 17:13:34 +0200
+Subject: na-tray-child: Use absolute icon position as root event coordinates
+
+Currently we're using relative positioning when sending click events to
+tray icon clients, and this leads to some apps (especially Qt ones) to
+try to open the menus at such absolute coordinate under X11.
+
+To prevent this to happen, let's get the root coordinate from the xembed
+and let's use it to compute the synthetic event root x/y.
+
+We could have even used the actual event position for this, but getting
+it from the xembed makes this more consistent.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3283>
+(cherry picked from commit 794acd65a8681d55ebcc74d2d049fc994ac43657)
+
+https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2059819
+---
+ src/tray/na-tray-child.c |  6 ++++--
+ src/tray/na-xembed.c     | 13 +++++++++++++
+ src/tray/na-xembed.h     |  4 ++++
+ 3 files changed, 21 insertions(+), 2 deletions(-)
+
+diff --git a/src/tray/na-tray-child.c b/src/tray/na-tray-child.c
+index 53a66ce..0911995 100644
+--- a/src/tray/na-tray-child.c
++++ b/src/tray/na-tray-child.c
+@@ -267,6 +267,7 @@ na_tray_child_emulate_event (NaTrayChild *tray_child,
+   Window xwindow, xrootwindow;
+   ClutterEventType event_type = clutter_event_type (event);
+   int width, height;
++  int root_x, root_y;
+ 
+   g_return_if_fail (event_type == CLUTTER_BUTTON_RELEASE ||
+                     event_type == CLUTTER_KEY_PRESS ||
+@@ -283,6 +284,7 @@ na_tray_child_emulate_event (NaTrayChild *tray_child,
+     }
+ 
+   na_xembed_get_size (NA_XEMBED (tray_child), &width, &height);
++  na_xembed_get_root_position (NA_XEMBED (tray_child), &root_x, &root_y);
+ 
+   mtk_x11_error_trap_push (xdisplay);
+   xrootwindow = XDefaultRootWindow (xdisplay);
+@@ -295,8 +297,8 @@ na_tray_child_emulate_event (NaTrayChild *tray_child,
+   xcevent.time = clutter_event_get_time (event);
+   xcevent.x = width / 2;
+   xcevent.y = height / 2;
+-  xcevent.x_root = xcevent.x;
+-  xcevent.y_root = xcevent.y;
++  xcevent.x_root = root_x + xcevent.x;
++  xcevent.y_root = root_y + xcevent.y;
+   xcevent.mode = NotifyNormal;
+   xcevent.detail = NotifyNonlinear;
+   xcevent.same_screen = True;
+diff --git a/src/tray/na-xembed.c b/src/tray/na-xembed.c
+index 8f78530..59b1071 100644
+--- a/src/tray/na-xembed.c
++++ b/src/tray/na-xembed.c
+@@ -796,6 +796,19 @@ na_xembed_get_size (NaXembed *xembed,
+     *height = priv->request_height;
+ }
+ 
++void
++na_xembed_get_root_position (NaXembed *xembed,
++                             int      *x,
++                             int      *y)
++{
++  NaXembedPrivate *priv = na_xembed_get_instance_private (xembed);
++
++  if (x)
++    *x = priv->root_x;
++  if (y)
++    *y = priv->root_y;
++}
++
+ static void
+ get_pixel_details (unsigned long  pixel_mask,
+                    int           *shift,
+diff --git a/src/tray/na-xembed.h b/src/tray/na-xembed.h
+index ec46119..ea8f9f4 100644
+--- a/src/tray/na-xembed.h
++++ b/src/tray/na-xembed.h
+@@ -51,6 +51,10 @@ void na_xembed_set_root_position (NaXembed *xembed,
+ 				  int       x,
+ 				  int       y);
+ 
++void na_xembed_get_root_position (NaXembed *xembed,
++				  int      *x,
++				  int      *y);
++
+ void na_xembed_get_size (NaXembed *xembed,
+ 			 int      *width,
+ 			 int      *height);

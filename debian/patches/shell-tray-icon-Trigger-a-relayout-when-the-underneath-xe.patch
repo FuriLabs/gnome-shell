@@ -29,7 +29,7 @@ index e1ff1cd..ddf40dd 100644
  
  /*
 diff --git a/src/tray/na-xembed.c b/src/tray/na-xembed.c
-index 1ad6d81..953b92b 100644
+index 447c1cb..873d193 100644
 --- a/src/tray/na-xembed.c
 +++ b/src/tray/na-xembed.c
 @@ -91,6 +91,7 @@ G_DEFINE_TYPE_WITH_PRIVATE (NaXembed, na_xembed, G_TYPE_OBJECT)
@@ -72,7 +72,7 @@ index 1ad6d81..953b92b 100644
      g_param_spec_object ("x11-display",
                           "x11-display",
 diff --git a/src/tray/na-xembed.h b/src/tray/na-xembed.h
-index 1544af1..8f7f8fb 100644
+index 751da97..a5a4fae 100644
 --- a/src/tray/na-xembed.h
 +++ b/src/tray/na-xembed.h
 @@ -36,6 +36,7 @@ struct _NaXembedClass

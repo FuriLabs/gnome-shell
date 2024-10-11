@@ -22,7 +22,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/2012388
  1 file changed, 34 insertions(+), 1 deletion(-)
 
 diff --git a/src/tray/na-xembed.c b/src/tray/na-xembed.c
-index 953b92b..a938022 100644
+index 873d193..1d179af 100644
 --- a/src/tray/na-xembed.c
 +++ b/src/tray/na-xembed.c
 @@ -36,6 +36,7 @@ struct _NaXembedPrivate

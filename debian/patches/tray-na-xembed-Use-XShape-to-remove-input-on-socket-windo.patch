@@ -51,7 +51,7 @@ index 2fc73f3..c91e940 100644
    include_directories: conf_inc
  )
 diff --git a/src/tray/na-xembed.c b/src/tray/na-xembed.c
-index 8f78530..5858acc 100644
+index 59b1071..69690f1 100644
 --- a/src/tray/na-xembed.c
 +++ b/src/tray/na-xembed.c
 @@ -24,6 +24,7 @@

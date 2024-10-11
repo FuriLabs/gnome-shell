@@ -54,6 +54,7 @@ js-Use-Shell.util_spawn_async-functions-to-launch-externa.patch
 js-environment-Add-GLib-spawn-async-overrides-warning-whe.patch
 js-environment-Always-use-Shell.util_spawn_async-function.patch
 shell-util-Pass-the-mutter-context-to-the-spawn-child-set.patch
+na-tray-child-Use-absolute-icon-position-as-root-event-co.patch
 build-Add-explicit-dependency-on-Xfixes.patch
 tray-na-xembed-Use-XShape-to-remove-input-on-socket-windo.patch
 shell-tray-icon-Use-available-space-when-that-s-defined.patch

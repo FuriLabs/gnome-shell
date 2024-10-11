@@ -29,7 +29,7 @@ index 3eee5f5..e1ff1cd 100644
     */
    clutter_actor_get_transformed_position (actor, &wx, &wy);
 diff --git a/src/tray/na-xembed.c b/src/tray/na-xembed.c
-index 5858acc..1ad6d81 100644
+index 69690f1..447c1cb 100644
 --- a/src/tray/na-xembed.c
 +++ b/src/tray/na-xembed.c
 @@ -43,6 +43,8 @@ struct _NaXembedPrivate
@@ -93,14 +93,14 @@ index 5858acc..1ad6d81 100644
 +  na_xembed_resize (xembed);
 +}
 +
- static void
- get_pixel_details (unsigned long  pixel_mask,
-                    int           *shift,
+ void
+ na_xembed_get_root_position (NaXembed *xembed,
+                              int      *x,
 diff --git a/src/tray/na-xembed.h b/src/tray/na-xembed.h
-index ec46119..1544af1 100644
+index ea8f9f4..751da97 100644
 --- a/src/tray/na-xembed.h
 +++ b/src/tray/na-xembed.h
-@@ -55,6 +55,10 @@ void na_xembed_get_size (NaXembed *xembed,
+@@ -59,6 +59,10 @@ void na_xembed_get_size (NaXembed *xembed,
  			 int      *width,
  			 int      *height);
  
