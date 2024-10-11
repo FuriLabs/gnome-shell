@@ -1,0 +1,40 @@
+From: Alessandro Bono <alessandro.bono369@gmail.com>
+Date: Mon, 19 Aug 2024 10:42:08 +0200
+Subject: authPrompt: Allow to set a custom ShellUserVerifer
+
+Move ShellUserVerifier creation to its own function so that
+extensions can easily override it.
+
+Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7828
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3446>
+(cherry picked from commit 5445b705f1c7accf1e7a949b614faade0fa5b1a1)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2084306
+---
+ js/gdm/authPrompt.js | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 5fd317d..a99de92 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -88,7 +88,7 @@ export const AuthPrompt = GObject.registerClass({
+         else if (this._mode === AuthPromptMode.UNLOCK_OR_LOG_IN)
+             reauthenticationOnly = false;
+ 
+-        this._userVerifier = new GdmUtil.ShellUserVerifier(this._gdmClient, {reauthenticationOnly});
++        this._userVerifier = this._createUserVerifier(this._gdmClient, {reauthenticationOnly});
+ 
+         this._userVerifier.connect('ask-question', this._onAskQuestion.bind(this));
+         this._userVerifier.connect('show-message', this._onShowMessage.bind(this));
+@@ -145,6 +145,10 @@ export const AuthPrompt = GObject.registerClass({
+         this.add_child(this._message);
+     }
+ 
++    _createUserVerifier(gdmClient, params) {
++        return new GdmUtil.ShellUserVerifier(gdmClient, params);
++    }
++
+     _onDestroy() {
+         this._inactiveEntry.destroy();
+         this._inactiveEntry = null;
