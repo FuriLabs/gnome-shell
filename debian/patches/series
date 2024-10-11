@@ -76,3 +76,6 @@ animationUtils-Allow-marking-animations-as-required.patch
 environment-Allow-marking-animations-as-required.patch
 ripples-Allow-to-specify-whether-the-ripple-is-required.patch
 locatePointer-Mark-the-animation-as-required.patch
+appDisplay-Use-navigate_from_event-for-keyboard-focus-in-.patch
+appDisplay-Use-navigate_focus-to-keep-focus-after-editing.patch
+appDisplay-Use-AppFolderDialog-grabHelper-to-obtain-key-f.patch

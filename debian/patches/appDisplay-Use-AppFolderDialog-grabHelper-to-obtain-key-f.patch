@@ -1,0 +1,31 @@
+From: sorelz <sorelz.zen498@passinbox.com>
+Date: Tue, 2 Jul 2024 16:17:35 -0400
+Subject: appDisplay: Use AppFolderDialog grabHelper to obtain key focus on
+ popup()
+
+When an app folder is opened it would do so without grabbing the
+keyboard focus, so one could not navigate with the arrow keys without
+pressing Tab. This adds the focus parameter to popup()'s grab, which
+sets the key focus to the elements of the folder when it is opened.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3338>
+(cherry picked from commit 9569239ec5e774f59bb973adb34196b984c50e85)
+(cherry picked from commit 4be19253236ed9214e1468b6f9b4e9206433a15a)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2042763
+---
+ js/ui/appDisplay.js | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
+index 1bbf40a..fd7f775 100644
+--- a/js/ui/appDisplay.js
++++ b/js/ui/appDisplay.js
+@@ -2903,6 +2903,7 @@ export const AppFolderDialog = GObject.registerClass({
+ 
+         this._isOpen = this._grabHelper.grab({
+             actor: this,
++            focus: this._editButton,
+             onUngrab: () => this.popdown(),
+         });
+ 

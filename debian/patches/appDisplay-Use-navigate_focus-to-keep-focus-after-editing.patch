@@ -1,0 +1,31 @@
+From: sorelz <sorelz.zen498@passinbox.com>
+Date: Mon, 1 Jul 2024 19:52:33 -0400
+Subject: appDisplay: Use navigate_focus() to keep focus after editing app
+ folder title
+
+The AppFolderDialog would lose keyboard focus after editing the title
+(likely due to the folder entry grabbing key focus). This commit adds
+navigate_focus() to _showFolderLabel() to send key focus back to the
+dialog's elements after editing the title.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3338>
+(cherry picked from commit a04b35b569e9e5c6237dd6c82bbdfa253d6bd4a3)
+(cherry picked from commit a912379665e4f605caa4ce51e24c20d7a130b46a)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2042763
+---
+ js/ui/appDisplay.js | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
+index e3e9e98..1bbf40a 100644
+--- a/js/ui/appDisplay.js
++++ b/js/ui/appDisplay.js
+@@ -2665,6 +2665,7 @@ export const AppFolderDialog = GObject.registerClass({
+ 
+         this._maybeUpdateFolderName();
+         this._switchActor(this._entry, this._folderNameLabel);
++        this.navigate_focus(this, St.DirectionType.TAB_FORWARD, false);
+     }
+ 
+     _showFolderEntry() {
