@@ -82,3 +82,4 @@ appDisplay-Use-AppFolderDialog-grabHelper-to-obtain-key-f.patch
 status-network-Fix-enterprise-network-connecting-from-pan.patch
 status-network-Add-user-permissions-to-new-wifi-connectio.patch
 gdm-Actually-wait-for-pending-messages-being-notified-on-.patch
+notificationDaemon-Use-correct-property-name-to-enable-ma.patch

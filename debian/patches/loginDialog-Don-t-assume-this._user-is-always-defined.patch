@@ -22,6 +22,8 @@ Fixes: df84854d9 ("loginDialog: On login, allow logout a conflicting session")
 Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7526
 Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3448>
 (cherry picked from commit e5d9a0fec869adbe610c46114afaede04f8c89e2)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2065432
 ---
  js/gdm/loginDialog.js | 8 ++++----
  1 file changed, 4 insertions(+), 4 deletions(-)
