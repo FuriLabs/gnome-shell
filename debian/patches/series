@@ -80,3 +80,4 @@ appDisplay-Use-navigate_from_event-for-keyboard-focus-in-.patch
 appDisplay-Use-navigate_focus-to-keep-focus-after-editing.patch
 appDisplay-Use-AppFolderDialog-grabHelper-to-obtain-key-f.patch
 status-network-Fix-enterprise-network-connecting-from-pan.patch
+status-network-Add-user-permissions-to-new-wifi-connectio.patch
