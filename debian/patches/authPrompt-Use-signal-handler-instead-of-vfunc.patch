@@ -1,0 +1,36 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Tue, 14 May 2024 19:49:56 +0200
+Subject: authPrompt: Use signal handler instead of vfunc
+
+The prompt itself may get destroyed when canceled, in which
+case it is no longer possible to chain up in the vfunc.
+
+This is usually not an issue as the prompt is only destroyed
+at the end of a transition, but it results in a warning if
+animations are disabled.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3317>
+(cherry picked from commit dac4f2cb862ce3f561faaa5a8a316377758b7c0b)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2084308
+---
+ js/gdm/authPrompt.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index ec1c931..ece597c 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -133,10 +133,10 @@ export const AuthPrompt = GObject.registerClass({
+         this._userVerifier = null;
+     }
+ 
+-    vfunc_key_press_event(event) {
++    on_key_press_event(event) {
+         if (event.get_key_symbol() === Clutter.KEY_Escape)
+             this.cancel();
+-        return super.vfunc_key_press_event(event);
++        return Clutter.EVENT_PROPAGATE;
+     }
+ 
+     _initInputRow() {

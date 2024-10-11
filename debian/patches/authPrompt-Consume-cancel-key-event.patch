@@ -1,0 +1,45 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Wed, 15 May 2024 01:55:40 +0200
+Subject: authPrompt: Consume cancel key event
+
+The auth prompt currently propagates all key presses, even the
+Escape press that is used to cancel it.
+
+On the lock screen that means that the same event that cancels
+the prompt (and switches back to the clock) is *also* propagated
+to the handler that activates the prompt on key press.
+
+That handler doesn't do anything when the prompt is already visible,
+which is the case when the transition to the clock is animated.
+
+However when animations are disabled, canceling the prompt will
+result in a new prompt getting created immediately, and the login
+screen is stuck on the prompt.
+
+Fix this by not propagating key events that are used to cancel
+the prompt.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3317>
+(cherry picked from commit e7dc0de75ea3e44795ddca64267eff03992ce82f)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2084308
+---
+ js/gdm/authPrompt.js | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index ece597c..8a46559 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -134,8 +134,10 @@ export const AuthPrompt = GObject.registerClass({
+     }
+ 
+     on_key_press_event(event) {
+-        if (event.get_key_symbol() === Clutter.KEY_Escape)
++        if (event.get_key_symbol() === Clutter.KEY_Escape) {
+             this.cancel();
++            return Clutter.EVENT_STOP;
++        }
+         return Clutter.EVENT_PROPAGATE;
+     }
+ 
