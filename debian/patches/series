@@ -68,6 +68,9 @@ CVE-2024-36472-3.patch
 CVE-2024-36472-4.patch
 st-theme-node-Forget-properties-cache-on-stylesheet-chang.patch
 shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
+loginDialog-Catch-possible-errors-when-session-is-opened.patch
+org.freedesktop.login1.Session-Sort-alphabetically.patch
+loginDialog-Get-username-directly-from-the-conflicting-se.patch
 loginDialog-Don-t-assume-this._user-is-always-defined.patch
 unlockDialog-Also-center-the-time-in-12h-format.patch
 workspaceAnimation-Do-not-create-clones-for-override-redi.patch

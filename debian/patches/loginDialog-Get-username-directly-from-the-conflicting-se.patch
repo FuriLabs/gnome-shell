@@ -1,0 +1,57 @@
+From: Alessandro Bono <alessandro.bono369@gmail.com>
+Date: Mon, 19 Aug 2024 18:02:04 +0200
+Subject: loginDialog: Get username directly from the conflicting session
+
+The conflicting session is owned by the same user per definition.
+Use the Name property of the conflicting session to get the
+username instead of assuming that `this._user` is defined and
+passing the username around.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3448>
+(cherry picked from commit 647747fbd6afef2f9f939682ab6527f3877ffbfb)
+(cherry picked from commit 83499579190ea4580385cf7d938ad57aaf62293c)
+
+https://bugs.launchpad.net/ubuntu/noble/+source/gnome-shell/+bug/2065432
+---
+ data/dbus-interfaces/org.freedesktop.login1.Session.xml | 1 +
+ js/gdm/loginDialog.js                                   | 6 +++---
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/data/dbus-interfaces/org.freedesktop.login1.Session.xml b/data/dbus-interfaces/org.freedesktop.login1.Session.xml
+index 5ebf2ed..68c7d11 100644
+--- a/data/dbus-interfaces/org.freedesktop.login1.Session.xml
++++ b/data/dbus-interfaces/org.freedesktop.login1.Session.xml
+@@ -5,6 +5,7 @@
+     <property name="Active" type="b" access="read"/>
+     <property name="Class" type="s" access="read"/>
+     <property name="Id" type="s" access="read"/>
++    <property name="Name" type="s" access="read"/>
+     <property name="Remote" type="b" access="read"/>
+     <property name="State" type="s" access="read"/>
+     <property name="Type" type="s" access="read"/>
+diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
+index 5e3a679..869d0cd 100644
+--- a/js/gdm/loginDialog.js
++++ b/js/gdm/loginDialog.js
+@@ -415,9 +415,10 @@ export const ConflictingSessionDialog = GObject.registerClass({
+         'force-stop': {},
+     },
+ }, class ConflictingSessionDialog extends ModalDialog.ModalDialog {
+-    _init(conflictingSession, greeterSession, userName) {
++    _init(conflictingSession, greeterSession) {
+         super._init();
+ 
++        const userName = conflictingSession.Name;
+         let bannerText;
+         if (greeterSession.Remote && conflictingSession.Remote)
+             /* Translators: is running for <username> */
+@@ -1168,8 +1169,7 @@ export const LoginDialog = GObject.registerClass({
+ 
+     _showConflictingSessionDialog(serviceName, conflictingSession) {
+         let conflictingSessionDialog = new ConflictingSessionDialog(conflictingSession,
+-            this._greeterSessionProxy,
+-            this._user.get_user_name());
++            this._greeterSessionProxy);
+ 
+         conflictingSessionDialog.connect('cancel', () => {
+             this._authPrompt.reset();

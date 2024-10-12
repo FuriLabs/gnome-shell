@@ -22,6 +22,7 @@ Fixes: df84854d9 ("loginDialog: On login, allow logout a conflicting session")
 Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7526
 Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3448>
 (cherry picked from commit e5d9a0fec869adbe610c46114afaede04f8c89e2)
+(cherry picked from commit fa84a98cb23a30449d9329867cbb16768fa79039)
 
 Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2065432
 ---
@@ -29,7 +30,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2065432
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index c1d288d..93c5bef 100644
+index 869d0cd..72af764 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -1214,15 +1214,15 @@ export const LoginDialog = GObject.registerClass({
