@@ -1,9 +1,41 @@
 gnome-shell (46.0-0ubuntu6~24.04.6) UNRELEASED; urgency=medium
 
+  [ Nathan Pratta Teodosio ]
   * d/p/chromium-snap-pwa.patch: Fixes tab and dock grouping of progressive
     web applications for the Chromium snap (LP: #2007652).
 
- -- Nathan Pratta Teodosio <nathan.teodosio@canonical.com>  Tue, 17 Sep 2024 13:49:22 +0200
+  [ Robert Malz ]
+  * d/p: Fix default service discovery.
+    Fix an issue where authentication service was not
+    properly picked due to incorrect checks in _isDiscreteServiceEnabled
+    (LP: #2065432)
+  * Add loginDialog-Don-t-assume-this._user-is-always-defined.patch.
+    Cherry-pick for e5d9a0fe
+    Fixes null dereference during login with smart cards. (LP: #2065432)
+
+  [ Marco Trevisan (Treviño) ]
+  * d/p: unlockDialog: Also center the time in 12h format (LP: #2084276)
+  * d/p: Exclude override-redirect windows from workspace animation
+    (LP: #2039543)
+  * d/p: Use absolute tray icon position in root event coordinates
+    (LP: #2059819)
+  * d/p: Fix password not re-asked for TCRYPT devices (LP: #2084281)
+  * d/p: Keep locate pointer animation when animations are disabled
+    (LP: #2039801)
+  * d/p: Fix keyboard navigation in AppFolderDialog (LP: #2042763)
+  * d/p: Fix connection to WPA Enterprise networks from quick settings
+    (LP: #2084286)
+  * d/p: Add user permissions to new wifi connections if has no system ones
+    (LP: #2084287)
+  * d/p: gdm: Actually wait for pending messages being notified on failures
+    (LP: #2084289)
+  * d/p: Fix themed icons rendering in notifications (LP: #2084301)
+  * d/p: Fix notifications not showing in the lockscreen (LP: #2084302)
+  * d/p: Allow to set a custom ShellUserVerifier (LP: #2084306)
+  * d/p: Fix toggling lockscreen view using Escape (LP: #2084308, #2072716)
+  * d/p: Make active workspace above siblings (LP: #2084310)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sat, 12 Oct 2024 04:33:04 +0200
 
 gnome-shell (46.0-0ubuntu6~24.04.5) noble; urgency=medium
 
