@@ -137,7 +137,7 @@ index fafed7c..029950d 100644
  });
  
 diff --git a/meson.build b/meson.build
-index 742d391..3147eda 100644
+index be86935..f58403e 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -33,7 +33,6 @@ systemd_req = '>= 246'
@@ -157,7 +157,7 @@ index 742d391..3147eda 100644
  nm_deps = []
  if get_option('networkmanager')
 diff --git a/src/meson.build b/src/meson.build
-index 0dd7fed..0e2c5c2 100644
+index b76bb23..7c912ec 100644
 --- a/src/meson.build
 +++ b/src/meson.build
 @@ -73,7 +73,6 @@ gnome_shell_deps = [

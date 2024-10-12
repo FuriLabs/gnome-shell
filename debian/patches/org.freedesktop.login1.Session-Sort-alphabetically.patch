@@ -1,0 +1,27 @@
+From: Alessandro Bono <alessandro.bono369@gmail.com>
+Date: Mon, 19 Aug 2024 17:58:24 +0200
+Subject: org.freedesktop.login1.Session: Sort alphabetically
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3448>
+(cherry picked from commit a80ad53500bbd5d07607dbaaacc9a6d4274a2e49)
+(cherry picked from commit 423a0da024f0160e9c6e57bfe89e3df3c48a8f41)
+
+https://bugs.launchpad.net/ubuntu/noble/+source/gnome-shell/+bug/2065432
+---
+ data/dbus-interfaces/org.freedesktop.login1.Session.xml | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/dbus-interfaces/org.freedesktop.login1.Session.xml b/data/dbus-interfaces/org.freedesktop.login1.Session.xml
+index 6fab817..5ebf2ed 100644
+--- a/data/dbus-interfaces/org.freedesktop.login1.Session.xml
++++ b/data/dbus-interfaces/org.freedesktop.login1.Session.xml
+@@ -6,8 +6,8 @@
+     <property name="Class" type="s" access="read"/>
+     <property name="Id" type="s" access="read"/>
+     <property name="Remote" type="b" access="read"/>
+-    <property name="Type" type="s" access="read"/>
+     <property name="State" type="s" access="read"/>
++    <property name="Type" type="s" access="read"/>
+     <method name="SetLockedHint">
+       <arg type="b" direction="in"/>
+     </method>

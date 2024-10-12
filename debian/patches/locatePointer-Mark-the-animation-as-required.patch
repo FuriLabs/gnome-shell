@@ -1,0 +1,31 @@
+From: Alessandro Bono <alessandro.bono369@gmail.com>
+Date: Fri, 20 Oct 2023 22:00:59 +0200
+Subject: locatePointer: Mark the animation as required
+
+When the accessibility option "Reduce Animation" is turned on, the
+accessibility option "Locate Pointer" stops to work. This is because
+the animation is not marked as required. Mark it as such.
+
+Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7472
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2986>
+(cherry picked from commit 31509e55ca83560b61663cab8ae695cb192eb4ef)
+(cherry picked from commit 43bd6eb6db55f6fb56bc9a51008767ececfe8978)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2039801
+---
+ js/ui/locatePointer.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/locatePointer.js b/js/ui/locatePointer.js
+index 7e59c56..e2ae64d 100644
+--- a/js/ui/locatePointer.js
++++ b/js/ui/locatePointer.js
+@@ -20,7 +20,7 @@ export class LocatePointer {
+             return;
+ 
+         if (enabled) {
+-            this._ripples = new Ripples.Ripples(0.5, 0.5, 'ripple-pointer-location');
++            this._ripples = new Ripples.Ripples(0.5, 0.5, 'ripple-pointer-location', true);
+             this._ripples.addTo(Main.uiGroup);
+         } else {
+             this._ripples.destroy();

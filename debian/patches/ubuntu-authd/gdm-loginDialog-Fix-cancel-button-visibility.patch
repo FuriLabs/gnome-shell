@@ -8,7 +8,7 @@ Subject: gdm/loginDialog: Fix cancel button visibility
  2 files changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 2f8eb15..9b067f6 100644
+index 52b19f1..db64101 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -59,6 +59,12 @@ export const AuthPrompt = GObject.registerClass({
@@ -24,7 +24,7 @@ index 2f8eb15..9b067f6 100644
  }, class AuthPrompt extends St.BoxLayout {
      _init(gdmClient, mode) {
          super._init({
-@@ -807,6 +813,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -811,6 +817,7 @@ export const AuthPrompt = GObject.registerClass({
          this.cancelButton.reactive = this._hasCancelButton;
          this.cancelButton.can_focus = this._hasCancelButton;
          this._preemptiveAnswer = null;
@@ -33,10 +33,10 @@ index 2f8eb15..9b067f6 100644
          if (this._userVerifier)
              this._userVerifier.cancel();
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 9bc916a..bcb3dc9 100644
+index 4a084ce..5b523d5 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -536,6 +536,8 @@ export const LoginDialog = GObject.registerClass({
+@@ -537,6 +537,8 @@ export const LoginDialog = GObject.registerClass({
          this._authPrompt.connect('prompted', this._onPrompted.bind(this));
          this._authPrompt.connect('reset', this._onReset.bind(this));
          this._authPrompt.connect('mechanisms-changed', this._onMechanismsChanged.bind(this));
@@ -45,7 +45,7 @@ index 9bc916a..bcb3dc9 100644
          this._authPrompt.hide();
          this.add_child(this._authPrompt);
  
-@@ -1103,9 +1105,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1104,9 +1106,7 @@ export const LoginDialog = GObject.registerClass({
                  this._user = this._userManager.get_user(answer);
                  this._authPrompt.clear();
                  this._beginVerification({userName: answer});

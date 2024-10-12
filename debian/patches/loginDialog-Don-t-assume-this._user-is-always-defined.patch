@@ -1,0 +1,55 @@
+From: Alessandro Bono <alessandro.bono369@gmail.com>
+Date: Mon, 19 Aug 2024 18:08:42 +0200
+Subject: loginDialog: Don't assume this._user is always defined
+
+There are cases where this._user might be null when a session
+is opened. This is because the user is not selected via GDM but
+it is set through PAM. This happens when logging with smart card
+or with credential managers, for example.
+
+Given the session-id of the opened session, look for the owner.
+This fixes the following error:
+```
+gnome-shell[153293]: TypeError: this._user is null
+
+                     Stack trace:
+                     _findConflictingSession@resource:///org/gnome/shell/gdm/loginDialog.js:1219:26
+                     _onSessionOpened@resource:///org/gnome/shell/gdm/loginDialog.js:1254:51
+                     @resource:///org/gnome/shell/ui/init.js:21:20
+```
+
+Fixes: df84854d9 ("loginDialog: On login, allow logout a conflicting session")
+Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7526
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3448>
+(cherry picked from commit e5d9a0fec869adbe610c46114afaede04f8c89e2)
+(cherry picked from commit fa84a98cb23a30449d9329867cbb16768fa79039)
+
+https://bugs.launchpad.net/ubuntu/noble/+source/gnome-shell/+bug/2065432
+---
+ js/gdm/loginDialog.js | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
+index 2b0edf6..325c7b3 100644
+--- a/js/gdm/loginDialog.js
++++ b/js/gdm/loginDialog.js
+@@ -1138,15 +1138,15 @@ export const LoginDialog = GObject.registerClass({
+         });
+     }
+ 
+-    async _findConflictingSession(ignoreSessionId) {
+-        const userName = this._user.get_user_name();
++    async _findConflictingSession(startingSessionId) {
+         const loginManager = LoginManager.getLoginManager();
+         const sessions = await loginManager.listSessions();
++        const [, , startingSessionOwner, ,] = sessions.find(([id, , , ,]) => id === startingSessionId);
+         for (const session of sessions.map(([id, , user, , path]) => ({id, user, path}))) {
+-            if (ignoreSessionId === session.id)
++            if (startingSessionId === session.id)
+                 continue;
+ 
+-            if (userName !== session.user)
++            if (startingSessionOwner !== session.user)
+                 continue;
+ 
+             const sessionProxy = loginManager.getSession(session.path);

@@ -1,0 +1,77 @@
+From: Alessandro Bono <alessandro.bono369@gmail.com>
+Date: Thu, 5 Sep 2024 14:41:30 +0200
+Subject: environment: Make more explicit what are the default values
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/2986>
+(cherry picked from commit 91ae7de3adf131f6574e93b7bdf7a1b3b89be86f)
+(cherry picked from commit 3e3398b0ccc1bb2d735377d5b4a2c82dfd3c5260)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2039801
+---
+ js/ui/environment.js | 28 ++++++++++++++++------------
+ 1 file changed, 16 insertions(+), 12 deletions(-)
+
+diff --git a/js/ui/environment.js b/js/ui/environment.js
+index 24e52d7..784a452 100644
+--- a/js/ui/environment.js
++++ b/js/ui/environment.js
+@@ -90,6 +90,12 @@ function _getPropertyTarget(actor, propName) {
+ }
+ 
+ function _easeActor(actor, params) {
++    params = {
++        repeatCount: 0,
++        autoReverse: false,
++        ...params,
++    };
++
+     actor.save_easing_state();
+ 
+     if (params.duration !== undefined)
+@@ -100,14 +106,10 @@ function _easeActor(actor, params) {
+         actor.set_easing_delay(params.delay);
+     delete params.delay;
+ 
+-    let repeatCount = 0;
+-    if (params.repeatCount !== undefined)
+-        repeatCount = params.repeatCount;
++    const repeatCount = params.repeatCount;
+     delete params.repeatCount;
+ 
+-    let autoReverse = false;
+-    if (params.autoReverse !== undefined)
+-        autoReverse = params.autoReverse;
++    const autoReverse = params.autoReverse;
+     delete params.autoReverse;
+ 
+     // repeatCount doesn't include the initial iteration
+@@ -157,6 +159,12 @@ function _easeActor(actor, params) {
+ }
+ 
+ function _easeActorProperty(actor, propName, target, params) {
++    params = {
++        repeatCount: 0,
++        autoReverse: false,
++        ...params,
++    };
++
+     // Avoid pointless difference with ease()
+     if (params.mode)
+         params.progress_mode = params.mode;
+@@ -166,14 +174,10 @@ function _easeActorProperty(actor, propName, target, params) {
+         params.duration = adjustAnimationTime(params.duration);
+     let duration = Math.floor(params.duration || 0);
+ 
+-    let repeatCount = 0;
+-    if (params.repeatCount !== undefined)
+-        repeatCount = params.repeatCount;
++    const repeatCount = params.repeatCount;
+     delete params.repeatCount;
+ 
+-    let autoReverse = false;
+-    if (params.autoReverse !== undefined)
+-        autoReverse = params.autoReverse;
++    const autoReverse = params.autoReverse;
+     delete params.autoReverse;
+ 
+     // repeatCount doesn't include the initial iteration

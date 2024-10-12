@@ -1,0 +1,46 @@
+From: Thore Sommer <mail@thson.de>
+Date: Mon, 2 Sep 2024 10:39:46 +0200
+Subject: status/network: Add user permissions to new wifi connections
+
+When creating a new NM connection they are by default system connections. A
+user cannot create them if they don't have the correct polkit permissions
+(org.freedesktop.NetworkManager.settings.modify.system).
+
+If a user tried to add a new connection in the drop down menu, then they got
+no password prompt and NM logged the following:
+[...] audit: op="connection-add-activate" pid=1872 uid=1000 result="fail" \
+reason="Insufficient privileges"
+
+This change adds the current user to the user permissions for the new
+connection, if the user has no permissions to modify the system connections,
+which copies the behavior of GNOME Settings.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3462>
+(cherry picked from commit cdf0e5fc6ecfc3c62223af67d9f72692a3f97dff)
+(cherry picked from commit 265fb096f17e586c3a0d309dd15393e3b39ea168)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2084287
+---
+ js/ui/status/network.js | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/js/ui/status/network.js b/js/ui/status/network.js
+index 6f206ac..f9aee79 100644
+--- a/js/ui/status/network.js
++++ b/js/ui/status/network.js
+@@ -951,6 +951,15 @@ const WirelessNetwork = GObject.registerClass({
+                 this._getDeviceDBusPath(), ap.get_path());
+         } else {
+             conn = new NM.SimpleConnection();
++            const permission = Polkit.Permission.new_sync('org.freedesktop.NetworkManager.settings.modify.system', null, null);
++            let allowedToShare = false;
++            if (permission)
++                allowedToShare = permission.get_allowed();
++            if (!allowedToShare) {
++                const setting = new NM.SettingConnection();
++                setting.add_permission('user', GLib.get_user_name(), null);
++                conn.add_setting(setting);
++            }
+             this._device.client.add_and_activate_connection_async(
+                 conn, this._device, ap.get_path(), null, null);
+         }

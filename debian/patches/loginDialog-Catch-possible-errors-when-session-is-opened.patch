@@ -1,0 +1,60 @@
+From: Alessandro Bono <alessandro.bono369@gmail.com>
+Date: Mon, 19 Aug 2024 11:47:45 +0200
+Subject: loginDialog: Catch possible errors when session is opened
+
+Since commit df84854d9073c457d79d7c2e6a5750428c52ff01 the function
+_onSessionOpened() is now async. This means that if an error occurs
+we get the following warning:
+```
+gnome-shell[1014]: Unhandled promise rejection. To suppress this
+warning, add an error handler to your promise chain with .catch()
+or a try-catch block around your await expression. Stack trace of
+the failed promise:
+_onSessionOpened@resource:///org/gnome/shell/gdm/loginDialog.js:1166:27 @resource:///org/gnome/shell/ui/init.js:21:20
+```
+
+Follow the suggestion and add a try-catch block in order to reveal
+what the error is. In the catch phase, reset the faded AuthPrompt
+otherwise we can't retry with another user.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3448>
+(cherry picked from commit f1223c6852ad5fcf279d5541dbb061e2a5613383)
+(cherry picked from commit 2a06cc368025dc1a99f4512e5fcc1cd57cfd163c)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/noble/+source/gnome-shell/+bug/2065432
+---
+ js/gdm/loginDialog.js | 19 ++++++++++++-------
+ 1 file changed, 12 insertions(+), 7 deletions(-)
+
+diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
+index 6af960b..374dccd 100644
+--- a/js/gdm/loginDialog.js
++++ b/js/gdm/loginDialog.js
+@@ -1164,15 +1164,20 @@ export const LoginDialog = GObject.registerClass({
+     }
+ 
+     async _onSessionOpened(client, serviceName, sessionId) {
+-        if (sessionId) {
+-            const conflictingSession = await this._findConflictingSession(sessionId);
+-            if (conflictingSession) {
+-                this._showConflictingSessionDialog(serviceName, conflictingSession);
+-                return;
++        try {
++            if (sessionId) {
++                const conflictingSession = await this._findConflictingSession(sessionId);
++                if (conflictingSession) {
++                    this._showConflictingSessionDialog(serviceName, conflictingSession);
++                    return;
++                }
+             }
+-        }
+ 
+-        this._authPrompt.finish(() => this._startSession(serviceName));
++            this._authPrompt.finish(() => this._startSession(serviceName));
++        } catch (error) {
++            logError(error, `Failed to start session '${sessionId}'`);
++            this._authPrompt.reset();
++        }
+     }
+ 
+     _waitForItemForUser(userName) {

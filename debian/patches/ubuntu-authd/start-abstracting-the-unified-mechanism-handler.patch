@@ -16,10 +16,10 @@ As we may have different protocols under the hood.
  create mode 100644 js/gdm/unifiedMechanism.js
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index b959198..2f8eb15 100644
+index a3a3d55..52b19f1 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -146,12 +146,19 @@ export const AuthPrompt = GObject.registerClass({
+@@ -150,12 +150,19 @@ export const AuthPrompt = GObject.registerClass({
  
      on_key_press_event(event) {
          if (event.get_key_symbol() === Clutter.KEY_Escape) {
@@ -40,7 +40,7 @@ index b959198..2f8eb15 100644
      _initInputRow() {
          this._mainBox = new St.BoxLayout({
              style_class: 'login-dialog-button-box',
-@@ -170,7 +177,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -174,7 +181,7 @@ export const AuthPrompt = GObject.registerClass({
              icon_name: 'go-previous-symbolic',
          });
          if (this._hasCancelButton)
@@ -62,10 +62,10 @@ index 0000000..ad854ca
 +export const SMARTCARD_ROLE_NAME = 'smartcard';
 +export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index c7d23be..505e388 100644
+index b2cb039..4d4b0c0 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -1029,11 +1029,11 @@ export const LoginDialog = GObject.registerClass({
+@@ -1030,11 +1030,11 @@ export const LoginDialog = GObject.registerClass({
  
          mechanisms.sort((a, b) => a.name.localeCompare(b.name));
  
