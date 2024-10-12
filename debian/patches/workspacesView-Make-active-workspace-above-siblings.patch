@@ -1,0 +1,51 @@
+From: Keyu Tao <me@taoky.moe>
+Date: Thu, 20 Jun 2024 23:09:27 +0800
+Subject: workspacesView: Make active workspace above siblings
+
+If there's a window flowing over the left edge in a workspace, the
+animation of showing or hiding overview in the left adjacent workspace
+would glitch, as the window would appear or disappear suddenly.
+
+This commits tries to fix it by making sure the active workspace are
+above other workspaces when updating workspaces or active workspace
+changed in workspacesView.
+
+Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7364
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3378>
+(cherry picked from commit ab8762924173e7aa6935bb4dcb73612d67bc948f)
+(cherry picked from commit 9b3ab9aca4b5de352fc368f2efa35e50ab91ba89)
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2084310
+---
+ js/ui/workspacesView.js | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/js/ui/workspacesView.js b/js/ui/workspacesView.js
+index 24c2489..0e962aa 100644
+--- a/js/ui/workspacesView.js
++++ b/js/ui/workspacesView.js
+@@ -440,6 +440,11 @@ class WorkspacesView extends WorkspacesViewBase {
+         }
+     }
+ 
++    _raiseActiveWorkspace() {
++        const activeWorkspace = this.getActiveWorkspace();
++        this.set_child_above_sibling(activeWorkspace, null);
++    }
++
+     _updateWorkspaces() {
+         let workspaceManager = global.workspace_manager;
+         let newNumWorkspaces = workspaceManager.n_workspaces;
+@@ -472,10 +477,12 @@ class WorkspacesView extends WorkspacesViewBase {
+ 
+         this._updateWorkspacesState();
+         this._updateVisibility();
++        this._raiseActiveWorkspace();
+     }
+ 
+     _activeWorkspaceChanged(_wm, _from, _to, _direction) {
+         this._scrollToActive();
++        this._raiseActiveWorkspace();
+     }
+ 
+     _onDestroy() {
