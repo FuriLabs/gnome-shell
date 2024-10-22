@@ -1,3 +1,9 @@
+gnome-shell (47.0-2ubuntu3.1) plucky; urgency=medium
+
+  * No-change upload to plucky
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 22 Oct 2024 11:38:25 +0200
+
 gnome-shell (47.0-2ubuntu3) oracular; urgency=medium
 
   * d/p: Fix toggling lockscreen view using Escape (LP: #2084308)
