@@ -1,3 +1,11 @@
+gnome-shell (3.36.9-0ubuntu0.20.04.5) UNRELEASED; urgency=medium
+
+  [ Nathan Pratta Teodosio ]
+  * d/p/chromium-snap-pwa.patch: Fixes tab and dock grouping of progressive
+    web applications for the Chromium snap (LP: #2007652)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 14 Nov 2024 12:58:34 +0100
+
 gnome-shell (3.36.9-0ubuntu0.20.04.4) focal-security; urgency=medium
 
   * SECURITY UPDATE: resource consumption via portal helper
