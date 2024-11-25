@@ -26,10 +26,10 @@ Bug-Dash-to-Dock: https://github.com/micheleg/dash-to-dock/issues/2179
  2 files changed, 16 insertions(+), 3 deletions(-)
 
 diff --git a/src/st/st-theme-node-private.h b/src/st/st-theme-node-private.h
-index 02eb95e..b802892 100644
+index d95284e..2d5065f 100644
 --- a/src/st/st-theme-node-private.h
 +++ b/src/st/st-theme-node-private.h
-@@ -105,7 +105,7 @@ struct _StThemeNode {
+@@ -104,7 +104,7 @@ struct _StThemeNode {
    int box_shadow_min_width;
    int box_shadow_min_height;
  
@@ -39,7 +39,7 @@ index 02eb95e..b802892 100644
    CoglTexture *border_slices_texture;
    CoglPipeline *border_slices_pipeline;
 diff --git a/src/st/st-theme-node.c b/src/st/st-theme-node.c
-index 51e6d21..31b2758 100644
+index 0817e51..1eb6925 100644
 --- a/src/st/st-theme-node.c
 +++ b/src/st/st-theme-node.c
 @@ -75,6 +75,10 @@ maybe_free_properties (StThemeNode *node)
@@ -70,7 +70,7 @@ index 51e6d21..31b2758 100644
    g_clear_pointer (&node->font_desc, pango_font_description_free);
  
    g_clear_pointer (&node->box_shadow, st_shadow_unref);
-@@ -473,6 +476,16 @@ ensure_properties (StThemeNode *node)
+@@ -472,6 +475,16 @@ ensure_properties (StThemeNode *node)
            node->n_properties = properties->len;
            node->properties = (CRDeclaration **)g_ptr_array_free (properties, FALSE);
          }
