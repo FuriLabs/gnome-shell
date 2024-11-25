@@ -1,12 +1,12 @@
-gnome-shell (47.2-1) UNRELEASED; urgency=medium
-
-  [ Daniel van Vugt ]
-  * Restore st-theme-node-Forget-properties-cache-on-stylesheet-chang.patch
+gnome-shell (47.2-1) unstable; urgency=medium
 
   [ Jeremy Bícha ]
   * New upstream release
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 25 Nov 2024 14:03:38 -0500
+  [ Daniel van Vugt ]
+  * Restore st-theme-node-Forget-properties-cache-on-stylesheet-chang.patch
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 25 Nov 2024 14:12:49 -0500
 
 gnome-shell (47.1-2) unstable; urgency=medium
 
