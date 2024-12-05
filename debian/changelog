@@ -14,6 +14,7 @@ gnome-shell (46.0-0ubuntu6~24.04.6) UNRELEASED; urgency=medium
     Fixes null dereference during login with smart cards. (LP: #2065432)
 
   [ Marco Trevisan (Treviño) ]
+  * debian/gbp.conf: Use upstream/46.x branch
   * d/p: unlockDialog: Also center the time in 12h format (LP: #2084276)
   * d/p: Exclude override-redirect windows from workspace animation
     (LP: #2039543)
@@ -34,8 +35,10 @@ gnome-shell (46.0-0ubuntu6~24.04.6) UNRELEASED; urgency=medium
   * d/p: Allow to set a custom ShellUserVerifier (LP: #2084306)
   * d/p: Fix toggling lockscreen view using Escape (LP: #2084308, #2072716)
   * d/p: Make active workspace above siblings (LP: #2084310)
+  * d/p: notificationDaemon: Use correct property name to enable markup
+    (LP: #2084293)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sat, 12 Oct 2024 04:33:04 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 05 Dec 2024 03:13:27 +0100
 
 gnome-shell (46.0-0ubuntu6~24.04.5) noble; urgency=medium
 
