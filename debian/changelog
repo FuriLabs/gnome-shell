@@ -1,4 +1,4 @@
-gnome-shell (46.0-0ubuntu6~24.04.6) UNRELEASED; urgency=medium
+gnome-shell (46.0-0ubuntu6~24.04.6) noble; urgency=medium
 
   [ Nathan Pratta Teodosio ]
   * d/p/chromium-snap-pwa.patch: Fixes tab and dock grouping of progressive
@@ -38,7 +38,7 @@ gnome-shell (46.0-0ubuntu6~24.04.6) UNRELEASED; urgency=medium
   * d/p: notificationDaemon: Use correct property name to enable markup
     (LP: #2084293)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 05 Dec 2024 03:13:27 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 05 Dec 2024 03:13:58 +0100
 
 gnome-shell (46.0-0ubuntu6~24.04.5) noble; urgency=medium
 
