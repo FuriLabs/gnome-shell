@@ -1,4 +1,4 @@
-gnome-shell (46.0-0ubuntu6~24.04.6) noble; urgency=medium
+gnome-shell (46.0-0ubuntu6~24.04.6) UNRELEASED; urgency=medium
 
   [ Nathan Pratta Teodosio ]
   * d/p/chromium-snap-pwa.patch: Fixes tab and dock grouping of progressive
@@ -35,7 +35,7 @@ gnome-shell (46.0-0ubuntu6~24.04.6) noble; urgency=medium
   * d/p: Fix toggling lockscreen view using Escape (LP: #2084308, #2072716)
   * d/p: Make active workspace above siblings (LP: #2084310)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sat, 12 Oct 2024 04:36:14 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sat, 12 Oct 2024 04:33:04 +0200
 
 gnome-shell (46.0-0ubuntu6~24.04.5) noble; urgency=medium
 
