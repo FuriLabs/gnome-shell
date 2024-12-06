@@ -96,3 +96,4 @@ messageTray-Ensure-_updateDatetimeId-idle-callback-is-can.patch
 unlockDialog-Bind-source-titles.patch
 authPrompt-Allow-to-set-a-custom-ShellUserVerifer.patch
 workspacesView-Make-active-workspace-above-siblings.patch
+main-Disable-text-mipmapping-with-env-variable.patch
