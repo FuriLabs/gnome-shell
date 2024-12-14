@@ -1,8 +1,12 @@
-gnome-shell (47.2-2) UNRELEASED; urgency=medium
+gnome-shell (47.2-2) unstable; urgency=medium
 
+  [ Jeremy Bícha ]
+  * Add Depends: gjs for screen lock keyboard shortcut (Closes: #1089745)
+
+  [ Simon McVittie ]
   * d/salsa-ci.yml: Use recommended recipe
 
- -- Simon McVittie <smcv@debian.org>  Sun, 08 Dec 2024 19:18:00 +0000
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 13 Dec 2024 19:00:26 -0500
 
 gnome-shell (47.2-1) unstable; urgency=medium
 
