@@ -1,8 +1,8 @@
-gnome-shell (47.3-1) UNRELEASED; urgency=medium
+gnome-shell (47.3-1) unstable; urgency=medium
 
   * New upstream release
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 16 Jan 2025 17:36:41 -0500
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 16 Jan 2025 17:40:28 -0500
 
 gnome-shell (47.2-2) unstable; urgency=medium
 
