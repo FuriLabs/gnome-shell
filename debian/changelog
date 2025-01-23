@@ -1,3 +1,10 @@
+gnome-shell (46.0-0ubuntu6~24.04.7) noble; urgency=medium
+
+  [ Alessandro Astone ]
+  * Backport patch to fix setenv/getenv crash on startup (LP: #2039340)
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Thu, 23 Jan 2025 17:06:17 +0800
+
 gnome-shell (46.0-0ubuntu6~24.04.6) noble; urgency=medium
 
   [ Nathan Pratta Teodosio ]
