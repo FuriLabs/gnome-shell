@@ -45,12 +45,12 @@ struct _StBoxLayout
 
 StWidget *st_box_layout_new (void);
 
-void     st_box_layout_set_vertical   (StBoxLayout *box,
-                                       gboolean     vertical);
-gboolean st_box_layout_get_vertical   (StBoxLayout *box);
+ClutterOrientation st_box_layout_get_orientation (StBoxLayout *box);
+void st_box_layout_set_orientation (StBoxLayout        *box,
+                                    ClutterOrientation  orientation);
 
-void     st_box_layout_set_pack_start (StBoxLayout *box,
-                                       gboolean     pack_start);
-gboolean st_box_layout_get_pack_start (StBoxLayout *box);
+void     st_box_layout_set_vertical   (StBoxLayout *box,
+                                       gboolean     vertical) G_GNUC_DEPRECATED_FOR (st_box_layout_set_orientation);
+gboolean st_box_layout_get_vertical   (StBoxLayout *box) G_GNUC_DEPRECATED_FOR (st_box_layout_get_orientation);
 
 G_END_DECLS

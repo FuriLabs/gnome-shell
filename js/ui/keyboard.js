@@ -124,7 +124,7 @@ class Suggestions extends St.BoxLayout {
     _init() {
         super._init({
             style_class: 'word-suggestions',
-            vertical: false,
+            orientation: Clutter.Orientation.HORIZONTAL,
             x_align: Clutter.ActorAlign.CENTER,
         });
         this.show();
@@ -275,7 +275,7 @@ const Key = GObject.registerClass({
         this._boxPointer.setPosition(this.keyButton, 0.5);
 
         // Adds style to existing keyboard style to avoid repetition
-        this._boxPointer.add_style_class_name('keyboard-subkeys');
+        this._boxPointer.add_style_class_name('keyboard-subkeys-boxpointer');
         this._getExtendedKeys();
         this.keyButton._extendedKeys = this._extendedKeyboard;
     }
@@ -434,7 +434,7 @@ const Key = GObject.registerClass({
     _getExtendedKeys() {
         this._extendedKeyboard = new St.BoxLayout({
             style_class: 'key-container',
-            vertical: false,
+            orientation: Clutter.Orientation.HORIZONTAL,
         });
         for (let i = 0; i < this._extendedKeys.length; ++i) {
             let extendedKey = this._extendedKeys[i];
@@ -1017,7 +1017,7 @@ const EmojiSelection = GObject.registerClass({
             section.button = key;
         }
 
-        key = new Key({iconName: 'keyboard-hide-symbolic'});
+        key = new Key({iconName: 'osk-hide-symbolic'});
         key.keyButton.add_style_class_name('default-key');
         key.keyButton.add_style_class_name('hide-key');
         key.connect('released', () => {
@@ -1059,7 +1059,7 @@ export class KeyboardManager extends Signals.EventEmitter {
         this._a11yApplicationsSettings = new Gio.Settings({schema_id: A11Y_APPLICATIONS_SCHEMA});
         this._a11yApplicationsSettings.connect('changed', this._syncEnabled.bind(this));
 
-        this._seat = Clutter.get_default_backend().get_default_seat();
+        this._seat = global.stage.context.get_backend().get_default_seat();
         this._seat.connect('notify::touch-mode', this._syncEnabled.bind(this));
 
         this._lastDevice = null;
@@ -1185,7 +1185,7 @@ export const Keyboard = GObject.registerClass({
             // the locale setting in order to avoid flipping the
             // keyboard on RTL locales.
             text_direction: Clutter.TextDirection.LTR,
-            vertical: true,
+            orientation: Clutter.Orientation.VERTICAL,
         });
         this._focusInExtendedKeys = false;
         this._emojiActive = false;
@@ -1519,7 +1519,7 @@ export const Keyboard = GObject.registerClass({
                         this._setActiveLevel(key.level);
                         this._setLatched(
                             key.level === 1 &&
-                                key.iconName === 'keyboard-caps-lock-symbolic');
+                                key.iconName === 'osk-caps-lock-symbolic');
                     }
 
                     this._longPressed = false;
@@ -1540,7 +1540,7 @@ export const Keyboard = GObject.registerClass({
             }
 
             if (key.action === 'levelSwitch' &&
-                key.iconName === 'keyboard-shift-symbolic') {
+                key.iconName === 'osk-shift-symbolic') {
                 layout.shiftKeys.push(button);
                 if (key.level === 'shift') {
                     button.connect('long-press', () => {
@@ -1623,7 +1623,7 @@ export const Keyboard = GObject.registerClass({
             let key = layout.shiftKeys[i];
             key.setLatched(latched);
             key.iconName = latched
-                ? 'keyboard-caps-lock-symbolic' : 'keyboard-shift-symbolic';
+                ? 'osk-caps-lock-symbolic' : 'osk-shift-symbolic';
         }
     }
 
@@ -1788,7 +1788,7 @@ export const Keyboard = GObject.registerClass({
     }
 
     _animateShow() {
-        Meta.disable_unredirect_for_display(global.display);
+        global.compositor.disable_unredirect();
 
         if (this._focusWindow)
             this._animateWindow(this._focusWindow, true);
@@ -1844,7 +1844,7 @@ export const Keyboard = GObject.registerClass({
 
     _animateHideComplete() {
         Main.layoutManager.keyboardBox.hide();
-        Meta.enable_unredirect_for_display(global.display);
+        global.compositor.enable_unredirect();
     }
 
     gestureProgress(delta) {
@@ -1984,7 +1984,7 @@ class KeyboardController extends Signals.EventEmitter {
     constructor() {
         super();
 
-        let seat = Clutter.get_default_backend().get_default_seat();
+        let seat = global.stage.context.get_backend().get_default_seat();
         this._virtualDevice = seat.create_virtual_device(Clutter.InputDeviceType.KEYBOARD_DEVICE);
 
         this._inputSourceManager = InputSourceManager.getInputSourceManager();

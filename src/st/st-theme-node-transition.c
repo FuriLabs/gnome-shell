@@ -235,6 +235,7 @@ st_theme_node_transition_get_paint_box (StThemeNodeTransition *transition,
 
 static gboolean
 setup_framebuffers (StThemeNodeTransition *transition,
+                    CoglContext           *ctx,
                     ClutterPaintContext   *paint_context,
                     ClutterPaintNode      *node,
                     const ClutterActorBox *allocation,
@@ -243,14 +244,12 @@ setup_framebuffers (StThemeNodeTransition *transition,
   g_autoptr (ClutterPaintNode) old_layer_node = NULL;
   g_autoptr (ClutterPaintNode) new_layer_node = NULL;
   CoglPipeline *noop_pipeline;
-  CoglContext *ctx;
   guint width, height;
   GError *catch_error = NULL;
 
   /* template pipeline to avoid unnecessary shader compilation */
   static CoglPipeline *pipeline_template = NULL;
 
-  ctx = clutter_backend_get_cogl_context (clutter_get_default_backend ());
   width  = ceilf ((transition->offscreen_box.x2 - transition->offscreen_box.x1) * resource_scale);
   height = ceilf ((transition->offscreen_box.y2 - transition->offscreen_box.y1) * resource_scale);
 
@@ -291,8 +290,6 @@ setup_framebuffers (StThemeNodeTransition *transition,
     {
       if (G_UNLIKELY (pipeline_template == NULL))
         {
-          CoglContext *ctx =
-            clutter_backend_get_cogl_context (clutter_get_default_backend ());
           pipeline_template = cogl_pipeline_new (ctx);
 
           cogl_pipeline_set_layer_combine (pipeline_template, 0,
@@ -326,7 +323,7 @@ setup_framebuffers (StThemeNodeTransition *transition,
   clutter_paint_node_add_child (node, old_layer_node);
 
   st_theme_node_paint (transition->old_theme_node, &transition->old_paint_state,
-                       paint_context,
+                       ctx, paint_context,
                        old_layer_node, allocation, 255, resource_scale);
 
   new_layer_node = clutter_layer_node_new_to_framebuffer (transition->new_offscreen,
@@ -338,7 +335,7 @@ setup_framebuffers (StThemeNodeTransition *transition,
                                  transition->offscreen_box.x2,
                                  transition->offscreen_box.y2, 0.0, 1.0);
   st_theme_node_paint (transition->new_theme_node, &transition->new_paint_state,
-                       paint_context,
+                       ctx, paint_context,
                        new_layer_node, allocation, 255, resource_scale);
 
   g_clear_object (&noop_pipeline);
@@ -348,6 +345,7 @@ setup_framebuffers (StThemeNodeTransition *transition,
 
 void
 st_theme_node_transition_paint (StThemeNodeTransition *transition,
+                                CoglContext           *cogl_context,
                                 ClutterPaintContext   *paint_context,
                                 ClutterPaintNode      *node,
                                 ClutterActorBox       *allocation,
@@ -375,6 +373,7 @@ st_theme_node_transition_paint (StThemeNodeTransition *transition,
       calculate_offscreen_box (transition, allocation);
       transition->needs_setup = clutter_actor_box_get_area (&transition->offscreen_box) == 0 ||
                                 !setup_framebuffers (transition,
+                                                     cogl_context,
                                                      paint_context,
                                                      node,
                                                      allocation,

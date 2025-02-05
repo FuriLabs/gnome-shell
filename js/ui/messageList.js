@@ -10,10 +10,12 @@ import St from 'gi://St';
 
 import * as Main from './main.js';
 import * as MessageTray from './messageTray.js';
+import * as Mpris from './mpris.js';
 
 import * as Util from '../misc/util.js';
 import {formatTimeSpan} from '../misc/dateUtils.js';
 
+const MAX_NOTIFICATION_BUTTONS = 3;
 const MESSAGE_ANIMATION_TIME = 100;
 
 const DEFAULT_EXPAND_LINES = 6;
@@ -407,7 +409,9 @@ export const Message = GObject.registerClass({
             GLib.DateTime),
     },
     Signals: {
-        'close': {},
+        'close': {
+            flags: GObject.SignalFlags.RUN_LAST,
+        },
         'expanded': {},
         'unexpanded': {},
     },
@@ -425,7 +429,7 @@ export const Message = GObject.registerClass({
         this._useBodyMarkup = false;
 
         let vbox = new St.BoxLayout({
-            vertical: true,
+            orientation: Clutter.Orientation.VERTICAL,
             x_expand: true,
         });
         this.set_child(vbox);
@@ -462,7 +466,7 @@ export const Message = GObject.registerClass({
 
         const contentBox = new St.BoxLayout({
             style_class: 'message-content',
-            vertical: true,
+            orientation: Clutter.Orientation.VERTICAL,
             x_expand: true,
         });
         hbox.add_child(contentBox);
@@ -484,8 +488,6 @@ export const Message = GObject.registerClass({
             child: this._bodyLabel,
         });
         contentBox.add_child(this._bodyBin);
-
-        this.connect('destroy', this._onDestroy.bind(this));
 
         this._header.closeButton.connect('clicked', this.close.bind(this));
         this._header.closeButton.visible = this.canClose();
@@ -638,9 +640,6 @@ export const Message = GObject.registerClass({
         return false;
     }
 
-    _onDestroy() {
-    }
-
     vfunc_key_press_event(event) {
         let keysym = event.get_key_symbol();
 
@@ -653,6 +652,150 @@ export const Message = GObject.registerClass({
             }
         }
         return super.vfunc_key_press_event(event);
+    }
+});
+
+export const NotificationMessage = GObject.registerClass(
+class NotificationMessage extends Message {
+    constructor(notification) {
+        super(notification.source);
+
+        this.notification = notification;
+
+        notification.connectObject(
+            'action-added', (_, action) => this._addAction(action),
+            'action-removed', (_, action) => this._removeAction(action),
+            'destroy', () => {
+                this.notification = null;
+                if (!this._closed)
+                    this.close();
+            }, this);
+
+        notification.bind_property('title',
+            this, 'title',
+            GObject.BindingFlags.SYNC_CREATE);
+        notification.bind_property('body',
+            this, 'body',
+            GObject.BindingFlags.SYNC_CREATE);
+        notification.bind_property('use-body-markup',
+            this, 'use-body-markup',
+            GObject.BindingFlags.SYNC_CREATE);
+        notification.bind_property('datetime',
+            this, 'datetime',
+            GObject.BindingFlags.SYNC_CREATE);
+        notification.bind_property('gicon',
+            this, 'icon',
+            GObject.BindingFlags.SYNC_CREATE);
+
+        this._actions = new Map();
+        this.notification.actions.forEach(action => {
+            this._addAction(action);
+        });
+    }
+
+    on_close() {
+        this._closed = true;
+        this.notification?.destroy(MessageTray.NotificationDestroyedReason.DISMISSED);
+    }
+
+    vfunc_clicked() {
+        this.notification?.activate();
+    }
+
+    canClose() {
+        return true;
+    }
+
+    _addAction(action) {
+        if (!this._buttonBox) {
+            this._buttonBox = new St.BoxLayout({
+                x_expand: true,
+                style_class: 'notification-buttons-bin',
+            });
+            this.setActionArea(this._buttonBox);
+            global.focus_manager.add_group(this._buttonBox);
+        }
+
+        if (this._buttonBox.get_n_children() >= MAX_NOTIFICATION_BUTTONS)
+            return;
+
+        const button = new St.Button({
+            style_class: 'notification-button',
+            x_expand: true,
+            label: action.label,
+        });
+
+        button.connect('clicked', () => action.activate());
+
+        this._actions.set(action, button);
+        this._buttonBox.add_child(button);
+    }
+
+    _removeAction(action) {
+        this._actions.get(action)?.destroy();
+        this._actions.delete(action);
+    }
+});
+
+const MediaMessage = GObject.registerClass(
+class MediaMessage extends Message {
+    constructor(player) {
+        super(player.source);
+
+        this._player = player;
+        this.add_style_class_name('media-message');
+
+        this._prevButton = this.addMediaControl('media-skip-backward-symbolic',
+            () => {
+                this._player.previous();
+            });
+
+        this._playPauseButton = this.addMediaControl('',
+            () => {
+                this._player.playPause();
+            });
+
+        this._nextButton = this.addMediaControl('media-skip-forward-symbolic',
+            () => {
+                this._player.next();
+            });
+
+        this._player.connectObject('changed', this._update.bind(this), this);
+        this._update();
+    }
+
+    vfunc_clicked() {
+        this._player.raise();
+        Main.panel.closeCalendar();
+    }
+
+    _updateNavButton(button, sensitive) {
+        button.reactive = sensitive;
+    }
+
+    _update() {
+        let icon;
+        if (this._player.trackCoverUrl) {
+            const file = Gio.File.new_for_uri(this._player.trackCoverUrl);
+            icon = new Gio.FileIcon({file});
+        } else {
+            icon = new Gio.ThemedIcon({name: 'audio-x-generic-symbolic'});
+        }
+
+        this.set({
+            title: this._player.trackTitle,
+            body: this._player.trackArtists.join(', '),
+            icon,
+        });
+
+        let isPlaying = this._player.status === 'Playing';
+        let iconName = isPlaying
+            ? 'media-playback-pause-symbolic'
+            : 'media-playback-start-symbolic';
+        this._playPauseButton.child.icon_name = iconName;
+
+        this._updateNavButton(this._prevButton, this._player.canGoPrevious);
+        this._updateNavButton(this._nextButton, this._player.canGoNext);
     }
 });
 
@@ -677,13 +820,13 @@ export const MessageListSection = GObject.registerClass({
         super._init({
             style_class: 'message-list-section',
             clip_to_allocation: true,
-            vertical: true,
+            orientation: Clutter.Orientation.VERTICAL,
             x_expand: true,
         });
 
         this._list = new St.BoxLayout({
             style_class: 'message-list-section-list',
-            vertical: true,
+            orientation: Clutter.Orientation.VERTICAL,
         });
         this.add_child(this._list);
 
@@ -712,10 +855,6 @@ export const MessageListSection = GObject.registerClass({
 
     _onKeyFocusIn(messageActor) {
         this.emit('message-focused', messageActor);
-    }
-
-    get allowed() {
-        return true;
     }
 
     addMessage(message, animate) {
@@ -842,10 +981,6 @@ export const MessageListSection = GObject.registerClass({
         }
     }
 
-    _shouldShow() {
-        return !this.empty;
-    }
-
     _sync() {
         let messages = this._messages;
         let empty = messages.length === 0;
@@ -861,6 +996,101 @@ export const MessageListSection = GObject.registerClass({
             this.notify('can-clear');
         }
 
-        this.visible = this.allowed && this._shouldShow();
+        this.visible = !this.empty;
+    }
+});
+
+export const NotificationSection = GObject.registerClass(
+class NotificationSection extends MessageListSection {
+    _init() {
+        super._init();
+
+        this._nUrgent = 0;
+
+        Main.messageTray.connect('source-added', this._sourceAdded.bind(this));
+        Main.messageTray.getSources().forEach(source => {
+            this._sourceAdded(Main.messageTray, source);
+        });
+    }
+
+    _sourceAdded(tray, source) {
+        source.connectObject(
+            'notification-added', this._onNotificationAdded.bind(this),
+            'notification-removed', this._onNotificationRemoved.bind(this),
+            this);
+    }
+
+    _onNotificationAdded(source, notification) {
+        let message = new NotificationMessage(notification);
+
+        const isUrgent = notification.urgency === MessageTray.Urgency.CRITICAL;
+
+        notification.connectObject(
+            'notify::datetime', () => {
+                // The datetime property changes whenever the notification is updated
+                this.moveMessage(message, isUrgent ? 0 : this._nUrgent, this.mapped);
+            }, this);
+
+        if (isUrgent) {
+            // Keep track of urgent notifications to keep them on top
+            this._nUrgent++;
+        } else if (this.mapped) {
+            // Only acknowledge non-urgent notifications in case it
+            // has important actions that are inaccessible when not
+            // shown as banner
+            notification.acknowledged = true;
+        }
+
+        const index = isUrgent ? 0 : this._nUrgent;
+        this.addMessageAtIndex(message, index, this.mapped);
+    }
+
+    _onNotificationRemoved(source_, notification) {
+        if (notification.urgency === MessageTray.Urgency.CRITICAL)
+            this._nUrgent--;
+    }
+
+    vfunc_map() {
+        this._messages.forEach(message => {
+            if (message.notification.urgency !== MessageTray.Urgency.CRITICAL)
+                message.notification.acknowledged = true;
+        });
+        super.vfunc_map();
+    }
+});
+
+export const MediaSection = GObject.registerClass(
+class MediaSection extends MessageListSection {
+    constructor() {
+        super();
+        this._players = new Map();
+        this._mediaSource = new Mpris.MprisSource();
+
+        this._mediaSource.connectObject(
+            'player-added', (_, player) => this._addPlayer(player),
+            'player-removed', (_, player) => this._removePlayer(player),
+            this);
+
+        this._mediaSource.players.forEach(player => {
+            this._addPlayer(player);
+        });
+    }
+
+    _addPlayer(player) {
+        if (this._players.has(player))
+            throw new Error('Player was already added previously');
+
+        const message = new MediaMessage(player);
+        this._players.set(player, message);
+        this.addMessage(message, true);
+    }
+
+    _removePlayer(player) {
+        const message = this._players.get(player);
+
+        if (message)
+            this.removeMessage(message, true);
+
+        this._players.delete(player);
     }
 });

@@ -23,6 +23,8 @@
 #pragma once
 
 #include <clutter/clutter.h>
+#include <pango/pango.h>
+
 #include "st-border-image.h"
 #include "st-icon-colors.h"
 #include "st-shadow.h"
@@ -342,6 +344,7 @@ gboolean st_theme_node_paint_equal    (StThemeNode *node,
  */
 void st_theme_node_paint (StThemeNode            *node,
                           StThemeNodePaintState  *state,
+                          CoglContext            *cogl_context,
                           ClutterPaintContext    *paint_context,
                           ClutterPaintNode       *root,
                           const ClutterActorBox  *box,

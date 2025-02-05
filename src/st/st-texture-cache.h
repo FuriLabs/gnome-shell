@@ -25,8 +25,9 @@
 #error "Only <st/st.h> can be included directly.h"
 #endif
 
-#include <gio/gio.h>
+#include <cairo.h>
 #include <clutter/clutter.h>
+#include <gio/gio.h>
 
 #include <st/st-types.h>
 #include <st/st-theme-node.h>
@@ -43,20 +44,6 @@ typedef enum {
 
 StTextureCache* st_texture_cache_get_default (void);
 
-ClutterActor *
-st_texture_cache_load_sliced_image (StTextureCache *cache,
-                                    GFile          *file,
-                                    gint            grid_width,
-                                    gint            grid_height,
-                                    gint            paint_scale,
-                                    gfloat          resource_scale,
-                                    GFunc           load_callback,
-                                    gpointer        user_data);
-
-GIcon *
-st_texture_cache_load_cairo_surface_to_gicon (StTextureCache  *cache,
-                                              cairo_surface_t *surface);
-
 ClutterActor *st_texture_cache_load_gicon (StTextureCache *cache,
                                            StThemeNode    *theme_node,
                                            GIcon          *icon,
@@ -72,6 +59,7 @@ ClutterActor *st_texture_cache_load_file_async (StTextureCache    *cache,
                                                 gfloat             resource_scale);
 
 CoglTexture     *st_texture_cache_load_file_to_cogl_texture (StTextureCache *cache,
+                                                             CoglContext    *context,
                                                              GFile          *file,
                                                              gint            paint_scale,
                                                              gfloat          resource_scale);
