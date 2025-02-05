@@ -114,7 +114,6 @@ enum {
   PROP_WINDOW_MANAGER,
   PROP_SETTINGS,
   PROP_DATADIR,
-  PROP_IMAGEDIR,
   PROP_USERDATADIR,
   PROP_FOCUS_MANAGER,
   PROP_FRAME_TIMESTAMPS,
@@ -308,10 +307,10 @@ shell_global_get_property(GObject         *object,
       g_value_set_object (value, global->stage);
       break;
     case PROP_WINDOW_GROUP:
-      g_value_set_object (value, meta_get_window_group_for_display (global->meta_display));
+      g_value_set_object (value, meta_compositor_get_window_group (global->compositor));
       break;
     case PROP_TOP_WINDOW_GROUP:
-      g_value_set_object (value, meta_get_top_window_group_for_display (global->meta_display));
+      g_value_set_object (value, meta_compositor_get_top_window_group (global->compositor));
       break;
     case PROP_WINDOW_MANAGER:
       g_value_set_object (value, global->wm);
@@ -321,9 +320,6 @@ shell_global_get_property(GObject         *object,
       break;
     case PROP_DATADIR:
       g_value_set_string (value, global->datadir);
-      break;
-    case PROP_IMAGEDIR:
-      g_value_set_string (value, global->imagedir);
       break;
     case PROP_USERDATADIR:
       g_value_set_string (value, global->userdatadir);
@@ -619,11 +615,6 @@ shell_global_class_init (ShellGlobalClass *klass)
                          NULL,
                          G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
-  props[PROP_IMAGEDIR] =
-    g_param_spec_string ("imagedir", NULL, NULL,
-                         NULL,
-                         G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
-
   props[PROP_USERDATADIR] =
     g_param_spec_string ("userdatadir", NULL, NULL,
                          NULL,
@@ -652,7 +643,7 @@ shell_global_class_init (ShellGlobalClass *klass)
   props[PROP_FORCE_ANIMATIONS] =
     g_param_spec_boolean ("force-animations", NULL, NULL,
                           FALSE,
-                          G_PARAM_READWRITE  | G_PARAM_CONSTRUCT| G_PARAM_STATIC_STRINGS);
+                          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
   props[PROP_AUTOMATION_SCRIPT] =
     g_param_spec_object ("automation-script", NULL, NULL,
@@ -766,6 +757,17 @@ shell_global_set_stage_input_region (ShellGlobal *global,
 }
 
 /**
+ * shell_global_get_backend:
+ *
+ * Return value: (transfer none): The #MetaBackend
+ */
+MetaBackend *
+shell_global_get_backend (ShellGlobal *global)
+{
+  return global->backend;
+}
+
+/**
  * shell_global_get_context:
  *
  * Return value: (transfer none): The #MetaContext
@@ -824,7 +826,7 @@ shell_global_get_window_actors (ShellGlobal *global)
 
   g_return_val_if_fail (SHELL_IS_GLOBAL (global), NULL);
 
-  for (l = meta_get_window_actors (global->meta_display); l; l = l->next)
+  for (l = meta_compositor_get_window_actors (global->compositor); l; l = l->next)
     if (!meta_window_actor_is_destroyed (l->data))
       filtered = g_list_prepend (filtered, l->data);
 
@@ -998,7 +1000,7 @@ _shell_global_set_plugin (ShellGlobal *global,
   global->backend = meta_context_get_backend (context);
   global->workspace_manager = meta_display_get_workspace_manager (display);
 
-  global->stage = CLUTTER_STAGE (meta_get_stage_for_display (display));
+  global->stage = CLUTTER_STAGE (meta_backend_get_stage (global->backend));
 
   st_entry_set_cursor_func (entry_cursor_func, global);
   st_clipboard_set_selection (meta_display_get_selection (display));
@@ -1008,16 +1010,16 @@ _shell_global_set_plugin (ShellGlobal *global,
   g_signal_connect (global->stage, "notify::height",
                     G_CALLBACK (global_stage_notify_height), global);
 
-  clutter_threads_add_repaint_func_full (CLUTTER_REPAINT_FLAGS_PRE_PAINT,
-                                         global_stage_before_paint,
-                                         global, NULL);
+  clutter_threads_add_repaint_func (CLUTTER_REPAINT_FLAGS_PRE_PAINT,
+                                    global_stage_before_paint,
+                                    global, NULL);
 
   g_signal_connect (global->stage, "after-paint",
                     G_CALLBACK (global_stage_after_paint), global);
 
-  clutter_threads_add_repaint_func_full (CLUTTER_REPAINT_FLAGS_POST_PAINT,
-                                         global_stage_after_swap,
-                                         global, NULL);
+  clutter_threads_add_repaint_func (CLUTTER_REPAINT_FLAGS_POST_PAINT,
+                                    global_stage_after_swap,
+                                    global, NULL);
 
   shell_perf_log_define_event (shell_perf_log_get_default(),
                                "clutter.stagePaintStart",
@@ -1286,7 +1288,7 @@ shell_global_get_pointer (ShellGlobal         *global,
   MetaCursorTracker *tracker;
   graphene_point_t point;
 
-  tracker = meta_cursor_tracker_get_for_display (global->meta_display);
+  tracker = meta_backend_get_cursor_tracker (global->backend);
   meta_cursor_tracker_get_pointer (tracker, &point, &raw_mods);
 
   if (x)

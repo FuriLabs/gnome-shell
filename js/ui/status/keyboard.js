@@ -121,7 +121,9 @@ class InputSourceSwitcher extends SwitcherPopup.SwitcherList {
     }
 
     _addIcon(item) {
-        let box = new St.BoxLayout({vertical: true});
+        const box = new St.BoxLayout({
+            orientation: Clutter.Orientation.VERTICAL,
+        });
 
         const symbol = new St.Bin({
             style_class: 'input-source-switcher-symbol',
@@ -426,7 +428,7 @@ export class InputSourceManager extends Signals.EventEmitter {
         return true;
     }
 
-    _switchInputSource(display, window, binding) {
+    _switchInputSource(display, window, event, binding) {
         if (this._mruSources.length < 2)
             return;
 

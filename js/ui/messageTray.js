@@ -6,7 +6,6 @@ import Meta from 'gi://Meta';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 
-import * as Calendar from './calendar.js';
 import * as GnomeSession from '../misc/gnomeSession.js';
 import * as Layout from './layout.js';
 import * as Main from './main.js';
@@ -439,6 +438,16 @@ export class Notification extends GObject.Object {
         });
         this._actions.push(action);
         this.emit('action-added', action);
+        return action;
+    }
+
+    removeAction(action) {
+        const index = this._actions.indexOf(action);
+        if (index < 0)
+            throw new Error('Action was already removed previously');
+
+        this._actions.splice(index, 1);
+        this.emit('action-removed', action);
     }
 
     clearActions() {
@@ -1109,7 +1118,7 @@ export const MessageTray = GObject.registerClass({
             this.idleMonitor.add_user_active_watch(this._onIdleMonitorBecameActive.bind(this));
         }
 
-        this._banner = new Calendar.NotificationMessage(this._notification);
+        this._banner = new MessageList.NotificationMessage(this._notification);
         this._banner.can_focus = false;
         this._banner._header.expandButton.visible = false;
         this._banner.add_style_class_name('notification-banner');
@@ -1120,7 +1129,7 @@ export const MessageTray = GObject.registerClass({
         this._bannerBin.y = -this._banner.height;
         this.show();
 
-        Meta.disable_unredirect_for_display(global.display);
+        global.compositor.disable_unredirect();
         this._updateShowingNotification();
 
         let [x, y] = global.get_pointer();
@@ -1257,7 +1266,7 @@ export const MessageTray = GObject.registerClass({
 
         this._pointerInNotification = false;
         this._notificationRemoved = false;
-        Meta.enable_unredirect_for_display(global.display);
+        global.compositor.enable_unredirect();
 
         this._banner.destroy();
         this._banner = null;

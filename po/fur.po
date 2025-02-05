@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: video-subtitles master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-shell/issues/\n"
-"POT-Creation-Date: 2024-10-19 02:57+0000\n"
-"PO-Revision-Date: 2024-10-20 20:14+0000\n"
-"Last-Translator: Fabio Tomat <f.t.public@gmail.com>\n"
+"POT-Creation-Date: 2024-10-19 03:11+0000\n"
+"PO-Revision-Date: 2024-10-20 21:17+0000\n"
+"Last-Translator: Fabio T. <f.t.public@gmail.com>\n"
 "Language-Team: Friulian <f.t.public@gmail.com>\n"
 "Language: fur\n"
 "MIME-Version: 1.0\n"
@@ -655,7 +655,7 @@ msgid ""
 " data loss"
 msgstr ""
 "La interuzion sfuarçade e fasarà sierâ dutis lis aplicazions e i procès in "
-"esecuzion. Al è pussibil che chest al puarti a une pierdite di dâts"
+"esecuzion. Al è pussibil che chest al puarti a une pierdite di dâts."
 
 #: js/gdm/loginDialog.js:474
 msgid "Force Stop"
@@ -1173,7 +1173,7 @@ msgid ""
 "quit entirely"
 msgstr ""
 "Tu puedis sielzi se spietâ che al continui par un altri pôc o sfuarçâ dal "
-"dut la jessude de aplicazion"
+"dut la jessude de aplicazion."
 
 #: js/ui/closeDialog.js:71
 msgid "Force Quit"
@@ -1252,8 +1252,8 @@ msgid ""
 "Passwords or encryption keys are required to access the wireless network "
 "“%s”"
 msgstr ""
-"E covente une password o une clâf di cifradure par jentrâ te rêt cence fîi "
-"“%s”"
+"Si scugne meti une password o une clâf di cifradure par jentrâ te rêt cence "
+"fîi “%s”"
 
 #: js/ui/components/networkAgent.js:375 js/ui/components/networkAgent.js:748
 msgid "Wired 802.1X authentication"
@@ -1478,7 +1478,7 @@ msgstr "Instale inzornaments e torne invie"
 msgid "The system will restart automatically in %d second"
 msgid_plural "The system will restart automatically in %d seconds"
 msgstr[0] "Il sisteme al tornarà a inviâsi in automatic ca di %d secont"
-msgstr[1] "Il sisteme al tornarà a inviâsi in automatic ca di %d seconts"
+msgstr[1] "Il sisteme al tornarà a inviâsi in automatic ca di %d secont"
 
 #: js/ui/endSessionDialog.js:101
 msgctxt "button"
@@ -1496,11 +1496,11 @@ msgid "The system will automatically restart and install updates in %d second"
 msgid_plural ""
 "The system will automatically restart and install updates in %d seconds"
 msgstr[0] ""
-"Il sisteme al tornarà a inviâsi in automatic instalant i inzornaments ca di "
-"%d secont"
+"Il sisteme al tornarà a inviâsi in automatic instalant, i inzornaments, ca "
+"di %d secont"
 msgstr[1] ""
-"Il sisteme al tornarà a inviâsi in automatic instalant i inzornaments ca di "
-"%d seconts"
+"Il sisteme al tornarà a inviâsi in automatic, instalant i inzornaments, ca "
+"di %d seconts"
 
 #: js/ui/endSessionDialog.js:119 js/ui/endSessionDialog.js:140
 msgctxt "button"
@@ -1579,11 +1579,11 @@ msgstr "Instale estension"
 msgid "Download and install “%s” from extensions.gnome.org?"
 msgstr "Scjariâ e instalâ '%s' da extensions.gnome.org?"
 
-#: js/ui/extensionSystem.js:352
+#: js/ui/extensionSystem.js:354
 msgid "Extension Updates Available"
 msgstr "Inzonraments di estensions disponibii"
 
-#: js/ui/extensionSystem.js:353
+#: js/ui/extensionSystem.js:355
 msgid "Extension updates are ready to be installed"
 msgstr "I inzornaments des estensions a son pronts pe instalazion"
 
@@ -1905,8 +1905,7 @@ msgstr "Barcon"
 msgid "Window Selection"
 msgstr "Selezion dal barcon"
 
-#. Translators: entry in the window right click menu.
-#: js/ui/screenshot.js:1315 js/ui/status/system.js:111 js/ui/windowMenu.js:28
+#: js/ui/screenshot.js:1315 js/ui/status/system.js:111
 msgid "Take Screenshot"
 msgstr "Cature Videade"
 
@@ -2197,24 +2196,36 @@ msgstr "Tastiere"
 msgid "Disconnect"
 msgstr "Disconet"
 
-#: js/ui/status/bluetooth.js:263 js/ui/status/bluetooth.js:265
+#. Translators: %s is a device name like "MyPhone"
+#: js/ui/status/bluetooth.js:265 js/ui/status/network.js:354
+#, javascript-format
+msgid "Disconnect %s"
+msgstr "Disconet %s"
+
+#. Translators: %s is a device name like "MyPhone"
+#: js/ui/status/bluetooth.js:267 js/ui/status/network.js:356
+#, javascript-format
+msgid "Connect to %s"
+msgstr "Conet a %s"
+
+#: js/ui/status/bluetooth.js:274 js/ui/status/bluetooth.js:276
 msgid "Bluetooth"
 msgstr "Bluetooth"
 
-#: js/ui/status/bluetooth.js:288 js/ui/status/network.js:1909
+#: js/ui/status/bluetooth.js:299 js/ui/status/network.js:1909
 msgid "Bluetooth Settings"
 msgstr "Impostazions Bluetooth"
 
-#: js/ui/status/bluetooth.js:335
+#: js/ui/status/bluetooth.js:346
 msgid "No available or connected devices"
 msgstr "Nissun dispositîf disponibil o colegât"
 
-#: js/ui/status/bluetooth.js:336
+#: js/ui/status/bluetooth.js:347
 msgid "Turn on Bluetooth to connect to devices"
 msgstr "Ative il Bluetooth par colegâti ai dispositîfs"
 
 #. Translators: This is the number of connected bluetooth devices
-#: js/ui/status/bluetooth.js:400
+#: js/ui/status/bluetooth.js:411
 #, javascript-format
 msgid "%d Connected"
 msgid_plural "%d Connected"
@@ -2280,18 +2291,6 @@ msgstr "Garantìs l'acès"
 #: js/ui/status/network.js:62
 msgid "<unknown>"
 msgstr "<no cognossût>"
-
-#. Translators: %s is a device name like "MyPhone"
-#: js/ui/status/network.js:354
-#, javascript-format
-msgid "Disconnect %s"
-msgstr "Disconet %s"
-
-#. Translators: %s is a device name like "MyPhone"
-#: js/ui/status/network.js:356
-#, javascript-format
-msgid "Connect to %s"
-msgstr "Conet a %s"
 
 #: js/ui/status/network.js:1059
 msgid "Secure"
@@ -2375,7 +2374,7 @@ msgstr "Mobile"
 
 #: js/ui/status/network.js:1973
 msgid "Sign Into Wi–Fi Network"
-msgstr "Jentre intune rêt Wi–Fi"
+msgstr "Jentre tes rêts Wi–Fi"
 
 #: js/ui/status/network.js:2160
 msgid "Connection failed"
@@ -2612,6 +2611,12 @@ msgstr[1] ""
 msgid "%d × %d"
 msgstr "%d × %d"
 
+#. Translators: entry in the window right click menu.
+#: js/ui/windowMenu.js:28
+msgctxt "window-menu"
+msgid "Take Screenshot"
+msgstr "Cature Videade"
+
 #: js/ui/windowMenu.js:40
 msgid "Hide"
 msgstr "Plate"
@@ -2745,15 +2750,15 @@ msgstr ""
 "configurazion des preferencis des estensions e la rimozion o la "
 "disabilitazion des estensions che no son desideradis."
 
-#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:65
+#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:64
 msgid "Main Window"
 msgstr "Barcon principâl"
 
-#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:69
+#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:68
 msgid "Available Updates"
 msgstr "Inzornaments disponibii"
 
-#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:73
+#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:72
 msgid "Search View"
 msgstr "Viodude ricercje"
 
