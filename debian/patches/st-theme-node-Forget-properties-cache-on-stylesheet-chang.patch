@@ -39,7 +39,7 @@ index d95284e..2d5065f 100644
    CoglTexture *border_slices_texture;
    CoglPipeline *border_slices_pipeline;
 diff --git a/src/st/st-theme-node.c b/src/st/st-theme-node.c
-index 0817e51..1eb6925 100644
+index 4e0111d..8d81693 100644
 --- a/src/st/st-theme-node.c
 +++ b/src/st/st-theme-node.c
 @@ -75,6 +75,10 @@ maybe_free_properties (StThemeNode *node)
