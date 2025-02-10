@@ -1,4 +1,3 @@
-status-keyboard-Fix-execution-order-when-activating-sourc.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
 tray-icons/build-Add-explicit-dependency-on-Xfixes.patch
 tray-icons/tray-na-xembed-Use-XShape-to-remove-input-on-socket-windo.patch

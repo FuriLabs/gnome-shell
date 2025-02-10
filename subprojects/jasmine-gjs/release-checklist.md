@@ -7,9 +7,9 @@
 - [ ] Delete `lib/jasmine.js`.
 - [ ] Run `cd lib; ./update-jasmine.sh` to regenerate `lib/jasmine.js` from the new upstream version.
 - [ ] Resolve patch conflicts with the new upstream version if necessary.
-- [ ] If making a new major release, update `test/jasmineIntegrationTest.js` and `test/focusedSpecIntegrationTest.js` from `https://github.com/jasmine/jasmine.github.io/tree/master/_versions/<VERSION>/src`.
-      Currently we use `introduction.js`, `custom_equality.js`, `custom_matcher.js`, and `focused_specs.js`, but there may be new features that should be included as well.
-      Strip the documentation comments and the weird indentation.
+- [ ] If making a new major release, update `test/jasmineIntegrationTest.js` and `test/focusedSpecIntegrationTest.js` from the appropriate point in the history of `https://github.com/jasmine/jasmine.github.io/tree/d9b48e17/_tutorials/src`.
+      Currently we use `0_your_first_suite.js` and `custom_matcher.js`, but there may be new features that should be included as well.
+      Remove the browser feature detection and put the "long asynchronous suite" test inside a check for an environment variable.
 - [ ] If making a new major release, see if there are any new features that we can use to improve jasmine-gjs's own tests.
 - [ ] Run `meson test`.
 - [ ] Make a commit.
@@ -37,21 +37,11 @@
 - [ ] Extract the tarball.
 - [ ] Enter the directory and run `debuild -uc -us -S` to build a source package.
 
-## Releasing: OBS ##
+## Releasing ##
 
-- [ ] On [OBS](https://build.opensuse.org/project/repositories/home:ptomato), check if repositories should be enabled for any new Fedora, Ubuntu, Debian, or OpenSUSE distribution releases.
-- [ ] Copy `jasmine-gjs-<VERSION>.tar.xz`, `jasmine-gjs.spec`, `jasmine-gjs_<VERSION>.orig.tar.xz`, `jasmine-gjs_<VERSION>-1.debian.tar.xz`, and `jasmine-gjs_<VERSION>-1.dsc` into an OBS checkout of the `home:ptomato/jasmine-gjs` project.
-- [ ] Remove the files in the OBS checkout that are from the previous version.
-- [ ] Run `osc addremove`.
-- [ ] Run `osc commit`.
-- [ ] Check that all builds passed.
-
-## Releasing: Other ##
-
-- [ ] Add `jasmine-gjs-<VERSION>.tar.xz` to the `downloads` directory in the `ptomato/ptomato.github.com` repository.
-- [ ] Modify `opensource/jasmine/jasmine.md` to point to the newest version.
-- [ ] Make a commit.
-- [ ] Back in the `jasmine-gjs` repository, run `git tag <VERSION>`; version is just dotted numbers, e.g. `2.2.1`, no `v` or `Version`.
+- [ ] Run `git tag <VERSION>`; version is just dotted numbers, e.g. `2.2.1`, no `v` or `Version`.
 - [ ] Push the tag to GitHub.
 - [ ] Copy the release notes from `NEWS.md` into https://github.com/ptomato/jasmine-gjs/releases
 - [ ] Attach the tarball and the sha256sum from the `meson-dist` directory to the release notes.
+- [ ] Attach the RPM packages from `/path/to/rpmbuild/RPMS/` and `/path/to/rpmbuild/SRPMS` to the release notes.
+- [ ] Attach the Debian packages (`jasmine-gjs_<VERSION>-1_all.deb`, `jasmine-gjs_<VERSION>.orig.tar.xz`, `jasmine-gjs_<VERSION>-1.debian.tar.xz`, and `jasmine-gjs_<VERSION>-1.dsc`) to the release notes.

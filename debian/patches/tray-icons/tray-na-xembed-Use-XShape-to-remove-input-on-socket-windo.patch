@@ -26,10 +26,10 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/2012388
  3 files changed, 17 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index 4dcf06a..87192f4 100644
+index 7726e92..d7ef022 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -94,6 +94,7 @@ have_x11 = mutter_dep.get_variable('have_x11') == 'true'
+@@ -93,6 +93,7 @@ have_x11 = mutter_dep.get_variable('have_x11') == 'true'
  have_x11_client = mutter_dep.get_variable('have_x11_client') == 'true'
  if have_x11_client or have_x11
    x11_dep = dependency('x11')
@@ -50,7 +50,7 @@ index 2fc73f3..c91e940 100644
    include_directories: conf_inc
  )
 diff --git a/src/tray/na-xembed.c b/src/tray/na-xembed.c
-index 38362f2..51c6d96 100644
+index 75af21a..1be1e9d 100644
 --- a/src/tray/na-xembed.c
 +++ b/src/tray/na-xembed.c
 @@ -24,6 +24,7 @@

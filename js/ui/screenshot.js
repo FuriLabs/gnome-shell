@@ -38,7 +38,7 @@ class IconLabelButton extends St.Button {
         super._init(params);
 
         this._container = new St.BoxLayout({
-            vertical: true,
+            orientation: Clutter.Orientation.VERTICAL,
             style_class: 'icon-label-button-container',
         });
         this.set_child(this._container);
@@ -1061,9 +1061,7 @@ const ScreencastPhase = {
 export const ScreenshotUI = GObject.registerClass({
     Properties: {
         'screencast-in-progress': GObject.ParamSpec.boolean(
-            'screencast-in-progress',
-            'screencast-in-progress',
-            'screencast-in-progress',
+            'screencast-in-progress', null, null,
             GObject.ParamFlags.READABLE,
             false),
     },
@@ -1187,7 +1185,7 @@ export const ScreenshotUI = GObject.registerClass({
             style_class: 'screenshot-ui-panel',
             y_align: Clutter.ActorAlign.END,
             y_expand: true,
-            vertical: true,
+            orientation: Clutter.Orientation.VERTICAL,
             offscreen_redirect: Clutter.OffscreenRedirect.AUTOMATIC_FOR_OPACITY,
         });
         this._primaryMonitorBin.add_child(this._panel);
@@ -1422,7 +1420,7 @@ export const ScreenshotUI = GObject.registerClass({
             new Gio.Settings({schema_id: 'org.gnome.shell.keybindings'}),
             Meta.KeyBindingFlags.IGNORE_AUTOREPEAT | Meta.KeyBindingFlags.PER_WINDOW,
             restrictedModes,
-            async (_display, window, _binding) => {
+            async (_display, window, _event, _binding) => {
                 try {
                     const actor = window.get_compositor_private();
                     const content = actor.paint_to_content(null);
@@ -2873,19 +2871,19 @@ class SelectArea extends St.Widget {
 const RecolorEffect = GObject.registerClass({
     Properties: {
         color: GObject.ParamSpec.boxed(
-            'color', 'color', 'replacement color',
+            'color', null, null,
             GObject.ParamFlags.WRITABLE,
             Cogl.Color.$gtype),
         chroma: GObject.ParamSpec.boxed(
-            'chroma', 'chroma', 'color to replace',
+            'chroma', null, null,
             GObject.ParamFlags.WRITABLE,
             Cogl.Color.$gtype),
         threshold: GObject.ParamSpec.float(
-            'threshold', 'threshold', 'threshold',
+            'threshold', null, null,
             GObject.ParamFlags.WRITABLE,
             0.0, 1.0, 0.0),
         smoothing: GObject.ParamSpec.float(
-            'smoothing', 'smoothing', 'smoothing',
+            'smoothing', null, null,
             GObject.ParamFlags.WRITABLE,
             0.0, 1.0, 0.0),
     },
@@ -2995,7 +2993,7 @@ const RecolorEffect = GObject.registerClass({
             cogl_color_out.rgb =                                    \n
               mix(recolor_color, cogl_color_out.rgb, blend);        \n`;
 
-        this.add_glsl_snippet(Shell.SnippetHook.FRAGMENT, decl, src, false);
+        this.add_glsl_snippet(Cogl.SnippetHook.FRAGMENT, decl, src, false);
     }
 });
 

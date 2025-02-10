@@ -12,10 +12,10 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/2012388
  3 files changed, 23 insertions(+)
 
 diff --git a/src/shell-tray-icon.c b/src/shell-tray-icon.c
-index b242533..19e4570 100644
+index ec799d2..c5d7045 100644
 --- a/src/shell-tray-icon.c
 +++ b/src/shell-tray-icon.c
-@@ -266,6 +266,10 @@ shell_tray_icon_set_child (ShellTrayIcon *tray_icon,
+@@ -260,6 +260,10 @@ shell_tray_icon_set_child (ShellTrayIcon *tray_icon,
                        "window-created",
                        G_CALLBACK (shell_tray_icon_window_created_cb),
                        tray_icon);
@@ -27,7 +27,7 @@ index b242533..19e4570 100644
  
  /*
 diff --git a/src/tray/na-xembed.c b/src/tray/na-xembed.c
-index f238979..116cb8a 100644
+index d4c389c..be08d6d 100644
 --- a/src/tray/na-xembed.c
 +++ b/src/tray/na-xembed.c
 @@ -91,6 +91,7 @@ G_DEFINE_TYPE_WITH_PRIVATE (NaXembed, na_xembed, G_TYPE_OBJECT)
@@ -67,13 +67,13 @@ index f238979..116cb8a 100644
 +                  G_TYPE_NONE, 0);
 +
    props[PROP_X11_DISPLAY] =
-     g_param_spec_object ("x11-display",
-                          "x11-display",
+     g_param_spec_object ("x11-display", NULL, NULL,
+                          META_TYPE_X11_DISPLAY,
 diff --git a/src/tray/na-xembed.h b/src/tray/na-xembed.h
-index 9aed044..bae2645 100644
+index 271060d..801c6a6 100644
 --- a/src/tray/na-xembed.h
 +++ b/src/tray/na-xembed.h
-@@ -36,6 +36,7 @@ struct _NaXembedClass
+@@ -35,6 +35,7 @@ struct _NaXembedClass
  
    void (* plug_added) (NaXembed *xembed);
    void (* plug_removed) (NaXembed *xembed);

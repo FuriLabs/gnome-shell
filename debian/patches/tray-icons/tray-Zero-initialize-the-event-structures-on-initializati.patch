@@ -27,7 +27,7 @@ index 0911995..9ec6670 100644
    Window xwindow, xrootwindow;
    ClutterEventType event_type = clutter_event_type (event);
 diff --git a/src/tray/na-xembed.c b/src/tray/na-xembed.c
-index 116cb8a..4088322 100644
+index be08d6d..398669c 100644
 --- a/src/tray/na-xembed.c
 +++ b/src/tray/na-xembed.c
 @@ -115,9 +115,8 @@ xembed_send_message (NaXembed          *xembed,

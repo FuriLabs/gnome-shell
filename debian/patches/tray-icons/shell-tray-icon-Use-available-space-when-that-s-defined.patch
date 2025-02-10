@@ -13,7 +13,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/2012388
  3 files changed, 37 insertions(+)
 
 diff --git a/src/shell-tray-icon.c b/src/shell-tray-icon.c
-index 3eee5f5..e1ff1cd 100644
+index 3af5cc4..d4c5552 100644
 --- a/src/shell-tray-icon.c
 +++ b/src/shell-tray-icon.c
 @@ -185,6 +185,10 @@ shell_tray_icon_allocate (ClutterActor          *actor,
@@ -28,7 +28,7 @@ index 3eee5f5..e1ff1cd 100644
     */
    clutter_actor_get_transformed_position (actor, &wx, &wy);
 diff --git a/src/tray/na-xembed.c b/src/tray/na-xembed.c
-index 51c6d96..f238979 100644
+index 1be1e9d..d4c389c 100644
 --- a/src/tray/na-xembed.c
 +++ b/src/tray/na-xembed.c
 @@ -43,6 +43,8 @@ struct _NaXembedPrivate
@@ -61,7 +61,7 @@ index 51c6d96..f238979 100644
    XMoveResizeWindow (xdisplay,
                       priv->socket_window,
                       x, y,
-@@ -747,6 +756,10 @@ na_xembed_class_init (NaXembedClass *klass)
+@@ -745,6 +754,10 @@ na_xembed_class_init (NaXembedClass *klass)
  static void
  na_xembed_init (NaXembed *xembed)
  {
@@ -72,7 +72,7 @@ index 51c6d96..f238979 100644
  }
  
  void
-@@ -811,6 +824,22 @@ na_xembed_get_size (NaXembed *xembed,
+@@ -809,6 +822,22 @@ na_xembed_get_size (NaXembed *xembed,
      *height = priv->request_height;
  }
  
@@ -96,10 +96,10 @@ index 51c6d96..f238979 100644
  na_xembed_get_root_position (NaXembed *xembed,
                               int      *x,
 diff --git a/src/tray/na-xembed.h b/src/tray/na-xembed.h
-index f6b9bc0..9aed044 100644
+index 4466305..271060d 100644
 --- a/src/tray/na-xembed.h
 +++ b/src/tray/na-xembed.h
-@@ -59,6 +59,10 @@ void na_xembed_get_size (NaXembed *xembed,
+@@ -58,6 +58,10 @@ void na_xembed_get_size (NaXembed *xembed,
  			 int      *width,
  			 int      *height);
  

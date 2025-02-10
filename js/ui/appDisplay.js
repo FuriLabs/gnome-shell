@@ -58,25 +58,25 @@ const DIALOG_SHADE_HIGHLIGHT = new Cogl.Color({red: 0, green: 0, blue: 0, alpha:
 
 const DEFAULT_FOLDERS = {
     'Utilities': {
-        name: 'X-GNOME-Utilities.directory',
-        categories: ['X-GNOME-Utilities'],
+        name: 'X-GNOME-Shell-Utilities.directory',
         apps: [
-            'gnome-abrt.desktop',
-            'gnome-system-log.desktop',
-            'nm-connection-editor.desktop',
-            'org.gnome.baobab.desktop',
-            'org.gnome.Connections.desktop',
-            'org.gnome.DejaDup.desktop',
-            'org.gnome.Dictionary.desktop',
-            'org.gnome.DiskUtility.desktop',
-            'org.gnome.Evince.desktop',
-            'org.gnome.FileRoller.desktop',
-            'org.gnome.fonts.desktop',
-            'org.gnome.Loupe.desktop',
-            'org.gnome.seahorse.Application.desktop',
-            'org.gnome.tweaks.desktop',
-            'org.gnome.Usage.desktop',
-            'vinagre.desktop',
+            // Sorted by name as shown in menus, not filename
+            'nm-connection-editor.desktop', // Advanced Network Configuration
+            'org.gnome.DejaDup.desktop', // Backups
+            'org.gnome.Characters.desktop', // Characters
+            'org.gnome.Connections.desktop', // Connections
+            'org.gnome.DiskUtility.desktop', // Disks
+            'org.gnome.baobab.desktop', // Disk Usage Analyzer
+            'org.gnome.Evince.desktop', // Document Viewer
+            'org.gnome.FileRoller.desktop', // File Roller
+            'org.gnome.font-viewer.desktop', // Fonts
+            'org.gnome.Loupe.desktop', // Image Viewer
+            'org.gnome.Logs.desktop', // Logs
+            'org.freedesktop.MalcontentControl.desktop', // Parental Controls
+            'org.gnome.seahorse.Application.desktop', // Passwords and Keys
+            'org.freedesktop.GnomeAbrt.desktop', // Problem Reporting
+            'org.gnome.tweaks.desktop', // Tweaks
+            'org.gnome.Usage.desktop', // Usage
         ],
     },
     'YaST': {
@@ -159,7 +159,7 @@ function _findBestFolderName(apps) {
 export const AppGrid = GObject.registerClass({
     Properties: {
         'indicators-padding': GObject.ParamSpec.boxed('indicators-padding',
-            'Indicators padding', 'Indicators padding',
+            null, null,
             GObject.ParamFlags.READWRITE,
             Clutter.Margin.$gtype),
     },
@@ -484,7 +484,7 @@ var BaseAppView = GObject.registerClass({
     GTypeFlags: GObject.TypeFlags.ABSTRACT,
     Properties: {
         'gesture-modes': GObject.ParamSpec.flags(
-            'gesture-modes', 'gesture-modes', 'gesture-modes',
+            'gesture-modes', null, null,
             GObject.ParamFlags.READWRITE | GObject.ParamFlags.CONSTRUCT_ONLY,
             Shell.ActionMode, Shell.ActionMode.OVERVIEW),
     },
@@ -610,7 +610,7 @@ var BaseAppView = GObject.registerClass({
         scrollContainer._delegate = this;
 
         this._box = new St.BoxLayout({
-            vertical: true,
+            orientation: Clutter.Orientation.VERTICAL,
             x_expand: true,
             y_expand: true,
         });
@@ -1446,7 +1446,8 @@ class AppDisplay extends BaseAppView {
             });
             child.set_string('name', name);
             child.set_boolean('translate', true);
-            child.set_strv('categories', categories);
+            if (categories)
+                child.set_strv('categories', categories);
             if (apps)
                 child.set_strv('apps', apps);
         }
@@ -2526,7 +2527,7 @@ export const AppFolderDialog = GObject.registerClass({
             y_expand: true,
             x_align: Clutter.ActorAlign.CENTER,
             y_align: Clutter.ActorAlign.CENTER,
-            vertical: true,
+            orientation: Clutter.Orientation.VERTICAL,
         });
 
         this.child = new St.Bin({

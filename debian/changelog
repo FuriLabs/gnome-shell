@@ -1,3 +1,67 @@
+gnome-shell (48~beta-1ubuntu1) UNRELEASED; urgency=medium
+
+  * Merge with Debian.
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 10 Feb 2025 14:12:17 -0500
+
+gnome-shell (48~beta-1) experimental; urgency=medium
+
+  * New upstream release
+  * Bump minimum gdm3, gsettings-desktop-schemas & mutter
+  * Have gnome-shell-common install X-GNOME-Shell-Utilities.directory
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Wed, 05 Feb 2025 08:30:06 -0500
+
+gnome-shell (47.3-1) unstable; urgency=medium
+
+  * New upstream release
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 16 Jan 2025 17:40:28 -0500
+
+gnome-shell (47.2-2) unstable; urgency=medium
+
+  [ Jeremy Bícha ]
+  * Add Depends: gjs for screen lock keyboard shortcut (Closes: #1089745)
+
+  [ Simon McVittie ]
+  * d/salsa-ci.yml: Use recommended recipe
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 13 Dec 2024 19:00:26 -0500
+
+gnome-shell (47.2-1) unstable; urgency=medium
+
+  [ Jeremy Bícha ]
+  * New upstream release
+
+  [ Daniel van Vugt ]
+  * Restore st-theme-node-Forget-properties-cache-on-stylesheet-chang.patch
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 25 Nov 2024 14:12:49 -0500
+
+gnome-shell (47.1-2) unstable; urgency=medium
+
+  * Team upload
+  * Release to unstable
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 06 Nov 2024 15:05:15 +0000
+
+gnome-shell (47.1-1) experimental; urgency=medium
+
+  * Team upload
+  * New upstream release
+  * d/upstream/metadata: Canonicalize case of repository URL
+  * Refresh patch series.
+    Drop "status/keyboard: Fix execution order when activating source"
+    which was fixed differently after upstream review.
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 30 Oct 2024 10:52:18 +0000
+
+gnome-shell (47.0-3) unstable; urgency=medium
+
+  * Release to unstable (Closes: #1060684)
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 04 Oct 2024 19:14:09 -0400
+
 gnome-shell (47.0-2ubuntu3.1) plucky; urgency=medium
 
   * No-change upload to plucky

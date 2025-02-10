@@ -38,7 +38,7 @@ build_container() {
   local debug_packages=(
     glib2 # makes gdb much more useful
   )
-  buildah run $build_cntr dnf config-manager --set-disabled '*-openh264'
+  buildah run $build_cntr dnf config-manager setopt '*-openh264.enabled=0'
   buildah run $build_cntr dnf install -y "${extra_packages[@]}"
   buildah run $build_cntr dnf debuginfo-install -y "${debug_packages[@]}"
   buildah run $build_cntr dnf clean all
@@ -57,7 +57,10 @@ build_container() {
   local update_mutter=$(mktemp)
   cat > $update_mutter <<-EOF
 	#!/bin/sh
-	/usr/libexec/install-meson-project.sh https://gitlab.gnome.org/GNOME/mutter.git $MUTTER_BRANCH
+	TOOLBOX=\$(. /run/.containerenv; echo \$name)
+	/usr/libexec/install-meson-project.sh \\
+	  --destdir=/ --destdir=/var/lib/extensions/\$TOOLBOX \\
+	  https://gitlab.gnome.org/GNOME/mutter.git $MUTTER_BRANCH
 	EOF
   buildah copy --chmod 755 $build_cntr $update_mutter /usr/bin/update-mutter
 

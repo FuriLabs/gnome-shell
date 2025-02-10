@@ -9,18 +9,18 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-shell master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-shell/issues/\n"
-"POT-Creation-Date: 2024-08-06 15:18+0000\n"
-"PO-Revision-Date: 2024-08-09 15:26+0300\n"
-"Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
+"POT-Creation-Date: 2024-11-29 06:28+0000\n"
+"PO-Revision-Date: 2025-01-06 14:17+0200\n"
+"Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
 "Language-Team: Hebrew\n"
 "Language: he\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n==1 ? 0 : n==2 ? 1 : n>10 && n%10==0 ? "
-"2 : 3)\n"
+"2 : 3);\n"
 "X-Poedit-SourceCharset: UTF-8\n"
-"X-Generator: Gtranslator 46.1\n"
+"X-Generator: Poedit 3.5\n"
 
 #: data/50-gnome-shell-launchers.xml:6
 msgid "Launchers"
@@ -99,7 +99,7 @@ msgid "Open new window of pinned app 9"
 msgstr "פתיחת חלון חדש ביישום המוצמד 9"
 
 #. Translators: name of the folder under ~/Pictures for screenshots.
-#: data/50-gnome-shell-screenshots.xml:6 js/ui/screenshot.js:2274
+#: data/50-gnome-shell-screenshots.xml:6 js/ui/screenshot.js:2272
 msgid "Screenshots"
 msgstr "צילומי מסך"
 
@@ -123,7 +123,7 @@ msgstr "צילום של חלון"
 msgid "Record a screencast interactively"
 msgstr "הסרטת המסך באופן הידודי"
 
-#: data/50-gnome-shell-system.xml:6 js/ui/messageTray.js:1298
+#: data/50-gnome-shell-system.xml:6 js/ui/messageTray.js:1308
 msgid "System"
 msgstr "מערכת"
 
@@ -542,6 +542,10 @@ msgstr "הרחבות"
 msgid "Network Login"
 msgstr "חיבורי רשת"
 
+#: data/X-GNOME-Shell-Utilities.directory.desktop.in:3
+msgid "Utilities"
+msgstr "כלי עזר"
+
 #: js/dbusServices/extensions/ui/extension-error-page.ui:15
 #: subprojects/extensions-app/data/ui/extensions-window.ui:275
 msgid "Something’s gone wrong"
@@ -568,15 +572,15 @@ msgstr "עמוד הבית"
 msgid "Visit extension homepage"
 msgstr "לבקר באתר ההרחבה"
 
-#: js/gdm/authPrompt.js:151 js/gdm/loginDialog.js:465
-#: js/ui/audioDeviceSelection.js:66 js/ui/components/networkAgent.js:113
+#: js/gdm/authPrompt.js:155 js/gdm/loginDialog.js:466
+#: js/ui/audioDeviceSelection.js:60 js/ui/components/networkAgent.js:113
 #: js/ui/components/polkitAgent.js:144 js/ui/endSessionDialog.js:437
 #: js/ui/extensionDownloader.js:276 js/ui/shellMountOperation.js:382
 #: js/ui/shellMountOperation.js:392
 msgid "Cancel"
 msgstr "ביטול"
 
-#: js/gdm/authPrompt.js:317 js/ui/components/networkAgent.js:213
+#: js/gdm/authPrompt.js:321 js/ui/components/networkAgent.js:213
 #: js/ui/components/networkAgent.js:233 js/ui/components/networkAgent.js:265
 #: js/ui/components/networkAgent.js:298 js/ui/components/networkAgent.js:337
 #: js/ui/components/networkAgent.js:350 js/ui/components/polkitAgent.js:286
@@ -589,7 +593,7 @@ msgid "Choose Session"
 msgstr "בחירת הפעלה"
 
 #. Translators: is running for <username>
-#: js/gdm/loginDialog.js:423
+#: js/gdm/loginDialog.js:424
 #, javascript-format
 msgid ""
 "Remote login is not possible because a remote session is already running for "
@@ -600,7 +604,7 @@ msgstr ""
 "מרחוק, יש לצאת מההפעלה המרוחקת או לכפות את עצירתה."
 
 #. Translators: is running for <username>
-#: js/gdm/loginDialog.js:426
+#: js/gdm/loginDialog.js:427
 #, javascript-format
 msgid ""
 "Login is not possible because a remote session is already running for %s. To "
@@ -610,7 +614,7 @@ msgstr ""
 "מההפעלה המרוחקת או לכפות את עצירתה."
 
 #. Translators: is running for <username>
-#: js/gdm/loginDialog.js:429
+#: js/gdm/loginDialog.js:430
 #, javascript-format
 msgid ""
 "Remote login is not possible because a local session is already running for "
@@ -621,7 +625,7 @@ msgstr ""
 "מרחוק, יש לצאת מההפעלה המקומית או לכפות את עצירתה."
 
 #. Translators: is running for <username>
-#: js/gdm/loginDialog.js:432
+#: js/gdm/loginDialog.js:433
 #, javascript-format
 msgid ""
 "Login is not possible because a session is already running for %s. To login, "
@@ -630,45 +634,45 @@ msgstr ""
 "כניסה אינה אפשרית כיוון שכבר יש הפעלה עבור %s. כדי להיכנס, יש לצאת מההפעלה "
 "או לכפות את עצירתה."
 
-#: js/gdm/loginDialog.js:441
+#: js/gdm/loginDialog.js:442
 msgid "Session Already Running"
 msgstr "ההפעלה כבר רצה"
 
-#: js/gdm/loginDialog.js:453
+#: js/gdm/loginDialog.js:454
 msgid ""
 "Force stopping will quit any running apps and processes, and could result in "
 "data loss"
 msgstr "אילוץ העצירה יסגור יישומים ותהליכים פעילים ויכול להוביל לאבדן נתונים"
 
-#: js/gdm/loginDialog.js:473
+#: js/gdm/loginDialog.js:474
 msgid "Force Stop"
 msgstr "אילוץ עצירה"
 
-#: js/gdm/loginDialog.js:541
+#: js/gdm/loginDialog.js:542
 msgid "Not listed?"
 msgstr "לא רשום?"
 
 #. Translators: this message is shown below the username entry field
 #. to clue the user in on how to login to the local network realm
-#: js/gdm/loginDialog.js:1009
+#: js/gdm/loginDialog.js:1010
 #, javascript-format
 msgid "(e.g., user or %s)"
 msgstr "(משתמש או %s לדוגמה)"
 
-#: js/gdm/loginDialog.js:1014 js/ui/components/networkAgent.js:257
+#: js/gdm/loginDialog.js:1015 js/ui/components/networkAgent.js:257
 #: js/ui/components/networkAgent.js:292 js/ui/components/networkAgent.js:326
 msgid "Username"
 msgstr "שם משתמש"
 
-#: js/gdm/loginDialog.js:1080
+#: js/gdm/loginDialog.js:1081
 msgid "Login Attempt Timed Out"
 msgstr "הזמן שהוקצב לניסיון הכניסה תם"
 
-#: js/gdm/loginDialog.js:1081
+#: js/gdm/loginDialog.js:1082
 msgid "Login took too long, please try again"
 msgstr "הכניסה למערכת ארכה זמן רב מדי, נא לנסות שוב"
 
-#: js/gdm/loginDialog.js:1426
+#: js/gdm/loginDialog.js:1431
 msgid "Login Window"
 msgstr "חלון כניסה"
 
@@ -687,6 +691,205 @@ msgstr "(או להחליק אצבע על הקורא)"
 #: js/gdm/util.js:732
 msgid "(or place finger on reader)"
 msgstr "(או לשים אצבע על הקורא)"
+
+#: js/misc/breakManager.js:765
+msgid "Break complete sound"
+msgstr "צליל סיום הפסקה"
+
+#: js/misc/breakManager.js:957
+#, javascript-format
+msgid "%d second"
+msgid_plural "%d seconds"
+msgstr[0] "שנייה"
+msgstr[1] "שתי שניות"
+msgstr[2] "%d שניות"
+msgstr[3] "%d שניות"
+
+#: js/misc/breakManager.js:963
+#, javascript-format
+msgid "%d minute"
+msgid_plural "%d minutes"
+msgstr[0] "דקה"
+msgstr[1] "שתי דקות"
+msgstr[2] "%d דקות"
+msgstr[3] "%d דקות"
+
+#: js/misc/breakManager.js:969
+#, javascript-format
+msgid "%d hour"
+msgid_plural "%d hours"
+msgstr[0] "שעה"
+msgstr[1] "שעתיים"
+msgstr[2] "%d שעות"
+msgstr[3] "%d שעות"
+
+#: js/misc/breakManager.js:975
+#, javascript-format
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] "יום"
+msgstr[1] "יומיים"
+msgstr[2] "%d ימים"
+msgstr[3] "%d ימים"
+
+#. %s will be replaced with a string that describes a time interval, such as “2 minutes”, “40 seconds” or “1 hour”
+#: js/misc/breakManager.js:1058
+#, javascript-format
+msgid "It will be time for a break in %s"
+msgid_plural "It will be time for a break in %s"
+msgstr[0] "הזמן לצאת להפסקה יגיע בעוד %s"
+msgstr[1] "הזמן לצאת להפסקה יגיע בעוד %s"
+msgstr[2] "הזמן לצאת להפסקה יגיע בעוד %s"
+msgstr[3] "הזמן לצאת להפסקה יגיע בעוד %s"
+
+#: js/misc/breakManager.js:1066
+msgid "Movement Break Soon"
+msgstr "הפסקת תנועה בקרוב"
+
+#: js/misc/breakManager.js:1069
+msgid "Eyesight Break Soon"
+msgstr "הפסקת מבט בקרוב"
+
+#: js/misc/breakManager.js:1072
+msgid "Break Soon"
+msgstr "הפסקה בקרוב"
+
+#: js/misc/breakManager.js:1116
+msgid "Movement Break in Progress"
+msgstr "בהפסקת תנועה"
+
+#. %s will be replaced with a string that describes a time interval, such as “2 minutes”, “40 seconds” or “1 hour”
+#: js/misc/breakManager.js:1119
+#, javascript-format
+msgid "Continue moving around for %s"
+msgid_plural "Continue moving around for %s"
+msgstr[0] "להמשיך לנוע סביב למשך %s"
+msgstr[1] "להמשיך לנוע סביב למשך %s"
+msgstr[2] "להמשיך לנוע סביב למשך %s"
+msgstr[3] "להמשיך לנוע סביב למשך %s"
+
+#: js/misc/breakManager.js:1125
+msgid "Eyesight Break in Progress"
+msgstr "בהפסקת תנועה"
+
+#. %s will be replaced with a string that describes a time interval, such as “2 minutes”, “40 seconds” or “1 hour”
+#: js/misc/breakManager.js:1128
+#, javascript-format
+msgid "Continue looking away for %s"
+msgid_plural "Continue looking away for %s"
+msgstr[0] "להמשיך להסיט את המבט למשך %s"
+msgstr[1] "להמשיך להסיט את המבט למשך %s"
+msgstr[2] "להמשיך להסיט את המבט למשך %s"
+msgstr[3] "להמשיך להסיט את המבט למשך %s"
+
+#: js/misc/breakManager.js:1134
+msgid "Break in Progress"
+msgstr "בזמן הפסקה"
+
+#. %s will be replaced with a string that describes a time interval, such as “2 minutes”, “40 seconds” or “1 hour”
+#: js/misc/breakManager.js:1137
+#, javascript-format
+msgid "%s left in your break"
+msgid_plural "%s left in your break"
+msgstr[0] "נותרה %s להפסקה שלך"
+msgstr[1] "נותרו %s להפסקה שלך"
+msgstr[2] "נותרו %s להפסקה שלך"
+msgstr[3] "נותרו %s להפסקה שלך"
+
+#: js/misc/breakManager.js:1176
+msgid "Time for a Movement Break"
+msgstr "הגיע הזמן להפסקת תנועה"
+
+#. %s will be replaced with a string that describes a time interval, such as “2 minutes”, “40 seconds” or “1 hour”
+#: js/misc/breakManager.js:1179
+#, javascript-format
+msgid "Take a break from the device and move around for %s"
+msgid_plural "Take a break from the device and move around for %s"
+msgstr[0] "נא לצאת להפסקה מהמכשיר ולנוע במרחב למשך %s"
+msgstr[1] "נא לצאת להפסקה מהמכשיר ולנוע במרחב למשך %s"
+msgstr[2] "נא לצאת להפסקה מהמכשיר ולנוע במרחב למשך %s"
+msgstr[3] "נא לצאת להפסקה מהמכשיר ולנוע במרחב למשך %s"
+
+#: js/misc/breakManager.js:1185
+msgid "Time for an Eyesight Break"
+msgstr "הגיע הזמן להפסקת מבט"
+
+#. %s will be replaced with a string that describes a time interval, such as “2 minutes”, “40 seconds” or “1 hour”
+#: js/misc/breakManager.js:1188
+#, javascript-format
+msgid ""
+"Take a break from the screen. Look at least 6 meters away for at least %s"
+msgid_plural ""
+"Take a break from the screen. Look at least 6 meters away for at least %s"
+msgstr[0] "נא לצאת להפסקה מהמסך. להביט למרחק של 6 מטרים לפחות למשך %s לפחות"
+msgstr[1] "נא לצאת להפסקה מהמסך. להביט למרחק של 6 מטרים לפחות למשך %s לפחות"
+msgstr[2] "נא לצאת להפסקה מהמסך. להביט למרחק של 6 מטרים לפחות למשך %s לפחות"
+msgstr[3] "נא לצאת להפסקה מהמסך. להביט למרחק של 6 מטרים לפחות למשך %s לפחות"
+
+#: js/misc/breakManager.js:1194
+msgid "Time for a Break"
+msgstr "הגיע הזמן להפסקה"
+
+#. %s will be replaced with a string that describes a time interval, such as “2 minutes”, “40 seconds” or “1 hour”
+#: js/misc/breakManager.js:1197
+#, javascript-format
+msgid "It’s time to take a break. Get away from the device for %s!"
+msgid_plural "It’s time to take a break. Get away from the device for %s!"
+msgstr[0] "הגיע הזמן לצאת להפסקה. להתרחק מהמכשיר למשך %s!"
+msgstr[1] "הגיע הזמן לצאת להפסקה. להתרחק מהמכשיר למשך %s!"
+msgstr[2] "הגיע הזמן לצאת להפסקה. להתרחק מהמכשיר למשך %s!"
+msgstr[3] "הגיע הזמן לצאת להפסקה. להתרחק מהמכשיר למשך %s!"
+
+#. %s will be replaced with a string that describes a time interval, such as “2 minutes”, “40 seconds” or “1 hour”
+#: js/misc/breakManager.js:1219
+#, javascript-format
+msgid "You were due to take a break %s ago"
+msgid_plural "You were due to take a break %s ago"
+msgstr[0] "איחרת לצאת להפסקה לפני %s"
+msgstr[1] "איחרת לצאת להפסקה לפני %s"
+msgstr[2] "איחרת לצאת להפסקה לפני %s"
+msgstr[3] "איחרת לצאת להפסקה לפני %s"
+
+#: js/misc/breakManager.js:1225
+msgid "Break Overdue"
+msgstr "ההפסקה חלפה"
+
+#. %s will be replaced with a string that describes a time interval, such as “2 minutes”, “40 seconds” or “1 hour”
+#: js/misc/breakManager.js:1239
+#, javascript-format
+msgid "There is %s remaining in your break"
+msgid_plural "There are %s remaining in your break"
+msgstr[0] "נותרה %s להפסקה שלך"
+msgstr[1] "נותרו %s להפסקה שלך"
+msgstr[2] "נותרו %s להפסקה שלך"
+msgstr[3] "נותרו %s להפסקה שלך"
+
+#: js/misc/breakManager.js:1245
+msgid "Break Interrupted"
+msgstr "ההפסקה נקטעה"
+
+#: js/misc/breakManager.js:1316
+msgid "Delay"
+msgstr "השהיה"
+
+#: js/misc/breakManager.js:1337 js/ui/welcomeDialog.js:61
+msgid "Skip"
+msgstr "דילוג"
+
+#: js/misc/breakManager.js:1358
+msgid "Take"
+msgstr "לקחת"
+
+#. Translators: This is a notification to warn the user that a
+#. screen time break will start shortly.
+#: js/misc/breakManager.js:1421
+#, javascript-format
+msgid "Break in %d second"
+msgid_plural "Break in %d seconds"
+msgstr[0] "הפסקה בעוד שנייה"
+msgstr[1] "הפסקה בעוד שתי שניות"
+msgstr[2] "הפסקה בעוד %d שניות"
+msgstr[3] "הפסקה בעוד %d שניות"
 
 #. Translators: The name of the power-off action in search
 #: js/misc/systemActions.js:91
@@ -955,7 +1158,7 @@ msgstr "לדחות"
 msgid "Allow"
 msgstr "לאפשר"
 
-#: js/ui/appDisplay.js:1769
+#: js/ui/appDisplay.js:1766
 msgid "Unnamed Folder"
 msgstr "תיקייה ללא שם"
 
@@ -969,7 +1172,7 @@ msgstr "‏%s הוצמד לחלונית היישומים."
 msgid "%s has been unpinned from the dash."
 msgstr "‏%s הוסר מחלונית היישומים."
 
-#: js/ui/appFavorites.js:208 js/ui/main.js:281
+#: js/ui/appFavorites.js:208 js/ui/main.js:290
 msgid "Undo"
 msgstr "ביטול"
 
@@ -1010,19 +1213,19 @@ msgstr "הפעלה בשימוש כרטיס מסך נפרד"
 msgid "Select Audio Device"
 msgstr "בחירת התקן שמע"
 
-#: js/ui/audioDeviceSelection.js:61 js/ui/status/volume.js:81
+#: js/ui/audioDeviceSelection.js:67 js/ui/status/volume.js:81
 msgid "Sound Settings"
 msgstr "הגדרות שמע"
 
-#: js/ui/audioDeviceSelection.js:74
+#: js/ui/audioDeviceSelection.js:75
 msgid "Headphones"
 msgstr "אזניות"
 
-#: js/ui/audioDeviceSelection.js:76
+#: js/ui/audioDeviceSelection.js:77
 msgid "Headset"
 msgstr "אזניות עם מיקרופון"
 
-#: js/ui/audioDeviceSelection.js:78 js/ui/status/volume.js:356
+#: js/ui/audioDeviceSelection.js:79 js/ui/status/volume.js:366
 msgid "Microphone"
 msgstr "מיקרופון"
 
@@ -1186,10 +1389,10 @@ msgid "The installed udisks version does not support the PIM setting"
 msgstr "גרסת udisks המותקנת לא תומכת בהגדרת PIM"
 
 # msgid_plural "%d Connected"
+# msgid_plural "%d connected"
 #. Translators: %s is the name of a partition on a external drive
 #: js/ui/components/autorunManager.js:189
 #, javascript-format
-# msgid_plural "%d connected"
 msgid "“%s” connected"
 msgstr "‏„%s” מחובר"
 
@@ -1207,7 +1410,7 @@ msgid ""
 "Alternatively you can connect by pushing the “WPS” button on your router"
 msgstr "לחלופין ניתן להתחבר על ידי לחיצה על כפתור ה־„WPS” בנתב שלך"
 
-#: js/ui/components/networkAgent.js:107 js/ui/status/bluetooth.js:245
+#: js/ui/components/networkAgent.js:107 js/ui/status/bluetooth.js:246
 #: js/ui/status/network.js:360 js/ui/status/network.js:444
 msgid "Connect"
 msgstr "התחברות"
@@ -1576,11 +1779,11 @@ msgstr "התקנת הרחבות"
 msgid "Download and install “%s” from extensions.gnome.org?"
 msgstr "הורדה והתקנה של „%s” מ־extensions.gnome.org?"
 
-#: js/ui/extensionSystem.js:352
+#: js/ui/extensionSystem.js:354
 msgid "Extension Updates Available"
 msgstr "עדכוני הרחבות זמינים"
 
-#: js/ui/extensionSystem.js:353
+#: js/ui/extensionSystem.js:355
 msgid "Extension updates are ready to be installed"
 msgstr "עדכוני הרחבות מוכנים להתקנה"
 
@@ -1661,7 +1864,7 @@ msgstr "כיבוי"
 msgid "Leave Off"
 msgstr "להשאיר כבוי"
 
-#: js/ui/keyboard.js:180 js/ui/status/keyboard.js:897
+#: js/ui/keyboard.js:180 js/ui/status/keyboard.js:899
 msgid "Keyboard Settings"
 msgstr "הגדרות מקלדת"
 
@@ -1719,19 +1922,19 @@ msgstr "צפייה במקור"
 msgid "Web Page"
 msgstr "דף אינטרנט"
 
-#: js/ui/main.js:277
+#: js/ui/main.js:286
 msgid "System was put in unsafe mode"
 msgstr "המערכת הועברה למצב בלתי בטוח"
 
-#: js/ui/main.js:278
+#: js/ui/main.js:287
 msgid "Apps now have unrestricted access"
 msgstr "ליישומים יש עכשיו גישה בלתי מוגבלת"
 
-#: js/ui/main.js:338
+#: js/ui/main.js:347
 msgid "Logged in as a privileged user"
 msgstr "מחובר כמשתמש בעל הרשאות מיוחדות"
 
-#: js/ui/main.js:339
+#: js/ui/main.js:348
 msgid ""
 "Running a session as a privileged user should be avoided for security "
 "reasons. If possible, you should log in as a normal user."
@@ -1739,11 +1942,11 @@ msgstr ""
 "יש להימנע מהרצת הפעלה כמשתמש בעל הרשאות מיוחדות מסיבות אבטחה. אם אפשרי, יש "
 "להתחבר כמשתמש רגיל."
 
-#: js/ui/main.js:387
+#: js/ui/main.js:396
 msgid "Screen Lock disabled"
 msgstr "מסך נעילה מושבת"
 
-#: js/ui/main.js:388
+#: js/ui/main.js:397
 msgid "Screen Locking requires the GNOME display manager"
 msgstr "מסך נעילה דורש הרצת מנהל תצוגה של GNOME"
 
@@ -1843,7 +2046,7 @@ msgstr "מערכת"
 msgid "Top Bar"
 msgstr "הסרגל העליון"
 
-#: js/ui/quickSettings.js:188
+#: js/ui/quickSettings.js:189 js/ui/quickSettings.js:341
 msgid "Open menu"
 msgstr "פתיחת תפריט"
 
@@ -1875,125 +2078,124 @@ msgstr "לא ניתן לנעול"
 msgid "Lock was blocked by an app"
 msgstr "הנעילה נחסמה ע״י יישום"
 
-#: js/ui/screenshot.js:1252
+#: js/ui/screenshot.js:1250
 msgid "Selection"
 msgstr "בחירה"
 
-#: js/ui/screenshot.js:1262
+#: js/ui/screenshot.js:1260
 msgid "Area Selection"
 msgstr "בחירת אזור"
 
-#: js/ui/screenshot.js:1267
+#: js/ui/screenshot.js:1265
 msgid "Screen"
 msgstr "מסך"
 
-#: js/ui/screenshot.js:1277
+#: js/ui/screenshot.js:1275
 msgid "Screen Selection"
 msgstr "בחירת מסך"
 
-#: js/ui/screenshot.js:1282
+#: js/ui/screenshot.js:1280
 msgid "Window"
 msgstr "חלון"
 
-#: js/ui/screenshot.js:1292
+#: js/ui/screenshot.js:1290
 msgid "Window Selection"
 msgstr "בחירת חלון"
 
-#. Translators: entry in the window right click menu.
-#: js/ui/screenshot.js:1317 js/ui/status/system.js:111 js/ui/windowMenu.js:28
+#: js/ui/screenshot.js:1315 js/ui/status/system.js:111
 msgid "Take Screenshot"
 msgstr "צילום המסך"
 
 # msgctxt "search-result"
-#: js/ui/screenshot.js:1333
+#: js/ui/screenshot.js:1331
 msgid "Record Screen"
 msgstr "הקלטת מסך"
 
 #. Translators: since this string refers to an action,
 #. it needs to be phrased as a verb.
-#: js/ui/screenshot.js:1350
+#: js/ui/screenshot.js:1348
 msgid "Capture"
 msgstr "לכידה"
 
-#: js/ui/screenshot.js:1372
+#: js/ui/screenshot.js:1370
 msgid "Show Pointer"
 msgstr "הצגת הסמן"
 
 #. Translators: this is the folder where recorded
 #. screencasts are stored.
-#: js/ui/screenshot.js:1996
+#: js/ui/screenshot.js:1994
 msgid "Screencasts"
 msgstr "הקלטות מסך"
 
 #. Translators: this is a filename used for screencast
 #. * recording, where "%d" and "%t" date and time, e.g.
 #. * "Screencast From 07-17-2013 10:00:46 PM"
-#: js/ui/screenshot.js:2001
+#: js/ui/screenshot.js:1999
 #, no-c-format
 msgid "Screencast From %d %t"
 msgstr "הקלטת מסך מתאריך %d %t"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2047
+#: js/ui/screenshot.js:2045
 msgid "Screencast recorded"
 msgstr "המסך הוקלט"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2060
+#: js/ui/screenshot.js:2058
 msgid "Screencast failed to start"
 msgstr "הפעלת הקלטת המסך נכשלה"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2066
+#: js/ui/screenshot.js:2064
 msgid "Screencast ended: Out of disk space"
 msgstr "הקלטת המסך הסתיימה: נגמר המקום בכונן"
 
 #. We can encourage user to try again on service crashes since the
 #. recorder will auto-blocklist the pipeline that crashed.
 #. Translators: notification title.
-#: js/ui/screenshot.js:2072
+#: js/ui/screenshot.js:2070
 msgid "Screencast ended unexpectedly, please try again"
 msgstr "הקלטת המסך הסתיימה במפתיע, נא לנסות שוב"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2075
+#: js/ui/screenshot.js:2073
 msgid "Screencast ended unexpectedly"
 msgstr "הקלטת המסך הסתיימה באופן בלתי צפוי"
 
 #. Translators: notification source name.
-#: js/ui/screenshot.js:2085 js/ui/screenshot.js:2327
+#: js/ui/screenshot.js:2083 js/ui/screenshot.js:2325
 msgid "Screenshot"
 msgstr "צילום מסך"
 
 #. Translators: notification body when a screencast was recorded.
-#: js/ui/screenshot.js:2092
+#: js/ui/screenshot.js:2090
 msgid "Click here to view the video."
 msgstr "לחיצה כאן מנגנת את הווידאו."
 
 #. Translators: button on the screencast notification.
 #. Translators: button on the screenshot notification.
-#: js/ui/screenshot.js:2100 js/ui/screenshot.js:2343
+#: js/ui/screenshot.js:2098 js/ui/screenshot.js:2341
 msgid "Show in Files"
 msgstr "הצגה בקבצים"
 
 #. Translators: this is the name of the file that the screenshot is
 #. saved to. The placeholder is a timestamp, e.g. "2017-05-21 12-24-03".
-#: js/ui/screenshot.js:2287
+#: js/ui/screenshot.js:2285
 #, javascript-format
 msgid "Screenshot From %s"
 msgstr "צילום מסך מתאריך %s"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2333
+#: js/ui/screenshot.js:2331
 msgid "Screenshot captured"
 msgstr "המסך צולם"
 
 #. Translators: notification body when a screenshot was captured.
-#: js/ui/screenshot.js:2335
+#: js/ui/screenshot.js:2333
 msgid "You can paste the image from the clipboard."
 msgstr "אפשר להדביק את התמונה מלוח הגזירים."
 
-#: js/ui/screenshot.js:2391 js/ui/screenshot.js:2555
+#: js/ui/screenshot.js:2389 js/ui/screenshot.js:2553
 msgid "Screenshot taken"
 msgstr "המסך צולם"
 
@@ -2170,44 +2372,56 @@ msgstr[3] "‏%d יישומים פועלים ברקע"
 msgid "Keyboard Brightness"
 msgstr "בהירות מקלדת"
 
-#: js/ui/status/backlight.js:79
+#: js/ui/status/backlight.js:87
 msgid "Off"
 msgstr "כבוי"
 
-#: js/ui/status/backlight.js:80
+#: js/ui/status/backlight.js:88
 msgid "Low"
 msgstr "נמוכה"
 
-#: js/ui/status/backlight.js:81
+#: js/ui/status/backlight.js:89
 msgid "High"
 msgstr "גבוהה"
 
-#: js/ui/status/backlight.js:147 js/ui/status/keyboard.js:879
+#: js/ui/status/backlight.js:162 js/ui/status/keyboard.js:881
 msgid "Keyboard"
 msgstr "מקלדת"
 
-#: js/ui/status/bluetooth.js:245 js/ui/status/network.js:360
+#: js/ui/status/bluetooth.js:246 js/ui/status/network.js:360
 msgid "Disconnect"
 msgstr "ניתוק"
 
-#: js/ui/status/bluetooth.js:262 js/ui/status/bluetooth.js:264
+#. Translators: %s is a device name like "MyPhone"
+#: js/ui/status/bluetooth.js:265 js/ui/status/network.js:354
+#, javascript-format
+msgid "Disconnect %s"
+msgstr "ניתוק %s"
+
+#. Translators: %s is a device name like "MyPhone"
+#: js/ui/status/bluetooth.js:267 js/ui/status/network.js:356
+#, javascript-format
+msgid "Connect to %s"
+msgstr "התחברות אל %s"
+
+#: js/ui/status/bluetooth.js:274 js/ui/status/bluetooth.js:276
 msgid "Bluetooth"
 msgstr "בלוטות'"
 
-#: js/ui/status/bluetooth.js:287 js/ui/status/network.js:1900
+#: js/ui/status/bluetooth.js:299 js/ui/status/network.js:1909
 msgid "Bluetooth Settings"
 msgstr "הגדרות בלוטות׳"
 
-#: js/ui/status/bluetooth.js:334
+#: js/ui/status/bluetooth.js:346
 msgid "No available or connected devices"
 msgstr "אין התקנים זמינים או מחוברים"
 
-#: js/ui/status/bluetooth.js:335
+#: js/ui/status/bluetooth.js:347
 msgid "Turn on Bluetooth to connect to devices"
 msgstr "יש להפעיל בלוטות׳ כדי להתחבר להתקנים"
 
 #. Translators: This is the number of connected bluetooth devices
-#: js/ui/status/bluetooth.js:389
+#: js/ui/status/bluetooth.js:411
 #, javascript-format
 msgid "%d Connected"
 msgid_plural "%d Connected"
@@ -2244,7 +2458,7 @@ msgstr "לחיצה משנית"
 msgid "Dwell Click"
 msgstr "לחיצה בהשהיה"
 
-#: js/ui/status/keyboard.js:896
+#: js/ui/status/keyboard.js:898
 msgid "Show Keyboard Layout"
 msgstr "הצגת פריסת המקלדת"
 
@@ -2274,45 +2488,33 @@ msgstr "אפשור גישה"
 msgid "<unknown>"
 msgstr "<לא ידוע>"
 
-#. Translators: %s is a device name like "MyPhone"
-#: js/ui/status/network.js:354
-#, javascript-format
-msgid "Disconnect %s"
-msgstr "ניתוק %s"
-
-#. Translators: %s is a device name like "MyPhone"
-#: js/ui/status/network.js:356
-#, javascript-format
-msgid "Connect to %s"
-msgstr "התחברות אל %s"
-
-#: js/ui/status/network.js:1050
+#: js/ui/status/network.js:1059
 msgid "Secure"
 msgstr "מאובטחת"
 
-#: js/ui/status/network.js:1050
+#: js/ui/status/network.js:1059
 msgid "Not secure"
 msgstr "לא מאובטחת"
 
-#: js/ui/status/network.js:1051
+#: js/ui/status/network.js:1060
 #, javascript-format
 msgid "Signal strength %s%%"
 msgstr "עוצמת קליטה %s%%"
 
 #. translators: The first placeholder is the network name, the second and indication whether it is secure, and the last the signal strength indication
-#: js/ui/status/network.js:1053
+#: js/ui/status/network.js:1062
 #, javascript-format
 msgid "%s, %s, %s"
 msgstr "%s, %s, %s"
 
 #. Translators: %s is a network identifier
-#: js/ui/status/network.js:1155
+#: js/ui/status/network.js:1164
 #, javascript-format
 msgid "%s Hotspot"
 msgstr "נקודה חמה %s"
 
 # msgid_plural "%d Connected"
-#: js/ui/status/network.js:1426
+#: js/ui/status/network.js:1435
 #, javascript-format
 msgid "%d connected"
 msgid_plural "%d connected"
@@ -2321,61 +2523,61 @@ msgstr[1] "‫שניים התחברו"
 msgstr[2] "‫%d התחברו"
 msgstr[3] "‫‫%d התחברו"
 
-#: js/ui/status/network.js:1524 js/ui/status/network.js:1540
+#: js/ui/status/network.js:1533 js/ui/status/network.js:1549
 msgid "VPN"
 msgstr "VPN"
 
-#: js/ui/status/network.js:1525
+#: js/ui/status/network.js:1534
 msgid "VPN Settings"
 msgstr "הגדרות VPN"
 
-#: js/ui/status/network.js:1785
+#: js/ui/status/network.js:1794
 msgid "Wi–Fi"
 msgstr "רשת אלחוטית"
 
-#: js/ui/status/network.js:1787
+#: js/ui/status/network.js:1796
 msgid "All Networks"
 msgstr "כל הרשתות"
 
-#: js/ui/status/network.js:1884
+#: js/ui/status/network.js:1893
 msgid "Wired Connections"
 msgstr "התחברויות קוויות"
 
-#: js/ui/status/network.js:1885
+#: js/ui/status/network.js:1894
 msgid "Wired Settings"
 msgstr "הגדרות רשת קווית"
 
-#: js/ui/status/network.js:1899
+#: js/ui/status/network.js:1908
 msgid "Bluetooth Tethers"
 msgstr "קישרת בלוטות׳"
 
 #. Translators: "Tether" from "Bluetooth Tether"
-#: js/ui/status/network.js:1906
+#: js/ui/status/network.js:1915
 msgid "Tether"
 msgstr "קישרת"
 
-#: js/ui/status/network.js:1919
+#: js/ui/status/network.js:1928
 msgid "Mobile Connections"
 msgstr "התחברויות ניידות"
 
-#: js/ui/status/network.js:1921
+#: js/ui/status/network.js:1930
 msgid "Mobile Broadband Settings"
 msgstr "הגדרות פס־רחב נייד"
 
 #. Translators: "Mobile" from "Mobile Broadband"
-#: js/ui/status/network.js:1930
+#: js/ui/status/network.js:1939
 msgid "Mobile"
 msgstr "נייד"
 
-#: js/ui/status/network.js:1964
+#: js/ui/status/network.js:1973
 msgid "Sign Into Wi–Fi Network"
 msgstr "התחברות לרשת אלחוטית"
 
-#: js/ui/status/network.js:2151
+#: js/ui/status/network.js:2160
 msgid "Connection failed"
 msgstr "ההתחברות נכשלה"
 
-#: js/ui/status/network.js:2152
+#: js/ui/status/network.js:2161
 msgid "Activation of network connection failed"
 msgstr "הפעלת חיבור הרשת נכשלה"
 
@@ -2490,15 +2692,15 @@ msgstr "ביטול ההשתקה"
 msgid "Mute"
 msgstr "השתקה"
 
-#: js/ui/status/volume.js:286
+#: js/ui/status/volume.js:293
 msgid "Volume"
 msgstr "עצמה"
 
-#: js/ui/status/volume.js:302
+#: js/ui/status/volume.js:309
 msgid "Sound Output"
 msgstr "פלט שמע"
 
-#: js/ui/status/volume.js:374
+#: js/ui/status/volume.js:384
 msgid "Sound Input"
 msgstr "קלט שמע"
 
@@ -2566,10 +2768,6 @@ msgstr "ברוכים הבאים אל ‏‎%s‎‎"
 msgid "If you want to learn your way around, check out the tour"
 msgstr "אם ברצונך ללמוד ולהכיר את הסביבה שלך, כדאי להעיף מבט בסיור"
 
-#: js/ui/welcomeDialog.js:61
-msgid "Skip"
-msgstr "דילוג"
-
 #: js/ui/welcomeDialog.js:66
 msgid "Take Tour"
 msgstr "אקח את הסיור"
@@ -2608,6 +2806,12 @@ msgstr[3] "‫שינויי הגדרות ישוחזרו בעוד %d שניות"
 #, javascript-format
 msgid "%d × %d"
 msgstr "%d × %d"
+
+#. Translators: entry in the window right click menu.
+#: js/ui/windowMenu.js:28
+msgctxt "window-menu"
+msgid "Take Screenshot"
+msgstr "צילום המסך"
 
 #: js/ui/windowMenu.js:40
 msgid "Hide"
@@ -2673,41 +2877,41 @@ msgstr "הזזה לצג שמימין"
 msgid "Close"
 msgstr "סגירה"
 
-#: src/main.c:529 subprojects/extensions-tool/src/main.c:336
+#: src/main.c:512 subprojects/extensions-tool/src/main.c:336
 msgid "Print version"
 msgstr "Print version"
 
-#: src/main.c:535
+#: src/main.c:518
 msgid "Mode used by GDM for login screen"
 msgstr "המצב בו GDM יעשה שימוש לצורך מסך הכניסה"
 
-#: src/main.c:541
+#: src/main.c:524
 msgid "Use a specific mode, e.g. “gdm” for login screen"
 msgstr "שימוש במצב מסוים, לדוגמה: „gdm“ למסך הכניסה"
 
-#: src/main.c:547
+#: src/main.c:530
 msgid "List possible modes"
 msgstr "הצגת המצבים האפשריים"
 
-#: src/main.c:553
+#: src/main.c:536
 msgid "Force animations to be enabled"
 msgstr "לכפות הפעלת הנפשות"
 
-#: src/shell-app.c:252
+#: src/shell-app.c:253
 msgctxt "program"
 msgid "Unknown"
 msgstr "לא ידוע"
 
-#: src/shell-app.c:503
+#: src/shell-app.c:504
 #, c-format
 msgid "Failed to launch “%s”"
 msgstr "אירע כשל בטעינת „%s”"
 
-#: src/shell-keyring-prompt.c:764
+#: src/shell-keyring-prompt.c:752
 msgid "Passwords do not match"
 msgstr "הססמאות אינן תואמות"
 
-#: src/shell-keyring-prompt.c:772
+#: src/shell-keyring-prompt.c:760
 msgid "Password cannot be blank"
 msgstr "הססמה אינה יכולה להישאר ריקה"
 
@@ -2715,12 +2919,12 @@ msgstr "הססמה אינה יכולה להישאר ריקה"
 msgid "Authentication dialog was dismissed by the user"
 msgstr "המשתמש בחר להתעלם מתיבת דו־שיח האימות"
 
-#: src/st/st-icon-theme.c:1865
+#: src/st/st-icon-theme.c:1859
 #, c-format
 msgid "Icon '%s' not present in theme %s"
 msgstr "Icon '%s' not present in theme %s"
 
-#: src/st/st-icon-theme.c:3454 src/st/st-icon-theme.c:3757
+#: src/st/st-icon-theme.c:3452 src/st/st-icon-theme.c:3755
 msgid "Failed to load icon"
 msgstr "טעינת הסמל נכשלה"
 
@@ -2729,11 +2933,11 @@ msgid "Manage your GNOME Extensions"
 msgstr "ניהול הרחבות GNOME שלך"
 
 #. developer_name tag deprecated with Appstream 1.0
-#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:19
+#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:20
 msgid "The GNOME Project"
 msgstr "מיזם GNOME"
 
-#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:51
+#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:52
 msgid ""
 "GNOME Extensions handles updating extensions, configuring extension "
 "preferences and removing or disabling unwanted extensions."
@@ -2825,33 +3029,33 @@ msgstr[1] "שתי הרחבות תעודכנה בכניסה הבאה למערכת
 msgstr[2] "‏%d הרחבות תעודכנה בכניסה הבאה למערכת."
 msgstr[3] "‫‏%d הרחבות תעודכנה בכניסה הבאה למערכת."
 
-#: subprojects/extensions-app/data/ui/extension-row.ui:22
+#: subprojects/extensions-app/data/ui/extension-row.ui:13
 msgid "Error Details"
 msgstr "פרטי שגיאה"
 
-#: subprojects/extensions-app/data/ui/extension-row.ui:62
+#: subprojects/extensions-app/data/ui/extension-row.ui:51
 msgid "Updates Details"
 msgstr "פרטי עדכון"
 
 # msgid_plural "%d extensions will be updated on next login."
-#: subprojects/extensions-app/data/ui/extension-row.ui:72
+#: subprojects/extensions-app/data/ui/extension-row.ui:68
 msgid ""
 "A new version of this extension is ready and will be loaded on next login."
 msgstr "גרסה חדשה של הרחבה זו מוכנה ותיטען בכניסה הבאה למערכת."
 
-#: subprojects/extensions-app/data/ui/extension-row.ui:104
+#: subprojects/extensions-app/data/ui/extension-row.ui:100
 msgid "Extension Details"
 msgstr "פרטי הרחבה"
 
-#: subprojects/extensions-app/data/ui/extension-row.ui:192
+#: subprojects/extensions-app/data/ui/extension-row.ui:188
 msgid "_Website"
 msgstr "_אתר אינטרנט"
 
-#: subprojects/extensions-app/data/ui/extension-row.ui:219
+#: subprojects/extensions-app/data/ui/extension-row.ui:215
 msgid "_Settings"
 msgstr "ה_גדרות"
 
-#: subprojects/extensions-app/data/ui/extension-row.ui:246
+#: subprojects/extensions-app/data/ui/extension-row.ui:242
 msgid "_Remove…"
 msgstr "_הסרה…"
 
@@ -3730,9 +3934,6 @@ msgstr "צלילי מערכת"
 
 #~ msgid "Add to Favorites"
 #~ msgstr "הוספה למועדפים"
-
-#~ msgid "Screen Recording in Progress"
-#~ msgstr "המסך מוקלט"
 
 #~ msgid "Stop"
 #~ msgstr "עצירה"
@@ -4860,9 +5061,6 @@ msgstr "צלילי מערכת"
 
 #~ msgid "Clock Preferences"
 #~ msgstr "העדפות השעון"
-
-#~ msgid "Show seco_nds"
-#~ msgstr "הצגת ש_ניות"
 
 #~ msgid "_12 hour format"
 #~ msgstr "מבנה _12 שעות"

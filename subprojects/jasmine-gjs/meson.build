@@ -1,4 +1,4 @@
-project('jasmine-gjs', version: '3.10.1', license: 'MIT',
+project('jasmine-gjs', version: '3.99.1', license: 'MIT',
     meson_version: '>= 0.58.0')
 
 gjs_dep = dependency('gjs-1.0', required: false)
@@ -33,7 +33,7 @@ config.set('PACKAGE_VERSION', meson.project_version())
 jasmine = configure_file(configuration: config, input: 'bin/jasmine.in',
     output: 'jasmine', install: not meson.is_subproject(), install_dir: 'bin')
 
-jasmine_runner = configure_file(configuration: config,
+configure_file(configuration: config,
     input: 'bin/jasmine-runner.in', output: 'jasmine-runner',
     install: not meson.is_subproject(),
     install_dir: pkglibexecdir)
@@ -70,14 +70,15 @@ endif
 # Tests
 
 tests = [
+    '0_your_first_suite',
+    'custom_matcher',
+
     'commandSpec',
     'configSpec',
     'consoleReporterSpec',
     'defaultReporterSpec',
-    'focusedSpecIntegrationTest',
     'importerSpec',
     'jasmineBootSpec',
-    'jasmineIntegrationTest',
     'junitReporterSpec',
     'optionsSpec',
     'tapReporterSpec',

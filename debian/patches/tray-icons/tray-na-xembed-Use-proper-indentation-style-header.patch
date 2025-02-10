@@ -9,7 +9,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/2012388
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/tray/na-xembed.c b/src/tray/na-xembed.c
-index 4088322..46c613c 100644
+index 398669c..4ef3666 100644
 --- a/src/tray/na-xembed.c
 +++ b/src/tray/na-xembed.c
 @@ -1,4 +1,4 @@
