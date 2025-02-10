@@ -12,10 +12,10 @@ Forwarded: not-needed
  2 files changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 1106acc..d2ad166 100644
+index 0861ce1..d28d06f 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
-@@ -587,7 +587,7 @@ export function reloadThemeResource() {
+@@ -615,7 +615,7 @@ export function reloadThemeResource() {
  
  /** @private */
  function _loadIcons() {

@@ -19,10 +19,10 @@ commits will add support for mechanisms that support other authentication
  3 files changed, 254 insertions(+), 14 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 0de2871..431a4b5 100644
+index 13f8557..21df951 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -498,7 +498,10 @@ export const LoginDialog = GObject.registerClass({
+@@ -500,7 +500,10 @@ export const LoginDialog = GObject.registerClass({
          this._gdmClient = new Gdm.Client();
  
          try {
@@ -35,7 +35,7 @@ index 0de2871..431a4b5 100644
          }
  
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index d3d79ee..7e6c7e1 100644
+index dc87dc3..ae085349 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -23,6 +23,7 @@ Gio._promisify(Gdm.UserVerifierProxy.prototype,
@@ -59,7 +59,7 @@ index d3d79ee..7e6c7e1 100644
  export const PASSWORD_AUTHENTICATION_KEY = 'enable-password-authentication';
  export const FINGERPRINT_AUTHENTICATION_KEY = 'enable-fingerprint-authentication';
  export const SMARTCARD_AUTHENTICATION_KEY = 'enable-smartcard-authentication';
-@@ -43,6 +48,13 @@ export const ALLOWED_FAILURES_KEY = 'allowed-failures';
+@@ -45,6 +50,13 @@ export const ALLOWED_FAILURES_KEY = 'allowed-failures';
  export const LOGO_KEY = 'logo';
  export const DISABLE_USER_LIST_KEY = 'disable-user-list';
  
@@ -73,7 +73,7 @@ index d3d79ee..7e6c7e1 100644
  // Give user 48ms to read each character of a PAM message
  const USER_READ_TIME = 48;
  const FINGERPRINT_SERVICE_PROXY_TIMEOUT = 5000;
-@@ -149,6 +161,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -151,6 +163,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._activeServices = new Set();
          this._unavailableServices = new Set();
          this._activeServices = new Set();
@@ -81,7 +81,7 @@ index d3d79ee..7e6c7e1 100644
          this._pendingMechanisms = new Map();
  
          this._credentialManagers = {};
-@@ -237,6 +250,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -239,6 +252,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                  this._userVerifierChoiceList.run_dispose();
                  this._userVerifierChoiceList = null;
              }
@@ -92,7 +92,7 @@ index d3d79ee..7e6c7e1 100644
          }
      }
  
-@@ -273,7 +290,20 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -275,7 +292,20 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      async answerQuery(serviceName, answer) {
          try {
              await this._handlePendingMessages();
@@ -114,7 +114,7 @@ index d3d79ee..7e6c7e1 100644
          } catch (e) {
              if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
                  logError(e);
-@@ -535,6 +565,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -537,6 +567,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._verificationFailed(serviceName, false);
      }
  
@@ -133,7 +133,7 @@ index d3d79ee..7e6c7e1 100644
      async _openReauthenticationChannel(userName) {
          try {
              this._clearUserVerifier();
-@@ -556,10 +598,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -558,10 +600,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              return;
          }
  
@@ -145,7 +145,7 @@ index d3d79ee..7e6c7e1 100644
  
          this.reauthenticating = true;
          this._connectSignals();
-@@ -579,10 +618,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -581,10 +620,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              return;
          }
  
@@ -157,7 +157,7 @@ index d3d79ee..7e6c7e1 100644
  
          this._connectSignals();
          this._beginVerification();
-@@ -608,11 +644,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -610,11 +646,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              this._userVerifierChoiceList.connectObject('choice-query',
                  this._onChoiceListQuery.bind(this), this);
          }
@@ -175,7 +175,7 @@ index d3d79ee..7e6c7e1 100644
      }
  
      _getForegroundService() {
-@@ -721,7 +763,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -723,7 +765,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _getDetectedDefaultService() {
@@ -186,7 +186,7 @@ index d3d79ee..7e6c7e1 100644
              return PASSWORD_SERVICE_NAME;
          else if (this._smartcardManager)
              return SMARTCARD_SERVICE_NAME;
-@@ -788,13 +832,71 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -790,13 +834,71 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._maybeStartFingerprintVerification().catch(logError);
      }
  
@@ -259,7 +259,7 @@ index d3d79ee..7e6c7e1 100644
      }
  
      _onChoiceListQuery(client, serviceName, promptMessage, list) {
-@@ -804,6 +906,128 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -806,6 +908,128 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this.emit('show-choice-list', serviceName, promptMessage, list.deepUnpack());
      }
  
@@ -388,7 +388,7 @@ index d3d79ee..7e6c7e1 100644
      _onInfo(client, serviceName, info) {
          if (this.serviceIsForeground(serviceName)) {
              this._queueMessage(serviceName, info, MessageType.INFO);
-@@ -885,12 +1109,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -887,12 +1111,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _generateMechanismsFromDiscreteServices() {
@@ -408,7 +408,7 @@ index d3d79ee..7e6c7e1 100644
                  mechanismsList.push({
                      id: definition.mechanismId,
                      name: definition.mechanismName,
-@@ -908,6 +1137,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -910,6 +1139,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._activeServices.clear();
          this._unavailableServices.clear();
          this._activeServices.clear();
@@ -419,7 +419,7 @@ index d3d79ee..7e6c7e1 100644
          this._updateDefaultService();
  
          this.emit('reset');
-@@ -989,6 +1222,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -991,6 +1224,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      _onServiceUnavailable(_client, serviceName, errorMessage) {
          this._unavailableServices.add(serviceName);
  
@@ -430,10 +430,10 @@ index d3d79ee..7e6c7e1 100644
              return;
  
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index 2ba72e2..3312384 100644
+index a9f4b35..4c52248 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
-@@ -493,6 +493,7 @@ export const UnlockDialog = GObject.registerClass({
+@@ -499,6 +499,7 @@ export const UnlockDialog = GObject.registerClass({
          try {
              this._gdmClient.set_enabled_extensions([
                  Gdm.UserVerifierChoiceList.interface_info().name,

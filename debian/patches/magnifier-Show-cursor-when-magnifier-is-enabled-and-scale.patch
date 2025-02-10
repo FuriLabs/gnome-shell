@@ -16,7 +16,7 @@ Forwarded: yes
  2 files changed, 73 insertions(+), 6 deletions(-)
 
 diff --git a/js/ui/layout.js b/js/ui/layout.js
-index 57b5d0a..8a1bb34 100644
+index 4a60403..a66f65b 100644
 --- a/js/ui/layout.js
 +++ b/js/ui/layout.js
 @@ -992,22 +992,38 @@ export const LayoutManager = GObject.registerClass({
@@ -63,10 +63,10 @@ index 57b5d0a..8a1bb34 100644
          if (!this._updateRegionIdle) {
              const laters = global.compositor.get_laters();
 diff --git a/js/ui/magnifier.js b/js/ui/magnifier.js
-index bcfdda1..9f2c80e 100644
+index 017451c..18b019a 100644
 --- a/js/ui/magnifier.js
 +++ b/js/ui/magnifier.js
-@@ -50,6 +50,8 @@ const MouseSpriteContent = GObject.registerClass({
+@@ -49,6 +49,8 @@ const MouseSpriteContent = GObject.registerClass({
  }, class MouseSpriteContent extends GObject.Object {
      _init() {
          super._init();
@@ -75,7 +75,7 @@ index bcfdda1..9f2c80e 100644
          this._texture = null;
      }
  
-@@ -57,7 +59,10 @@ const MouseSpriteContent = GObject.registerClass({
+@@ -56,7 +58,10 @@ const MouseSpriteContent = GObject.registerClass({
          if (!this._texture)
              return [false, 0, 0];
  
@@ -87,7 +87,7 @@ index bcfdda1..9f2c80e 100644
      }
  
      vfunc_paint_content(actor, node, _paintContext) {
-@@ -73,6 +78,29 @@ const MouseSpriteContent = GObject.registerClass({
+@@ -72,6 +77,29 @@ const MouseSpriteContent = GObject.registerClass({
          textureNode.add_rectangle(actor.get_content_box());
      }
  
@@ -117,7 +117,7 @@ index bcfdda1..9f2c80e 100644
      get texture() {
          return this._texture;
      }
-@@ -87,7 +115,19 @@ const MouseSpriteContent = GObject.registerClass({
+@@ -86,7 +114,19 @@ const MouseSpriteContent = GObject.registerClass({
  
          if (!oldTexture || !coglTexture ||
              oldTexture.get_width() !== coglTexture.get_width() ||
@@ -161,7 +161,7 @@ index bcfdda1..9f2c80e 100644
      /**
       * showSystemCursor:
       * Show the system mouse pointer.
-@@ -272,6 +321,8 @@ export class Magnifier extends Signals.EventEmitter {
+@@ -268,6 +317,8 @@ export class Magnifier extends Signals.EventEmitter {
          this.xMouse = xMouse;
          this.yMouse = yMouse;
  

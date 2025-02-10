@@ -116,7 +116,7 @@ index 0000000..fc24cb6
 +    }
 +});
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 9fedfd5..65d8773 100644
+index 59fc58a..3a4e253 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -1,4 +1,5 @@
@@ -169,7 +169,7 @@ index 9fedfd5..65d8773 100644
          let {beginRequestType, queryingService} = Params.parse(params, {
              beginRequestType: null,
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 8d68835..75d76f5 100644
+index 1b23e41..af6dac4 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
 @@ -2,6 +2,7 @@
@@ -181,12 +181,12 @@ index 8d68835..75d76f5 100644
      <file>gdm/authPrompt.js</file>
      <file>gdm/batch.js</file>
 diff --git a/po/POTFILES.in b/po/POTFILES.in
-index 0a9aa2f..ae8aba5 100644
+index c3cfaaf..3f0d063 100644
 --- a/po/POTFILES.in
 +++ b/po/POTFILES.in
-@@ -8,6 +8,7 @@ data/org.gnome.shell.gschema.xml.in
- data/org.gnome.Shell.Extensions.desktop.in.in
+@@ -9,6 +9,7 @@ data/org.gnome.Shell.Extensions.desktop.in.in
  data/org.gnome.Shell.PortalHelper.desktop.in.in
+ data/X-GNOME-Shell-Utilities.directory.desktop.in
  js/dbusServices/extensions/ui/extension-error-page.ui
 +js/gdm/authNotification.js
  js/gdm/authPrompt.js

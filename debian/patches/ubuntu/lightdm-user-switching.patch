@@ -12,7 +12,7 @@ https://bugzilla.gnome.org/show_bug.cgi?id=685794
  1 file changed, 40 insertions(+), 7 deletions(-)
 
 diff --git a/js/misc/systemActions.js b/js/misc/systemActions.js
-index efb875b..75a7016 100644
+index 99c9173..6672230 100644
 --- a/js/misc/systemActions.js
 +++ b/js/misc/systemActions.js
 @@ -231,6 +231,34 @@ const SystemActions = GObject.registerClass({
@@ -78,11 +78,11 @@ index efb875b..75a7016 100644
 +        if (Main.screenShield) {
              Main.screenShield.lock(false);
  
--        Clutter.threads_add_repaint_func_full(Clutter.RepaintFlags.POST_PAINT, () => {
+-        Clutter.threads_add_repaint_func(Clutter.RepaintFlags.POST_PAINT, () => {
 -            Gdm.goto_login_session_sync(null);
 -            return false;
 -        });
-+            Clutter.threads_add_repaint_func_full(Clutter.RepaintFlags.POST_PAINT, () => {
++            Clutter.threads_add_repaint_func(Clutter.RepaintFlags.POST_PAINT, () => {
 +                Gdm.goto_login_session_sync(null);
 +                return false;
 +            });

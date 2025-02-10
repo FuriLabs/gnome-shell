@@ -15,7 +15,7 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  2 files changed, 65 insertions(+), 21 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index 4d344ea..d8b856c 100644
+index a69205e..0ad12ae 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -42,16 +42,26 @@ static char *session_mode = NULL;
@@ -107,7 +107,7 @@ index 4d344ea..d8b856c 100644
  
    if ((_shell_debug & SHELL_DEBUG_BACKTRACE_SEGFAULTS))
      {
-@@ -632,8 +665,9 @@ main (int argc, char **argv)
+@@ -633,8 +666,9 @@ main (int argc, char **argv)
    g_autoptr (MetaContext) context = NULL;
    g_autoptr (GFile) automation_script = NULL;
    g_autofree char *cwd = NULL;
@@ -118,7 +118,7 @@ index 4d344ea..d8b856c 100644
    int ecode = EXIT_SUCCESS;
  
    bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
-@@ -677,7 +711,7 @@ main (int argc, char **argv)
+@@ -678,7 +712,7 @@ main (int argc, char **argv)
     * resolve internal modules.
     */
    _shell_global_init ("session-mode", session_mode,
@@ -127,7 +127,7 @@ index 4d344ea..d8b856c 100644
                        "force-animations", force_animations,
                        "automation-script", automation_script,
                        NULL);
-@@ -696,8 +730,14 @@ main (int argc, char **argv)
+@@ -697,8 +731,14 @@ main (int argc, char **argv)
        return EXIT_FAILURE;
      }
  
@@ -145,10 +145,10 @@ index 4d344ea..d8b856c 100644
    shell_dbus_init (meta_context_is_replacing (context));
    shell_a11y_init ();
 diff --git a/src/shell-global.c b/src/shell-global.c
-index 8891061..e5d7908 100644
+index 471a848..6231975 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
-@@ -1963,11 +1963,15 @@ shell_global_get_debug_flags (ShellGlobal *global)
+@@ -1921,11 +1921,15 @@ shell_global_get_debug_flags (ShellGlobal *global)
  /**
   * shell_global_set_debug_flags:
   * @global: a #ShellGlobal

@@ -137,38 +137,38 @@ index fafed7c..029950d 100644
  });
  
 diff --git a/meson.build b/meson.build
-index 12b7c86..87192f4 100644
+index 002fcd6..d7ef022 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -33,7 +33,6 @@ systemd_req = '>= 246'
- ibus_req = '>= 1.5.19'
+@@ -31,7 +31,6 @@ schemas_req = '>= 48.beta'
+ systemd_req = '>= 246'
  gnome_desktop_req = '>= 40'
  pipewire_req = '>= 0.3.49'
 -qrencode_req = '>= 4.1.1'
+ pango_req = '>= 1.46.0'
  
  nm_req = '>= 1.10.4'
- secret_req = '>= 0.18'
-@@ -90,7 +89,6 @@ polkit_dep = dependency('polkit-agent-1', version: polkit_req)
- ibus_dep = dependency('ibus-1.0', version: ibus_req)
+@@ -88,7 +87,6 @@ polkit_dep = dependency('polkit-agent-1', version: polkit_req)
  schemas_dep = dependency('gsettings-desktop-schemas', version: schemas_req)
  gnome_desktop_dep = dependency('gnome-desktop-4', version: gnome_desktop_req)
+ pango_dep = dependency('pango', version: pango_req)
 -qrencode_dep = dependency('libqrencode', version: qrencode_req)
  
+ have_fonts = mutter_dep.get_variable('have_fonts') == 'true'
  have_x11 = mutter_dep.get_variable('have_x11') == 'true'
- have_x11_client = mutter_dep.get_variable('have_x11_client') == 'true'
 diff --git a/src/meson.build b/src/meson.build
-index c975720..bfd0b6b 100644
+index fc1ae5e..d037286 100644
 --- a/src/meson.build
 +++ b/src/meson.build
 @@ -75,7 +75,6 @@ gnome_shell_deps = [
-   gcr_dep,
    libsystemd_dep,
    libpipewire_dep,
+   pango_dep,
 -  qrencode_dep
  ]
  
  if have_x11_client
-@@ -195,6 +194,10 @@ if have_x11_client
+@@ -197,6 +196,10 @@ if have_x11_client
    ]
  endif
  

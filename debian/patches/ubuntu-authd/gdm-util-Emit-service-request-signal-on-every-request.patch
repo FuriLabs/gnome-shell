@@ -16,10 +16,10 @@ a dialog used for Web Login)
  1 file changed, 10 insertions(+)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index c9111cf..b72aea2 100644
+index 296d2ac..e5b469b 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -911,6 +911,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -913,6 +913,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _onChoiceListQuery(client, serviceName, promptMessage, list) {
@@ -28,7 +28,7 @@ index c9111cf..b72aea2 100644
          if (!this.serviceIsForeground(serviceName))
              return;
  
-@@ -1040,6 +1042,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1042,6 +1044,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _onInfo(client, serviceName, info) {
@@ -37,7 +37,7 @@ index c9111cf..b72aea2 100644
          if (this.serviceIsForeground(serviceName)) {
              this._queueMessage(serviceName, info, MessageType.INFO);
          } else if (this.serviceIsFingerprint(serviceName)) {
-@@ -1061,6 +1065,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1063,6 +1067,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _onProblem(client, serviceName, problem) {
@@ -46,7 +46,7 @@ index c9111cf..b72aea2 100644
          const isFingerprint = this.serviceIsFingerprint(serviceName);
  
          if (!this.serviceIsForeground(serviceName) && !isFingerprint)
-@@ -1097,6 +1103,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1099,6 +1105,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _onInfoQuery(client, serviceName, question) {
@@ -55,7 +55,7 @@ index c9111cf..b72aea2 100644
          if (!this.serviceIsForeground(serviceName))
              return;
  
-@@ -1104,6 +1112,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1106,6 +1114,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _onSecretInfoQuery(client, serviceName, secretQuestion) {

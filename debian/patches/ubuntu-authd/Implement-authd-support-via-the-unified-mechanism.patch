@@ -6405,7 +6405,7 @@ index ad854ca..b6ed4cd 100644
  export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 +export const CHOICE_LIST_ROLE_NAME = 'choice-list';
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index a474d33..30697c4 100644
+index 501b8de..7c01216 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -4,6 +4,7 @@ import Gio from 'gi://Gio';
@@ -6425,7 +6425,7 @@ index a474d33..30697c4 100644
  export const PASSWORD_SERVICE_NAME = 'gdm-password';
  export const FINGERPRINT_SERVICE_NAME = 'gdm-fingerprint';
  export const SMARTCARD_SERVICE_NAME = 'gdm-smartcard';
-@@ -165,6 +166,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -167,6 +168,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
          this._unifiedAuthServices = new Map();
          this.addUnifiedAuthService(new UnifiedMechanism.UnifiedMechanismProtocolHandler());
@@ -6434,7 +6434,7 @@ index a474d33..30697c4 100644
          this._credentialManagers = {};
  
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index f80b44d..6aa47ad 100644
+index e949aeb..0c85b6f 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
 @@ -16,6 +16,9 @@
@@ -6448,12 +6448,12 @@ index f80b44d..6aa47ad 100644
      <file>extensions/sharedInternals.js</file>
  
 diff --git a/po/POTFILES.in b/po/POTFILES.in
-index 66e6967..6a569fd 100644
+index 4619088..2415ee1 100644
 --- a/po/POTFILES.in
 +++ b/po/POTFILES.in
-@@ -8,6 +8,7 @@ data/org.gnome.shell.gschema.xml.in
- data/org.gnome.Shell.Extensions.desktop.in.in
+@@ -9,6 +9,7 @@ data/org.gnome.Shell.Extensions.desktop.in.in
  data/org.gnome.Shell.PortalHelper.desktop.in.in
+ data/X-GNOME-Shell-Utilities.directory.desktop.in
  js/dbusServices/extensions/ui/extension-error-page.ui
 +js/gdm/authd.js
  js/gdm/authNotification.js

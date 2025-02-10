@@ -7,10 +7,10 @@ Subject: gdm: Improve detection of unavailable services
  1 file changed, 19 insertions(+), 1 deletion(-)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index ee818b7..726df8b 100644
+index b7b70d3..84a8caa 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -876,8 +876,15 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -878,8 +878,15 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          }
      }
  
@@ -27,7 +27,7 @@ index ee818b7..726df8b 100644
              return UNIFIED_AUTH_SERVICE_NAME;
  
          const definition = DiscreteServiceMechanismDefinitions.find(
-@@ -889,6 +896,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -891,6 +898,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const oldDefaultService = this._defaultService;
          this._defaultService = this._getDetectedDefaultService();
  
@@ -37,7 +37,7 @@ index ee818b7..726df8b 100644
          if (!this._defaultService) {
              log('no authentication service is enabled, using password authentication');
              this._defaultService = PASSWORD_SERVICE_NAME;
-@@ -914,6 +924,14 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -916,6 +926,14 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              }
          } catch (e) {
              this._activeServices.delete(serviceName);

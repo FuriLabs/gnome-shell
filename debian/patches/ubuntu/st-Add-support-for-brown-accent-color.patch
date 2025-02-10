@@ -9,10 +9,10 @@ Subject: st: Add support for brown accent color
  3 files changed, 8 insertions(+)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 788e606..8679a36 100644
+index f2e7ff9..58b43a2 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
-@@ -468,6 +468,8 @@ export function getYaruVariantFromAccent() {
+@@ -496,6 +496,8 @@ export function getYaruVariantFromAccent() {
        return "purple";
      case St.SystemAccentColor.SLATE:
        return "sage";
@@ -22,10 +22,10 @@ index 788e606..8679a36 100644
  }
  
 diff --git a/src/st/st-settings.h b/src/st/st-settings.h
-index 272a4ad..421647c 100644
+index c871c48..2af86c5 100644
 --- a/src/st/st-settings.h
 +++ b/src/st/st-settings.h
-@@ -45,6 +45,7 @@ typedef enum {
+@@ -44,6 +44,7 @@ typedef enum {
    ST_SYSTEM_ACCENT_COLOR_PINK = G_DESKTOP_ACCENT_COLOR_PINK,
    ST_SYSTEM_ACCENT_COLOR_PURPLE = G_DESKTOP_ACCENT_COLOR_PURPLE,
    ST_SYSTEM_ACCENT_COLOR_SLATE = G_DESKTOP_ACCENT_COLOR_SLATE,
@@ -34,7 +34,7 @@ index 272a4ad..421647c 100644
  
  #define ST_TYPE_SETTINGS (st_settings_get_type ())
 diff --git a/src/st/st-theme-context.c b/src/st/st-theme-context.c
-index 865ab61..cb91ba2 100644
+index eb24212..08a4ee0 100644
 --- a/src/st/st-theme-context.c
 +++ b/src/st/st-theme-context.c
 @@ -37,6 +37,7 @@
@@ -45,7 +45,7 @@ index 865ab61..cb91ba2 100644
  
  #define ACCENT_FG_COLOR     "#ffffff"
  
-@@ -325,6 +326,10 @@ update_accent_colors (StThemeContext *context)
+@@ -289,6 +290,10 @@ update_accent_colors (StThemeContext *context)
        cogl_color_from_string (&context->accent_color, ACCENT_COLOR_SLATE);
        break;
  

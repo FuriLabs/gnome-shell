@@ -28,10 +28,10 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/1878998
  2 files changed, 28 insertions(+), 6 deletions(-)
 
 diff --git a/src/st/st-entry.c b/src/st/st-entry.c
-index 6255813..af50210 100644
+index d2b9c61..5991b31 100644
 --- a/src/st/st-entry.c
 +++ b/src/st/st-entry.c
-@@ -1092,6 +1092,8 @@ st_entry_init (StEntry *entry)
+@@ -1077,6 +1077,8 @@ st_entry_init (StEntry *entry)
    g_signal_connect (priv->entry, "notify::line-alignment",
                      G_CALLBACK (invalidate_shadow_pipeline), entry);
  
@@ -41,10 +41,10 @@ index 6255813..af50210 100644
    priv->spacing = 6.0f;
  
 diff --git a/src/st/st-private.c b/src/st/st-private.c
-index b997fa1..f295c36 100644
+index 4df1a45..845e38f 100644
 --- a/src/st/st-private.c
 +++ b/src/st/st-private.c
-@@ -115,22 +115,42 @@ _st_set_text_from_style (ClutterText *text,
+@@ -118,22 +118,42 @@ _st_set_text_from_style (ClutterText *text,
    StTextDecoration decoration;
    PangoAttrList *attribs = NULL;
    const PangoFontDescription *font;

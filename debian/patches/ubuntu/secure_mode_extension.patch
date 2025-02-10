@@ -54,7 +54,7 @@ index 53fd928..2576839 100644
              version: extension.metadata.version,
          };
 diff --git a/js/ui/extensionSystem.js b/js/ui/extensionSystem.js
-index bc80437..1b2bebd 100644
+index ece089b..6c297ed 100644
 --- a/js/ui/extensionSystem.js
 +++ b/js/ui/extensionSystem.js
 @@ -6,6 +6,7 @@ import Shell from 'gi://Shell';
@@ -64,8 +64,8 @@ index bc80437..1b2bebd 100644
 +import * as Desktop from '../misc/desktop.js';
  import * as ExtensionDownloader from './extensionDownloader.js';
  import {formatError} from '../misc/errorUtils.js';
- import {ExtensionState, ExtensionType} from '../misc/extensionUtils.js';
-@@ -524,6 +525,10 @@ export class ExtensionManager extends Signals.EventEmitter {
+ import {
+@@ -481,6 +482,10 @@ export class ExtensionManager extends Signals.EventEmitter {
          await this.loadExtension(newExtension);
      }
  
@@ -76,7 +76,7 @@ index bc80437..1b2bebd 100644
      async _callExtensionInit(uuid) {
          if (!this._extensionSupportsSessionMode(uuid))
              return false;
-@@ -765,6 +770,10 @@ export class ExtensionManager extends Signals.EventEmitter {
+@@ -722,6 +727,10 @@ export class ExtensionManager extends Signals.EventEmitter {
              let type = dir.has_prefix(perUserDir)
                  ? ExtensionType.PER_USER
                  : ExtensionType.SYSTEM;

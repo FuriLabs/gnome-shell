@@ -116,7 +116,7 @@ index c7123f8..a9ee297 100644
    background-color: transparent;
  
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 65d8773..5415a82 100644
+index 3a4e253..d402064 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -16,6 +16,7 @@ import * as MessageTray from '../ui/messageTray.js';
@@ -307,7 +307,7 @@ index 65d8773..5415a82 100644
  
          let hold = params.hold;
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index b72aea2..c590539 100644
+index e5b469b..e28445d 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -39,6 +39,7 @@ export const AUTH_MECHANISM_PROTOCOL = 'auth-mechanisms';
@@ -318,7 +318,7 @@ index b72aea2..c590539 100644
  export const FINGERPRINT_AUTHENTICATION_KEY = 'enable-fingerprint-authentication';
  export const SMARTCARD_AUTHENTICATION_KEY = 'enable-smartcard-authentication';
  export const BANNER_MESSAGE_KEY = 'banner-message-enable';
-@@ -264,6 +265,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -266,6 +267,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              this._cancellable = null;
          }
  
@@ -326,7 +326,7 @@ index b72aea2..c590539 100644
          this._clearUserVerifier();
          this._clearMessageQueue();
          this._activeServices.clear();
-@@ -845,6 +847,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -847,6 +849,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      _startMechanismFromUnifiedService(mechanism) {
          const roleHandlers = {
@@ -334,7 +334,7 @@ index b72aea2..c590539 100644
              [PASSWORD_ROLE_NAME]: this._startPasswordLogin.bind(this),
          };
  
-@@ -948,6 +951,45 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -950,6 +953,45 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          await this.replyWithJSON(serviceName, JSON.stringify(reply));
      }
  
@@ -380,7 +380,7 @@ index b72aea2..c590539 100644
      _filterAuthMechanisms(mechanismsList, filterFunc) {
          return mechanismsList.filter(mechanism => {
              const mapping = DiscreteServiceMechanismDefinitions.find(m =>
-@@ -1209,6 +1251,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1211,6 +1253,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const doneTrying = !shouldRetry || !this._canRetry();
  
          this.emit('verification-failed', serviceName, !doneTrying);
@@ -657,7 +657,7 @@ index 0000000..fafed7c
 +    }
 +});
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 75d76f5..3c88ab5 100644
+index af6dac4..899a09d 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
 @@ -12,6 +12,7 @@
@@ -669,14 +669,14 @@ index 75d76f5..3c88ab5 100644
      <file>extensions/extension.js</file>
      <file>extensions/sharedInternals.js</file>
 diff --git a/po/POTFILES.in b/po/POTFILES.in
-index ae8aba5..66e6967 100644
+index 3f0d063..4619088 100644
 --- a/po/POTFILES.in
 +++ b/po/POTFILES.in
-@@ -12,6 +12,7 @@ js/gdm/authNotification.js
+@@ -13,6 +13,7 @@ js/gdm/authNotification.js
  js/gdm/authPrompt.js
  js/gdm/loginDialog.js
  js/gdm/util.js
 +js/gdm/webLogin.js
+ js/misc/breakManager.js
  js/misc/systemActions.js
- js/misc/util.js
- js/misc/dateUtils.js
+ js/misc/timeLimitsManager.js
