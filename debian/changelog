@@ -1,8 +1,10 @@
-gnome-shell (48~beta-1ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (48~beta-1ubuntu1) plucky; urgency=medium
 
-  * Merge with Debian.
+  * Merge with Debian
+  * Refresh patches
+  * Temporarily disable authd patches
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 10 Feb 2025 14:12:17 -0500
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 11 Feb 2025 22:17:37 -0500
 
 gnome-shell (48~beta-1) experimental; urgency=medium
 
