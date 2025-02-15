@@ -2,9 +2,8 @@ From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
 Date: Wed, 1 May 2024 04:18:50 +0200
 Subject: shell-tray-icon: Use available space when that's defined
 
-Fixes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7613
-
 Origin: https://gitlab.gnome.org/3v1n0/gnome-shell/-/commits/tray-offscreen-xwindows
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7613
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/2012388
 ---
  src/shell-tray-icon.c |  4 ++++
@@ -17,9 +16,9 @@ index 3af5cc4..d4c5552 100644
 --- a/src/shell-tray-icon.c
 +++ b/src/shell-tray-icon.c
 @@ -185,6 +185,10 @@ shell_tray_icon_allocate (ClutterActor          *actor,
- 
+
    CLUTTER_ACTOR_CLASS (shell_tray_icon_parent_class)->allocate (actor, box);
- 
+
 +  na_xembed_set_available_size (NA_XEMBED (tray_icon->tray_child),
 +                                roundf (clutter_actor_box_get_width (box)),
 +                                roundf (clutter_actor_box_get_height (box)));
@@ -39,7 +38,7 @@ index 1be1e9d..d4c389c 100644
 +  int available_height;
    int resize_count;
    int xembed_version;
- 
+
 @@ -141,6 +143,8 @@ na_xembed_end_embedding (NaXembed *xembed)
    priv->current_width = 0;
    priv->current_height = 0;
@@ -48,11 +47,11 @@ index 1be1e9d..d4c389c 100644
 +  priv->available_height = -1;
    g_clear_handle_id (&priv->resize_id, g_source_remove);
  }
- 
+
 @@ -186,6 +190,11 @@ na_xembed_synchronize_size (NaXembed *xembed)
    width = priv->request_width;
    height = priv->request_height;
- 
+
 +  if (priv->available_width >= 0)
 +    width = priv->available_width;
 +  if (priv->available_height >= 0)
@@ -70,12 +69,12 @@ index 1be1e9d..d4c389c 100644
 +  priv->available_width = -1;
 +  priv->available_height = -1;
  }
- 
+
  void
 @@ -809,6 +822,22 @@ na_xembed_get_size (NaXembed *xembed,
      *height = priv->request_height;
  }
- 
+
 +void
 +na_xembed_set_available_size (NaXembed *xembed,
 +                              int       width,
@@ -102,11 +101,11 @@ index 4466305..271060d 100644
 @@ -58,6 +58,10 @@ void na_xembed_get_size (NaXembed *xembed,
  			 int      *width,
  			 int      *height);
- 
+
 +void na_xembed_set_available_size (NaXembed *xembed,
 +				   int       width,
 +				   int       height);
 +
  void na_xembed_set_background_color (NaXembed        *xembed,
                                       const CoglColor *color);
- 
+
