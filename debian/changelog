@@ -1,4 +1,6 @@
-gnome-shell (48~beta-2) UNRELEASED; urgency=medium
+gnome-shell (48~beta-2) experimental; urgency=medium
+
+  * Team upload
 
   [ Jeremy Bícha ]
   * Set Salsa CI release to Experimental
@@ -7,7 +9,12 @@ gnome-shell (48~beta-2) UNRELEASED; urgency=medium
   * Depend on gnome-shell-common >= 48~.
     The interfaces need to match (Closes: #1096064, LP: #2098453)
 
- -- Simon McVittie <smcv@debian.org>  Sat, 15 Feb 2025 16:07:44 +0000
+  [ Simon McVittie ]
+  * Remove an obsolete Lintian override
+  * Adjust patch metadata to mark some patches as forwarded
+  * Adjust some patch metadata to use DEP-3 representation for upstream bugs
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 15 Feb 2025 16:47:57 +0000
 
 gnome-shell (48~beta-1) experimental; urgency=medium
 
