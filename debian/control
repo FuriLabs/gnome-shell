@@ -161,7 +161,6 @@ Depends: gir1.2-adw-1,
          gir1.2-gtk-4.0,
          gjs (>= 1.73.1),
          gnome-shell (= ${binary:Version}),
-         gnome-shell-common (>= 48~),
          ${gir:Depends},
          ${misc:Depends},
          ${shlibs:Depends}
