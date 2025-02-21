@@ -1,9 +1,8 @@
 ---
 include:
-  - https://salsa.debian.org/salsa-ci-team/pipeline/raw/master/recipes/debian.yml
+  - https://salsa.debian.org/salsa-ci-team/pipeline/raw/master/recipes/ubuntu.yml
 
 variables:
-  RELEASE: 'experimental'
   # https://salsa.debian.org/salsa-ci-team/pipeline/-/issues/58
   SALSA_CI_DISABLE_PIUPARTS: 1
   # https://salsa.debian.org/salsa-ci-team/pipeline/-/issues/192
