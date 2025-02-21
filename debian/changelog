@@ -1,3 +1,37 @@
+gnome-shell (48~beta-3) experimental; urgency=medium
+
+  * debian/control: Set both upper and lower bounds for gnome-shell-common
+    dependency.
+  * debian/control: Remove dependency on gnome-shell-common from prefs.
+    The tool has already a strict dependency on gnome-shell, that depends on
+    gnome-shell-common, so no reason to handle that
+  * Revert "d/c: Don't depend on exact versions of gnome-shell-common"
+    gnome-shell-common contains the Javascript code that consumes the
+    typelib and the APIs that are defined in the libraries that gnome-shell
+    package provides, so the dependency should be strict on the version,
+    since even a point release may expose a new internal API that then the
+    javascript code consumes. (LP: #2098654)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 21 Feb 2025 12:17:50 +0100
+
+gnome-shell (48~beta-2) experimental; urgency=medium
+
+  * Team upload
+
+  [ Jeremy Bícha ]
+  * Set Salsa CI release to Experimental
+
+  [ Alessandro Astone ]
+  * Depend on gnome-shell-common >= 48~.
+    The interfaces need to match (Closes: #1096064, LP: #2098453)
+
+  [ Simon McVittie ]
+  * Remove an obsolete Lintian override
+  * Adjust patch metadata to mark some patches as forwarded
+  * Adjust some patch metadata to use DEP-3 representation for upstream bugs
+
+ -- Simon McVittie <smcv@debian.org>  Sat, 15 Feb 2025 16:47:57 +0000
+
 gnome-shell (48~beta-1ubuntu1) plucky; urgency=medium
 
   * Merge with Debian
