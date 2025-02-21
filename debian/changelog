@@ -1,3 +1,19 @@
+gnome-shell (48~beta-3) experimental; urgency=medium
+
+  * debian/control: Set both upper and lower bounds for gnome-shell-common
+    dependency.
+  * debian/control: Remove dependency on gnome-shell-common from prefs.
+    The tool has already a strict dependency on gnome-shell, that depends on
+    gnome-shell-common, so no reason to handle that
+  * Revert "d/c: Don't depend on exact versions of gnome-shell-common"
+    gnome-shell-common contains the Javascript code that consumes the
+    typelib and the APIs that are defined in the libraries that gnome-shell
+    package provides, so the dependency should be strict on the version,
+    since even a point release may expose a new internal API that then the
+    javascript code consumes. (LP: #2098654)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 21 Feb 2025 12:17:50 +0100
+
 gnome-shell (48~beta-2) experimental; urgency=medium
 
   * Team upload
