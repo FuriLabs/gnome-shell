@@ -1,3 +1,15 @@
+gnome-shell (48~beta-3ubuntu1) UNRELEASED; urgency=medium
+
+  [ Marco Trevisan (Treviño) ]
+  * Merge with debian
+  * debian/salsa-ci: Use ubuntu recipes
+  * debian/patches/ubuntu-authd: Rebase as per upstream changes
+
+  [ Daniel van Vugt ]
+  * Add missing import to the magnifier patch (LP: #2098745)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sat, 22 Feb 2025 05:40:55 +0100
+
 gnome-shell (48~beta-3) experimental; urgency=medium
 
   * debian/control: Set both upper and lower bounds for gnome-shell-common
