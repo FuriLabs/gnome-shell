@@ -1,4 +1,4 @@
-gnome-shell (48~beta-3ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (48~beta-3ubuntu1) plucky; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
   * Merge with debian
@@ -8,7 +8,7 @@ gnome-shell (48~beta-3ubuntu1) UNRELEASED; urgency=medium
   [ Daniel van Vugt ]
   * Add missing import to the magnifier patch (LP: #2098745)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sat, 22 Feb 2025 05:40:55 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sat, 22 Feb 2025 05:54:30 +0100
 
 gnome-shell (48~beta-3) experimental; urgency=medium
 
