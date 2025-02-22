@@ -13,13 +13,9 @@ notification, but doesn't actually call that code yet.
 
 It will be used later when Web Login support is added.
 ---
- .../gnome-shell-sass/widgets/_login-lock.scss      | 13 +++++
- js/gdm/authNotification.js                         | 64 ++++++++++++++++++++++
- js/gdm/authPrompt.js                               | 28 ++++++++++
- js/js-resources.gresource.xml                      |  1 +
- po/POTFILES.in                                     |  1 +
- 5 files changed, 107 insertions(+)
- create mode 100644 js/gdm/authNotification.js
+ .../gnome-shell-sass/widgets/_login-lock.scss      | 13 ++++++++++++
+ js/gdm/authPrompt.js                               | 23 ++++++++++++++++++++++
+ 2 files changed, 36 insertions(+)
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 index 353ad43..c7123f8 100644
@@ -45,112 +41,30 @@ index 353ad43..c7123f8 100644
  // QR Code
  .qr-code {
    background: black;
-diff --git a/js/gdm/authNotification.js b/js/gdm/authNotification.js
-new file mode 100644
-index 0000000..fc24cb6
---- /dev/null
-+++ b/js/gdm/authNotification.js
-@@ -0,0 +1,64 @@
-+// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
-+/*
-+ * Copyright 2024 Red Hat, Inc
-+ *
-+ * This program is free software; you can redistribute it and/or modify
-+ * it under the terms of the GNU General Public License as published by
-+ * the Free Software Foundation; either version 2, or (at your option)
-+ * any later version.
-+ *
-+ * This program is distributed in the hope that it will be useful,
-+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-+ * GNU General Public License for more details.
-+ *
-+ * You should have received a copy of the GNU General Public License
-+ * along with this program; if not, see <http://www.gnu.org/licenses/>.
-+ */
-+
-+import GObject from 'gi://GObject';
-+import * as Calendar from '../ui/calendar.js';
-+import * as MessageTray from '../ui/messageTray.js';
-+import * as Params from '../misc/params.js';
-+
-+export const AuthNotificationSource = GObject.registerClass({
-+}, class AuthNotificationSource extends MessageTray.Source {
-+    constructor(params) {
-+        params = Params.parse(params, {
-+            title: _('Login Failed'),
-+            iconName: 'dialog-password-symbolic',
-+        });
-+
-+        super(params);
-+    }
-+
-+    createBanner(notification) {
-+        return new AuthNotificationBanner(notification);
-+    }
-+});
-+
-+const AuthNotificationBanner = GObject.registerClass({
-+    Signals: {
-+        'done-displaying': {},
-+    },
-+}, class AuthNotificationBanner extends Calendar.NotificationMessage {
-+    _init(notification) {
-+        super._init(notification);
-+
-+        this.can_focus = false;
-+        this.add_style_class_name('notification-banner');
-+        this.add_style_class_name('auth-notification-banner');
-+
-+        this.notification.connectObject('activated', () => {
-+            // We hide all types of notifications once the user clicks on
-+            // them because the common outcome of clicking should be the
-+            // relevant window being brought forward and the user's
-+            // attention switching to the window.
-+            this.emit('done-displaying');
-+        }, this);
-+    }
-+
-+    createBanner(notification) {
-+        return new AuthNotificationBanner(notification);
-+    }
-+});
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 59fc58a..3a4e253 100644
+index 59fc58a..320a5da 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -1,4 +1,5 @@
- import Clutter from 'gi://Clutter';
-+import Gio from 'gi://Gio';
- import GLib from 'gi://GLib';
- import GObject from 'gi://GObject';
- import Pango from 'gi://Pango';
-@@ -7,8 +8,11 @@ import St from 'gi://St';
- 
- import * as Animation from '../ui/animation.js';
+@@ -9,6 +9,7 @@ import * as Animation from '../ui/animation.js';
  import * as AuthList from './authList.js';
-+import * as AuthNotification from '../gdm/authNotification.js';
  import * as Batch from './batch.js';
  import * as GdmUtil from './util.js';
-+import * as Main from '../ui/main.js';
 +import * as MessageTray from '../ui/messageTray.js';
  import * as Params from '../misc/params.js';
  import * as ShellEntry from '../ui/shellEntry.js';
  import * as UserWidget from '../ui/userWidget.js';
-@@ -634,6 +638,30 @@ export const AuthPrompt = GObject.registerClass({
+@@ -634,6 +635,28 @@ export const AuthPrompt = GObject.registerClass({
          this._userVerifier.setForegroundMechanism(mechanism);
      }
  
 +    showLoginFailedNotification() {
-+        const source = new AuthNotification.AuthNotificationSource();
-+        Main.messageTray.add(source);
++        const source = new MessageTray.getSystemSource();
 +
-+        const gicon = new Gio.ThemedIcon({name: 'dialog-password-symbolic'});
 +        this._loginFailedNotification = new MessageTray.Notification({
 +            source,
++            iconName: 'dialog-password-symbolic',
 +            title: _('Login Failed'),
 +            body: _('Please try again'),
-+            gicon,
 +            isTransient: true,
 +        });
 +
@@ -168,27 +82,3 @@ index 59fc58a..3a4e253 100644
      reset(params) {
          let {beginRequestType, queryingService} = Params.parse(params, {
              beginRequestType: null,
-diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 1b23e41..af6dac4 100644
---- a/js/js-resources.gresource.xml
-+++ b/js/js-resources.gresource.xml
-@@ -2,6 +2,7 @@
- <gresources>
-   <gresource prefix="/org/gnome/shell">
-     <file>gdm/authList.js</file>
-+    <file>gdm/authNotification.js</file>
-     <file>gdm/authMenuButton.js</file>
-     <file>gdm/authPrompt.js</file>
-     <file>gdm/batch.js</file>
-diff --git a/po/POTFILES.in b/po/POTFILES.in
-index c3cfaaf..3f0d063 100644
---- a/po/POTFILES.in
-+++ b/po/POTFILES.in
-@@ -9,6 +9,7 @@ data/org.gnome.Shell.Extensions.desktop.in.in
- data/org.gnome.Shell.PortalHelper.desktop.in.in
- data/X-GNOME-Shell-Utilities.directory.desktop.in
- js/dbusServices/extensions/ui/extension-error-page.ui
-+js/gdm/authNotification.js
- js/gdm/authPrompt.js
- js/gdm/loginDialog.js
- js/gdm/util.js

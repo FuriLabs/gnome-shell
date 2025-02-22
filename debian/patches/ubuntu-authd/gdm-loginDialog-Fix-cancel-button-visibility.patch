@@ -8,10 +8,10 @@ Subject: gdm/loginDialog: Fix cancel button visibility
  2 files changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index c17fe2d..28b3ea0 100644
+index 40a7f26..001eac1 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -57,6 +57,12 @@ export const AuthPrompt = GObject.registerClass({
+@@ -54,6 +54,12 @@ export const AuthPrompt = GObject.registerClass({
          'mechanisms-changed': {param_types: [GObject.TYPE_STRING]},
          'reset': {param_types: [GObject.TYPE_UINT]},
      },
@@ -24,7 +24,7 @@ index c17fe2d..28b3ea0 100644
  }, class AuthPrompt extends St.BoxLayout {
      _init(gdmClient, mode) {
          super._init({
-@@ -809,6 +815,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -804,6 +810,7 @@ export const AuthPrompt = GObject.registerClass({
          this.cancelButton.reactive = this._hasCancelButton;
          this.cancelButton.can_focus = this._hasCancelButton;
          this._preemptiveAnswer = null;

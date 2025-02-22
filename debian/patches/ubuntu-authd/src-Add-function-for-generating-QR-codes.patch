@@ -12,9 +12,9 @@ of a QR code for a specified URL.
  .../gnome-shell-sass/widgets/_login-lock.scss      |   8 +
  meson.build                                        |   2 +
  src/meson.build                                    |   3 +
- src/shell-qr-code-generator.c                      | 279 +++++++++++++++++++++
- src/shell-qr-code-generator.h                      |  28 +++
- 5 files changed, 320 insertions(+)
+ src/shell-qr-code-generator.c                      | 289 +++++++++++++++++++++
+ src/shell-qr-code-generator.h                      |  28 ++
+ 5 files changed, 330 insertions(+)
  create mode 100644 src/shell-qr-code-generator.c
  create mode 100644 src/shell-qr-code-generator.h
 
@@ -35,17 +35,17 @@ index e5f9449..353ad43 100644
 +  border-width: 1em;
 +}
 diff --git a/meson.build b/meson.build
-index d7ef022..002fcd6 100644
+index d7ef022..e537d3b 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -31,6 +31,7 @@ schemas_req = '>= 48.beta'
- systemd_req = '>= 246'
+@@ -32,6 +32,7 @@ systemd_req = '>= 246'
  gnome_desktop_req = '>= 40'
  pipewire_req = '>= 0.3.49'
-+qrencode_req = '>= 4.1.1'
  pango_req = '>= 1.46.0'
++qrencode_req = '>= 4.1.1'
  
  nm_req = '>= 1.10.4'
+ secret_req = '>= 0.18'
 @@ -87,6 +88,7 @@ polkit_dep = dependency('polkit-agent-1', version: polkit_req)
  schemas_dep = dependency('gsettings-desktop-schemas', version: schemas_req)
  gnome_desktop_dep = dependency('gnome-desktop-4', version: gnome_desktop_req)
@@ -55,14 +55,14 @@ index d7ef022..002fcd6 100644
  have_fonts = mutter_dep.get_variable('have_fonts') == 'true'
  have_x11 = mutter_dep.get_variable('have_x11') == 'true'
 diff --git a/src/meson.build b/src/meson.build
-index 6b24535..fc1ae5e 100644
+index 6b24535..dc41298 100644
 --- a/src/meson.build
 +++ b/src/meson.build
 @@ -75,6 +75,7 @@ gnome_shell_deps = [
    libsystemd_dep,
    libpipewire_dep,
    pango_dep,
-+  qrencode_dep
++  qrencode_dep,
  ]
  
  if have_x11_client
@@ -77,10 +77,10 @@ index 6b24535..fc1ae5e 100644
    'shell-secure-text-buffer.h',
 diff --git a/src/shell-qr-code-generator.c b/src/shell-qr-code-generator.c
 new file mode 100644
-index 0000000..c069227
+index 0000000..6c7da8c
 --- /dev/null
 +++ b/src/shell-qr-code-generator.c
-@@ -0,0 +1,279 @@
+@@ -0,0 +1,289 @@
 +/* -*- mode: C; c-file-style: "gnu"; indent-tabs-mode: nil; -*- */
 +
 +#include <clutter/clutter.h>
@@ -92,6 +92,7 @@ index 0000000..c069227
 +
 +#include <qrencode.h>
 +
++#include "shell-global.h"
 +#include "shell-qr-code-generator.h"
 +
 +#define BYTES_PER_RGB_888 3
@@ -235,6 +236,13 @@ index 0000000..c069227
 +                        GAsyncResult         *result,
 +                        gpointer              user_data)
 +{
++  ShellGlobal *global = shell_global_get ();
++  ClutterStage *stage = shell_global_get_stage (global);
++  ClutterContext *clutter_context =
++    clutter_actor_get_context (CLUTTER_ACTOR (stage));
++  ClutterBackend *backend =
++    clutter_context_get_backend (clutter_context);
++  CoglContext *ctx = clutter_backend_get_cogl_context (backend);
 +  guint8 *pixel_data;
 +  g_autoptr (ClutterContent) content = NULL;
 +  g_autoptr (GError) error = NULL;
@@ -248,14 +256,16 @@ index 0000000..c069227
 +      return;
 +    }
 +
-+  content = st_image_content_new_with_preferred_size (self->priv->width, self->priv->height);
-+  data_set = clutter_image_set_data (CLUTTER_IMAGE (content),
-+                                     pixel_data,
-+                                     COGL_PIXEL_FORMAT_RGB_888,
-+                                     self->priv->width,
-+                                     self->priv->height,
-+                                     self->priv->width * BYTES_PER_RGB_888,
-+                                     &error);
++  content = st_image_content_new_with_preferred_size (self->priv->width,
++                                                      self->priv->height);
++  data_set = st_image_content_set_data (ST_IMAGE_CONTENT (content),
++                                        ctx,
++                                        pixel_data,
++                                        COGL_PIXEL_FORMAT_RGB_888,
++                                        self->priv->width,
++                                        self->priv->height,
++                                        self->priv->width * BYTES_PER_RGB_888,
++                                        &error);
 +
 +  if (!data_set)
 +    {

@@ -16,10 +16,10 @@ As we may have different protocols under the hood.
  create mode 100644 js/gdm/unifiedMechanism.js
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 2c0b44a..c17fe2d 100644
+index 25e5e32..40a7f26 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -148,12 +148,19 @@ export const AuthPrompt = GObject.registerClass({
+@@ -145,12 +145,19 @@ export const AuthPrompt = GObject.registerClass({
  
      on_key_press_event(event) {
          if (event.get_key_symbol() === Clutter.KEY_Escape) {
@@ -40,7 +40,7 @@ index 2c0b44a..c17fe2d 100644
      _initInputRow() {
          this._mainBox = new St.BoxLayout({
              style_class: 'login-dialog-button-box',
-@@ -172,7 +179,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -169,7 +176,7 @@ export const AuthPrompt = GObject.registerClass({
              icon_name: 'go-previous-symbolic',
          });
          if (this._hasCancelButton)
@@ -702,10 +702,10 @@ index e76055e..b7b70d3 100644
              this.disconnect(this._mechanismsListChangedSignalId);
              this._mechanismsListChangedSignalId = 0;
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 899a09d..e949aeb 100644
+index 8c60572..1a3513f 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
-@@ -6,12 +6,14 @@
+@@ -5,12 +5,14 @@
      <file>gdm/authMenuButton.js</file>
      <file>gdm/authPrompt.js</file>
      <file>gdm/batch.js</file>

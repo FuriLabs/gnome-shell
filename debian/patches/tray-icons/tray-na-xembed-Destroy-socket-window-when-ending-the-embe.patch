@@ -28,13 +28,13 @@ index 4ef3666..588e034 100644
    Window socket_window;
    Window plug_window;
 +  Window old_parent;
-
+ 
    int root_x;
    int root_y;
 @@ -139,7 +140,26 @@ na_xembed_end_embedding (NaXembed *xembed)
  {
    NaXembedPrivate *priv = na_xembed_get_instance_private (xembed);
-
+ 
 +  if (priv->socket_window)
 +    {
 +      Display *xdisplay = meta_x11_display_get_xdisplay (priv->x11_display);
@@ -60,7 +60,7 @@ index 4ef3666..588e034 100644
    priv->resize_count = 0;
 @@ -413,6 +433,18 @@ na_xembed_add_window (NaXembed  *xembed,
                         &socket_attrs);
-
+ 
        XUnmapWindow (xdisplay, priv->plug_window); /* Shouldn't actually be necessary for XEMBED, but just in case */
 +
 +      if (!priv->old_parent)
@@ -103,9 +103,9 @@ index 4ef3666..588e034 100644
 @@ -696,7 +733,7 @@ na_xembed_finalize (GObject *object)
    if (priv->x11_display && priv->event_func_id)
      meta_x11_display_remove_event_func (priv->x11_display, priv->event_func_id);
-
+ 
 -  if (priv->plug_window)
 +  if (priv->plug_window || priv->socket_window)
      na_xembed_end_embedding (xembed);
-
+ 
    G_OBJECT_CLASS (na_xembed_parent_class)->finalize (object);

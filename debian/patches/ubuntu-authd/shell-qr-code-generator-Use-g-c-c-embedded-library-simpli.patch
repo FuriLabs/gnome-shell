@@ -1,5 +1,5 @@
 From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
-Date: Wed, 28 Feb 2024 04:38:05 +0100
+Date: Sat, 22 Feb 2025 03:31:47 +0100
 Subject: shell-qr-code-generator: Use g-c-c embedded library,
  simplifying dependencies
 
@@ -10,9 +10,9 @@ Subject: shell-qr-code-generator: Use g-c-c embedded library,
  src/meson.build                                    |    5 +-
  src/qrcodegen.c                                    | 1028 ++++++++++++++++++++
  src/qrcodegen.h                                    |  385 ++++++++
- src/shell-qr-code-generator.c                      |  269 +++--
+ src/shell-qr-code-generator.c                      |  266 +++--
  src/shell-qr-code-generator.h                      |    7 +-
- 8 files changed, 1664 insertions(+), 100 deletions(-)
+ 8 files changed, 1662 insertions(+), 99 deletions(-)
  create mode 100644 src/qrcodegen.c
  create mode 100644 src/qrcodegen.h
 
@@ -137,17 +137,17 @@ index fafed7c..029950d 100644
  });
  
 diff --git a/meson.build b/meson.build
-index 002fcd6..d7ef022 100644
+index e537d3b..d7ef022 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -31,7 +31,6 @@ schemas_req = '>= 48.beta'
- systemd_req = '>= 246'
+@@ -32,7 +32,6 @@ systemd_req = '>= 246'
  gnome_desktop_req = '>= 40'
  pipewire_req = '>= 0.3.49'
--qrencode_req = '>= 4.1.1'
  pango_req = '>= 1.46.0'
+-qrencode_req = '>= 4.1.1'
  
  nm_req = '>= 1.10.4'
+ secret_req = '>= 0.18'
 @@ -88,7 +87,6 @@ polkit_dep = dependency('polkit-agent-1', version: polkit_req)
  schemas_dep = dependency('gsettings-desktop-schemas', version: schemas_req)
  gnome_desktop_dep = dependency('gnome-desktop-4', version: gnome_desktop_req)
@@ -157,14 +157,14 @@ index 002fcd6..d7ef022 100644
  have_fonts = mutter_dep.get_variable('have_fonts') == 'true'
  have_x11 = mutter_dep.get_variable('have_x11') == 'true'
 diff --git a/src/meson.build b/src/meson.build
-index fc1ae5e..d037286 100644
+index dc41298..d037286 100644
 --- a/src/meson.build
 +++ b/src/meson.build
 @@ -75,7 +75,6 @@ gnome_shell_deps = [
    libsystemd_dep,
    libpipewire_dep,
    pango_dep,
--  qrencode_dep
+-  qrencode_dep,
  ]
  
  if have_x11_client
@@ -1605,16 +1605,17 @@ index 0000000..edbb6c0
 +}
 +#endif
 diff --git a/src/shell-qr-code-generator.c b/src/shell-qr-code-generator.c
-index c069227..4eb55df 100644
+index 6c7da8c..52531e9 100644
 --- a/src/shell-qr-code-generator.c
 +++ b/src/shell-qr-code-generator.c
-@@ -7,14 +7,17 @@
+@@ -7,15 +7,18 @@
  #include <meta/meta-plugin.h>
  #include <st/st.h>
  
 -#include <qrencode.h>
 +#include "qrcodegen.h"
  
+ #include "shell-global.h"
  #include "shell-qr-code-generator.h"
  
 -#define BYTES_PER_RGB_888 3
@@ -1629,7 +1630,7 @@ index c069227..4eb55df 100644
  struct _ShellQrCodeGenerator
  {
    GObject parent_instance;
-@@ -27,6 +30,8 @@ struct _ShellQrCodeGeneratorPrivate
+@@ -28,6 +31,8 @@ struct _ShellQrCodeGeneratorPrivate
    char *url;
    size_t width;
    size_t height;
@@ -1638,7 +1639,7 @@ index c069227..4eb55df 100644
    GTask *image_task;
    GTask *icon_task;
  };
-@@ -38,6 +43,8 @@ shell_qr_code_generator_dispose (GObject *object)
+@@ -39,6 +44,8 @@ shell_qr_code_generator_dispose (GObject *object)
  {
    ShellQrCodeGenerator *self = SHELL_QR_CODE_GENERATOR (object);
    g_clear_pointer (&self->priv->url, g_free);
@@ -1647,7 +1648,7 @@ index c069227..4eb55df 100644
  }
  
  static void
-@@ -53,32 +60,56 @@ shell_qr_code_generator_init (ShellQrCodeGenerator *qr_code_generator)
+@@ -54,32 +61,56 @@ shell_qr_code_generator_init (ShellQrCodeGenerator *qr_code_generator)
    qr_code_generator->priv = shell_qr_code_generator_get_instance_private (qr_code_generator);
  }
  
@@ -1728,7 +1729,7 @@ index c069227..4eb55df 100644
      {
        g_set_error (error,
                     G_IO_ERROR,
-@@ -88,47 +119,69 @@ generate_icon (const char   *url,
+@@ -89,47 +120,69 @@ generate_icon (const char   *url,
        return NULL;
      }
  
@@ -1827,7 +1828,7 @@ index c069227..4eb55df 100644
  static void
  qr_code_generator_thread (GTask        *task,
                            gpointer      source,
-@@ -138,13 +191,37 @@ qr_code_generator_thread (GTask        *task,
+@@ -139,13 +192,37 @@ qr_code_generator_thread (GTask        *task,
    GError *error = NULL;
    ShellQrCodeGenerator *self = task_data;
    g_autofree guint8 *pixel_data = NULL;
@@ -1869,10 +1870,10 @@ index c069227..4eb55df 100644
  }
  
  static void
-@@ -152,31 +229,33 @@ on_image_task_complete (ShellQrCodeGenerator *self,
-                         GAsyncResult         *result,
-                         gpointer              user_data)
- {
+@@ -160,16 +237,16 @@ on_image_task_complete (ShellQrCodeGenerator *self,
+   ClutterBackend *backend =
+     clutter_context_get_backend (clutter_context);
+   CoglContext *ctx = clutter_backend_get_cogl_context (backend);
 -  guint8 *pixel_data;
 +  g_autoptr (QrCodeData) qrcode_data = NULL;
    g_autoptr (ClutterContent) content = NULL;
@@ -1889,22 +1890,22 @@ index c069227..4eb55df 100644
        return;
      }
  
--  content = st_image_content_new_with_preferred_size (self->priv->width, self->priv->height);
-+  content = st_image_content_new_with_preferred_size (self->priv->width,
-+                                                      self->priv->height);
-   data_set = clutter_image_set_data (CLUTTER_IMAGE (content),
--                                     pixel_data,
--                                     COGL_PIXEL_FORMAT_RGB_888,
--                                     self->priv->width,
--                                     self->priv->height,
--                                     self->priv->width * BYTES_PER_RGB_888,
-+                                     qrcode_data->pixel_data,
-+                                     qrcode_data->pixel_format,
-+                                     qrcode_data->size,
-+                                     qrcode_data->size,
-+                                     qrcode_data->size *
-+                                     BYTES_PER_FORMAT (qrcode_data->pixel_format),
-                                      &error);
+@@ -177,16 +254,17 @@ on_image_task_complete (ShellQrCodeGenerator *self,
+                                                       self->priv->height);
+   data_set = st_image_content_set_data (ST_IMAGE_CONTENT (content),
+                                         ctx,
+-                                        pixel_data,
+-                                        COGL_PIXEL_FORMAT_RGB_888,
+-                                        self->priv->width,
+-                                        self->priv->height,
+-                                        self->priv->width * BYTES_PER_RGB_888,
++                                        qrcode_data->pixel_data,
++                                        qrcode_data->pixel_format,
++                                        qrcode_data->size,
++                                        qrcode_data->size,
++                                        qrcode_data->size *
++                                        BYTES_PER_FORMAT (qrcode_data->pixel_format),
+                                         &error);
  
    if (!data_set)
      {
@@ -1913,7 +1914,7 @@ index c069227..4eb55df 100644
        return;
      }
  
-@@ -185,19 +264,30 @@ on_image_task_complete (ShellQrCodeGenerator *self,
+@@ -195,19 +273,30 @@ on_image_task_complete (ShellQrCodeGenerator *self,
  }
  
  /**
@@ -1948,7 +1949,7 @@ index c069227..4eb55df 100644
                                            GAsyncReadyCallback   callback,
                                            gpointer              user_data)
  {
-@@ -216,7 +306,20 @@ shell_qr_code_generator_generate_qr_code (ShellQrCodeGenerator *self,
+@@ -226,7 +315,20 @@ shell_qr_code_generator_generate_qr_code (ShellQrCodeGenerator *self,
                                   shell_qr_code_generator_generate_qr_code,
                                   G_IO_ERROR,
                                   G_IO_ERROR_INVALID_DATA,
@@ -1970,7 +1971,7 @@ index c069227..4eb55df 100644
        return;
      }
  
-@@ -237,12 +340,15 @@ shell_qr_code_generator_generate_qr_code (ShellQrCodeGenerator *self,
+@@ -247,12 +349,15 @@ shell_qr_code_generator_generate_qr_code (ShellQrCodeGenerator *self,
    priv->url = g_strdup (url);
    priv->width = width;
    priv->height = height;
@@ -1988,7 +1989,7 @@ index c069227..4eb55df 100644
    g_task_set_source_tag (priv->image_task, on_image_task_complete);
    g_task_set_task_data (priv->image_task, self, NULL);
    g_task_run_in_thread (priv->image_task, qr_code_generator_thread);
-@@ -250,13 +356,15 @@ shell_qr_code_generator_generate_qr_code (ShellQrCodeGenerator *self,
+@@ -260,13 +365,15 @@ shell_qr_code_generator_generate_qr_code (ShellQrCodeGenerator *self,
  
  /**
   * shell_qr_code_generator_generate_qr_code_finish:
@@ -2006,7 +2007,7 @@ index c069227..4eb55df 100644
   *
   */
  GIcon *
-@@ -269,6 +377,9 @@ shell_qr_code_generator_generate_qr_code_finish (ShellQrCodeGenerator   *self,
+@@ -279,6 +386,9 @@ shell_qr_code_generator_generate_qr_code_finish (ShellQrCodeGenerator   *self,
    g_return_val_if_fail (g_async_result_is_tagged (result,
                                                    shell_qr_code_generator_generate_qr_code),
                          NULL);
