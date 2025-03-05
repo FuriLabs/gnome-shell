@@ -1,10 +1,10 @@
-gnome-shell (46.0-0ubuntu6~24.04.8) UNRELEASED; urgency=medium
+gnome-shell (46.0-0ubuntu6~24.04.8) noble; urgency=medium
 
   [ Alessandro Astone ]
   * Backport patch for connecting to a new Wi-Fi network from the log-in screen
     (LP: #2098016)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 05 Mar 2025 16:23:33 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 05 Mar 2025 16:24:15 +0100
 
 gnome-shell (46.0-0ubuntu6~24.04.7) noble; urgency=medium
 
