@@ -1,3 +1,14 @@
+gnome-shell (47.0-2ubuntu3.24.10.1) UNRELEASED; urgency=medium
+
+  [ Alessandro Astone ]
+  * Backport patch for connecting to a new Wi-Fi network from the log-in screen
+    (LP: #2098016)
+
+  [ Marco Trevisan (Treviño) ]
+  * debian: Prepare for oracular branching
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 05 Mar 2025 16:31:01 +0100
+
 gnome-shell (47.0-2ubuntu3) oracular; urgency=medium
 
   * d/p: Fix toggling lockscreen view using Escape (LP: #2084308)
