@@ -1,8 +1,14 @@
 include:
   - project: 'GNOME/citemplates'
+    file: 'templates/default-rules.yml'
+  - project: 'GNOME/citemplates'
     file: 'flatpak/flatpak_ci_initiative.yml'
-  - remote: 'https://gitlab.gnome.org/Infrastructure/freedesktop-ci-templates/-/raw/057b052e682d8e5a20c1eb2dd60d5b87d2b56856/templates/fedora.yml'
-  - remote: 'https://gitlab.gnome.org/Infrastructure/freedesktop-ci-templates/-/raw/bc70242ffb8402243e934659ecc1a2d1c89eca2b/templates/ci-fairy.yml'
+  - project: 'Infrastructure/freedesktop-ci-templates'
+    file: 'templates/fedora.yml'
+    ref: '057b052e682d8e5a20c1eb2dd60d5b87d2b56856'
+  - project: 'Infrastructure/freedesktop-ci-templates'
+    file: 'templates/ci-fairy.yml'
+    ref: 'bc70242ffb8402243e934659ecc1a2d1c89eca2b'
   - component: gitlab.gnome.org/GNOME/citemplates/release-service@master
     inputs:
       job-stage: deploy
@@ -21,7 +27,7 @@ build-sysext:
     - .gitlab-ci/install-gnomeos-sysext-dependencies.sh $CI_PROJECT_DIR/extension
 
 stages:
-  - pre_review
+  - pre-review
   - prep
   - review
   - build
@@ -32,32 +38,14 @@ stages:
 
 default:
   image: $MUTTER_CI_IMAGE
-  # Cancel jobs if newer commits are pushed to the branch
-  interruptible: true
-  # Auto-retry jobs in case of infra failures
-  retry:
-    max: 1
-    when:
-      - 'runner_system_failure'
-      - 'stuck_or_timeout_failure'
-      - 'scheduler_failure'
-      - 'api_failure'
 
 variables:
-  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/41:x86_64-2025-02-04.1
+  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/41:x86_64-2025-02-19.1
   FDO_UPSTREAM_REPO: GNOME/gnome-shell
   BUNDLE: "extensions-git.flatpak"
   LINT_LOG: "eslint-report.xml"
   LINT_MR_LOG: "eslint-mr-report.xml"
   TARBALL_ARTIFACT_PATH: build/meson-dist/$CI_PROJECT_NAME-$CI_COMMIT_TAG.tar.xz
-
-workflow:
-  rules:
-    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"'
-      when: never
-    - if: '$CI_MERGE_REQUEST_IID'
-    - if: '$CI_COMMIT_TAG'
-    - if: '$CI_COMMIT_BRANCH'
 
 .pipeline-guard:
   rules:
@@ -97,10 +85,10 @@ workflow:
         https://gitlab.gnome.org/GNOME/gnome-shell.git \
         main
 
-check_commit_log:
+check-commit-log:
   extends:
     - .fdo.ci-fairy
-  stage: pre_review
+  stage: pre-review
   variables:
     GIT_DEPTH: "100"
   script:
@@ -122,7 +110,7 @@ check_commit_log:
 check-merge-request:
   extends:
     - .fdo.ci-fairy
-  stage: pre_review
+  stage: pre-review
   script:
     - if [[ x"$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" != "x" ]] ;
       then
@@ -145,7 +133,7 @@ build-fedora-container:
     - .gnome-shell.fedora
   stage: prep
 
-js_check:
+js-check:
   extends:
       - .fdo.distribution-image@fedora
       - .gnome-shell.fedora
@@ -184,7 +172,7 @@ eslint-doc:
         - .eslintrc.yml
         - lint/*
 
-potfile_c_check:
+potfile-c-check:
   extends:
     - .fdo.distribution-image@fedora
     - .gnome-shell.fedora
@@ -192,7 +180,7 @@ potfile_c_check:
   script:
     - ./.gitlab-ci/check-potfiles.sh
 
-potfile_js_check:
+potfile-js-check:
   extends:
     - .fdo.distribution-image@fedora
     - .gnome-shell.fedora
@@ -205,7 +193,7 @@ potfile_js_check:
 
 build:
   stage: build
-  needs: ["check_commit_log"]
+  needs: ["check-commit-log"]
   before_script:
     - .gitlab-ci/checkout-mutter.sh
     - meson mutter mutter/build --prefix=/usr
@@ -268,7 +256,7 @@ test-coverity:
 
 flatpak:
   stage: build
-  needs: ["check_commit_log"]
+  needs: ["check-commit-log"]
   variables:
     SUBPROJECT: "subprojects/extensions-app"
     # Your manifest path
