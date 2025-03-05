@@ -97,3 +97,4 @@ unlockDialog-Bind-source-titles.patch
 authPrompt-Allow-to-set-a-custom-ShellUserVerifer.patch
 workspacesView-Make-active-workspace-above-siblings.patch
 main-Disable-text-mipmapping-with-env-variable.patch
+shell-network-agent-Do-not-query-keyring-in-greeter-mode.patch
