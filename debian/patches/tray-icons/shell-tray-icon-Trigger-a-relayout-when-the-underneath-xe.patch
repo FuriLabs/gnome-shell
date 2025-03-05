@@ -12,7 +12,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/2012388
  3 files changed, 23 insertions(+)
 
 diff --git a/src/shell-tray-icon.c b/src/shell-tray-icon.c
-index ec799d2..c5d7045 100644
+index 9b79c2b..c9be146 100644
 --- a/src/shell-tray-icon.c
 +++ b/src/shell-tray-icon.c
 @@ -260,6 +260,10 @@ shell_tray_icon_set_child (ShellTrayIcon *tray_icon,

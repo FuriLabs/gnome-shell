@@ -32,10 +32,10 @@ index d95284e..2d5065f 100644
 @@ -104,7 +104,7 @@ struct _StThemeNode {
    int box_shadow_min_width;
    int box_shadow_min_height;
-
+ 
 -  guint stylesheets_changed_id;
 +  gulong stylesheets_changed_id;
-
+ 
    CoglTexture *border_slices_texture;
    CoglPipeline *border_slices_pipeline;
 diff --git a/src/st/st-theme-node.c b/src/st/st-theme-node.c
@@ -51,24 +51,24 @@ index 4e0111d..8d81693 100644
 +
 +  node->properties_computed = FALSE;
  }
-
+ 
  static void
 @@ -102,6 +106,7 @@ st_theme_node_dispose (GObject *gobject)
-
+ 
    st_theme_node_paint_state_free (&node->cached_state);
-
+ 
 +  maybe_free_properties (node);
    g_clear_object (&node->theme);
-
+ 
    G_OBJECT_CLASS (st_theme_node_parent_class)->dispose (gobject);
 @@ -117,8 +122,6 @@ st_theme_node_finalize (GObject *object)
    g_strfreev (node->pseudo_classes);
    g_free (node->inline_style);
-
+ 
 -  maybe_free_properties (node);
 -
    g_clear_pointer (&node->font_desc, pango_font_description_free);
-
+ 
    g_clear_pointer (&node->box_shadow, st_shadow_unref);
 @@ -472,6 +475,16 @@ ensure_properties (StThemeNode *node)
            node->n_properties = properties->len;
@@ -86,4 +86,4 @@ index 4e0111d..8d81693 100644
 +        }
      }
  }
-
+ 

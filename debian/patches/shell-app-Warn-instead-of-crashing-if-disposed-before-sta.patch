@@ -19,19 +19,19 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3457
  1 file changed, 21 insertions(+), 3 deletions(-)
 
 diff --git a/src/shell-app.c b/src/shell-app.c
-index 0b55aa0..d561367 100644
+index 916783a..c7630d2 100644
 --- a/src/shell-app.c
 +++ b/src/shell-app.c
-@@ -1722,14 +1722,32 @@ shell_app_dispose (GObject *object)
+@@ -1736,14 +1736,32 @@ shell_app_dispose (GObject *object)
  {
    ShellApp *app = SHELL_APP (object);
-
+ 
 -  g_clear_object (&app->info);
    g_clear_object (&app->fallback_icon);
-
+ 
    while (app->running_state)
      _shell_app_remove_window (app, app->running_state->windows->data);
-
+ 
 -  /* We should have been transitioned when we removed all of our windows */
 -  g_assert (app->state == SHELL_APP_STATE_STOPPED);
 +  if (app->state != SHELL_APP_STATE_STOPPED && app->info)
@@ -56,5 +56,5 @@ index 0b55aa0..d561367 100644
 +
 +  g_clear_object (&app->info);
    g_assert (app->running_state == NULL);
-
+ 
    G_OBJECT_CLASS(shell_app_parent_class)->dispose (object);

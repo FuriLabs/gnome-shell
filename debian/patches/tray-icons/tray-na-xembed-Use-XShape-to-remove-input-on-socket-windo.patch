@@ -25,7 +25,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/2012388
  3 files changed, 17 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index 7726e92..d7ef022 100644
+index 74af7e7..fa33b9f 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -93,6 +93,7 @@ have_x11 = mutter_dep.get_variable('have_x11') == 'true'
@@ -35,13 +35,13 @@ index 7726e92..d7ef022 100644
 +  xext_dep = dependency('xext')
    xfixes_dep = dependency('xfixes')
  endif
-
+ 
 diff --git a/src/tray/meson.build b/src/tray/meson.build
 index 2fc73f3..c91e940 100644
 --- a/src/tray/meson.build
 +++ b/src/tray/meson.build
 @@ -9,6 +9,6 @@ tray_sources = [
-
+ 
  libtray = static_library('tray', tray_sources,
    c_args: ['-DG_LOG_DOMAIN="notification_area"'],
 -  dependencies: [mutter_dep, mtk_dep, xfixes_dep],
@@ -54,7 +54,7 @@ index 75af21a..1be1e9d 100644
 +++ b/src/tray/na-xembed.c
 @@ -24,6 +24,7 @@
  #include "na-xembed.h"
-
+ 
  #include <mtk/mtk-x11.h>
 +#include <X11/extensions/shape.h>
  #include <X11/extensions/Xfixes.h>
@@ -66,7 +66,7 @@ index 75af21a..1be1e9d 100644
        XWindowAttributes plug_attrs;
 +      int shape_major, shape_minor;
        int result;
-
+ 
        result = XGetWindowAttributes (xdisplay, priv->plug_window, &plug_attrs);
 @@ -407,6 +409,19 @@ na_xembed_add_window (NaXembed  *xembed,
                         priv->plug_window,
@@ -86,5 +86,5 @@ index 75af21a..1be1e9d 100644
 +                                   0, 0, NULL, 0, ShapeSet, 0);
 +        }
      }
-
+ 
    priv->have_size = FALSE;
