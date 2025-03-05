@@ -1,16 +1,18 @@
-gnome-shell (48~rc-1) UNRELEASED; urgency=medium
+gnome-shell (48~rc-1) experimental; urgency=medium
 
+  * Team upload
   * New upstream release candidate
     - In particular, when combined with mutter 48~rc, this version avoids
       an issue where the visible cursor position in GTK 4 apps does not
       match the position where clicks will be applied
   * Refresh patch series
   * Bump mutter dependency to 48~rc as per meson.build
+  * d/gnome-shell-common.install: Install the new System directory
   * Standards-Version: 4.7.2 (no changes required)
   * Release to experimental to avoid disrupting the gnome-shell/mutter
     transition
 
- -- Simon McVittie <smcv@debian.org>  Wed, 05 Mar 2025 10:58:08 +0000
+ -- Simon McVittie <smcv@debian.org>  Wed, 05 Mar 2025 11:23:09 +0000
 
 gnome-shell (48~beta-4) unstable; urgency=medium
 
