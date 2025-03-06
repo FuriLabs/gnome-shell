@@ -21,7 +21,7 @@ https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/web-lo
  create mode 100644 js/gdm/webLogin.js
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index c7123f8..a9ee297 100644
+index 574037f..e836418 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 @@ -32,7 +32,8 @@ $_gdm_dialog_width: 25em;
@@ -34,7 +34,7 @@ index c7123f8..a9ee297 100644
      @extend .icon-button;
      @extend %system_button;
    }
-@@ -212,8 +213,80 @@ $_gdm_dialog_width: 25em;
+@@ -225,8 +226,80 @@ $_gdm_dialog_width: 25em;
    }
  }
  
@@ -116,7 +116,7 @@ index c7123f8..a9ee297 100644
    background-color: transparent;
  
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 320a5da..369f260 100644
+index 4e74163..091b189 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -13,6 +13,7 @@ import * as MessageTray from '../ui/messageTray.js';
@@ -150,7 +150,7 @@ index 320a5da..369f260 100644
          this._authList = new AuthList.AuthList();
          this._authList.set({
              visible: false,
-@@ -304,6 +314,9 @@ export const AuthPrompt = GObject.registerClass({
+@@ -306,6 +316,9 @@ export const AuthPrompt = GObject.registerClass({
              this._inactiveEntry = this._passwordEntry;
          }
          this._capsLockWarningLabel.visible = secret;
@@ -160,7 +160,7 @@ index 320a5da..369f260 100644
      }
  
      _onAskQuestion(verifier, serviceName, question, secret) {
-@@ -350,6 +363,110 @@ export const AuthPrompt = GObject.registerClass({
+@@ -352,6 +365,110 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('mechanisms-changed', serviceName);
      }
  
@@ -271,7 +271,7 @@ index 320a5da..369f260 100644
      _onCredentialManagerAuthenticated() {
          if (this.verificationStatus !== AuthPromptStatus.VERIFICATION_SUCCEEDED)
              this.reset();
-@@ -506,12 +623,16 @@ export const AuthPrompt = GObject.registerClass({
+@@ -508,12 +625,16 @@ export const AuthPrompt = GObject.registerClass({
          this.stopSpinning();
          this._authList.clear();
          this._authList.hide();
@@ -288,7 +288,7 @@ index 320a5da..369f260 100644
          this._entry.show();
          this._entry.grab_key_focus();
      }
-@@ -592,6 +713,9 @@ export const AuthPrompt = GObject.registerClass({
+@@ -594,6 +715,9 @@ export const AuthPrompt = GObject.registerClass({
      }
  
      updateSensitivity(sensitive) {
@@ -298,7 +298,7 @@ index 320a5da..369f260 100644
          if (this._entry.reactive === sensitive)
              return;
  
-@@ -721,6 +845,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -723,6 +847,7 @@ export const AuthPrompt = GObject.registerClass({
              hold: null,
          });
  
@@ -669,10 +669,10 @@ index 1b23e41..8c60572 100644
      <file>extensions/extension.js</file>
      <file>extensions/sharedInternals.js</file>
 diff --git a/po/POTFILES.in b/po/POTFILES.in
-index c3cfaaf..ddbf27f 100644
+index 7df1718..5169ba6 100644
 --- a/po/POTFILES.in
 +++ b/po/POTFILES.in
-@@ -12,6 +12,7 @@ js/dbusServices/extensions/ui/extension-error-page.ui
+@@ -13,6 +13,7 @@ js/dbusServices/extensions/ui/extension-error-page.ui
  js/gdm/authPrompt.js
  js/gdm/loginDialog.js
  js/gdm/util.js

@@ -19,10 +19,10 @@ of a QR code for a specified URL.
  create mode 100644 src/shell-qr-code-generator.h
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index e5f9449..353ad43 100644
+index e2b33c6..198559d 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-@@ -361,3 +361,11 @@ $_gdm_dialog_width: 25em;
+@@ -374,3 +374,11 @@ $_gdm_dialog_width: 25em;
      }
    }
  }
@@ -35,7 +35,7 @@ index e5f9449..353ad43 100644
 +  border-width: 1em;
 +}
 diff --git a/meson.build b/meson.build
-index d7ef022..e537d3b 100644
+index fa33b9f..c774508 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -32,6 +32,7 @@ systemd_req = '>= 246'

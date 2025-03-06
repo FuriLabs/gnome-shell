@@ -21,10 +21,10 @@ Forwarded: not-needed
  create mode 100644 data/org.gnome.shell.ubuntu.gschema.xml.in
 
 diff --git a/data/meson.build b/data/meson.build
-index 5be31f7..a7a535d 100644
+index d59cf05..6b73d3d 100644
 --- a/data/meson.build
 +++ b/data/meson.build
-@@ -106,6 +106,12 @@ schema = configure_file(
+@@ -119,6 +119,12 @@ schema = configure_file(
    configuration: schemaconf,
    install_dir: schemadir
  )
@@ -37,7 +37,7 @@ index 5be31f7..a7a535d 100644
  schema_ubuntu_login = configure_file(
    input: 'com.ubuntu.login-screen.gschema.xml.in',
    output: 'com.ubuntu.login-screen.gschema.xml',
-@@ -155,7 +161,7 @@ endif
+@@ -168,7 +174,7 @@ endif
  
  # for unit tests - gnome.compile_schemas() only looks in srcdir
  custom_target('compile-schemas',
@@ -70,7 +70,7 @@ index 0000000..6f9cc62
 +  </schema>
 +</schemalist>
 diff --git a/js/ui/main.js b/js/ui/main.js
-index d28d06f..f2e7ff9 100644
+index adab13c..0dcb783 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -180,6 +180,9 @@ export async function start() {
@@ -143,7 +143,7 @@ index d28d06f..f2e7ff9 100644
          stylesheet = _getStylesheet(name.replace('.css', `-${getStyleVariant()}.css`));
  
 diff --git a/src/st/st-settings.c b/src/st/st-settings.c
-index 235a2b5..eaae274 100644
+index 5fe1842..502f339 100644
 --- a/src/st/st-settings.c
 +++ b/src/st/st-settings.c
 @@ -34,6 +34,7 @@
@@ -177,7 +177,7 @@ index 235a2b5..eaae274 100644
    int inhibit_animations_count;
    gboolean enable_animations;
    gboolean primary_paste;
-@@ -138,7 +143,9 @@ st_settings_finalize (GObject *object)
+@@ -228,7 +233,9 @@ st_settings_finalize (GObject *object)
    g_object_unref (settings->a11y_applications_settings);
    g_object_unref (settings->a11y_interface_settings);
    g_object_unref (settings->lockdown_settings);
@@ -187,7 +187,7 @@ index 235a2b5..eaae274 100644
    g_free (settings->gtk_icon_theme);
  
    G_OBJECT_CLASS (st_settings_parent_class)->finalize (object);
-@@ -190,6 +197,13 @@ st_settings_get_property (GObject    *object,
+@@ -280,6 +287,13 @@ st_settings_get_property (GObject    *object,
      case PROP_GTK_ICON_THEME:
        g_value_set_string (value, settings->gtk_icon_theme);
        break;
@@ -201,7 +201,7 @@ index 235a2b5..eaae274 100644
      case PROP_COLOR_SCHEME:
        g_value_set_enum (value, settings->color_scheme);
        break;
-@@ -293,6 +307,26 @@ st_settings_class_init (StSettingsClass *klass)
+@@ -383,6 +397,26 @@ st_settings_class_init (StSettingsClass *klass)
                                                  ST_TYPE_SYSTEM_ACCENT_COLOR,
                                                  ST_SYSTEM_ACCENT_COLOR_BLUE,
                                                  ST_PARAM_READABLE);
@@ -228,7 +228,7 @@ index 235a2b5..eaae274 100644
  
    /**
     * StSettings:magnifier-active:
-@@ -324,6 +358,25 @@ st_settings_class_init (StSettingsClass *klass)
+@@ -414,6 +448,25 @@ st_settings_class_init (StSettingsClass *klass)
    g_object_class_install_properties (object_class, N_PROPS, props);
  }
  
@@ -254,7 +254,7 @@ index 235a2b5..eaae274 100644
  static void
  on_interface_settings_changed (GSettings   *g_settings,
                                 const gchar *key,
-@@ -345,6 +398,10 @@ on_interface_settings_changed (GSettings   *g_settings,
+@@ -435,6 +488,10 @@ on_interface_settings_changed (GSettings   *g_settings,
        settings->font_name = g_settings_get_string (g_settings, key);
        g_object_notify_by_pspec (G_OBJECT (settings), props[PROP_FONT_NAME]);
      }
@@ -265,7 +265,7 @@ index 235a2b5..eaae274 100644
    else if (g_str_equal (key, KEY_GTK_ICON_THEME))
      {
        g_free (settings->gtk_icon_theme);
-@@ -363,6 +420,23 @@ on_interface_settings_changed (GSettings   *g_settings,
+@@ -453,6 +510,23 @@ on_interface_settings_changed (GSettings   *g_settings,
        settings->accent_color = g_settings_get_enum (g_settings, key);
        g_object_notify_by_pspec (G_OBJECT (settings), props[PROP_ACCENT_COLOR]);
      }
@@ -289,7 +289,7 @@ index 235a2b5..eaae274 100644
  }
  
  static void
-@@ -420,6 +494,10 @@ st_settings_init (StSettings *settings)
+@@ -510,6 +584,10 @@ st_settings_init (StSettings *settings)
    g_signal_connect (settings->interface_settings, "changed",
                      G_CALLBACK (on_interface_settings_changed), settings);
  
@@ -300,7 +300,7 @@ index 235a2b5..eaae274 100644
    settings->mouse_settings = g_settings_new ("org.gnome.desktop.peripherals.mouse");
    g_signal_connect (settings->mouse_settings, "changed",
                      G_CALLBACK (on_mouse_settings_changed), settings);
-@@ -436,6 +514,8 @@ st_settings_init (StSettings *settings)
+@@ -526,6 +604,8 @@ st_settings_init (StSettings *settings)
    g_signal_connect (settings->lockdown_settings, "changed",
                      G_CALLBACK (on_lockdown_settings_changed), settings);
  

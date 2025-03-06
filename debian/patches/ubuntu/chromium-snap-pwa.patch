@@ -9,7 +9,7 @@ Forwarded: not-needed
  1 file changed, 30 insertions(+), 2 deletions(-)
 
 diff --git a/src/shell-window-tracker.c b/src/shell-window-tracker.c
-index ce98840..cab7241 100644
+index 839f524..675d74c 100644
 --- a/src/shell-window-tracker.c
 +++ b/src/shell-window-tracker.c
 @@ -152,11 +152,21 @@ get_app_from_window_wmclass (MetaWindow  *window)

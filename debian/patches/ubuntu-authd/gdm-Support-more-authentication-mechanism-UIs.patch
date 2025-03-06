@@ -8,7 +8,7 @@ Subject: gdm: Support more authentication mechanism UIs
  2 files changed, 79 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 001eac1..dfc8fbe 100644
+index 6e4e41d..b76807c 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -87,9 +87,11 @@ export const AuthPrompt = GObject.registerClass({
@@ -23,7 +23,7 @@ index 001eac1..dfc8fbe 100644
          this._userVerifier.connect('web-login', this._onWebLogin.bind(this));
          this._userVerifier.connect('web-login-time-out', this._onWebLoginTimeOut.bind(this));
          this._userVerifier.connect('verification-failed', this._onVerificationFailed.bind(this));
-@@ -357,6 +359,20 @@ export const AuthPrompt = GObject.registerClass({
+@@ -359,6 +361,20 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('prompted');
      }
  
@@ -44,7 +44,7 @@ index 001eac1..dfc8fbe 100644
      _onShowChoiceList(userVerifier, serviceName, promptMessage, choiceList) {
          if (this._queryingService)
              this.clear();
-@@ -376,6 +392,11 @@ export const AuthPrompt = GObject.registerClass({
+@@ -378,6 +394,11 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('mechanisms-changed', serviceName);
      }
  

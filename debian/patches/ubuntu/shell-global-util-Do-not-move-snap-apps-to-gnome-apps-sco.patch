@@ -49,10 +49,10 @@ index 517ff57..9c9e038 100644
      // Dummy child watch; we don't want to double-fork internally
      // because then we lose the parent-child relationship, which
 diff --git a/src/shell-global.c b/src/shell-global.c
-index 1a3caeb..ef5efb9 100644
+index ef5ceee..c943502 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
-@@ -1386,6 +1386,7 @@ shell_global_app_launched_cb (GAppLaunchContext *context,
+@@ -1432,6 +1432,7 @@ shell_global_app_launched_cb (GAppLaunchContext *context,
  {
    gint32 pid;
    const gchar *app_name;
@@ -60,7 +60,7 @@ index 1a3caeb..ef5efb9 100644
  
    if (!g_variant_lookup (platform_data, "pid", "i", &pid))
      return;
-@@ -1399,6 +1400,12 @@ shell_global_app_launched_cb (GAppLaunchContext *context,
+@@ -1445,6 +1446,12 @@ shell_global_app_launched_cb (GAppLaunchContext *context,
    if (app_name == NULL)
      app_name = g_app_info_get_executable (info);
  

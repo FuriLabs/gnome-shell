@@ -17,10 +17,10 @@ Subject: shell-qr-code-generator: Use g-c-c embedded library,
  create mode 100644 src/qrcodegen.h
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index a9ee297..08cd09f 100644
+index e836418..f955338 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-@@ -450,8 +450,16 @@ $_gdm_dialog_width: 25em;
+@@ -463,8 +463,16 @@ $_gdm_dialog_width: 25em;
  
  // QR Code
  .qr-code {
@@ -137,7 +137,7 @@ index fafed7c..029950d 100644
  });
  
 diff --git a/meson.build b/meson.build
-index e537d3b..d7ef022 100644
+index c774508..fa33b9f 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -32,7 +32,6 @@ systemd_req = '>= 246'

@@ -9,7 +9,7 @@ Subject: st: Add support for brown accent color
  3 files changed, 8 insertions(+)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
-index f2e7ff9..58b43a2 100644
+index 0dcb783..a74eae2 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -496,6 +496,8 @@ export function getYaruVariantFromAccent() {
@@ -22,7 +22,7 @@ index f2e7ff9..58b43a2 100644
  }
  
 diff --git a/src/st/st-settings.h b/src/st/st-settings.h
-index c871c48..2af86c5 100644
+index 4c00188..796502a 100644
 --- a/src/st/st-settings.h
 +++ b/src/st/st-settings.h
 @@ -44,6 +44,7 @@ typedef enum {

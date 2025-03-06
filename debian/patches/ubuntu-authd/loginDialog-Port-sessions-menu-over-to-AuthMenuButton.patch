@@ -12,7 +12,7 @@ control.
  2 files changed, 73 insertions(+), 22 deletions(-)
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index a89af5b..e5f9449 100644
+index 879b353..e2b33c6 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 @@ -31,6 +31,7 @@ $_gdm_dialog_width: 25em;

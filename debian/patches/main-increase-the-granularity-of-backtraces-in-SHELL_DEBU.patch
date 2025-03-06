@@ -145,10 +145,10 @@ index a69205e..0ad12ae 100644
    shell_dbus_init (meta_context_is_replacing (context));
    shell_a11y_init ();
 diff --git a/src/shell-global.c b/src/shell-global.c
-index 471a848..6231975 100644
+index f3a04ec..d38be60 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
-@@ -1921,11 +1921,15 @@ shell_global_get_debug_flags (ShellGlobal *global)
+@@ -2041,11 +2041,15 @@ shell_global_get_debug_flags (ShellGlobal *global)
  /**
   * shell_global_set_debug_flags:
   * @global: a #ShellGlobal

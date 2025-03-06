@@ -6448,11 +6448,11 @@ index 1a3513f..aaf0e96 100644
      <file>extensions/sharedInternals.js</file>
  
 diff --git a/po/POTFILES.in b/po/POTFILES.in
-index ddbf27f..40093af 100644
+index 5169ba6..bc4ba9a 100644
 --- a/po/POTFILES.in
 +++ b/po/POTFILES.in
-@@ -9,6 +9,7 @@ data/org.gnome.Shell.Extensions.desktop.in.in
- data/org.gnome.Shell.PortalHelper.desktop.in.in
+@@ -10,6 +10,7 @@ data/org.gnome.Shell.PortalHelper.desktop.in.in
+ data/X-GNOME-Shell-System.directory.desktop.in
  data/X-GNOME-Shell-Utilities.directory.desktop.in
  js/dbusServices/extensions/ui/extension-error-page.ui
 +js/gdm/authd.js
