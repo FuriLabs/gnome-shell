@@ -924,7 +924,7 @@ st_scroll_view_class_init (StScrollViewClass *klass)
                           ST_PARAM_READABLE);
 
   /**
-   * StScrollView:enable-mouse-scrolling:
+   * StScrollView:enable-mouse-scrolling: (getter get_mouse_scrolling) (setter set_mouse_scrolling):
    *
    * Whether to enable automatic mouse wheel scrolling.
    */
@@ -1426,4 +1426,26 @@ st_scroll_view_get_bar_offsets (StScrollView *scroll,
       *voffset = priv->hscrollbar_visible ? clutter_actor_get_height (priv->hscroll)
                                           : 0.;
     }
+}
+
+gboolean
+st_scroll_view_get_hscrollbar_visible (StScrollView *scroll)
+{
+  StScrollViewPrivate *priv;
+
+  g_return_val_if_fail (ST_IS_SCROLL_VIEW (scroll), FALSE);
+
+  priv = st_scroll_view_get_instance_private (scroll);
+  return priv->hscrollbar_visible;
+}
+
+gboolean
+st_scroll_view_get_vscrollbar_visible (StScrollView *scroll)
+{
+  StScrollViewPrivate *priv;
+
+  g_return_val_if_fail (ST_IS_SCROLL_VIEW (scroll), FALSE);
+
+  priv = st_scroll_view_get_instance_private (scroll);
+  return priv->vscrollbar_visible;
 }

@@ -25,7 +25,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/2012388
  3 files changed, 17 insertions(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index 7726e92..d7ef022 100644
+index 74af7e7..fa33b9f 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -93,6 +93,7 @@ have_x11 = mutter_dep.get_variable('have_x11') == 'true'

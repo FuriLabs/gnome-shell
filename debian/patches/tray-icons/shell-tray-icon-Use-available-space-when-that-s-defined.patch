@@ -12,7 +12,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/2012388
  3 files changed, 37 insertions(+)
 
 diff --git a/src/shell-tray-icon.c b/src/shell-tray-icon.c
-index 3af5cc4..d4c5552 100644
+index 462945e..39204bf 100644
 --- a/src/shell-tray-icon.c
 +++ b/src/shell-tray-icon.c
 @@ -185,6 +185,10 @@ shell_tray_icon_allocate (ClutterActor          *actor,

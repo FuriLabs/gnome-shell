@@ -24,6 +24,8 @@ import * as SystemActions from '../misc/systemActions.js';
 
 import * as Main from './main.js';
 
+import * as Config from '../misc/config.js';
+
 const MENU_POPUP_TIMEOUT = 600;
 const POPDOWN_DIALOG_TIMEOUT = 500;
 
@@ -57,27 +59,13 @@ const DIALOG_SHADE_NORMAL = new Cogl.Color({red: 0, green: 0, blue: 0, alpha: 20
 const DIALOG_SHADE_HIGHLIGHT = new Cogl.Color({red: 0, green: 0, blue: 0, alpha: 85});
 
 const DEFAULT_FOLDERS = {
+    'System': {
+        name: 'X-GNOME-Shell-System.directory',
+        apps: Config.SYSTEM_FOLDER_APPS,
+    },
     'Utilities': {
         name: 'X-GNOME-Shell-Utilities.directory',
-        apps: [
-            // Sorted by name as shown in menus, not filename
-            'nm-connection-editor.desktop', // Advanced Network Configuration
-            'org.gnome.DejaDup.desktop', // Backups
-            'org.gnome.Characters.desktop', // Characters
-            'org.gnome.Connections.desktop', // Connections
-            'org.gnome.DiskUtility.desktop', // Disks
-            'org.gnome.baobab.desktop', // Disk Usage Analyzer
-            'org.gnome.Evince.desktop', // Document Viewer
-            'org.gnome.FileRoller.desktop', // File Roller
-            'org.gnome.font-viewer.desktop', // Fonts
-            'org.gnome.Loupe.desktop', // Image Viewer
-            'org.gnome.Logs.desktop', // Logs
-            'org.freedesktop.MalcontentControl.desktop', // Parental Controls
-            'org.gnome.seahorse.Application.desktop', // Passwords and Keys
-            'org.freedesktop.GnomeAbrt.desktop', // Problem Reporting
-            'org.gnome.tweaks.desktop', // Tweaks
-            'org.gnome.Usage.desktop', // Usage
-        ],
+        apps: Config.UTILITIES_FOLDER_APPS,
     },
     'YaST': {
         name: 'suse-yast.directory',
@@ -1434,12 +1422,16 @@ class AppDisplay extends BaseAppView {
         if (this._folderSettings.get_strv('folder-children').length > 0)
             return;
 
+        const appSys = Shell.AppSystem.get_default();
         const folders = Object.keys(DEFAULT_FOLDERS);
         this._folderSettings.set_strv('folder-children', folders);
 
         const {path} = this._folderSettings;
         for (const folder of folders) {
             const {name, categories, apps} = DEFAULT_FOLDERS[folder];
+            const filteredApps = apps
+                ? apps.filter(id => appSys.lookup_app(id) != null)
+                : [];
             const child = new Gio.Settings({
                 schema_id: 'org.gnome.desktop.app-folders.folder',
                 path: `${path}folders/${folder}/`,
@@ -1448,8 +1440,8 @@ class AppDisplay extends BaseAppView {
             child.set_boolean('translate', true);
             if (categories)
                 child.set_strv('categories', categories);
-            if (apps)
-                child.set_strv('apps', apps);
+            if (filteredApps.length > 0)
+                child.set_strv('apps', filteredApps);
         }
     }
 

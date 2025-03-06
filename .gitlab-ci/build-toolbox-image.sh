@@ -32,7 +32,7 @@ build_container() {
     gnome-console # can't do without *some* terminal
     flatpak-spawn # run host commands
     flatpak # for host apps
-    abattis-cantarell-fonts # system font
+    nautilus # FileChooser portal
     gnome-backgrounds # no blank background!
   )
   local debug_packages=(
@@ -52,6 +52,9 @@ build_container() {
 
   local srcdir=$(realpath $(dirname $0))
   buildah copy --chmod 755 $build_cntr $srcdir/install-meson-project.sh /usr/libexec
+
+  buildah run $build_cntr /usr/libexec/install-meson-project.sh \
+    https://gitlab.gnome.org/GNOME/adwaita-fonts.git main
 
   # include convenience script for updating mutter dependency
   local update_mutter=$(mktemp)

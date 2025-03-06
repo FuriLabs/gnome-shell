@@ -19,10 +19,10 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3457
  1 file changed, 21 insertions(+), 3 deletions(-)
 
 diff --git a/src/shell-app.c b/src/shell-app.c
-index 0b55aa0..d561367 100644
+index 916783a..c7630d2 100644
 --- a/src/shell-app.c
 +++ b/src/shell-app.c
-@@ -1722,14 +1722,32 @@ shell_app_dispose (GObject *object)
+@@ -1736,14 +1736,32 @@ shell_app_dispose (GObject *object)
  {
    ShellApp *app = SHELL_APP (object);
  
