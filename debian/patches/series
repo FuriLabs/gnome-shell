@@ -61,8 +61,6 @@ ubuntu-authd/gdm-Improve-detection-of-unavailable-services.patch
 ubuntu-authd/gdm-Support-more-authentication-mechanism-UIs.patch
 ubuntu-authd/gdm-webLogin-Support-custom-buttons-and-auto-ack.patch
 ubuntu-authd/gdm-webLogin-Improve-label-rendering.patch
-ubuntu-authd/theme-Improve-theming-of-the-login-dialog-auth-list-items.patch
-ubuntu-authd/authList-Expand-the-list-items-to-use-all-the-available-s.patch
 ubuntu-authd/Implement-authd-support-via-the-unified-mechanism.patch
 ubuntu-authd/js-Minify-the-authd-protocol-during-build.patch
 ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch
