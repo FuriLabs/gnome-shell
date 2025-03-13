@@ -16,7 +16,7 @@ index 6f9cc62..e668c17 100644
        </description>
      </key>
 +    <key name="startup-sound" type="s">
-+      <default>'warty-startup'</default>
++      <default>''</default>
 +      <summary>Startup sound</summary>
 +      <description>
 +        The startup sound file name for the current sound theme or a file path.
