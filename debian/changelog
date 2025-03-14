@@ -4,8 +4,9 @@ gnome-shell (48~rc-2ubuntu3) UNRELEASED; urgency=medium
   * d/p: Drop patch to use CSS foreground for highlighted text
   * d/p: Use yaru accent colors when yaru is used
   * d/p: Optimize yaru accent colors for contrast
+  * debian/control: Bump recommends on yaru-theme-gnome-shell 25.04
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 14 Mar 2025 07:08:52 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 14 Mar 2025 07:21:39 +0100
 
 gnome-shell (48~rc-2ubuntu2) plucky; urgency=medium
 
