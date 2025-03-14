@@ -1,4 +1,4 @@
-gnome-shell (48~rc-2ubuntu3) UNRELEASED; urgency=medium
+gnome-shell (48~rc-2ubuntu3) plucky; urgency=medium
 
   * d/p: Use native accent colors instead of yaru flavored stylesheets
   * d/p: Drop patch to use CSS foreground for highlighted text
@@ -6,7 +6,7 @@ gnome-shell (48~rc-2ubuntu3) UNRELEASED; urgency=medium
   * d/p: Optimize yaru accent colors for contrast
   * debian/control: Bump recommends on yaru-theme-gnome-shell 25.04
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 14 Mar 2025 07:21:39 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 14 Mar 2025 07:21:56 +0100
 
 gnome-shell (48~rc-2ubuntu2) plucky; urgency=medium
 
