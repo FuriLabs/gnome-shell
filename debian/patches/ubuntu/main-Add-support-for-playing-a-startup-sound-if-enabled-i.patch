@@ -8,7 +8,7 @@ Subject: main: Add support for playing a startup sound if enabled in settings
  2 files changed, 24 insertions(+)
 
 diff --git a/data/org.gnome.shell.ubuntu.gschema.xml.in b/data/org.gnome.shell.ubuntu.gschema.xml.in
-index 6f9cc62..e668c17 100644
+index 6f9cc62..10b7dbb 100644
 --- a/data/org.gnome.shell.ubuntu.gschema.xml.in
 +++ b/data/org.gnome.shell.ubuntu.gschema.xml.in
 @@ -13,5 +13,12 @@
