@@ -3,10 +3,10 @@ Date: Thu, 15 Aug 2024 07:36:01 -0400
 Subject: st: Add support for brown accent color
 
 ---
- js/ui/main.js             | 2 ++
- src/st/st-settings.h      | 1 +
- src/st/st-theme-context.c | 5 +++++
- 3 files changed, 8 insertions(+)
+ js/ui/main.js             |  2 ++
+ src/st/st-settings.h      |  1 +
+ src/st/st-theme-context.c | 22 ++++++++++++++++------
+ 3 files changed, 19 insertions(+), 6 deletions(-)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
 index de05eb0..e9e660b 100644
@@ -34,10 +34,10 @@ index 4c00188..796502a 100644
  
  #define ST_TYPE_SETTINGS (st_settings_get_type ())
 diff --git a/src/st/st-theme-context.c b/src/st/st-theme-context.c
-index eb24212..08a4ee0 100644
+index 6b50c18..3995050 100644
 --- a/src/st/st-theme-context.c
 +++ b/src/st/st-theme-context.c
-@@ -37,6 +37,7 @@
+@@ -37,18 +37,20 @@
  #define ACCENT_COLOR_PINK   "#d56199"
  #define ACCENT_COLOR_PURPLE "#9141ac"
  #define ACCENT_COLOR_SLATE  "#6f8396"
@@ -45,7 +45,37 @@ index eb24212..08a4ee0 100644
  
  #define ACCENT_FG_COLOR     "#ffffff"
  
-@@ -289,6 +290,10 @@ update_accent_colors (StThemeContext *context)
+-#define YARU_ACCENT_COLOR_BLUE "#0073e5"
+-#define YARU_ACCENT_COLOR_TEAL "#308280"
+-#define YARU_ACCENT_COLOR_GREEN "#4b8501"
++#define YARU_ACCENT_COLOR_BLUE   "#0073e5"
++#define YARU_ACCENT_COLOR_TEAL   "#308280"
++#define YARU_ACCENT_COLOR_GREEN  "#4b8501"
+ #define YARU_ACCENT_COLOR_YELLOW "#c88800"
+ #define YARU_ACCENT_COLOR_ORANGE "#e95420"
+-#define YARU_ACCENT_COLOR_RED "#da3450"
+-#define YARU_ACCENT_COLOR_PINK "#b34cb3"
++#define YARU_ACCENT_COLOR_RED    "#da3450"
++#define YARU_ACCENT_COLOR_PINK   "#b34cb3"
+ #define YARU_ACCENT_COLOR_PURPLE "#7764d8"
+-#define YARU_ACCENT_COLOR_SLATE "#657b69"
++#define YARU_ACCENT_COLOR_SLATE  "#657b69"
++#define YARU_ACCENT_COLOR_BROWN  "#b39169"
+ 
+ struct _StThemeContext {
+   GObject parent;
+@@ -307,6 +309,10 @@ update_accent_colors (StThemeContext *context)
+           cogl_color_from_string (&context->accent_color, YARU_ACCENT_COLOR_SLATE);
+           break;
+ 
++        case ST_SYSTEM_ACCENT_COLOR_BROWN:
++          cogl_color_from_string (&context->accent_color, YARU_ACCENT_COLOR_BROWN);
++          break;
++
+         default:
+           g_assert_not_reached ();
+         }
+@@ -354,6 +360,10 @@ update_accent_colors (StThemeContext *context)
        cogl_color_from_string (&context->accent_color, ACCENT_COLOR_SLATE);
        break;
  

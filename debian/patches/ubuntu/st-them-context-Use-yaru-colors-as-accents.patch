@@ -1,0 +1,109 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 14 Mar 2025 04:23:17 +0100
+Subject: st/them-context: Use yaru colors as accents
+
+While they're very close to the GNOME ones, yaru has some variations of
+the accent colors, so let's use them instead of the default ones
+---
+ src/st/st-theme-context.c | 67 ++++++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 66 insertions(+), 1 deletion(-)
+
+diff --git a/src/st/st-theme-context.c b/src/st/st-theme-context.c
+index eb24212..6b50c18 100644
+--- a/src/st/st-theme-context.c
++++ b/src/st/st-theme-context.c
+@@ -40,6 +40,16 @@
+ 
+ #define ACCENT_FG_COLOR     "#ffffff"
+ 
++#define YARU_ACCENT_COLOR_BLUE "#0073e5"
++#define YARU_ACCENT_COLOR_TEAL "#308280"
++#define YARU_ACCENT_COLOR_GREEN "#4b8501"
++#define YARU_ACCENT_COLOR_YELLOW "#c88800"
++#define YARU_ACCENT_COLOR_ORANGE "#e95420"
++#define YARU_ACCENT_COLOR_RED "#da3450"
++#define YARU_ACCENT_COLOR_PINK "#b34cb3"
++#define YARU_ACCENT_COLOR_PURPLE "#7764d8"
++#define YARU_ACCENT_COLOR_SLATE "#657b69"
++
+ struct _StThemeContext {
+   GObject parent;
+ 
+@@ -182,6 +192,10 @@ st_theme_context_init (StThemeContext *context)
+                             "notify::accent-color",
+                             G_CALLBACK (update_accent_colors),
+                             context);
++  g_signal_connect_swapped (st_settings_get (),
++                            "notify::gtk-theme",
++                            G_CALLBACK (update_accent_colors),
++                            context);
+   g_signal_connect (st_texture_cache_get_default (),
+                     "icon-theme-changed",
+                     G_CALLBACK (on_icon_theme_changed),
+@@ -248,8 +262,59 @@ update_accent_colors (StThemeContext *context)
+ {
+   StSettings *settings = st_settings_get ();
+   StSystemAccentColor accent_color;
++  g_autofree char *gtk_theme = NULL;
+ 
+   g_object_get (settings, "accent-color", &accent_color, NULL);
++  g_object_get (settings, "gtk-theme", &gtk_theme, NULL);
++
++  if (G_LIKELY (gtk_theme && g_str_has_prefix (gtk_theme, "Yaru")))
++    {
++      switch (accent_color)
++        {
++        case ST_SYSTEM_ACCENT_COLOR_BLUE:
++          cogl_color_from_string (&context->accent_color, YARU_ACCENT_COLOR_BLUE);
++          break;
++
++        case ST_SYSTEM_ACCENT_COLOR_TEAL:
++          cogl_color_from_string (&context->accent_color, YARU_ACCENT_COLOR_TEAL);
++          break;
++
++        case ST_SYSTEM_ACCENT_COLOR_GREEN:
++          cogl_color_from_string (&context->accent_color, YARU_ACCENT_COLOR_GREEN);
++          break;
++
++        case ST_SYSTEM_ACCENT_COLOR_YELLOW:
++          cogl_color_from_string (&context->accent_color, YARU_ACCENT_COLOR_YELLOW);
++          break;
++
++        case ST_SYSTEM_ACCENT_COLOR_ORANGE:
++          cogl_color_from_string (&context->accent_color, YARU_ACCENT_COLOR_ORANGE);
++          break;
++
++        case ST_SYSTEM_ACCENT_COLOR_RED:
++          cogl_color_from_string (&context->accent_color, YARU_ACCENT_COLOR_RED);
++          break;
++
++        case ST_SYSTEM_ACCENT_COLOR_PINK:
++          cogl_color_from_string (&context->accent_color, YARU_ACCENT_COLOR_PINK);
++          break;
++
++        case ST_SYSTEM_ACCENT_COLOR_PURPLE:
++          cogl_color_from_string (&context->accent_color, YARU_ACCENT_COLOR_PURPLE);
++          break;
++
++        case ST_SYSTEM_ACCENT_COLOR_SLATE:
++          cogl_color_from_string (&context->accent_color, YARU_ACCENT_COLOR_SLATE);
++          break;
++
++        default:
++          g_assert_not_reached ();
++        }
++
++      cogl_color_from_string (&context->accent_fg_color, ACCENT_FG_COLOR);
++      st_theme_context_changed (context);
++      return;
++    }
+ 
+   switch (accent_color)
+     {
+@@ -599,4 +664,4 @@ st_theme_context_get_resolution (StThemeContext *context)
+   g_return_val_if_fail (ST_IS_THEME_CONTEXT (context), -1);
+ 
+   return clutter_backend_get_resolution (context->clutter_backend);
+-}
+\ No newline at end of file
++}
