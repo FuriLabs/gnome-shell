@@ -4,11 +4,11 @@ Subject: darkMode: Add support to Yaru theme color variants
 
 Support switching to dark mode when using the Yaru theme color accents.
 ---
- js/ui/status/darkMode.js | 38 ++++++++++++++++++++++++++++++++++++++
- 1 file changed, 38 insertions(+)
+ js/ui/status/darkMode.js | 36 ++++++++++++++++++++++++++++++++++++
+ 1 file changed, 36 insertions(+)
 
 diff --git a/js/ui/status/darkMode.js b/js/ui/status/darkMode.js
-index 4e68a74..3e10eaf 100644
+index 4e68a74..6fc8f18 100644
 --- a/js/ui/status/darkMode.js
 +++ b/js/ui/status/darkMode.js
 @@ -1,5 +1,6 @@
@@ -28,21 +28,19 @@ index 4e68a74..3e10eaf 100644
          this.connectObject(
              'destroy', () => this._settings.run_dispose(),
              'clicked', () => this._toggleMode(),
-@@ -28,8 +32,42 @@ class DarkModeToggle extends QuickToggle {
+@@ -28,8 +32,40 @@ class DarkModeToggle extends QuickToggle {
  
      _toggleMode() {
          Main.layoutManager.screenTransition.run();
 +        const preferDark = !this.checked;
-+        const {gtkTheme} = St.Settings.get();
          this._settings.set_string('color-scheme',
              this.checked ? 'default' : 'prefer-dark');
 +
-+        if (gtkTheme === 'Yaru')
++        if (St.Settings.get().gtkTheme === 'Yaru')
 +            this._setYaruSettings(preferDark);
 +    }
 +
 +    _setYaruSettings(preferDark) {
-+        const colorScheme = this._settings.get_string('color-scheme');
 +        const currentlyDark =
 +            this._settings.get_string('gtk-theme').endsWith('-dark') &&
 +            this._settings.get_string('icon-theme').endsWith('-dark');

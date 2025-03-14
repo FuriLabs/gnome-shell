@@ -25,7 +25,7 @@ index 6f9cc62..e668c17 100644
    </schema>
  </schemalist>
 diff --git a/js/ui/main.js b/js/ui/main.js
-index a74eae2..055eb9c 100644
+index e9e660b..6519b82 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -12,6 +12,7 @@ import * as BreakManager from '../misc/breakManager.js';
@@ -36,7 +36,7 @@ index a74eae2..055eb9c 100644
  import * as EndSessionDialog from './endSessionDialog.js';
  import * as ExtensionSystem from './extensionSystem.js';
  import * as ExtensionDownloader from './extensionDownloader.js';
-@@ -390,6 +391,22 @@ async function _initializeUI() {
+@@ -388,6 +389,22 @@ async function _initializeUI() {
              let perfOutput = GLib.getenv('SHELL_PERF_OUTPUT');
              Scripting.runPerfScript(perfModule, perfOutput);
          }
