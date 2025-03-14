@@ -1,3 +1,12 @@
+gnome-shell (48~rc-2ubuntu3) UNRELEASED; urgency=medium
+
+  * d/p: Use native accent colors instead of yaru flavored stylesheets
+  * d/p: Drop patch to use CSS foreground for highlighted text
+  * d/p: Use yaru accent colors when yaru is used
+  * d/p: Optimize yaru accent colors for contrast
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 14 Mar 2025 07:08:52 +0100
+
 gnome-shell (48~rc-2ubuntu2) plucky; urgency=medium
 
   * Disable startup sound by default: it can be re-enabled
