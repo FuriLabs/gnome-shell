@@ -1,0 +1,89 @@
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Thu, 5 Dec 2024 14:36:20 +0100
+Subject: main: Disable text mipmapping with env variable
+
+In shell_fonts_init we disable text mipmapping by setting a property on the
+font map retrieved by clutter_get_font_map.
+clutter_get_font_map will initialize the font map in a thread, which means
+we might have a thread calling getenv while mutter is setting up the display
+environment variables. setenv/getenv are not thread safe [1] so we may crash.
+
+Instead, we can use CLUTTER_DISABLE_MIPMAPPED_TEXT to disable mipmapping, which
+will take effect later, whenever the font map is initialized.
+Ironically, that is also a setenv so move it to before any threads are started.
+
+This is a stopgap for the most frequent crashes as seen in Ubuntu and Fedora
+crash collectors, while a complete fix would be to set the display environment
+variables earlier, or not set them at all in the gnome-shell process [2].
+
+In GNOME 47 the early initialization of the font map was removed with [3],
+which is why we don't see crashes collected on those versions.
+This has the same effect, but is more easily backportable as a self-contained
+change.
+
+[1]: improvements are on the way for glibc, https://sourceware.org/git/?p=glibc.git;a=commit;h=7a61e7f557a97ab597d6fca5e2d1f13f65685c61
+[2]: https://gitlab.gnome.org/GNOME/mutter/-/merge_requests/2888
+[3]: https://gitlab.gnome.org/GNOME/mutter/-/commit/60edafe3ebe56b46f561599f7602c3867fd7729a,
+     https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/ccc46d3f5c1d7b6b9c7e04b825982df05b0e60dc
+
+Related: https://gitlab.gnome.org/GNOME/mutter/-/issues/2463
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3571>
+---
+ src/main.c | 23 +++++++----------------
+ 1 file changed, 7 insertions(+), 16 deletions(-)
+
+diff --git a/src/main.c b/src/main.c
+index ca963da..9b5ed1d 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -10,7 +10,6 @@
+ #include <stdlib.h>
+ #include <string.h>
+ 
+-#include <cogl-pango/cogl-pango.h>
+ #include <clutter/clutter.h>
+ #include <glib-unix.h>
+ #include <glib/gi18n-lib.h>
+@@ -254,20 +253,6 @@ shell_introspection_init (void)
+ #endif
+ }
+ 
+-static void
+-shell_fonts_init (void)
+-{
+-  CoglPangoFontMap *fontmap;
+-
+-  /* Disable text mipmapping; it causes problems on pre-GEM Intel
+-   * drivers and we should just be rendering text at the right
+-   * size rather than scaling it. If we do effects where we dynamically
+-   * zoom labels, then we might want to reconsider.
+-   */
+-  fontmap = COGL_PANGO_FONT_MAP (clutter_get_font_map ());
+-  cogl_pango_font_map_set_use_mipmapping (fontmap, FALSE);
+-}
+-
+ static void
+ shell_profiler_init (void)
+ {
+@@ -704,6 +689,13 @@ main (int argc, char **argv)
+   g_setenv ("GJS_DEBUG_OUTPUT", "stderr", TRUE);
+   g_setenv ("GJS_DEBUG_TOPICS", "JS ERROR;JS LOG", TRUE);
+ 
++  /* Disable text mipmapping; it causes problems on pre-GEM Intel
++   * drivers and we should just be rendering text at the right
++   * size rather than scaling it. If we do effects where we dynamically
++   * zoom labels, then we might want to reconsider.
++   */
++  g_setenv ("CLUTTER_DISABLE_MIPMAPPED_TEXT", "1", TRUE);
++
+   context = meta_create_context (WM_NAME);
+   meta_context_add_option_entries (context, gnome_shell_options,
+                                    GETTEXT_PACKAGE);
+@@ -767,7 +759,6 @@ main (int argc, char **argv)
+   shell_a11y_init ();
+   shell_perf_log_init ();
+   shell_introspection_init ();
+-  shell_fonts_init ();
+ 
+   g_log_set_writer_func (default_log_writer, NULL, NULL);
+ 
