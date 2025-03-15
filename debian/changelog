@@ -1,3 +1,9 @@
+gnome-shell (46.3.1-1ubuntu1~24.04.1authd5) noble; urgency=medium
+
+  * d/p: Sync with noble patches
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sat, 15 Mar 2025 05:30:59 +0100
+
 gnome-shell (46.3.1-1ubuntu1~24.04.1authd4) noble; urgency=medium
 
   * d/p: Sync with ubuntu/noble patches
