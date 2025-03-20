@@ -1448,35 +1448,35 @@ StScrollBar {
   .audio-device-selection-dialog .audio-selection-box {
     spacing: 12px; }
     .audio-device-selection-dialog .audio-selection-box .audio-selection-device {
-      color: #ffffff;
-      background-color: #2e2e33;
+      color: #222226;
+      background-color: #fafafb;
       background-color: transparent; }
       .audio-device-selection-dialog .audio-selection-box .audio-selection-device:focus {
-        color: #ffffff;
+        color: #222226;
         box-shadow: inset 0 0 0 2px st-transparentize(-st-accent-color, 0.2) !important;
-        background-color: st-mix(-st-accent-color, rgba(46, 46, 51, 0.25), 5%); }
+        background-color: st-mix(-st-accent-color, rgba(250, 250, 251, 0.25), 5%); }
         .audio-device-selection-dialog .audio-selection-box .audio-selection-device:focus:hover {
-          background-color: st-mix(-st-accent-color, st-lighten(#2e2e33, 7%), 5%); }
+          background-color: st-mix(-st-accent-color, st-darken(#fafafb, 7%), 5%); }
       .audio-device-selection-dialog .audio-selection-box .audio-selection-device:hover {
-        color: #ffffff;
-        background-color: st-lighten(#2e2e33, 7%); }
+        color: #222226;
+        background-color: st-darken(#fafafb, 7%); }
       .audio-device-selection-dialog .audio-selection-box .audio-selection-device:active {
-        color: #ffffff;
-        background-color: st-lighten(#2e2e33, 9%); }
+        color: #222226;
+        background-color: st-darken(#fafafb, 9%); }
         .audio-device-selection-dialog .audio-selection-box .audio-selection-device:active:hover {
-          background-color: st-lighten(st-lighten(#2e2e33, 9%), 7%); }
+          background-color: st-darken(st-darken(#fafafb, 9%), 7%); }
         .audio-device-selection-dialog .audio-selection-box .audio-selection-device:active:focus {
-          background-color: st-mix(-st-accent-color, st-lighten(#2e2e33, 9%), 5%); }
+          background-color: st-mix(-st-accent-color, st-darken(#fafafb, 9%), 5%); }
       .audio-device-selection-dialog .audio-selection-box .audio-selection-device:highlighted, .audio-device-selection-dialog .audio-selection-box .audio-selection-device:selected, .audio-device-selection-dialog .audio-selection-box .audio-selection-device:checked {
-        color: #ffffff;
-        background-color: st-lighten(#2e2e33, 8%); }
+        color: #222226;
+        background-color: st-darken(#fafafb, 8%); }
         .audio-device-selection-dialog .audio-selection-box .audio-selection-device:highlighted:hover, .audio-device-selection-dialog .audio-selection-box .audio-selection-device:selected:hover, .audio-device-selection-dialog .audio-selection-box .audio-selection-device:checked:hover {
-          background-color: st-lighten(st-lighten(#2e2e33, 8%), 7%); }
+          background-color: st-darken(st-darken(#fafafb, 8%), 7%); }
         .audio-device-selection-dialog .audio-selection-box .audio-selection-device:highlighted:active, .audio-device-selection-dialog .audio-selection-box .audio-selection-device:selected:active, .audio-device-selection-dialog .audio-selection-box .audio-selection-device:checked:active {
-          background-color: st-lighten(st-lighten(#2e2e33, 8%), 9%); }
+          background-color: st-darken(st-darken(#fafafb, 8%), 9%); }
       .audio-device-selection-dialog .audio-selection-box .audio-selection-device:insensitive {
-        color: st-transparentize(#ffffff, 0.6);
-        background-color: #2e2e33; }
+        color: st-transparentize(#222226, 0.6);
+        background-color: #fafafb; }
       .audio-device-selection-dialog .audio-selection-box .audio-selection-device:drop {
         background-color: st-transparentize(-st-accent-color, 0.8);
         box-shadow: inset 0 0 0 2px st-transparentize(-st-accent-color, 0.2); }
