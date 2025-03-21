@@ -3,22 +3,22 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authd.js               |  712 ++++++
+ js/gdm/authd.js               |  713 ++++++
  js/gdm/authdProtocol.js       | 5653 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    3 +
  js/gdm/util.js                |    4 +-
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6375 insertions(+), 1 deletion(-)
+ 6 files changed, 6376 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..73f3d7e
+index 0000000..ceb3d32
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,712 @@
+@@ -0,0 +1,713 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import GLib from 'gi://GLib';
@@ -103,13 +103,13 @@ index 0000000..73f3d7e
 +        this._authMechanisms = {};
 +        this._pendingEvents = [];
 +        this._stage = undefined;
++        this._pendingStage = undefined;
 +        this._pendingNewChallenge = null;
 +    }
 +
 +    handleProtocolRequest(protocol, version, json) {
 +        const authdData = AuthdGdm.Data.fromObject(JSON.parse(json));
 +        const reply = this._handleAuthdProtocol(authdData);
-+
 +        this.sendProtocolResponse(reply.toJSON(), {ignoreMessageWait: true});
 +    }
 +
@@ -208,9 +208,15 @@ index 0000000..73f3d7e
 +        if (this._authenticationStarted) {
 +            this._pendingEvents.push(
 +                new AuthdGdm.EventData({
-+                    type: AuthdGdm.EventType.isAuthenticatedCancelled,
-+                    isAuthenticatedCancelled: new AuthdGdm.Events.IsAuthenticatedCancelled(),
-+                }),
++                type: AuthdGdm.EventType.isAuthenticatedCancelled,
++                isAuthenticatedCancelled: new AuthdGdm.Events.IsAuthenticatedCancelled(),
++            }));
++        }
++
++        if (this._stage === AuthdPam.Stage.challenge) {
++            this._stage = AuthdPam.Stage.authModeSelection;
++            this._pendingStage = AuthdGdm.EventType.challenge;
++            this._pendingEvents.push(
 +                new AuthdGdm.EventData({
 +                    type: AuthdGdm.EventType.authModeSelected,
 +                    authModeSelected: new AuthdGdm.Events.AuthModeSelected({
@@ -218,14 +224,13 @@ index 0000000..73f3d7e
 +                    }),
 +                })
 +            );
-+            this._authenticationStarted = false;
 +        }
 +
 +        return true;
 +    }
 +
 +    handleMechanism(mechanism) {
-+        if (!this._selectedAuthMode || !this._authenticationInProgress)
++        if (!this._selectedAuthMode || this._stage !== AuthdPam.Stage.challenge)
 +            return mechanism.role !== Const.CHOICE_LIST_ROLE_NAME;
 +
 +        if (this._selectedAuthMode !== mechanism.id)
@@ -333,25 +338,34 @@ index 0000000..73f3d7e
 +    }
 +
 +    _maybeStartBrokerSelection() {
-+        if (this._stage !== AuthdPam.Stage.brokerSelection)
++        if (this._pendingStage !== AuthdPam.Stage.brokerSelection)
 +            return;
++
++        if (this._stage === AuthdPam.Stage.brokerSelection)
++            return;
++
 +        if (!Object.keys(this._brokers).length)
 +            return;
 +
++        this._stage = this._pendingStage;
 +        this._showChoiceList(AuthMechanismIDs.BrokerSelection,
 +            _('Select the broker'), this._brokers);
 +    }
 +
 +    _maybeStartAuthModeSelection() {
-+        if (this._stage !== AuthdPam.Stage.authModeSelection)
++        if (this._pendingStage !== AuthdPam.Stage.authModeSelection)
++            return;
++
++        if (this._stage === AuthdPam.Stage.authModeSelection)
 +            return;
 +
 +        if (!Object.keys(this._authModes).length)
 +            return;
 +
-+        if (this._authenticationInProgress || this._authenticationStarted)
++        if (this._authenticationStarted)
 +            return;
 +
++        this._stage = this._pendingStage;
 +        this._showChoiceList(AuthMechanismIDs.AuthModeSelection,
 +            _('Select the authentication mode'), this._authModes);
 +    }
@@ -401,15 +415,14 @@ index 0000000..73f3d7e
 +            return false;
 +        }
 +
-+        this._selectedAuthMode = null;
 +        this._requestStageChange(this._stage - 1);
 +        return true;
 +    }
 +
 +    _onStageChanged(stage) {
-+        if (this._stage !== stage) {
++        if (this._pendingStage !== stage) {
 +            this.emit('clear-message-queue');
-+            this._stage = stage;
++            this._pendingStage = stage;
 +        }
 +
 +        switch (stage) {
@@ -418,14 +431,13 @@ index 0000000..73f3d7e
 +            break;
 +
 +        case AuthdPam.Stage.brokerSelection:
-+            this._authenticationInProgress = false;
 +            this._uiLayout = null;
 +            this._selectedAuthMode = null;
 +            this._maybeStartBrokerSelection();
 +            break;
 +
 +        case AuthdPam.Stage.authModeSelection:
-+            this._authenticationInProgress = false;
++            this._authenticationStarted = false;
 +            this._uiLayout = null;
 +            this._selectedAuthMode = null;
 +            this._maybeStartAuthModeSelection();
@@ -463,8 +475,6 @@ index 0000000..73f3d7e
 +            this._authMechanisms = {};
 +            this._authModes = {};
 +            event.authModesReceived.authModes.forEach(authMode => {
-+                // if (Object.values(this._authMechanisms).length)
-+                //     return;
 +                this._authModes[authMode.id] = authMode.label;
 +                this._authMechanisms[authMode.id] = {
 +                    name: authMode.label,
@@ -478,7 +488,6 @@ index 0000000..73f3d7e
 +                };
 +            });
 +
-+            // this.emit('mechanisms-changed', this._authMechanisms);
 +            this._maybeStartAuthModeSelection();
 +            break;
 +
@@ -490,9 +499,6 @@ index 0000000..73f3d7e
 +
 +            if (this._stage >= AuthdPam.Stage.brokerSelection)
 +                this._maybeStartChallenge();
-+            /*  else if (this._stage === AuthdPam.Stage.undefined) {
-+                    this._showAuthMode();
-+                } */
 +            break;
 +
 +        case AuthdGdm.EventType.uiLayoutReceived:
@@ -508,7 +514,6 @@ index 0000000..73f3d7e
 +            break;
 +
 +        case AuthdGdm.EventType.authEvent:
-+            this._authenticationInProgress = false;
 +
 +            if (!this._authenticationStarted)
 +                return;
@@ -530,7 +535,6 @@ index 0000000..73f3d7e
 +        this._uiLayout = null;
 +        this._pendingNewChallenge = null;
 +        this._selectedAuthMode = null;
-+        this._authenticationInProgress = false;
 +        this._authenticationStarted = false;
 +        this._authMechanisms = {};
 +        this._authModes = {};
@@ -538,14 +542,15 @@ index 0000000..73f3d7e
 +    }
 +
 +    _maybeStartChallenge() {
++        if (this._pendingStage !== AuthdPam.Stage.challenge)
++            return;
++
 +        if (!this._selectedAuthMode)
 +            return;
 +
 +        if (!this._authenticationStarted)
 +            return;
 +
-+        if (this._authenticationInProgress)
-+            return;
 +
 +        if (!this._uiLayout)
 +            return;
@@ -553,6 +558,7 @@ index 0000000..73f3d7e
 +        if (!this._authModes[this._selectedAuthMode])
 +            return;
 +
++        this._stage = this._pendingStage;
 +        this._showChallenge();
 +    }
 +
@@ -574,8 +580,6 @@ index 0000000..73f3d7e
 +        if (!this._uiLayout)
 +            throw new Error('No ui layouts defined');
 +
-+        this._authenticationInProgress = true;
-+        this._stage = AuthdPam.Stage.challenge;
 +
 +        const hasWait = this._uiLayout.wait === 'true';
 +
@@ -711,10 +715,7 @@ index 0000000..73f3d7e
 +                return;
 +            }
 +
-+            this.emit('queue-message',
-+                _('Authentication was cancelled, try again!'), MessageType.ERROR);
 +
-+            this._doStageChange(AuthdPam.Stage.authModeSelection);
 +            break;
 +        }
 +
