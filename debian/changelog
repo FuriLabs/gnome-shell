@@ -1,3 +1,9 @@
+gnome-shell (48~rc-2ubuntu5) plucky; urgency=medium
+
+  * d/p/authd: Update generated proto files to match new protocol
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 21 Mar 2025 01:48:18 +0100
+
 gnome-shell (48~rc-2ubuntu4) plucky; urgency=medium
 
   * d/p/ubuntu-authd: Update authd authentication to support latest protocol
