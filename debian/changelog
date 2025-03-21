@@ -1,3 +1,9 @@
+gnome-shell (48.0-1ubuntu1) plucky; urgency=medium
+
+  * Merge with Debian
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 21 Mar 2025 09:15:46 -0400
+
 gnome-shell (48.0-1) unstable; urgency=medium
 
   * New upstream release
