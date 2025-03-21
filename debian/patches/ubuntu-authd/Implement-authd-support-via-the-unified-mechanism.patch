@@ -4,18 +4,18 @@ Subject: Implement authd support via the unified mechanism
 
 ---
  js/gdm/authd.js               |  713 ++++++
- js/gdm/authdProtocol.js       | 5653 +++++++++++++++++++++++++++++++++++++++++
+ js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    3 +
  js/gdm/util.js                |    4 +-
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6376 insertions(+), 1 deletion(-)
+ 6 files changed, 6389 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..ceb3d32
+index 0000000..7d93e18
 --- /dev/null
 +++ b/js/gdm/authd.js
 @@ -0,0 +1,713 @@
@@ -284,7 +284,7 @@ index 0000000..ceb3d32
 +                    type: AuthdGdm.EventType.isAuthenticatedRequested,
 +                    isAuthenticatedRequested: new AuthdGdm.Events.IsAuthenticatedRequested({
 +                        authenticationData: new Authd.IARequest.AuthenticationData({
-+                            challenge: response.password,
++                            secret: response.password,
 +                        }),
 +                    }),
 +                }));
@@ -302,7 +302,7 @@ index 0000000..ceb3d32
 +                    type: AuthdGdm.EventType.isAuthenticatedRequested,
 +                    isAuthenticatedRequested: new AuthdGdm.Events.IsAuthenticatedRequested({
 +                        authenticationData: new Authd.IARequest.AuthenticationData({
-+                            challenge: response.text,
++                            secret: response.text,
 +                        }),
 +                    }),
 +                }));
@@ -734,10 +734,10 @@ index 0000000..ceb3d32
 +}
 diff --git a/js/gdm/authdProtocol.js b/js/gdm/authdProtocol.js
 new file mode 100644
-index 0000000..9a2f765
+index 0000000..a371827
 --- /dev/null
 +++ b/js/gdm/authdProtocol.js
-@@ -0,0 +1,5653 @@
+@@ -0,0 +1,5666 @@
 +var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 +
 +var indexMinimal = {};
@@ -5120,8 +5120,8 @@ index 0000000..9a2f765
 +    authd.SessionMode = (function() {
 +        const valuesById = {}, values = Object.create(valuesById);
 +        values[valuesById[0] = "UNDEFINED"] = 0;
-+        values[valuesById[1] = "AUTH"] = 1;
-+        values[valuesById[2] = "PASSWD"] = 2;
++        values[valuesById[1] = "LOGIN"] = 1;
++        values[valuesById[2] = "CHANGE_PASSWORD"] = 2;
 +        return values;
 +    })();
 +
@@ -5160,11 +5160,11 @@ index 0000000..9a2f765
 +            case 0:
 +                message.mode = 0;
 +                break;
-+            case "AUTH":
++            case "LOGIN":
 +            case 1:
 +                message.mode = 1;
 +                break;
-+            case "PASSWD":
++            case "CHANGE_PASSWORD":
 +            case 2:
 +                message.mode = 2;
 +                break;
@@ -5318,6 +5318,7 @@ index 0000000..9a2f765
 +        UILayout.prototype.entry = null;
 +        UILayout.prototype.content = null;
 +        UILayout.prototype.code = null;
++        UILayout.prototype.rendersQrcode = null;
 +
 +        let $oneOfFields;
 +
@@ -5351,6 +5352,11 @@ index 0000000..9a2f765
 +            set: $util.oneOfSetter($oneOfFields)
 +        });
 +
++        Object.defineProperty(UILayout.prototype, "_rendersQrcode", {
++            get: $util.oneOfGetter($oneOfFields = ["rendersQrcode"]),
++            set: $util.oneOfSetter($oneOfFields)
++        });
++
 +        UILayout.fromObject = function fromObject(object) {
 +            if (object instanceof $root.authd.UILayout)
 +                return object;
@@ -5369,6 +5375,8 @@ index 0000000..9a2f765
 +                message.content = String(object.content);
 +            if (object.code != null)
 +                message.code = String(object.code);
++            if (object.rendersQrcode != null)
++                message.rendersQrcode = Boolean(object.rendersQrcode);
 +            return message;
 +        };
 +
@@ -5409,6 +5417,11 @@ index 0000000..9a2f765
 +                object.code = message.code;
 +                if (options.oneofs)
 +                    object._code = "code";
++            }
++            if (message.rendersQrcode != null && message.hasOwnProperty("rendersQrcode")) {
++                object.rendersQrcode = message.rendersQrcode;
++                if (options.oneofs)
++                    object._rendersQrcode = "rendersQrcode";
 +            }
 +            return object;
 +        };
@@ -5655,14 +5668,14 @@ index 0000000..9a2f765
 +                            this[keys[i]] = properties[keys[i]];
 +            }
 +
-+            AuthenticationData.prototype.challenge = null;
++            AuthenticationData.prototype.secret = null;
 +            AuthenticationData.prototype.wait = null;
 +            AuthenticationData.prototype.skip = null;
 +
 +            let $oneOfFields;
 +
 +            Object.defineProperty(AuthenticationData.prototype, "item", {
-+                get: $util.oneOfGetter($oneOfFields = ["challenge", "wait", "skip"]),
++                get: $util.oneOfGetter($oneOfFields = ["secret", "wait", "skip"]),
 +                set: $util.oneOfSetter($oneOfFields)
 +            });
 +
@@ -5670,8 +5683,8 @@ index 0000000..9a2f765
 +                if (object instanceof $root.authd.IARequest.AuthenticationData)
 +                    return object;
 +                let message = new $root.authd.IARequest.AuthenticationData();
-+                if (object.challenge != null)
-+                    message.challenge = String(object.challenge);
++                if (object.secret != null)
++                    message.secret = String(object.secret);
 +                if (object.wait != null)
 +                    message.wait = String(object.wait);
 +                if (object.skip != null)
@@ -5683,10 +5696,10 @@ index 0000000..9a2f765
 +                if (!options)
 +                    options = {};
 +                let object = {};
-+                if (message.challenge != null && message.hasOwnProperty("challenge")) {
-+                    object.challenge = message.challenge;
++                if (message.secret != null && message.hasOwnProperty("secret")) {
++                    object.secret = message.secret;
 +                    if (options.oneofs)
-+                        object.item = "challenge";
++                        object.item = "secret";
 +                }
 +                if (message.wait != null && message.hasOwnProperty("wait")) {
 +                    object.wait = message.wait;

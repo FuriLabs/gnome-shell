@@ -11,7 +11,7 @@ Subject: js: Minify the authd protocol during build
  create mode 100644 js/gdm/meson.build
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
-index ceb3d32..5e3bff5 100644
+index 7d93e18..a943b2f 100644
 --- a/js/gdm/authd.js
 +++ b/js/gdm/authd.js
 @@ -2,7 +2,7 @@
