@@ -1,3 +1,10 @@
+gnome-shell (48~rc-2ubuntu4) plucky; urgency=medium
+
+  * d/p/ubuntu-authd: Update authd authentication to support latest protocol
+  * debian/control: Add breaks on authd << 0.4.2~
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 21 Mar 2025 01:06:46 +0100
+
 gnome-shell (48~rc-2ubuntu3) plucky; urgency=medium
 
   * d/p: Use native accent colors instead of yaru flavored stylesheets
