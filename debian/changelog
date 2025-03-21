@@ -1,9 +1,9 @@
-gnome-shell (46.3.1-1ubuntu1~24.04.1authd6) UNRELEASED; urgency=medium
+gnome-shell (46.3.1-1ubuntu1~24.04.1authd6) noble; urgency=medium
 
   * d/p/ubuntu-authd: Update authd authentication to support latest protocol
   * debian/control: Add breaks on authd << 0.4.1+git250320+355~
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 21 Mar 2025 01:54:45 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 21 Mar 2025 02:05:26 +0100
 
 gnome-shell (46.3.1-1ubuntu1~24.04.1authd5) noble; urgency=medium
 
