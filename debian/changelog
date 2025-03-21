@@ -1,3 +1,10 @@
+gnome-shell (48.0-1) unstable; urgency=medium
+
+  * New upstream release
+  * Bump minimum mutter
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 21 Mar 2025 09:15:07 -0400
+
 gnome-shell (48~rc-2ubuntu5) plucky; urgency=medium
 
   * d/p/authd: Update generated proto files to match new protocol

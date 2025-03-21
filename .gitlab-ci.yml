@@ -25,6 +25,7 @@ build-sysext:
     - x86_64_v3
   before_script:
     - .gitlab-ci/install-gnomeos-sysext-dependencies.sh $CI_PROJECT_DIR/extension
+  when: manual
 
 stages:
   - pre-review
@@ -127,9 +128,14 @@ check-merge-request:
     reports:
       junit: check-merge-request-report.xml
 
+.dummy-container-build:
+  script:
+    - echo Dummy container build
+
 build-fedora-container:
   extends:
-    - .fdo.container-build@fedora@x86_64
+    #- .fdo.container-build@fedora@x86_64
+    - .dummy-container-build
     - .gnome-shell.fedora
   stage: prep
 
