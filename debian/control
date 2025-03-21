@@ -144,6 +144,7 @@ Breaks: gnome-shell-extension-appindicator (<< 50),
         gnome-shell-extension-top-icons-plus (<< 27-3~),
         gnome-shell-extension-workspaces-to-dock (<< 54~),
         gnome-shell-extensions (<< 40.0~),
+        authd (<< 0.4.1+git250320+355~),
 Provides: notification-daemon,
           polkit-1-auth-agent
 Description: graphical shell for the GNOME desktop
