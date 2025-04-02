@@ -1,4 +1,4 @@
-gnome-shell (47.0-2ubuntu3.24.10.2) UNRELEASED; urgency=medium
+gnome-shell (47.0-2ubuntu3.24.10.2) oracular; urgency=medium
 
   [ Alessandro Astone ]
   * Backport patch to fix crash when enabling Window List extension
@@ -8,7 +8,7 @@ gnome-shell (47.0-2ubuntu3.24.10.2) UNRELEASED; urgency=medium
   [ Marco Trevisan (Treviño) ]
   * debian/salsa-ci: Use ubuntu recipe
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 02 Apr 2025 17:00:01 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 02 Apr 2025 17:00:30 +0200
 
 gnome-shell (47.0-2ubuntu3.24.10.1) oracular; urgency=medium
 
