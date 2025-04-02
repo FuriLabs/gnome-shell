@@ -70,3 +70,6 @@ ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch
 ubuntu-authd/gdm-authPrompt-Grab-key-focus-when-choice-list-is-shown.patch
 shell-network-agent-Do-not-query-keyring-in-greeter-mode.patch
 st-theme-Reuse-stylesheets-if-possible.patch
+keyboard-Don-t-check-for-key.action-using-strict-equality.patch
+keyboard-Don-t-press-and-release-keyval-if-it-s-a-modifie.patch
+keyboard-Switch-back-from-shift-to-default-level-on-more-.patch
