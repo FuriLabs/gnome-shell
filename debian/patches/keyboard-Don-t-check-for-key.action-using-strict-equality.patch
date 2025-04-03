@@ -1,0 +1,33 @@
+From: =?utf-8?q?Jonas_Dre=C3=9Fler?= <verdre@v0yd.nl>
+Date: Sun, 17 Nov 2024 19:01:23 +0100
+Subject: keyboard: Don't check for key.action using strict equality operator
+
+A lot of keys have no action set. In that case key.action is `undefined`,
+but the strict equality check of `action !== null` here will return true and
+we'll enter the if-case anyway.
+
+That's quite confusing and was not intended like that, so change the
+comparison to a less-strict operator.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3286>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3286
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7714
+Bug-Ubuntu: https://launchpad.net/bugs/2092181
+---
+ js/ui/keyboard.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/keyboard.js b/js/ui/keyboard.js
+index 73ff1d2..cb579a8 100644
+--- a/js/ui/keyboard.js
++++ b/js/ui/keyboard.js
+@@ -1514,7 +1514,7 @@ export const Keyboard = GObject.registerClass({
+                 });
+             }
+ 
+-            if (key.action !== null) {
++            if (key.action) {
+                 button.connect('released', () => {
+                     if (key.action === 'hide') {
+                         this.close(true);
