@@ -1,0 +1,81 @@
+From: =?utf-8?q?Jonas_Dre=C3=9Fler?= <verdre@v0yd.nl>
+Date: Sun, 17 Nov 2024 19:16:58 +0100
+Subject: keyboard: Don't press and release keyval if it's a modifier key
+
+Looks like we currently do the press-and-release dance for keys that specify
+both a keyval and the "modifier" action. So when pressing CTRL in the
+extended OSK, not only is the CTRL modifier set together with the next key
+pressed, but the actual CTRL keyval quickly gets pressed and released,
+similar to how we'd do it for the TAB key.
+
+This seems unintentional, as the press-and-release behavior should probably
+be specific to keys like TAB, and not apply to modifier keys, so limit that
+behavior to only keys without an action specified.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3286>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3286
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7714
+Bug-Ubuntu: https://launchpad.net/bugs/2092181
+---
+ js/ui/keyboard.js | 40 ++++++++++++++++++----------------------
+ 1 file changed, 18 insertions(+), 22 deletions(-)
+
+diff --git a/js/ui/keyboard.js b/js/ui/keyboard.js
+index cb579a8..f159c70 100644
+--- a/js/ui/keyboard.js
++++ b/js/ui/keyboard.js
+@@ -1492,28 +1492,6 @@ export const Keyboard = GObject.registerClass({
+                 keyval: key.keyval,
+             }, strings);
+ 
+-            if (key.keyval) {
+-                button.connect('keyval', (_actor, keyval) => {
+-                    this._keyboardController.keyvalPress(keyval);
+-                    this._keyboardController.keyvalRelease(keyval);
+-                });
+-            }
+-
+-            if (key.action !== 'modifier') {
+-                button.connect('commit', (_actor, str) => {
+-                    this._keyboardController.commit(str, this._modifiers).then(() => {
+-                        this._disableAllModifiers();
+-                        if (layout.mode === 'default' ||
+-                            (layout.mode === 'latched' && !this._latched)) {
+-                            if (this._contentHint !== 0)
+-                                this._updateLevelFromHints();
+-                            else
+-                                this._setActiveLevel('default');
+-                        }
+-                    }).catch(console.error);
+-                });
+-            }
+-
+             if (key.action) {
+                 button.connect('released', () => {
+                     if (key.action === 'hide') {
+@@ -1536,6 +1514,24 @@ export const Keyboard = GObject.registerClass({
+ 
+                     this._longPressed = false;
+                 });
++            } else if (key.keyval) {
++                button.connect('keyval', (_actor, keyval) => {
++                    this._keyboardController.keyvalPress(keyval);
++                    this._keyboardController.keyvalRelease(keyval);
++                });
++            } else {
++                button.connect('commit', (_actor, str) => {
++                    this._keyboardController.commit(str, this._modifiers).then(() => {
++                        this._disableAllModifiers();
++                        if (layout.mode === 'default' ||
++                            (layout.mode === 'latched' && !this._latched)) {
++                            if (this._contentHint !== 0)
++                                this._updateLevelFromHints();
++                            else
++                                this._setActiveLevel('default');
++                        }
++                    }).catch(console.error);
++                });
+             }
+ 
+             if (key.action === 'levelSwitch' &&
