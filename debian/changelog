@@ -1,3 +1,10 @@
+gnome-shell (48.0-1ubuntu2.authd1) plucky; urgency=medium
+
+  * debian: Prepare for plucky-authd branching
+  * d/p/authd: Notify messages on authentication Next too
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 14 Apr 2025 11:03:02 +0200
+
 gnome-shell (48.0-1ubuntu1) plucky; urgency=medium
 
   * Merge with Debian
