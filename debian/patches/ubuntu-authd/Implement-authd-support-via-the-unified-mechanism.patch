@@ -3,25 +3,24 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authd.js               |  713 ++++++
+ js/gdm/authd.js               |  710 ++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    3 +
  js/gdm/util.js                |    4 +-
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6389 insertions(+), 1 deletion(-)
+ 6 files changed, 6386 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..7d93e18
+index 0000000..305b671
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,713 @@
+@@ -0,0 +1,710 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
-+import GLib from 'gi://GLib';
 +import {MessageType} from './util.js';
 +import {authd as Authd, gdm as AuthdGdm, pam as AuthdPam} from './authdProtocol.js';
 +import {UnifiedAuthService} from './unifiedMechanism.js';
@@ -551,7 +550,6 @@ index 0000000..7d93e18
 +        if (!this._authenticationStarted)
 +            return;
 +
-+
 +        if (!this._uiLayout)
 +            return;
 +
@@ -714,13 +712,12 @@ index 0000000..7d93e18
 +                this._ignoreNextCancellation = false;
 +                return;
 +            }
-+
-+
 +            break;
 +        }
 +
 +        case AuthResult.Next: {
 +            this.emit('clear-message-queue');
++            this.emit('queue-priority-message', response.msg, MessageType.INFO);
 +            this._authModes = {};
 +            break;
 +        }
