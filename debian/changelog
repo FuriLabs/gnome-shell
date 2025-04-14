@@ -1,8 +1,8 @@
-gnome-shell (46.3.1-1ubuntu1~24.04.1authd7) UNRELEASED; urgency=medium
+gnome-shell (46.3.1-1ubuntu1~24.04.1authd7) noble; urgency=medium
 
   * d/p/authd: Notify messages on authentication Next too
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 14 Apr 2025 11:06:47 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 14 Apr 2025 11:07:21 +0200
 
 gnome-shell (46.3.1-1ubuntu1~24.04.1authd6) noble; urgency=medium
 
