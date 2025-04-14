@@ -1,3 +1,10 @@
+gnome-shell (46.0-0ubuntu6~24.04.9) noble; urgency=medium
+
+  [ Alessandro Astone ]
+  * Backport patches to fix the Shift behaviour in OSK (LP: #2092181)
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Mon, 14 Apr 2025 17:35:20 +0800
+
 gnome-shell (46.0-0ubuntu6~24.04.8) noble; urgency=medium
 
   [ Alessandro Astone ]
