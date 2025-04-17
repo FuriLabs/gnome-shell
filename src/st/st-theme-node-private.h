@@ -119,5 +119,6 @@ void _st_theme_node_ensure_background (StThemeNode *node);
 void _st_theme_node_ensure_geometry (StThemeNode *node);
 void _st_theme_node_apply_margins (StThemeNode *node,
                                    ClutterActor *actor);
+void _st_theme_node_maybe_free_properties (StThemeNode *node);
 
 G_END_DECLS
