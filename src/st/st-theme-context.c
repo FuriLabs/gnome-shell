@@ -170,6 +170,13 @@ st_theme_context_class_init (StThemeContextClass *klass)
 }
 
 static void
+forget_node (StThemeNode *node)
+{
+  _st_theme_node_maybe_free_properties (node);
+  g_object_unref (node);
+}
+
+static void
 st_theme_context_init (StThemeContext *context)
 {
   context->font = get_interface_font_description ();
@@ -189,7 +196,8 @@ st_theme_context_init (StThemeContext *context)
 
   context->nodes = g_hash_table_new_full ((GHashFunc) st_theme_node_hash,
                                           (GEqualFunc) st_theme_node_equal,
-                                          g_object_unref, NULL);
+                                          (GDestroyNotify) forget_node,
+                                          NULL);
   context->scale_factor = 1;
 
   update_accent_colors (context);
