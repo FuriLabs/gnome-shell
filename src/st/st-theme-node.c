@@ -59,8 +59,8 @@ st_theme_node_class_init (StThemeNodeClass *klass)
   object_class->finalize = st_theme_node_finalize;
 }
 
-static void
-maybe_free_properties (StThemeNode *node)
+void
+_st_theme_node_maybe_free_properties (StThemeNode *node)
 {
   if (node->properties)
     {
@@ -102,7 +102,7 @@ st_theme_node_dispose (GObject *gobject)
 
   st_theme_node_paint_state_free (&node->cached_state);
 
-  maybe_free_properties (node);
+  _st_theme_node_maybe_free_properties (node);
   g_clear_object (&node->theme);
 
   G_OBJECT_CLASS (st_theme_node_parent_class)->dispose (gobject);
