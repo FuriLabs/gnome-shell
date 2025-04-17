@@ -25,7 +25,6 @@ build-sysext:
     - x86_64_v3
   before_script:
     - .gitlab-ci/install-gnomeos-sysext-dependencies.sh $CI_PROJECT_DIR/extension
-  when: manual
 
 stages:
   - pre-review
@@ -41,7 +40,7 @@ default:
   image: $MUTTER_CI_IMAGE
 
 variables:
-  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/41:x86_64-2025-02-19.1
+  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/42:x86_64-2025-03-31.0
   FDO_UPSTREAM_REPO: GNOME/gnome-shell
   BUNDLE: "extensions-git.flatpak"
   LINT_LOG: "eslint-report.xml"
@@ -58,8 +57,8 @@ variables:
 
 .gnome-shell.fedora:
   variables:
-    FDO_DISTRIBUTION_VERSION: 41
-    FDO_DISTRIBUTION_TAG: '2024-10-18.0'
+    FDO_DISTRIBUTION_VERSION: 42
+    FDO_DISTRIBUTION_TAG: '2025-04-01.0'
     FDO_DISTRIBUTION_PACKAGES:
       gjs
       nodejs
@@ -128,14 +127,9 @@ check-merge-request:
     reports:
       junit: check-merge-request-report.xml
 
-.dummy-container-build:
-  script:
-    - echo Dummy container build
-
 build-fedora-container:
   extends:
-    #- .fdo.container-build@fedora@x86_64
-    - .dummy-container-build
+    - .fdo.container-build@fedora@x86_64
     - .gnome-shell.fedora
   stage: prep
 
