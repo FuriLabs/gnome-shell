@@ -1,3 +1,9 @@
+gnome-shell (48.0-1ubuntu2) questing; urgency=medium
+
+  * d/p/authd: Notify messages on authentication Next too
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 26 May 2025 14:46:39 +0200
+
 gnome-shell (48.0-1ubuntu1) plucky; urgency=medium
 
   * Merge with Debian
