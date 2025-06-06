@@ -1,9 +1,9 @@
-gnome-shell (48.2-1) UNRELEASED; urgency=medium
+gnome-shell (48.2-1) experimental; urgency=medium
 
   * New upstream bugfix release
     - Wellbeing tracking fixes (Closes: #1104630)
 
- -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 06 Jun 2025 13:26:04 -0400
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 06 Jun 2025 13:32:38 -0400
 
 gnome-shell (48.1-1) unstable; urgency=medium
 
