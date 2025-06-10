@@ -2,7 +2,40 @@ gnome-shell (48.2-2) UNRELEASED; urgency=medium
 
   * Summarize upstream changes in previous changelog entry
 
- -- Simon McVittie <smcv@debian.org>  Sun, 08 Jun 2025 18:11:51 +0100
+  * d/gnome-shell.gsettings-override: Update default pinned apps for trixie.
+    The pinned (favourite) apps appear in the Dash (the bottom panel),
+    instead of appearing in the main app grid.
+    This file is a Debian-specific override for upstream's default list.
+    The changes compared with previous versions in Debian:
+    - Remove Rhythmbox. We no longer install a music player by default or
+      have a recommended music player for GNOME; users are welcome to
+      install Amberol, GNOME Music, Lollypop, Rhythmbox or any other
+      music player of their choice.
+    - Remove LibreOffice Writer. Pinned apps don't appear in the app grid,
+      and it seems inconsistent to have Writer in the Dash (and not the
+      app grid) but every other LibreOffice component such as Calc in the
+      app grid (not the dash).
+    - Add gnome-text-editor, matching upstream.
+    - Add gnome-calculator, matching upstream.
+    The changes compared with upstream:
+    - Replace Epiphany (GNOME Web) with Firefox ESR, matching what we
+      install by default
+    - Replace GNOME Calendar with Evolution
+    - Add Yelp (GNOME Help)
+    This doesn't necessarily have any effect for existing users:
+    if the user has pinned or unpinned an app at least once, once,
+    then their list of pinned apps is saved and will be unaffected
+    by this override. Please test with a completely new installation,
+    a newly-created test user, or a user with an empty home directory.
+    (Closes: #1099579)
+  * d/patches: Move im-config from main app grid to the System folder,
+    as requested by Jeremy Bícha on #1099579.
+    A known issue is that this only has an effect for completely new
+    installations or newly-created users: if the user has logged in at
+    least once, then their app -> folder mapping is saved, even if they
+    never explicitly modified it.
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 10 Jun 2025 11:43:31 +0100
 
 gnome-shell (48.2-1) experimental; urgency=medium
 
