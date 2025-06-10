@@ -1,7 +1,7 @@
-gnome-shell (48.2-2) UNRELEASED; urgency=medium
+gnome-shell (48.2-2) experimental; urgency=medium
 
+  * Team upload
   * Summarize upstream changes in previous changelog entry
-
   * d/gnome-shell.gsettings-override: Update default pinned apps for trixie.
     The pinned (favourite) apps appear in the Dash (the bottom panel),
     instead of appearing in the main app grid.
@@ -35,7 +35,7 @@ gnome-shell (48.2-2) UNRELEASED; urgency=medium
     least once, then their app -> folder mapping is saved, even if they
     never explicitly modified it.
 
- -- Simon McVittie <smcv@debian.org>  Tue, 10 Jun 2025 11:43:31 +0100
+ -- Simon McVittie <smcv@debian.org>  Tue, 10 Jun 2025 14:16:06 +0100
 
 gnome-shell (48.2-1) experimental; urgency=medium
 
