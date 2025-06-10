@@ -1,3 +1,10 @@
+gnome-shell (48.2-3) UNRELEASED; urgency=medium
+
+  * Adjust wording of previous changelog entry to reflect that gnome-music
+    is still installed by default
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 10 Jun 2025 15:25:26 +0100
+
 gnome-shell (48.2-2) experimental; urgency=medium
 
   * Team upload
@@ -7,10 +14,9 @@ gnome-shell (48.2-2) experimental; urgency=medium
     instead of appearing in the main app grid.
     This file is a Debian-specific override for upstream's default list.
     The changes compared with previous versions in Debian:
-    - Remove Rhythmbox. We no longer install a music player by default or
-      have a recommended music player for GNOME; users are welcome to
-      install Amberol, GNOME Music, Lollypop, Rhythmbox or any other
-      music player of their choice.
+    - Remove Rhythmbox. We no longer recommend a specific music player for
+      GNOME; users are welcome to install Amberol, GNOME Music, Lollypop,
+      Rhythmbox or any other music player of their choice.
     - Remove LibreOffice Writer. Pinned apps don't appear in the app grid,
       and it seems inconsistent to have Writer in the Dash (and not the
       app grid) but every other LibreOffice component such as Calc in the
