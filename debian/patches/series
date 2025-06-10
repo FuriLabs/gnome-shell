@@ -10,3 +10,4 @@ tray-icons/tray-na-xembed-Destroy-socket-window-when-ending-the-embe.patch
 tray-icons/tray-na-tray-manager-Remove-outdated-comment-and-return-v.patch
 shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
 st-theme-node-Forget-properties-cache-on-stylesheet-chang.patch
+debian/data-Add-im-config.desktop-to-System-folder.patch
