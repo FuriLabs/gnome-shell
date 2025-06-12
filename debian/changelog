@@ -1,9 +1,11 @@
-gnome-shell (48.2-3) UNRELEASED; urgency=medium
+gnome-shell (48.2-3) unstable; urgency=medium
 
+  * Team upload
   * Adjust wording of previous changelog entry to reflect that gnome-music
     is still installed by default
+  * Release to unstable
 
- -- Simon McVittie <smcv@debian.org>  Tue, 10 Jun 2025 15:25:26 +0100
+ -- Simon McVittie <smcv@debian.org>  Thu, 12 Jun 2025 21:08:12 +0100
 
 gnome-shell (48.2-2) experimental; urgency=medium
 
