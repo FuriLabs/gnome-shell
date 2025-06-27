@@ -1,18 +1,27 @@
 Description: Align StSpinnerContent Design and Animation to YaruCircularProgressIndicator
 Author: Vincent Renzo Quilon
 Forwarded: no, ubuntu only.
-Last-Update: 2025-06-25
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2114899
+Last-Update: 2025-06-28
 ---
 This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 --- a/src/st/st-spinner-content.c
 +++ b/src/st/st-spinner-content.c
-@@ -23,21 +23,32 @@
+@@ -20,7 +20,9 @@
+ #include <cairo.h>
  
+ #include <st-widget.h>
++#include <st-settings.h>
+ 
++/* Upstream Definitions */
  #define MIN_RADIUS 8
  #define NAT_RADIUS 48
--#define SMALL_WIDTH 2.5
--#define LARGE_WIDTH 12
--#define SPIN_DURATION_MS 1200
+ #define SMALL_WIDTH 2.5
+@@ -39,6 +41,33 @@
+  * where k is an integer */
+ #define N_CYCLES 53
+ 
++/* Yaru Definitions */
 +/*
 + * AdwSpinnerPaintable's MAX_RADIUS has similar function to NAT_RADIUS
 + * but NAT_RADIUS = 48 while MAX_RADIUS = 32.
@@ -21,23 +30,12 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 + * AdwSpinnerPaintable's LARGE_WIDTH = 6
 + * new LARGE_WIDTH = LERP (2, 6, 1.67) = 8.67
 + */
-+#define LARGE_WIDTH 8.67
-+#define SMALL_WIDTH 2
- #define START_ANGLE (G_PI * 0.35)
- #define CIRCLE_OPACITY 0.15
--#define MIN_ARC_LENGTH (G_PI * 0.015)
--#define MAX_ARC_LENGTH (G_PI * 0.9)
--#define IDLE_DISTANCE (G_PI * 0.9)
--#define OVERLAP_DISTANCE (G_PI * 0.7)
--#define EXTEND_DISTANCE (G_PI * 1.1)
--#define CONTRACT_DISTANCE (G_PI * 1.35)
--/* How many full cycles it takes for the spinner to loop. Should be:
-- * (IDLE_DISTANCE + EXTEND_DISTANCE + CONTRACT_DISTANCE - OVERLAP_DISTANCE) * k,
-- * where k is an integer */
--#define N_CYCLES 53
++#define YARU_LARGE_WIDTH 8.67
++#define YARU_SMALL_WIDTH 2
++#define YARU_START_ANGLE (-G_PI * 0.5)
 +#define SEGMENT_ANGLE (2 * G_PI / 3) // 120 degress per segment
-+#define SPIN_DURATION_MS 8000
-+#define N_CYCLES 6
++#define YARU_SPIN_DURATION_MS 8000
++#define YARU_N_CYCLES 6
 +/*
 + * AdwSpinnerPaintable UPPER_MIN_GAP_ANGLE = 0.2 at MAX_RADIUS = 32
 + * LOWER_MIN_GAP_ANGLE =  0.1 at MIN_RADIUS = 8.
@@ -49,142 +47,106 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 +#define UPPER_MIN_GAP_ANGLE 0.267
 +#define LOWER_MIN_GAP_ANGLE 0.1
 +#define MAX_GAP_ANGLE 0.5
- 
++
  /**
   * StSpinnerContent:
-@@ -127,9 +138,9 @@ st_spinner_content_set_actor (StSpinnerC
-   if (spinner->actor)
-     {
-       spinner->timeline = clutter_timeline_new_for_actor (actor,
--                                                          SPIN_DURATION_MS * N_CYCLES);
-+                                                          SPIN_DURATION_MS);
-       clutter_timeline_set_repeat_count (spinner->timeline, -1);
--      clutter_timeline_set_progress_mode (spinner->timeline, CLUTTER_LINEAR);
-+      clutter_timeline_set_progress_mode (spinner->timeline, CLUTTER_EASE_IN_OUT_SINE);
- 
-       g_signal_connect (spinner->timeline, "new-frame", G_CALLBACK (new_frame_cb), spinner);
- 
-@@ -200,46 +211,6 @@ normalize_angle (double angle)
-   return angle;
+  *
+@@ -82,6 +111,22 @@ st_spinner_content_class_init (StSpinner
+ {
  }
  
--static inline double
--ease_in_out_sine (double t)
--{
--  return -0.5 * (cos (M_PI * t) - 1);
--}
--
--static double
--get_arc_start (double angle)
--{
--  double l = IDLE_DISTANCE + EXTEND_DISTANCE + CONTRACT_DISTANCE - OVERLAP_DISTANCE;
--  double t;
--
--  angle = fmod (angle, l);
--
--  if (angle > EXTEND_DISTANCE)
--    t = 1;
--  else
--    t = ease_in_out_sine (angle / EXTEND_DISTANCE);
--
--  return LERP (MIN_ARC_LENGTH, MAX_ARC_LENGTH, t) - angle * MAX_ARC_LENGTH / l;
--}
--
--static double
--get_arc_end (double angle)
--{
--  double l = IDLE_DISTANCE + EXTEND_DISTANCE + CONTRACT_DISTANCE - OVERLAP_DISTANCE;
--  double t;
--
--  angle = fmod (angle, l);
--
--  if (angle < EXTEND_DISTANCE - OVERLAP_DISTANCE)
--    t = 0;
--  else if (angle > l - IDLE_DISTANCE)
--    t = 1;
--  else
--    t = ease_in_out_sine ((angle - EXTEND_DISTANCE + OVERLAP_DISTANCE) / CONTRACT_DISTANCE);
--
--  return LERP (0, MAX_ARC_LENGTH - MIN_ARC_LENGTH, t) - angle * MAX_ARC_LENGTH / l;
--}
--
++static gboolean
++is_target_session_and_icon_theme ()
++{
++  StSettings *settings = st_settings_get();
++  const char *icon_theme_name = st_settings_get_gtk_icon_theme (settings);
++
++  gboolean is_target_icon_theme = g_str_has_prefix (icon_theme_name, "Yaru") || g_str_has_prefix (icon_theme_name, "Yaru-");
++  const char *target_session = g_getenv ("XDG_SESSION_DESKTOP");
++  gboolean is_target_session = g_strcmp0(target_session, "ubuntu") == 0;
++
++  if (target_session == NULL)
++    return false;
++
++  return is_target_icon_theme && is_target_session;
++}
++
  static void
- st_spinner_content_draw_spinner (StSpinnerContent *spinner,
-                                  cairo_t          *cr,
-@@ -247,8 +218,10 @@ st_spinner_content_draw_spinner (StSpinn
-                                  int               height)
- {
-   CoglColor color;
--  double radius, line_width;
+ actor_map_cb (GObject    *object,
+               GParamSpec *pspec,
+@@ -131,6 +176,12 @@ st_spinner_content_set_actor (StSpinnerC
+       clutter_timeline_set_repeat_count (spinner->timeline, -1);
+       clutter_timeline_set_progress_mode (spinner->timeline, CLUTTER_LINEAR);
+ 
++      if (is_target_session_and_icon_theme ())
++        {
++          clutter_timeline_set_progress_mode (spinner->timeline, CLUTTER_EASE_IN_OUT_SINE);
++          clutter_timeline_set_duration (spinner->timeline, YARU_SPIN_DURATION_MS);
++        }
++
+       g_signal_connect (spinner->timeline, "new-frame", G_CALLBACK (new_frame_cb), spinner);
+ 
+       if (clutter_actor_is_mapped (actor))
+@@ -316,6 +367,84 @@ st_spinner_content_draw_spinner (StSpinn
+ }
+ 
+ static void
++st_spinner_content_draw_yaru_spinner (StSpinnerContent *spinner,
++                                 cairo_t          *cr,
++                                 int               width,
++                                 int               height)
++{
++  CoglColor color;
 +  double radius, radius_t, line_width;
-   double progress, start_angle, end_angle;
++  double progress, start_angle, end_angle;
 +  float gap_angle, min_gap_angle, gap_angle_t_actual, gap_angle_t;
 +  uint8_t segment_counter;
- 
-   g_assert (spinner->actor);
- 
-@@ -263,6 +236,7 @@ st_spinner_content_draw_spinner (StSpinn
-     }
- 
-   radius = MIN (floorf (MIN (width, height) / 2), NAT_RADIUS);
++
++  g_assert (spinner->actor);
++
++  if (ST_IS_WIDGET (spinner->actor))
++    {
++      StThemeNode *theme_node = st_widget_get_theme_node (ST_WIDGET (spinner->actor));
++      st_theme_node_get_foreground_color (theme_node, &color);
++    }
++  else
++    {
++      cogl_color_init_from_4f (&color, 0., 0., 0., 1.);
++    }
++
++  radius = MIN (floorf (MIN (width, height) / 2), NAT_RADIUS);
 +  radius_t = INVERSE_LERP (MIN_RADIUS, NAT_RADIUS, radius);
-   line_width = LERP (SMALL_WIDTH, LARGE_WIDTH,
-                      INVERSE_LERP (MIN_RADIUS, NAT_RADIUS, radius));
-   radius -= roundf (line_width / 2.);
-@@ -273,46 +247,46 @@ st_spinner_content_draw_spinner (StSpinn
-   cairo_translate (cr, roundf (width / 2), roundf(height / 2));
-   cairo_set_line_width (cr, line_width);
- 
--  /* Circle */
--
--  cairo_save (cr);
--
--  cairo_set_source_rgba (cr,
--                         color.red / 255.,
--                         color.green / 255.,
--                         color.blue / 255.,
--                         color.alpha / 255. * CIRCLE_OPACITY);
--  cairo_arc (cr, 0, 0, radius, 0, 2 * M_PI);
--  cairo_stroke (cr);
--
--  cairo_restore (cr);
--
-   /* Moving part */
- 
--  cairo_save (cr);
++  line_width = LERP (YARU_SMALL_WIDTH, YARU_LARGE_WIDTH,
++                     INVERSE_LERP (MIN_RADIUS, NAT_RADIUS, radius));
++  radius -= roundf (line_width / 2.);
++
++  if (radius < 0)
++    return;
++
++  cairo_translate (cr, roundf (width / 2), roundf(height / 2));
++  cairo_set_line_width (cr, line_width);
++
++  /* Moving part */
++
 +  segment_counter = 0;
- 
-   if (spinner->timeline)
-     progress = clutter_timeline_get_progress (spinner->timeline) * N_CYCLES * M_PI * 2;
-   else
--    progress = EXTEND_DISTANCE - OVERLAP_DISTANCE / 2;
++
++  if (spinner->timeline)
++    progress = clutter_timeline_get_progress (spinner->timeline) * YARU_N_CYCLES * M_PI * 2;
++  else
 +    progress = START_ANGLE;
- 
--  start_angle = progress + get_arc_start (progress) + START_ANGLE;
--  end_angle = progress + get_arc_end (progress) + START_ANGLE;
- 
--  start_angle = normalize_angle (start_angle);
--  end_angle = normalize_angle (end_angle);
++
++
 +  min_gap_angle = LERP (UPPER_MIN_GAP_ANGLE, LOWER_MIN_GAP_ANGLE, radius_t);
-+  gap_angle_t_actual = INVERSE_LERP (0, 2 * M_PI * N_CYCLES, progress);
++  gap_angle_t_actual = INVERSE_LERP (0, 2 * M_PI * YARU_N_CYCLES, progress);
 +  gap_angle_t = 1 - fabs (2 * gap_angle_t_actual - 1); // pinpong behavior: 0->1 is transformed to 0->1->0
 +  gap_angle = LERP (min_gap_angle, MAX_GAP_ANGLE, gap_angle_t);
- 
--  cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
--  cairo_set_source_rgba (cr,
--                         color.red / 255.,
--                         color.green / 255.,
--                         color.blue / 255.,
--                         color.alpha / 255.);
++
 +  end_angle = progress + START_ANGLE - SEGMENT_ANGLE;
 +  start_angle = progress + START_ANGLE - gap_angle;
- 
--  cairo_arc (cr, 0, 0, radius, end_angle, start_angle);
--  cairo_stroke (cr);
++
 +  do {
 +    cairo_save (cr);
- 
--  cairo_restore (cr);
++
 +    start_angle = normalize_angle (start_angle);
 +    end_angle = normalize_angle (end_angle);
 +
@@ -201,13 +163,28 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 +    segment_counter++;
 +    start_angle += SEGMENT_ANGLE;
 +    end_angle += SEGMENT_ANGLE;
-+    cairo_restore (cr);
 +
++    cairo_restore (cr);
 +  } while (segment_counter < 3);
- }
++}
++
++static void
+ st_spinner_content_redraw (StSpinnerContent *spinner)
+ {
+   ClutterActorBox allocation;
+@@ -398,7 +527,10 @@ st_spinner_content_redraw (StSpinnerCont
+   cairo_paint (cr);
+   cairo_restore (cr);
  
- static void
-@@ -446,3 +420,4 @@ st_spinner_content_new (void)
+-  st_spinner_content_draw_spinner (spinner, cr, width, height);
++  if (!is_target_session_and_icon_theme ())
++    st_spinner_content_draw_spinner (spinner, cr, width, height);
++  else
++    st_spinner_content_draw_yaru_spinner (spinner, cr, width, height);
+ 
+   cairo_destroy (cr);
+ 
+@@ -446,3 +578,4 @@ st_spinner_content_new (void)
  {
    return g_object_new (ST_TYPE_SPINNER_CONTENT, NULL);
  }
