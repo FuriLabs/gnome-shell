@@ -1,3 +1,12 @@
+gnome-shell (48.0-1ubuntu1.1) plucky; urgency=medium
+
+  * Fix accessibility issues in Gnome Shell/GDM/Unlock (LP: #2115948)
+    - Add labels to the Today Events and Weather buttons
+    - Notify to screen reader users any error during login/unlocking
+    - Add screen reader compatible labels to St.Entry elements
+
+ -- Sergio Costas Rodriguez <sergio.costas@canonical.com>  Fri, 4 Jul 2025 10:56:46 +0200
+
 gnome-shell (48.0-1ubuntu1) plucky; urgency=medium
 
   * Merge with Debian

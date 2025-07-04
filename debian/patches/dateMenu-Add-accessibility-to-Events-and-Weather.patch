@@ -1,0 +1,35 @@
+From: Sergio Costas Rodriguez <sergio.costas@canonical.com>
+Date: Tue, 24 Jun 2025 18:20:21 +0200
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3769
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2115948
+Subject: dateMenu: Add accessibility to Events and Weather
+
+The Events element, with today events, and the Weather element,
+with the weather in our location, lack accessibility names.
+
+This patch fixes it.
+
+---
+ js/ui/dateMenu.js | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/js/ui/dateMenu.js b/js/ui/dateMenu.js
+index 39687c3..04dde66 100644
+--- a/js/ui/dateMenu.js
++++ b/js/ui/dateMenu.js
+@@ -132,6 +132,7 @@ class EventsSection extends St.Button {
+             style_class: 'events-title',
+         });
+         this.child.add_child(this._title);
++        this.labelActor = this._title;
+ 
+         this._eventsList = new St.BoxLayout({
+             style_class: 'events-list',
+@@ -567,6 +568,7 @@ class WeatherSection extends St.Button {
+         });
+         titleBox.add_child(this._titleLabel);
+         box.add_child(titleBox);
++        this.labelActor = this._titleLabel;
+ 
+         this._titleLocation = new St.Label({
+             style_class: 'weather-header location',
