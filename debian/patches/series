@@ -101,3 +101,6 @@ shell-network-agent-Do-not-query-keyring-in-greeter-mode.patch
 keyboard-Don-t-check-for-key.action-using-strict-equality.patch
 keyboard-Don-t-press-and-release-keyval-if-it-s-a-modifie.patch
 keyboard-Switch-back-from-shift-to-default-level-on-more-.patch
+dateMenu-Add-accessibility-to-Events-and-Weather.patch
+authPrompt-Notify-error-messages-in-GDM-login-unlock.patch
+st-entry-Use-hint-actor-as-a11y-description-if-possible.patch
