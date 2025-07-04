@@ -1,0 +1,37 @@
+From: Sergio Costas Rodriguez <sergio.costas@canonical.com>
+Date: Tue, 24 Jun 2025 14:31:40 +0200
+Subject: authPrompt: Notify error messages in GDM login/unlock
+
+When there is an error during GDM login or unlock (for example,
+typing a wrong password), a text message is shown, but nothing
+is said by the screen reader.
+
+This patch fixes this, by notifying any error set in the auth
+prompt.
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3765
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2115948
+---
+ js/gdm/authPrompt.js | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 46ef236..58cdc7f 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -3,6 +3,7 @@
+ import Clutter from 'gi://Clutter';
+ import Gio from 'gi://Gio';
+ import GLib from 'gi://GLib';
++import Atk from 'gi://Atk';
+ import GObject from 'gi://GObject';
+ import Pango from 'gi://Pango';
+ import Shell from 'gi://Shell';
+@@ -755,6 +756,7 @@ export const AuthPrompt = GObject.registerClass({
+             this._message.remove_all_transitions();
+             this._message.text = message;
+             this._message.opacity = 255;
++            this.get_accessible().emit('notification', message, Atk.Live.ASSERTIVE);
+         } else {
+             this._message.opacity = 0;
+         }
