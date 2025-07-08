@@ -1,5 +1,6 @@
 /*
- * Copyright © 2016 Red Hat, Inc
+ * SPDX-FileCopyrightText: 2016 Red Hat, Inc
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,7 +25,7 @@
 
 #include "shew-external-window.h"
 
-#define SHEW_TYPE_EXTERNAL_WINDOW_WAYLAND (shew_external_window_wayland_get_type ())
-G_DECLARE_FINAL_TYPE (ShewExternalWindowWayland, shew_external_window_wayland, SHEW, EXTERNAL_WINDOW_WAYLAND, ShewExternalWindow)
+#define SHEW_TYPE_EXTERNAL_WINDOW_X11 (shew_external_window_x11_get_type ())
+G_DECLARE_FINAL_TYPE (ShewExternalWindowX11, shew_external_window_x11, SHEW, EXTERNAL_WINDOW_X11, ShewExternalWindow)
 
-ShewExternalWindowWayland *shew_external_window_wayland_new (const char *handle_str);
+ShewExternalWindowX11 *shew_external_window_x11_new (const char *handle_str);

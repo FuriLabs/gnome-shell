@@ -1,5 +1,6 @@
 /*
- * Copyright © 2016 Red Hat, Inc
+ * SPDX-FileCopyrightText: 2016 Red Hat, Inc
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,23 +22,10 @@
 #pragma once
 
 #include <glib-object.h>
-#include <gtk/gtk.h>
 
+#include "shew-external-window.h"
 
-#define SHEW_TYPE_EXTERNAL_WINDOW (shew_external_window_get_type ())
-G_DECLARE_DERIVABLE_TYPE (ShewExternalWindow, shew_external_window, SHEW, EXTERNAL_WINDOW, GObject)
+#define SHEW_TYPE_EXTERNAL_WINDOW_WAYLAND (shew_external_window_wayland_get_type ())
+G_DECLARE_FINAL_TYPE (ShewExternalWindowWayland, shew_external_window_wayland, SHEW, EXTERNAL_WINDOW_WAYLAND, ShewExternalWindow)
 
-struct _ShewExternalWindowClass
-{
-  GObjectClass parent_class;
-
-  void (*set_parent_of) (ShewExternalWindow *external_window,
-                         GdkSurface         *child_surface);
-};
-
-ShewExternalWindow *shew_external_window_new_from_handle (const char *handle_str);
-
-void shew_external_window_set_parent_of (ShewExternalWindow *external_window,
-                                         GdkSurface         *child_surface);
-
-GdkDisplay *shew_external_window_get_display (ShewExternalWindow *external_window);
+ShewExternalWindowWayland *shew_external_window_wayland_new (const char *handle_str);
