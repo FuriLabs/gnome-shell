@@ -137,11 +137,9 @@ export class Magnifier extends Signals.EventEmitter {
             this._cursorUnfocusInhibited = false;
         }
 
-        if (this._cursorVisibilityChangedId) {
-            this._cursorTracker.disconnect(this._cursorVisibilityChangedId);
-            delete this._cursorVisibilityChangedId;
-
-            this._cursorTracker.set_pointer_visible(true);
+        if (this._cursorVisibleInhibited) {
+            this._cursorTracker.uninhibit_cursor_visibility();
+            this._cursorVisibleInhibited = false;
         }
     }
 
@@ -155,12 +153,9 @@ export class Magnifier extends Signals.EventEmitter {
             this._cursorUnfocusInhibited = true;
         }
 
-        if (!this._cursorVisibilityChangedId) {
-            this._cursorTracker.set_pointer_visible(false);
-            this._cursorVisibilityChangedId = this._cursorTracker.connect('visibility-changed', () => {
-                if (this._cursorTracker.get_pointer_visible())
-                    this._cursorTracker.set_pointer_visible(false);
-            });
+        if (!this._cursorVisibleInhibited) {
+            this._cursorTracker.inhibit_cursor_visibility();
+            this._cursorVisibleInhibited = true;
         }
     }
 
@@ -1280,7 +1275,7 @@ class ZoomRegion {
         this._clearScrollContentsTimer();
         this._scrollContentsTimerId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, POINTER_REST_TIME, () => {
             this._followingCursor = false;
-            if (this._xDelayed !== null && this._yDelayed !== null) {
+            if (this._xDelayed != null && this._yDelayed != null) {
                 this._scrollContentsToDelayed(this._xDelayed, this._yDelayed);
                 this._xDelayed = null;
                 this._yDelayed = null;

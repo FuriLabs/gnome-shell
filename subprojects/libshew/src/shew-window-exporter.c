@@ -1,5 +1,6 @@
 /*
- * Copyright © 2020 Red Hat, Inc
+ * SPDX-FileCopyrightText: 2020 Red Hat, Inc
+ * SPDX-License-Identifier: LGPL-2.1-or-later
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -91,9 +92,12 @@ shew_window_exporter_export (ShewWindowExporter  *exporter,
   if (GDK_IS_X11_DISPLAY (gtk_widget_get_display (widget)))
     {
       GdkSurface *s = gtk_native_get_surface (GTK_NATIVE (widget));
+      G_GNUC_BEGIN_IGNORE_DEPRECATIONS
       guint32 xid = (guint32) gdk_x11_surface_get_xid (s);
+      G_GNUC_END_IGNORE_DEPRECATIONS
 
       g_task_return_pointer (task, g_strdup_printf ("x11:%x", xid), g_free);
+      return;
     }
 #endif
 
@@ -104,14 +108,12 @@ shew_window_exporter_export (ShewWindowExporter  *exporter,
       gdk_wayland_toplevel_export_handle (GDK_WAYLAND_TOPLEVEL (s),
                                           wayland_window_exported,
                                           g_steal_pointer (&task), NULL);
+      return;
     }
 #endif
 
-  if (task != NULL && !g_task_get_completed (task))
-    {
-      g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
-                               "Unsupported windowing system");
-    }
+  g_task_return_new_error (task, G_IO_ERROR, G_IO_ERROR_NOT_SUPPORTED,
+                           "Unsupported windowing system");
 }
 
 char *

@@ -1,3 +1,87 @@
+gnome-shell (49~alpha.1-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 08 Jul 2025 04:47:27 +0200
+
+gnome-shell (48.2-3) unstable; urgency=medium
+
+  * Team upload
+  * Adjust wording of previous changelog entry to reflect that gnome-music
+    is still installed by default
+  * Release to unstable
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 12 Jun 2025 21:08:12 +0100
+
+gnome-shell (48.2-2) experimental; urgency=medium
+
+  * Team upload
+  * Summarize upstream changes in previous changelog entry
+  * d/gnome-shell.gsettings-override: Update default pinned apps for trixie.
+    The pinned (favourite) apps appear in the Dash (the bottom panel),
+    instead of appearing in the main app grid.
+    This file is a Debian-specific override for upstream's default list.
+    The changes compared with previous versions in Debian:
+    - Remove Rhythmbox. We no longer recommend a specific music player for
+      GNOME; users are welcome to install Amberol, GNOME Music, Lollypop,
+      Rhythmbox or any other music player of their choice.
+    - Remove LibreOffice Writer. Pinned apps don't appear in the app grid,
+      and it seems inconsistent to have Writer in the Dash (and not the
+      app grid) but every other LibreOffice component such as Calc in the
+      app grid (not the dash).
+    - Add gnome-text-editor, matching upstream.
+    - Add gnome-calculator, matching upstream.
+    The changes compared with upstream:
+    - Replace Epiphany (GNOME Web) with Firefox ESR, matching what we
+      install by default
+    - Replace GNOME Calendar with Evolution
+    - Add Yelp (GNOME Help)
+    This doesn't necessarily have any effect for existing users:
+    if the user has pinned or unpinned an app at least once, once,
+    then their list of pinned apps is saved and will be unaffected
+    by this override. Please test with a completely new installation,
+    a newly-created test user, or a user with an empty home directory.
+    (Closes: #1099579)
+  * d/patches: Move im-config from main app grid to the System folder,
+    as requested by Jeremy Bícha on #1099579.
+    A known issue is that this only has an effect for completely new
+    installations or newly-created users: if the user has logged in at
+    least once, then their app -> folder mapping is saved, even if they
+    never explicitly modified it.
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 10 Jun 2025 14:16:06 +0100
+
+gnome-shell (48.2-1) experimental; urgency=medium
+
+  * New upstream bugfix release
+    - Track screen-time for the Wellbeing feature correctly across
+      suspend/resume, not counting time spent suspended as screen time
+      (Closes: #1104630; gnome-shell!3707 upstream)
+    - Check for surrounding text before enabling that capability
+      (mutter#3102, gnome-shell!3666 upstream)
+    - Fix a crash that can occur during startup when an extension is
+      updated
+      (gnome-shell#8417 upstream)
+    - Fix a regression that broke the ability to run commands in
+      terminals via: Alt+F2, <command>, Ctrl+Enter
+      (gnome-shell#7516 upstream)
+    - Fix VPN toggle in system menu not working when clicking the switch
+      (gnome-shell#8204 upstream)
+    - Always close folders when clicking outside them
+      (gnome-shell#7541 upstream)
+    - Add comments to give context for translators
+      (gnome-shell!3716 upstream)
+    - Translation updates: ro
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Fri, 06 Jun 2025 13:32:38 -0400
+
+gnome-shell (48.1-1) unstable; urgency=medium
+
+  * New upstream release
+  * Refresh patches
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 17 Apr 2025 13:38:58 -0400
+
 gnome-shell (48.0-1ubuntu2) questing; urgency=medium
 
   * d/p/authd: Notify messages on authentication Next too

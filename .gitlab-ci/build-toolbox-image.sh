@@ -33,6 +33,7 @@ build_container() {
     flatpak-spawn # run host commands
     flatpak # for host apps
     nautilus # FileChooser portal
+    adwaita-fonts-all # system fonts
     gnome-backgrounds # no blank background!
   )
   local debug_packages=(
@@ -44,6 +45,10 @@ build_container() {
   buildah run $build_cntr dnf clean all
   buildah run $build_cntr rm -rf /var/lib/cache/dnf
 
+  # somehow the sysusers trigger from the flatpak package messes up the
+  # permissions of /etc/passwd to be only readable by root
+  buildah run $build_cntr chmod 644 /etc/passwd
+
   # disable gnome-keyring activation:
   # it either asks for unlocking the login keyring on startup, or it detects
   # the running host daemon and doesn't export the object on the bus, which
@@ -52,9 +57,6 @@ build_container() {
 
   local srcdir=$(realpath $(dirname $0))
   buildah copy --chmod 755 $build_cntr $srcdir/install-meson-project.sh /usr/libexec
-
-  buildah run $build_cntr /usr/libexec/install-meson-project.sh \
-    https://gitlab.gnome.org/GNOME/adwaita-fonts.git main
 
   # include convenience script for updating mutter dependency
   local update_mutter=$(mktemp)

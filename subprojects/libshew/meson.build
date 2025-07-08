@@ -1,6 +1,9 @@
+# SPDX-FileCopyrightText: 2020 Florian Müllner <fmuellner@gnome.org>
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
 project('shew', 'c',
-  version: '48.0',
-  meson_version: '>= 0.58.0',
+  version: '48.1',
+  meson_version: '>= 1.1.0',
   license: 'LGPL-2.1-or-later',
 )
 
@@ -16,13 +19,25 @@ package_version = meson.project_version()
 package_name = get_option('package_name')
 assert(package_name != '', 'package_name must be specified')
 
-pkgdatadir = join_paths(get_option('datadir'), package_name)
 pkglibdir = join_paths(get_option('libdir'), package_name)
 
-girdir = join_paths(pkgdatadir, 'gir-1.0')
 typelibdir = join_paths(pkglibdir, 'girepository-1.0')
 
 gtk_dep = dependency('gtk4')
 x11_dep = dependency('x11', required: false)
 
 subdir('src')
+
+if get_option('tests')
+  add_test_setup('plain')
+  add_test_setup('headless',
+    exe_wrapper: [
+      find_program('dbus-run-session'),
+      find_program('mutter'),
+      '--headless',
+      '--',
+    ],
+  )
+
+  subdir('tests')
+endif

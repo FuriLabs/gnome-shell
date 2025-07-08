@@ -77,7 +77,7 @@ export function loadRemoteSearchProviders(searchSettings) {
 
         try {
             keyfile.load_from_file(path, 0);
-        } catch (e) {
+        } catch {
             return;
         }
 
@@ -99,7 +99,7 @@ export function loadRemoteSearchProviders(searchSettings) {
                 appInfo = Gio.DesktopAppInfo.new(desktopId);
                 if (!appInfo.should_show())
                     return;
-            } catch (e) {
+            } catch {
                 log(`Ignoring search provider ${path}: missing DesktopId`);
                 return;
             }
@@ -107,14 +107,14 @@ export function loadRemoteSearchProviders(searchSettings) {
             let autoStart = true;
             try {
                 autoStart = keyfile.get_boolean(group, 'AutoStart');
-            } catch (e) {
+            } catch {
                 // ignore error
             }
 
             let version = '1';
             try {
                 version = keyfile.get_string(group, 'Version');
-            } catch (e) {
+            } catch {
                 // ignore error
             }
 
@@ -126,7 +126,7 @@ export function loadRemoteSearchProviders(searchSettings) {
             remoteProvider.defaultEnabled = true;
             try {
                 remoteProvider.defaultEnabled = !keyfile.get_boolean(group, 'DefaultDisabled');
-            } catch (e) {
+            } catch {
                 // ignore error
             }
 
@@ -140,8 +140,8 @@ export function loadRemoteSearchProviders(searchSettings) {
     if (searchSettings.get_boolean('disable-external'))
         return [];
 
-    for (const {dir} of FileUtils.collectFromDatadirs('search-providers', false))
-        loadRemoteSearchProvider(dir);
+    for (const {file} of FileUtils.collectFromDatadirs('search-providers', false))
+        loadRemoteSearchProvider(file);
 
     let sortOrder = searchSettings.get_strv('sort-order');
 

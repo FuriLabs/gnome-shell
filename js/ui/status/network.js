@@ -1323,6 +1323,16 @@ const NMVpnConnectionItem = GObject.registerClass({
         this.bind_property('is-active',
             this._switch, 'state',
             GObject.BindingFlags.SYNC_CREATE);
+
+        // Switch handle is reactive, so events don't propagate to the item;
+        // activate it manually in that case
+        this._switch.connect('notify::state', () => {
+            if (this.is_active === this._switch.state)
+                return;
+
+            this.activate();
+        });
+
         this.bind_property('name',
             this._label, 'text',
             GObject.BindingFlags.SYNC_CREATE);
@@ -1970,7 +1980,7 @@ class CaptivePortalHandler extends Signals.EventEmitter {
         const source = MessageTray.getSystemSource();
 
         const notification = new MessageTray.Notification({
-            title: _('Sign Into Wi–Fi Network'),
+            title: _('Sign in to Network'),
             body: name,
             source,
         });
@@ -2126,7 +2136,7 @@ class Indicator extends SystemIndicator {
                 const state = await this._client.check_connectivity_async(null);
                 if (state >= NM.ConnectivityState.FULL)
                     this._portalHandler.removeConnection(path);
-            } catch (e) { }
+            } catch {}
         });
 
         this._client.connectObject(

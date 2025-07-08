@@ -2434,9 +2434,7 @@ export class ScreenshotService {
         this._screenShooter = new Map();
         this._senderChecker = new DBusSenderChecker([
             'org.gnome.SettingsDaemon.MediaKeys',
-            'org.freedesktop.impl.portal.desktop.gtk',
             'org.freedesktop.impl.portal.desktop.gnome',
-            'org.gnome.Screenshot',
         ]);
 
         this._lockdownSettings = new Gio.Settings({schema_id: 'org.gnome.desktop.lockdown'});
@@ -2621,7 +2619,7 @@ export class ScreenshotService {
                 screenshot.screenshot_area(x, y, width, height, stream),
             ]);
             this._onScreenshotComplete(stream, file, invocation);
-        } catch (e) {
+        } catch {
             invocation.return_value(new GLib.Variant('(bs)', [false, '']));
         } finally {
             this._removeShooterForSender(invocation.get_sender());
@@ -2644,7 +2642,7 @@ export class ScreenshotService {
                 screenshot.screenshot_window(includeFrame, includeCursor, stream),
             ]);
             this._onScreenshotComplete(stream, file, invocation);
-        } catch (e) {
+        } catch {
             invocation.return_value(new GLib.Variant('(bs)', [false, '']));
         } finally {
             this._removeShooterForSender(invocation.get_sender());
@@ -2667,7 +2665,7 @@ export class ScreenshotService {
                 screenshot.screenshot(includeCursor, stream),
             ]);
             this._onScreenshotComplete(stream, file, invocation);
-        } catch (e) {
+        } catch {
             invocation.return_value(new GLib.Variant('(bs)', [false, '']));
         } finally {
             this._removeShooterForSender(invocation.get_sender());
@@ -2696,7 +2694,7 @@ export class ScreenshotService {
 
         try {
             Main.screenshotUI.open(UIMode.SCREENSHOT_ONLY);
-        } catch (e) {
+        } catch {
             Main.screenshotUI.disconnectObject(invocation);
             invocation.return_value(new GLib.Variant('(bs)', [false, '']));
         }
@@ -2717,7 +2715,7 @@ export class ScreenshotService {
                 areaRectangle.x, areaRectangle.y,
                 areaRectangle.width, areaRectangle.height);
             invocation.return_value(GLib.Variant.new('(iiii)', retRectangle));
-        } catch (e) {
+        } catch {
             invocation.return_error_literal(
                 Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED,
                 'Operation was cancelled');
@@ -2763,7 +2761,7 @@ export class ScreenshotService {
                 ]),
             }]);
             invocation.return_value(retval);
-        } catch (e) {
+        } catch {
             invocation.return_error_literal(
                 Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED,
                 'Operation was cancelled');

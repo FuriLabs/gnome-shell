@@ -1,3 +1,75 @@
+49.alpha.1
+==========
+* Add support for pad dials [Joshua; !3583]
+* Show workspace switcher OSD on all monitors [Oscar; !3734]
+* Add missing accessibility labels in various components
+  [Florian, Sergio; !3736, !3765, !3769, !3773, !3179]
+* Add "gnome-extensions upload" command [Florian; !3712]
+* Allow users to correct keyring password after failure [Alynx; !3757]
+* Handle unknown power-profiles in quick settings [Morgan; !3774]
+* Move do-not-disturb into quick settings [Florian, Jakub; !3691]
+* Add dedicated accessibility menu on login screen [Florian; !3744]
+* Misc. bug fixes and cleanups [Michael, Florian, Joan, Daniel v. V., Jordan,
+  Daniel R., Thomas, Sebastian, Sam, Carlos; !3717, !3745, !3747, !3749, !3743,
+  !3738, !3753, !3748, !3755, !3754, !3758, !3650, !3759, !3764, !3761, !3772,
+  !3775, !3776, !3777, !3706, !3756, !3760]
+
+Contributors:
+  Thomas Booker, Michael Catanzaro, Sergio Costas Rodriguez, Mike FABIAN,
+  Carlos Garnacho, Sam Hewitt, Joshua, Morgan, Florian Müllner,
+  Jordan Petridis, Daniel Rusek, Oscar Sommerer, Jakub Steiner,
+  Joan Torres López, Daniel van Vugt, Sebastian Wick, Alynx Zhou
+
+Translators:
+  Martin [sl], Emilio Sepúlveda [ia], Emin Tufan Çetin [tr],
+  Vasil Pupkin [be], Jordi Mas [ca], Artur S0 [ru]
+
+49.alpha.0
+==========
+* Only enable surrounding-text IM capability when needed [Takao; !3666]
+* Fix launching command from terminal in run dialog [Balló; !3683]
+* Ignore offset changes caused by suspend for screen time [Sebastian K.; !3707]
+* Fix app folders sometimes not closing after outside clicks [Damien; !3713]
+* Check all modifiers for modifier-scroll [Florian; !3725]
+* Notify gnome-session when we're ready [Adrian; !3730]
+* Support running shell via --devkit [Florian; !3731]
+* Fix visibility of emoji key in on-screen-keyboard [Carlos; !3733]
+* Stop using ratio character for time [Florian; !3732]
+* Port to new MetaBacklight API [Sebastian W.; !3715]
+* Fixed crash [Florian; !3721]
+* Misc. bug fixes and cleanups [Philipp, Alynx, Florian, fossdd, Jordan;
+  !3716, !3711, !3700, !3718, !3728, !3735, !3737, !3727, !3699, !3704,
+  !3690, !3740, !3741, ]
+
+Contributors:
+  Jonas Ådahl, fossdd, Takao Fujiwara, Carlos Garnacho, Balló György,
+  Sebastian Keller, Philipp Kiemle, Florian Müllner, Jordan Petridis,
+  Damien Tournoud, Adrian Vovk, Alynx Zhou, Sebastian Wick
+
+Translators:
+  Juliano de Souza Camargo [pt_BR], Vasil Pupkin [be], Jun Oyamada [ja],
+  Rūdolfs Mazurs [lv], Takayuki KUSANO [ja], Philipp Kiemle [de],
+  Jose Riha [sk], Antonio Marin [ro], Emilio Sepúlveda [ia], Fabio Tomat [fur]
+
+48.1
+====
+* Fix glitch in sliders when close to maximum [Sebastian; !3648]
+* Fix detecting suspend/resume for time tracking [Sebastian; !3679]
+* Fix wrongly sized images with fractional scaling [Jonas; !3680]
+* Fix frozen cursor when using magnifier in push mode [Jerome; !3688]
+* Fix session button on login screen after wrong password [Florian; !3638]
+* Misc. bug fixes and cleanups [Florian, Philip, Balló, Andy; !3673,
+  !3675, !3685, !3676, !3689, !3687, !3641, !3694, !3684, !3672]
+
+Contributors:
+  Jerome Brenier, Jonas Dreßler, Balló György, Andy Holmes, Sebastian Keller,
+  Florian Müllner, Vasil Pupkin, Baxrom Raxmatov, Philip Withnall
+
+Translators:
+  Vasil Pupkin [be@latin], Daniel Mustieles [es], Antonio Marin [ro],
+  Danial Behzadi [fa], Jose Riha [sk], Cheng-Chia Tseng [zh_TW],
+  Danial Behzadi [fa], Jose Riha [sk], Cheng-Chia Tseng [zh_TW],
+
 48.0
 ====
 * Fix ibus candidate popup position [Peng; !3659]

@@ -1305,18 +1305,13 @@ export const Keyboard = GObject.registerClass({
         this._keyboardController.connectObject(
             'group-changed', this._onGroupChanged.bind(this),
             'panel-state', this._onKeyboardStateChanged.bind(this),
-            'purpose-changed', this._onPurposeChanged.bind(this),
+            'purpose-changed', () => this._updateKeys(),
             'content-hints-changed', this._onContentHintsChanged.bind(this),
             this);
         global.stage.connectObject('notify::key-focus',
             this._onKeyFocusChanged.bind(this), this);
 
         this._relayout();
-    }
-
-    _onPurposeChanged(controller, purpose) {
-        this._purpose = purpose;
-        this._updateKeys();
     }
 
     _onContentHintsChanged(controller, contentHint) {
@@ -1439,7 +1434,7 @@ export const Keyboard = GObject.registerClass({
                 try {
                     keyboardModel = new KeyboardModel(group);
                     break;
-                } catch (e) {
+                } catch {
                     // Ignore this error and fall back to next model
                 }
             }
@@ -1660,7 +1655,8 @@ export const Keyboard = GObject.registerClass({
 
     _updateKeys() {
         const group = this._keyboardController.getCurrentGroup();
-        this._updateLayout(group, this._purpose);
+        const {purpose} = this._keyboardController;
+        this._updateLayout(group, purpose);
         this._setActiveLevel('default');
     }
 
@@ -1994,11 +1990,16 @@ class KeyboardController extends Signals.EventEmitter {
             'current-source-changed', this._onSourceChanged.bind(this),
             'sources-changed', this._onSourcesModified.bind(this), this);
         this._currentSource = this._inputSourceManager.currentSource;
+        this._purpose = Main.inputMethod.contentPurpose;
 
         Main.inputMethod.connectObject(
             'notify::content-purpose', this._onPurposeHintsChanged.bind(this),
             'notify::content-hints', this._onContentHintsChanged.bind(this),
             'input-panel-state', (o, state) => this.emit('panel-state', state), this);
+    }
+
+    get purpose() {
+        return this._purpose;
     }
 
     destroy() {
