@@ -16,10 +16,10 @@ As we may have different protocols under the hood.
  create mode 100644 js/gdm/unifiedMechanism.js
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index edf2cfe..19dd711 100644
+index d5cf9b9..38af437 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -145,12 +145,19 @@ export const AuthPrompt = GObject.registerClass({
+@@ -146,12 +146,19 @@ export const AuthPrompt = GObject.registerClass({
  
      on_key_press_event(event) {
          if (event.get_key_symbol() === Clutter.KEY_Escape) {
@@ -40,7 +40,7 @@ index edf2cfe..19dd711 100644
      _initInputRow() {
          this._mainBox = new St.BoxLayout({
              style_class: 'login-dialog-button-box',
-@@ -169,7 +176,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -170,7 +177,7 @@ export const AuthPrompt = GObject.registerClass({
              icon_name: 'go-previous-symbolic',
          });
          if (this._hasCancelButton)
@@ -62,10 +62,10 @@ index 0000000..ad854ca
 +export const SMARTCARD_ROLE_NAME = 'smartcard';
 +export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 21df951..b403aa4 100644
+index 48c15eb..9420440 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -1090,11 +1090,11 @@ export const LoginDialog = GObject.registerClass({
+@@ -1189,11 +1189,11 @@ export const LoginDialog = GObject.registerClass({
  
          mechanisms.sort((a, b) => a.name.localeCompare(b.name));
  
@@ -702,7 +702,7 @@ index e76055e..b7b70d3 100644
              this.disconnect(this._mechanismsListChangedSignalId);
              this._mechanismsListChangedSignalId = 0;
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 8c60572..1a3513f 100644
+index 6eec02a..30b2f80 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
 @@ -5,12 +5,14 @@
@@ -721,7 +721,7 @@ index 8c60572..1a3513f 100644
  
      <file>extensions/extension.js</file>
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index 4c52248..804b903 100644
+index 1d51a51..d77c185 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
 @@ -847,11 +847,11 @@ export const UnlockDialog = GObject.registerClass({

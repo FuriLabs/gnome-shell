@@ -12,10 +12,10 @@ Forwarded: not-needed
  2 files changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
-index f9d4e9c..adab13c 100644
+index ff3381c..8a9dd1a 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
-@@ -615,7 +615,7 @@ export function reloadThemeResource() {
+@@ -630,7 +630,7 @@ export function reloadThemeResource() {
  
  /** @private */
  function _loadIcons() {
@@ -25,7 +25,7 @@ index f9d4e9c..adab13c 100644
  }
  
 diff --git a/js/ui/sessionMode.js b/js/ui/sessionMode.js
-index 3e4f8b8..d884945 100644
+index d131d07..16bbfd6 100644
 --- a/js/ui/sessionMode.js
 +++ b/js/ui/sessionMode.js
 @@ -24,6 +24,7 @@ const _modes = {

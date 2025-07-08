@@ -7,7 +7,7 @@ Subject: gdm/webLogin: Improve label rendering
  1 file changed, 8 insertions(+)
 
 diff --git a/js/gdm/webLogin.js b/js/gdm/webLogin.js
-index 16a53d6..8bbf5ac 100644
+index 65b10e6..19f3ac2 100644
 --- a/js/gdm/webLogin.js
 +++ b/js/gdm/webLogin.js
 @@ -7,6 +7,7 @@ import Clutter from 'gi://Clutter';

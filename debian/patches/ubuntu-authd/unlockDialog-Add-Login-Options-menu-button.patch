@@ -21,7 +21,7 @@ index 19cd357..dc87dc3 100644
  
              let mechanismsList = [];
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index 48a9dc0..a9f4b35 100644
+index aefcb81..9849aec 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
 @@ -15,6 +15,7 @@ import * as Main from './main.js';

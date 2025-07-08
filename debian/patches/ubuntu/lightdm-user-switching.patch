@@ -12,7 +12,7 @@ https://bugzilla.gnome.org/show_bug.cgi?id=685794
  1 file changed, 40 insertions(+), 7 deletions(-)
 
 diff --git a/js/misc/systemActions.js b/js/misc/systemActions.js
-index 99c9173..6672230 100644
+index a027a81..5147ef0 100644
 --- a/js/misc/systemActions.js
 +++ b/js/misc/systemActions.js
 @@ -231,6 +231,34 @@ const SystemActions = GObject.registerClass({

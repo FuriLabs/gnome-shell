@@ -11,7 +11,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2011806
  2 files changed, 25 insertions(+), 2 deletions(-)
 
 diff --git a/js/misc/util.js b/js/misc/util.js
-index 517ff57..9c9e038 100644
+index 0a6bf19..6d45711 100644
 --- a/js/misc/util.js
 +++ b/js/misc/util.js
 @@ -117,6 +117,20 @@ export function spawnApp(argv) {

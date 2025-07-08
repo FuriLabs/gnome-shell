@@ -8,10 +8,10 @@ Subject: gdm/loginDialog: Fix cancel button visibility
  2 files changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 19dd711..6e4e41d 100644
+index 38af437..dab5e2c 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -54,6 +54,12 @@ export const AuthPrompt = GObject.registerClass({
+@@ -55,6 +55,12 @@ export const AuthPrompt = GObject.registerClass({
          'mechanisms-changed': {param_types: [GObject.TYPE_STRING]},
          'reset': {param_types: [GObject.TYPE_UINT]},
      },
@@ -24,7 +24,7 @@ index 19dd711..6e4e41d 100644
  }, class AuthPrompt extends St.BoxLayout {
      _init(gdmClient, mode) {
          super._init({
-@@ -806,6 +812,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -808,6 +814,7 @@ export const AuthPrompt = GObject.registerClass({
          this.cancelButton.reactive = this._hasCancelButton;
          this.cancelButton.can_focus = this._hasCancelButton;
          this._preemptiveAnswer = null;
@@ -33,10 +33,10 @@ index 19dd711..6e4e41d 100644
          if (this._userVerifier)
              this._userVerifier.cancel();
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 4dfe681..8b64fa5 100644
+index 080641e..7498e0e 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -548,6 +548,8 @@ export const LoginDialog = GObject.registerClass({
+@@ -598,6 +598,8 @@ export const LoginDialog = GObject.registerClass({
          this._authPrompt.connect('prompted', this._onPrompted.bind(this));
          this._authPrompt.connect('reset', this._onReset.bind(this));
          this._authPrompt.connect('mechanisms-changed', this._onMechanismsChanged.bind(this));
@@ -45,7 +45,7 @@ index 4dfe681..8b64fa5 100644
          this._authPrompt.hide();
          this.add_child(this._authPrompt);
  
-@@ -1164,9 +1166,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1267,9 +1269,7 @@ export const LoginDialog = GObject.registerClass({
                  this._user = this._userManager.get_user(answer);
                  this._authPrompt.clear();
                  this._beginVerification({userName: answer});

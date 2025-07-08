@@ -8,10 +8,10 @@ Subject: gdm: Support more authentication mechanism UIs
  2 files changed, 79 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 6e4e41d..b76807c 100644
+index dab5e2c..9f9eaef 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -87,9 +87,11 @@ export const AuthPrompt = GObject.registerClass({
+@@ -88,9 +88,11 @@ export const AuthPrompt = GObject.registerClass({
  
          this._userVerifier.connect('ask-question', this._onAskQuestion.bind(this));
          this._userVerifier.connect('show-message', this._onShowMessage.bind(this));
@@ -23,7 +23,7 @@ index 6e4e41d..b76807c 100644
          this._userVerifier.connect('web-login', this._onWebLogin.bind(this));
          this._userVerifier.connect('web-login-time-out', this._onWebLoginTimeOut.bind(this));
          this._userVerifier.connect('verification-failed', this._onVerificationFailed.bind(this));
-@@ -359,6 +361,20 @@ export const AuthPrompt = GObject.registerClass({
+@@ -360,6 +362,20 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('prompted');
      }
  
@@ -44,7 +44,7 @@ index 6e4e41d..b76807c 100644
      _onShowChoiceList(userVerifier, serviceName, promptMessage, choiceList) {
          if (this._queryingService)
              this.clear();
-@@ -378,6 +394,11 @@ export const AuthPrompt = GObject.registerClass({
+@@ -379,6 +395,11 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('mechanisms-changed', serviceName);
      }
  

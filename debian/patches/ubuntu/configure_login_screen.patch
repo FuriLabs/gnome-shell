@@ -120,7 +120,7 @@ index 114dd20..d59cf05 100644
    command: [find_program('glib-compile-schemas'), '--strict', data_builddir],
    build_by_default: true)
 diff --git a/js/ui/background.js b/js/ui/background.js
-index c02f344..ad0abca 100644
+index c320300..0454c64 100644
 --- a/js/ui/background.js
 +++ b/js/ui/background.js
 @@ -542,7 +542,11 @@ export const SystemBackground = GObject.registerClass({
@@ -136,7 +136,7 @@ index c02f344..ad0abca 100644
                  backgroundColor = dummyBgActor.get_theme_node().get_background_color();
                  dummyBgActor.destroy();
 diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js
-index 370599f..ae05f94 100644
+index 7edcf36..fec2704 100644
 --- a/js/ui/screenShield.js
 +++ b/js/ui/screenShield.js
 @@ -31,6 +31,12 @@ const DISABLE_LOCK_KEY = 'disable-lock-screen';
@@ -201,7 +201,7 @@ index 370599f..ae05f94 100644
      async _syncInhibitor() {
          const lockEnabled = this._settings.get_boolean(LOCK_ENABLED_KEY) ||
                              this._settings.get_boolean(SUSPEND_LOCK_ENABLED_KEY);
-@@ -427,6 +468,7 @@ export class ScreenShield extends Signals.EventEmitter {
+@@ -437,6 +478,7 @@ export class ScreenShield extends Signals.EventEmitter {
              }
  
              this._dialog = new constructor(this._lockDialogGroup);

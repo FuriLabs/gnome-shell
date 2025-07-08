@@ -7,23 +7,23 @@ Now that AuthMenuButton exists, we should use it.
 This commit changes the session menu over to use the new
 control.
 ---
- .../gnome-shell-sass/widgets/_login-lock.scss      | 27 +++++++++
- js/gdm/loginDialog.js                              | 68 +++++++++++++++-------
- 2 files changed, 73 insertions(+), 22 deletions(-)
+ .../gnome-shell-sass/widgets/_login-lock.scss      | 27 ++++++++
+ js/gdm/loginDialog.js                              | 79 ++++++++++++++++------
+ 2 files changed, 87 insertions(+), 19 deletions(-)
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index 879b353..e2b33c6 100644
+index 64e2955..6c20fb6 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-@@ -31,6 +31,7 @@ $_gdm_dialog_width: 25em;
- 
+@@ -32,6 +32,7 @@ $_gdm_dialog_width: 25em;
+   &.a11y-button,
    &.cancel-button,
    &.switch-user-button,
 +  &.login-dialog-auth-menu-button,
    &.login-dialog-session-list-button {
      @extend .icon-button;
      @extend %system_button;
-@@ -41,6 +42,25 @@ $_gdm_dialog_width: 25em;
+@@ -42,6 +43,25 @@ $_gdm_dialog_width: 25em;
    }
  }
  
@@ -49,7 +49,7 @@ index 879b353..e2b33c6 100644
  .login-dialog-button-box {
    spacing: $base_padding * 2;
  }
-@@ -64,6 +84,13 @@ $_gdm_dialog_width: 25em;
+@@ -65,6 +85,13 @@ $_gdm_dialog_width: 25em;
    }
  }
  
@@ -64,7 +64,7 @@ index 879b353..e2b33c6 100644
    margin: 3em 0;
  }
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 5f22a34..26ff6ca 100644
+index 79f23ce..7d83993 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -27,9 +27,9 @@ import Pango from 'gi://Pango';
@@ -78,15 +78,7 @@ index 5f22a34..26ff6ca 100644
  import * as CtrlAltTab from '../ui/ctrlAltTab.js';
  import * as GdmUtil from './util.js';
  import * as Layout from '../ui/layout.js';
-@@ -38,7 +38,6 @@ import * as Main from '../ui/main.js';
- import * as MessageTray from '../ui/messageTray.js';
- import * as ModalDialog from '../ui/modalDialog.js';
- import * as Params from '../misc/params.js';
--import * as PopupMenu from '../ui/popupMenu.js';
- import * as Realmd from './realmd.js';
- import * as UserWidget from '../ui/userWidget.js';
- 
-@@ -593,14 +592,10 @@ export const LoginDialog = GObject.registerClass({
+@@ -642,14 +642,10 @@ export const LoginDialog = GObject.registerClass({
          this._updateBannerMessageFile();
          this._updateBanner().catch(logError);
  
@@ -103,9 +95,9 @@ index 5f22a34..26ff6ca 100644
 +
 +        this._createSessionMenuButton();
  
-         this._logoBin = new St.Widget({
-             style_class: 'login-dialog-logo-bin',
-@@ -633,6 +628,35 @@ export const LoginDialog = GObject.registerClass({
+         this._a11yMenuButton = new A11yMenuButton();
+         this.add_child(this._a11yMenuButton);
+@@ -685,6 +681,35 @@ export const LoginDialog = GObject.registerClass({
              this._updateDisableUserList.bind(this), this);
      }
  
@@ -141,17 +133,7 @@ index 5f22a34..26ff6ca 100644
      _getBannerAllocation(dialogBox) {
          let actorBox = new Clutter.ActorBox();
  
-@@ -661,17 +685,17 @@ export const LoginDialog = GObject.registerClass({
-         return actorBox;
-     }
- 
--    _getSessionMenuButtonAllocation(dialogBox) {
-+    _getMenuButtonAllocation(dialogBox) {
-         let actorBox = new Clutter.ActorBox();
- 
--        let [, , natWidth, natHeight] = this._sessionMenuButton.get_preferred_size();
-+        let [, , natWidth, natHeight] = this._menuButtonBox.get_preferred_size();
- 
+@@ -721,9 +746,26 @@ export const LoginDialog = GObject.registerClass({
          if (this.get_text_direction() === Clutter.TextDirection.RTL)
              actorBox.x1 = dialogBox.x1 + natWidth;
          else
@@ -160,26 +142,42 @@ index 5f22a34..26ff6ca 100644
  
 -        actorBox.y1 = dialogBox.y2 - (natHeight * 2);
 +        actorBox.y1 = dialogBox.y2 - natHeight;
++        actorBox.x2 = actorBox.x1 + natWidth;
++        actorBox.y2 = actorBox.y1 + natHeight;
++
++        return actorBox;
++    }
++
++    _getMenuButtonAllocation(dialogBox) {
++        let actorBox = new Clutter.ActorBox();
++
++        let [, , natWidth, natHeight] = this._menuButtonBox.get_preferred_size();
++
++        if (this.get_text_direction() === Clutter.TextDirection.RTL)
++            actorBox.x1 = dialogBox.x1 + natWidth;
++        else
++            actorBox.x1 = dialogBox.x2 - natWidth;
++
++        actorBox.y1 = dialogBox.y2 - natHeight;
          actorBox.x2 = actorBox.x1 + natWidth;
          actorBox.y2 = actorBox.y1 + natHeight;
  
-@@ -734,9 +758,10 @@ export const LoginDialog = GObject.registerClass({
-             logoHeight = logoAllocation.y2 - logoAllocation.y1;
+@@ -813,9 +855,9 @@ export const LoginDialog = GObject.registerClass({
+             a11yButtonWidth = a11yMenuButtonAllocation.get_width();
          }
  
 -        let sessionMenuButtonAllocation = null;
 -        if (this._sessionMenuButton.visible)
--            sessionMenuButtonAllocation = this._getSessionMenuButtonAllocation(dialogBox);
+-            sessionMenuButtonAllocation = this._getSessionMenuButtonAllocation(dialogBox, a11yButtonWidth);
 +        let menuButtonBoxAllocation = null;
 +        if (this._menuButtonBox.visible)
 +            menuButtonBoxAllocation = this._getMenuButtonAllocation(dialogBox);
-+
  
          // Then figure out if we're overly constrained and need to
          // try a different layout, or if we have what extra space we
-@@ -837,8 +862,8 @@ export const LoginDialog = GObject.registerClass({
-         if (logoAllocation)
-             this._logoBin.allocate(logoAllocation);
+@@ -919,8 +961,8 @@ export const LoginDialog = GObject.registerClass({
+         if (a11yMenuButtonAllocation)
+             this._a11yMenuButton.allocate(a11yMenuButtonAllocation);
  
 -        if (sessionMenuButtonAllocation)
 -            this._sessionMenuButton.allocate(sessionMenuButtonAllocation);
@@ -188,7 +186,7 @@ index 5f22a34..26ff6ca 100644
      }
  
      _ensureUserListLoaded() {
-@@ -1032,7 +1057,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1114,7 +1156,7 @@ export const LoginDialog = GObject.registerClass({
      }
  
      _onDefaultSessionChanged(client, sessionId) {
@@ -197,7 +195,7 @@ index 5f22a34..26ff6ca 100644
      }
  
      _shouldShowSessionMenuButton() {
-@@ -1416,8 +1441,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1502,8 +1544,7 @@ export const LoginDialog = GObject.registerClass({
          this._ensureUserListLoaded();
          this._authPrompt.hide();
          this._hideBannerView();

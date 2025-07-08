@@ -1,10 +1,19 @@
-Description: Align StSpinnerContent Design and Animation to YaruCircularProgressIndicator
-Author: Vincent Renzo Quilon
+From: Ubuntu Developers <ubuntu-devel-discuss@lists.ubuntu.com>
+Date: Tue, 8 Jul 2025 05:37:21 +0200
+Subject: Align StSpinnerContent Design and Animation to
+ YaruCircularProgressIndicator
+
 Forwarded: no, ubuntu only.
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/2114899
 Last-Update: 2025-06-28
+
+Last-Update: 2025-06-28
 ---
-This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+ src/st/st-spinner-content.c | 135 +++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 134 insertions(+), 1 deletion(-)
+
+diff --git a/src/st/st-spinner-content.c b/src/st/st-spinner-content.c
+index 76fe3f2..de9adb0 100644
 --- a/src/st/st-spinner-content.c
 +++ b/src/st/st-spinner-content.c
 @@ -20,7 +20,9 @@
@@ -51,7 +60,7 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
  /**
   * StSpinnerContent:
   *
-@@ -82,6 +111,22 @@ st_spinner_content_class_init (StSpinner
+@@ -82,6 +111,22 @@ st_spinner_content_class_init (StSpinnerContentClass *klass)
  {
  }
  
@@ -74,7 +83,7 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
  static void
  actor_map_cb (GObject    *object,
                GParamSpec *pspec,
-@@ -131,6 +176,12 @@ st_spinner_content_set_actor (StSpinnerC
+@@ -131,6 +176,12 @@ st_spinner_content_set_actor (StSpinnerContent *spinner,
        clutter_timeline_set_repeat_count (spinner->timeline, -1);
        clutter_timeline_set_progress_mode (spinner->timeline, CLUTTER_LINEAR);
  
@@ -87,10 +96,11 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
        g_signal_connect (spinner->timeline, "new-frame", G_CALLBACK (new_frame_cb), spinner);
  
        if (clutter_actor_is_mapped (actor))
-@@ -316,6 +367,84 @@ st_spinner_content_draw_spinner (StSpinn
+@@ -315,6 +366,84 @@ st_spinner_content_draw_spinner (StSpinnerContent *spinner,
+   cairo_restore (cr);
  }
  
- static void
++static void
 +st_spinner_content_draw_yaru_spinner (StSpinnerContent *spinner,
 +                                 cairo_t          *cr,
 +                                 int               width,
@@ -168,11 +178,10 @@ This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
 +  } while (segment_counter < 3);
 +}
 +
-+static void
+ static void
  st_spinner_content_redraw (StSpinnerContent *spinner)
  {
-   ClutterActorBox allocation;
-@@ -398,7 +527,10 @@ st_spinner_content_redraw (StSpinnerCont
+@@ -398,7 +527,10 @@ st_spinner_content_redraw (StSpinnerContent *spinner)
    cairo_paint (cr);
    cairo_restore (cr);
  

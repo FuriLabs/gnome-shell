@@ -18,7 +18,7 @@ Forwarded: https://bugzilla.gnome.org/show_bug.cgi?id=789852
  2 files changed, 20 insertions(+)
 
 diff --git a/js/ui/extensionDownloader.js b/js/ui/extensionDownloader.js
-index 53fd928..2576839 100644
+index fe687cb..1bb709c 100644
 --- a/js/ui/extensionDownloader.js
 +++ b/js/ui/extensionDownloader.js
 @@ -5,6 +5,7 @@ import GObject from 'gi://GObject';
@@ -54,7 +54,7 @@ index 53fd928..2576839 100644
              version: extension.metadata.version,
          };
 diff --git a/js/ui/extensionSystem.js b/js/ui/extensionSystem.js
-index ece089b..6c297ed 100644
+index 06f7d96..68b15ef 100644
 --- a/js/ui/extensionSystem.js
 +++ b/js/ui/extensionSystem.js
 @@ -6,6 +6,7 @@ import Shell from 'gi://Shell';
@@ -76,7 +76,7 @@ index ece089b..6c297ed 100644
      async _callExtensionInit(uuid) {
          if (!this._extensionSupportsSessionMode(uuid))
              return false;
-@@ -722,6 +727,10 @@ export class ExtensionManager extends Signals.EventEmitter {
+@@ -726,6 +731,10 @@ export class ExtensionManager extends Signals.EventEmitter {
              let type = dir.has_prefix(perUserDir)
                  ? ExtensionType.PER_USER
                  : ExtensionType.SYSTEM;

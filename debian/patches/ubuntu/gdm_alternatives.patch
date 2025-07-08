@@ -28,7 +28,7 @@ index 30d9dc4..544ce4b 100644
      <file>gnome-shell-light.css</file>
      <file>gnome-shell-high-contrast.css</file>
 diff --git a/js/ui/sessionMode.js b/js/ui/sessionMode.js
-index e284b90..2cdf338 100644
+index e45fce0..dea9be9 100644
 --- a/js/ui/sessionMode.js
 +++ b/js/ui/sessionMode.js
 @@ -50,6 +50,8 @@ const _modes = {

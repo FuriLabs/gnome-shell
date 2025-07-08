@@ -63,7 +63,7 @@ index 4a60403..a66f65b 100644
          if (!this._updateRegionIdle) {
              const laters = global.compositor.get_laters();
 diff --git a/js/ui/magnifier.js b/js/ui/magnifier.js
-index 017451c..c1b881f 100644
+index 386a807..27eb4e0 100644
 --- a/js/ui/magnifier.js
 +++ b/js/ui/magnifier.js
 @@ -5,6 +5,7 @@ import GDesktopEnums from 'gi://GDesktopEnums';
@@ -169,7 +169,7 @@ index 017451c..c1b881f 100644
      /**
       * showSystemCursor:
       * Show the system mouse pointer.
-@@ -268,6 +318,8 @@ export class Magnifier extends Signals.EventEmitter {
+@@ -263,6 +313,8 @@ export class Magnifier extends Signals.EventEmitter {
          this.xMouse = xMouse;
          this.yMouse = yMouse;
  

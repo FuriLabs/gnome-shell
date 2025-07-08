@@ -19,10 +19,10 @@ commits will add support for mechanisms that support other authentication
  3 files changed, 254 insertions(+), 14 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 13f8557..21df951 100644
+index 4179563..48c15eb 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -500,7 +500,10 @@ export const LoginDialog = GObject.registerClass({
+@@ -550,7 +550,10 @@ export const LoginDialog = GObject.registerClass({
          this._gdmClient = new Gdm.Client();
  
          try {
@@ -31,7 +31,7 @@ index 13f8557..21df951 100644
 +                Gdm.UserVerifierChoiceList.interface_info().name,
 +                Gdm.UserVerifierCustomJSON.interface_info().name,
 +            ]);
-         } catch (e) {
+         } catch {
          }
  
 diff --git a/js/gdm/util.js b/js/gdm/util.js
@@ -430,7 +430,7 @@ index dc87dc3..ae085349 100644
              return;
  
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index a9f4b35..4c52248 100644
+index 9849aec..1d51a51 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
 @@ -499,6 +499,7 @@ export const UnlockDialog = GObject.registerClass({
@@ -439,5 +439,5 @@ index a9f4b35..4c52248 100644
                  Gdm.UserVerifierChoiceList.interface_info().name,
 +                Gdm.UserVerifierCustomJSON.interface_info().name,
              ]);
-         } catch (e) {
+         } catch {
          }

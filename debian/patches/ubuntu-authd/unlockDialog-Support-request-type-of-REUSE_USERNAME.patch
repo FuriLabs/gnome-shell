@@ -9,7 +9,7 @@ to do so. This commit fixes that.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index 1e02da4..48a9dc0 100644
+index 77e8057..aefcb81 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
 @@ -798,7 +798,7 @@ export const UnlockDialog = GObject.registerClass({

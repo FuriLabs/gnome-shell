@@ -15,10 +15,10 @@ https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/login-
  3 files changed, 189 insertions(+), 9 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 664d966..4aced9e 100644
+index 1ee0708..e45127a 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -49,6 +49,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -50,6 +50,7 @@ export const AuthPrompt = GObject.registerClass({
          'failed': {},
          'next': {},
          'prompted': {},
@@ -26,7 +26,7 @@ index 664d966..4aced9e 100644
          'reset': {param_types: [GObject.TYPE_UINT]},
      },
  }, class AuthPrompt extends St.BoxLayout {
-@@ -79,6 +80,8 @@ export const AuthPrompt = GObject.registerClass({
+@@ -80,6 +81,8 @@ export const AuthPrompt = GObject.registerClass({
          this._userVerifier.connect('ask-question', this._onAskQuestion.bind(this));
          this._userVerifier.connect('show-message', this._onShowMessage.bind(this));
          this._userVerifier.connect('show-choice-list', this._onShowChoiceList.bind(this));
@@ -35,7 +35,7 @@ index 664d966..4aced9e 100644
          this._userVerifier.connect('verification-failed', this._onVerificationFailed.bind(this));
          this._userVerifier.connect('verification-complete', this._onVerificationComplete.bind(this));
          this._userVerifier.connect('reset', this._onReset.bind(this));
-@@ -87,6 +90,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -88,6 +91,7 @@ export const AuthPrompt = GObject.registerClass({
          this.smartcardDetected = this._userVerifier.smartcardDetected;
  
          this.connect('destroy', this._onDestroy.bind(this));
@@ -43,7 +43,7 @@ index 664d966..4aced9e 100644
  
          this._userWell = new St.Bin({
              x_expand: true,
-@@ -342,6 +346,11 @@ export const AuthPrompt = GObject.registerClass({
+@@ -343,6 +347,11 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('prompted');
      }
  
@@ -55,7 +55,7 @@ index 664d966..4aced9e 100644
      _onCredentialManagerAuthenticated() {
          if (this.verificationStatus !== AuthPromptStatus.VERIFICATION_SUCCEEDED)
              this.reset();
-@@ -367,6 +376,11 @@ export const AuthPrompt = GObject.registerClass({
+@@ -368,6 +377,11 @@ export const AuthPrompt = GObject.registerClass({
              this.reset();
      }
  
@@ -67,7 +67,7 @@ index 664d966..4aced9e 100644
      _onShowMessage(_userVerifier, serviceName, message, type) {
          let wiggleParameters = {duration: 0};
  
-@@ -617,6 +631,11 @@ export const AuthPrompt = GObject.registerClass({
+@@ -619,6 +633,11 @@ export const AuthPrompt = GObject.registerClass({
              this._updateEntry(false);
      }
  
@@ -80,10 +80,10 @@ index 664d966..4aced9e 100644
          let {beginRequestType, queryingService} = Params.parse(params, {
              beginRequestType: null,
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 26ff6ca..13f8557 100644
+index 7d83993..4179563 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -544,6 +544,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -594,6 +594,7 @@ export const LoginDialog = GObject.registerClass({
          this._authPrompt = new AuthPrompt.AuthPrompt(this._gdmClient, AuthPrompt.AuthPromptMode.UNLOCK_OR_LOG_IN);
          this._authPrompt.connect('prompted', this._onPrompted.bind(this));
          this._authPrompt.connect('reset', this._onReset.bind(this));
@@ -91,15 +91,15 @@ index 26ff6ca..13f8557 100644
          this._authPrompt.hide();
          this.add_child(this._authPrompt);
  
-@@ -595,6 +596,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -645,6 +646,7 @@ export const LoginDialog = GObject.registerClass({
          this._menuButtonBox = new St.BoxLayout({style_class: 'login-dialog-menu-button-box'});
          this.add_child(this._menuButtonBox);
  
 +        this._createLoginOptionsButton();
          this._createSessionMenuButton();
  
-         this._logoBin = new St.Widget({
-@@ -628,6 +630,22 @@ export const LoginDialog = GObject.registerClass({
+         this._a11yMenuButton = new A11yMenuButton();
+@@ -681,6 +683,22 @@ export const LoginDialog = GObject.registerClass({
              this._updateDisableUserList.bind(this), this);
      }
  
@@ -122,7 +122,7 @@ index 26ff6ca..13f8557 100644
      _createSessionMenuButton() {
          this._sessionMenuButton = new AuthMenuButton.AuthMenuButton({
              title: _('Session'),
-@@ -1056,6 +1074,34 @@ export const LoginDialog = GObject.registerClass({
+@@ -1155,6 +1173,34 @@ export const LoginDialog = GObject.registerClass({
          }
      }
  
@@ -157,7 +157,7 @@ index 26ff6ca..13f8557 100644
      _onDefaultSessionChanged(client, sessionId) {
          this._sessionMenuButton.setActiveItem({id: sessionId});
      }
-@@ -1414,6 +1460,8 @@ export const LoginDialog = GObject.registerClass({
+@@ -1517,6 +1563,8 @@ export const LoginDialog = GObject.registerClass({
          });
  
          this._authPrompt.begin(params);
@@ -166,7 +166,7 @@ index 26ff6ca..13f8557 100644
      }
  
      _setUserListExpanded(expanded) {
-@@ -1422,6 +1470,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1525,6 +1573,7 @@ export const LoginDialog = GObject.registerClass({
      }
  
      _hideUserList() {
@@ -174,7 +174,7 @@ index 26ff6ca..13f8557 100644
          this._setUserListExpanded(false);
          if (this._userSelectionBox.visible)
              GdmUtil.cloneAndFadeOutActor(this._userSelectionBox);
-@@ -1441,6 +1490,8 @@ export const LoginDialog = GObject.registerClass({
+@@ -1544,6 +1593,8 @@ export const LoginDialog = GObject.registerClass({
          this._ensureUserListLoaded();
          this._authPrompt.hide();
          this._hideBannerView();

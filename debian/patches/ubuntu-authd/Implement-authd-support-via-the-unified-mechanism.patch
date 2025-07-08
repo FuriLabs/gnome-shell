@@ -6445,7 +6445,7 @@ index 501b8de..7c01216 100644
          this._credentialManagers = {};
  
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 1a3513f..aaf0e96 100644
+index 30b2f80..510ad47 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
 @@ -15,6 +15,9 @@
@@ -6459,7 +6459,7 @@ index 1a3513f..aaf0e96 100644
      <file>extensions/sharedInternals.js</file>
  
 diff --git a/po/POTFILES.in b/po/POTFILES.in
-index 5169ba6..bc4ba9a 100644
+index bc35337..f364f34 100644
 --- a/po/POTFILES.in
 +++ b/po/POTFILES.in
 @@ -10,6 +10,7 @@ data/org.gnome.Shell.PortalHelper.desktop.in.in

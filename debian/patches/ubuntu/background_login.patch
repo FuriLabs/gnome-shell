@@ -16,7 +16,7 @@ Forwarded: not-needed
  1 file changed, 12 insertions(+), 1 deletion(-)
 
 diff --git a/js/ui/background.js b/js/ui/background.js
-index b0bf4a2..c02f344 100644
+index cee38f7..c320300 100644
 --- a/js/ui/background.js
 +++ b/js/ui/background.js
 @@ -100,8 +100,10 @@ import GObject from 'gi://GObject';
