@@ -22,6 +22,12 @@ unit_testenv.append('GI_TYPELIB_PATH', st_typelib_path, separator: ':')
 unit_tests = {
   'breakManager': {},
   'extensionUtils': {},
+  'fileUtils': {
+    'env': {
+      'XDG_DATA_DIRS': join_paths(meson.current_source_dir(), 'unit/fixtures/datadirs/system'),
+      'XDG_DATA_HOME': join_paths(meson.current_source_dir(), 'unit/fixtures/datadirs/home'),
+    },
+  },
   'highlighter': {},
   'injectionManager': {},
   'insertSorted': {},
@@ -41,7 +47,7 @@ unit_tests = {
 foreach test, extra_args : unit_tests
   local_test_env = unit_testenv
   foreach var, value : extra_args.get('env', {})
-    local_test_env.append(var, value)
+    local_test_env.set(var, value)
   endforeach
 
   test(test, jasmine,

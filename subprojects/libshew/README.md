@@ -1,3 +1,7 @@
+<!--
+SPDX-FileCopyrightText: 2020 Florian Müllner <fmuellner@gnome.org>
+SPDX-License-Identifier: CC-BY-SA-4.0
+-->
 # Shell External Windows
 
 Shew is a small support library for dealing with external windows.
