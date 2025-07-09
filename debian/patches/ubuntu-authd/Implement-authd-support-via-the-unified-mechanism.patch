@@ -3,22 +3,22 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authd.js               |  710 ++++++
+ js/gdm/authd.js               |  723 ++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    3 +
  js/gdm/util.js                |    4 +-
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6386 insertions(+), 1 deletion(-)
+ 6 files changed, 6399 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..305b671
+index 0000000..3a3c24b
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,710 @@
+@@ -0,0 +1,723 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import {MessageType} from './util.js';
@@ -112,8 +112,13 @@ index 0000000..305b671
 +        this.sendProtocolResponse(reply.toJSON(), {ignoreMessageWait: true});
 +    }
 +
-+    handleProblem(_problem) {
-+        this.emit('verification-failed', false);
++    handleProblem(problem) {
++        console.log(`authd: Got a problem: ${problem}`)
++
++        this.emit('queue-priority-message', problem, MessageType.ERROR);
++        this._failVerification();
++
++        return true
 +    }
 +
 +    getProtocolResponse(_mechanism, _role, _response) {
@@ -123,7 +128,7 @@ index 0000000..305b671
 +    _handleAuthdProtocol(authdData) {
 +        switch (authdData.type) {
 +        case AuthdGdm.DataType.hello:
-+            console.log('Starting authd protocol');
++            console.log('authd: Starting authd protocol');
 +            return new AuthdGdm.Data({
 +                type: AuthdGdm.DataType.hello,
 +                hello: new AuthdGdm.HelloData({version: 1}),
@@ -513,9 +518,9 @@ index 0000000..305b671
 +            break;
 +
 +        case AuthdGdm.EventType.authEvent:
-+
 +            if (!this._authenticationStarted)
 +                return;
++
 +            this._authenticationStarted = false;
 +            this._handleAuthResponse(event.authEvent.response);
 +            break;
@@ -700,7 +705,7 @@ index 0000000..305b671
 +                this.emit('queue-priority-message', response.msg, MessageType.ERROR);
 +
 +            if (response.access === AuthResult.Denied) {
-+                this.emit('verification-failed', /* should retry */ false);
++                this._failVerification();
 +            } else if (response.access === AuthResult.Retry) {
 +                this._maybeStartAuthModeSelection();
 +            }
@@ -724,6 +729,14 @@ index 0000000..305b671
 +        }
 +    }
 +
++    _failVerification() {
++        this._authMechanisms = {};
++        this._authModes = {};
++        this.emit('mechanisms-changed', {});
++
++        this.emit('verification-failed', /* should retry */ false);
++    }
++
 +    _cancelAndReset() {
 +        this.emit('cancel');
 +        this.emit('reset');
@@ -731,7 +744,7 @@ index 0000000..305b671
 +}
 diff --git a/js/gdm/authdProtocol.js b/js/gdm/authdProtocol.js
 new file mode 100644
-index 0000000..a371827
+index 0000000..ad2b5ea
 --- /dev/null
 +++ b/js/gdm/authdProtocol.js
 @@ -0,0 +1,5666 @@
@@ -6416,7 +6429,7 @@ index ad854ca..b6ed4cd 100644
  export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 +export const CHOICE_LIST_ROLE_NAME = 'choice-list';
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 501b8de..7c01216 100644
+index 43fe656..0fd61ca 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -4,6 +4,7 @@ import Gio from 'gi://Gio';
