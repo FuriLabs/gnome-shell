@@ -1,5 +1,4 @@
 build-Bump-Mutter-ABI-version.patch
-ubuntu/st-spinner-design-and-animation.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
 tray-icons/build-Add-explicit-dependency-on-Xfixes.patch
 tray-icons/tray-na-xembed-Use-XShape-to-remove-input-on-socket-windo.patch
@@ -36,6 +35,7 @@ ubuntu/main-Support-ubuntu-color-scheme-and-yaru-variants.patch
 ubuntu/st-them-context-Use-yaru-colors-as-accents.patch
 ubuntu/darkMode-Add-support-to-Yaru-theme-color-variants.patch
 ubuntu/st-Add-support-for-brown-accent-color.patch
+ubuntu/st-spinner-design-and-animation.patch
 ubuntu/shell-global-util-Do-not-move-snap-apps-to-gnome-apps-sco.patch
 ubuntu/appMenu-Show-details-menu-item-for-snap-applications.patch
 ubuntu/main-Add-support-for-playing-a-startup-sound-if-enabled-i.patch

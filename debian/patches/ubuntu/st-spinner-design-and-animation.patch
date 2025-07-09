@@ -9,11 +9,11 @@ Last-Update: 2025-06-28
 
 Last-Update: 2025-06-28
 ---
- src/st/st-spinner-content.c | 135 +++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 134 insertions(+), 1 deletion(-)
+ src/st/st-spinner-content.c | 138 +++++++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 137 insertions(+), 1 deletion(-)
 
 diff --git a/src/st/st-spinner-content.c b/src/st/st-spinner-content.c
-index 76fe3f2..de9adb0 100644
+index 76fe3f2..1c2883d 100644
 --- a/src/st/st-spinner-content.c
 +++ b/src/st/st-spinner-content.c
 @@ -20,7 +20,9 @@
@@ -26,7 +26,7 @@ index 76fe3f2..de9adb0 100644
  #define MIN_RADIUS 8
  #define NAT_RADIUS 48
  #define SMALL_WIDTH 2.5
-@@ -39,6 +41,33 @@
+@@ -39,6 +41,34 @@
   * where k is an integer */
  #define N_CYCLES 53
  
@@ -42,9 +42,10 @@ index 76fe3f2..de9adb0 100644
 +#define YARU_LARGE_WIDTH 8.67
 +#define YARU_SMALL_WIDTH 2
 +#define YARU_START_ANGLE (-G_PI * 0.5)
-+#define SEGMENT_ANGLE (2 * G_PI / 3) // 120 degress per segment
++#define YARU_SEGMENT_ANGLE (2 * G_PI / 3) /* 120 degress per segment */
 +#define YARU_SPIN_DURATION_MS 8000
 +#define YARU_N_CYCLES 6
++
 +/*
 + * AdwSpinnerPaintable UPPER_MIN_GAP_ANGLE = 0.2 at MAX_RADIUS = 32
 + * LOWER_MIN_GAP_ANGLE =  0.1 at MIN_RADIUS = 8.
@@ -60,34 +61,46 @@ index 76fe3f2..de9adb0 100644
  /**
   * StSpinnerContent:
   *
-@@ -82,6 +111,22 @@ st_spinner_content_class_init (StSpinnerContentClass *klass)
- {
- }
+@@ -62,6 +92,7 @@ struct _StSpinnerContent
  
-+static gboolean
-+is_target_session_and_icon_theme ()
+   CoglTexture *texture;
+   gboolean dirty;
++  gboolean yaru_mode;
+ 
+   CoglBitmap *buffer;
+ };
+@@ -72,9 +103,26 @@ G_DEFINE_FINAL_TYPE_WITH_CODE (StSpinnerContent, st_spinner_content, G_TYPE_OBJE
+                                G_IMPLEMENT_INTERFACE (CLUTTER_TYPE_CONTENT,
+                                                       st_spinner_content_iface_init))
+ 
++static void
++update_yaru_mode (StSpinnerContent *spinner,
++                      StSettings       *settings)
 +{
-+  StSettings *settings = st_settings_get();
-+  const char *icon_theme_name = st_settings_get_gtk_icon_theme (settings);
++  g_autofree char *gtk_theme = NULL;
 +
-+  gboolean is_target_icon_theme = g_str_has_prefix (icon_theme_name, "Yaru") || g_str_has_prefix (icon_theme_name, "Yaru-");
-+  const char *target_session = g_getenv ("XDG_SESSION_DESKTOP");
-+  gboolean is_target_session = g_strcmp0(target_session, "ubuntu") == 0;
++  g_object_get (settings, "gtk-theme", &gtk_theme, NULL);
 +
-+  if (target_session == NULL)
-+    return false;
-+
-+  return is_target_icon_theme && is_target_session;
++  spinner->yaru_mode = g_strcmp0 (gtk_theme, "Yaru") == 0;
 +}
 +
  static void
- actor_map_cb (GObject    *object,
-               GParamSpec *pspec,
-@@ -131,6 +176,12 @@ st_spinner_content_set_actor (StSpinnerContent *spinner,
+ st_spinner_content_init (StSpinnerContent *spinner)
+ {
++  StSettings *settings = st_settings_get ();
++
++  update_yaru_mode (spinner, settings);
++  g_signal_connect_object (settings, "notify::gtk-theme",
++                           G_CALLBACK (update_yaru_mode),
++                           spinner, G_CONNECT_SWAPPED);
+ }
+ 
+ static void
+@@ -131,6 +179,12 @@ st_spinner_content_set_actor (StSpinnerContent *spinner,
        clutter_timeline_set_repeat_count (spinner->timeline, -1);
        clutter_timeline_set_progress_mode (spinner->timeline, CLUTTER_LINEAR);
  
-+      if (is_target_session_and_icon_theme ())
++      if (spinner->yaru_mode)
 +        {
 +          clutter_timeline_set_progress_mode (spinner->timeline, CLUTTER_EASE_IN_OUT_SINE);
 +          clutter_timeline_set_duration (spinner->timeline, YARU_SPIN_DURATION_MS);
@@ -96,15 +109,15 @@ index 76fe3f2..de9adb0 100644
        g_signal_connect (spinner->timeline, "new-frame", G_CALLBACK (new_frame_cb), spinner);
  
        if (clutter_actor_is_mapped (actor))
-@@ -315,6 +366,84 @@ st_spinner_content_draw_spinner (StSpinnerContent *spinner,
+@@ -315,6 +369,85 @@ st_spinner_content_draw_spinner (StSpinnerContent *spinner,
    cairo_restore (cr);
  }
  
 +static void
 +st_spinner_content_draw_yaru_spinner (StSpinnerContent *spinner,
-+                                 cairo_t          *cr,
-+                                 int               width,
-+                                 int               height)
++                                      cairo_t          *cr,
++                                      int               width,
++                                      int               height)
 +{
 +  CoglColor color;
 +  double radius, radius_t, line_width;
@@ -148,10 +161,11 @@ index 76fe3f2..de9adb0 100644
 +
 +  min_gap_angle = LERP (UPPER_MIN_GAP_ANGLE, LOWER_MIN_GAP_ANGLE, radius_t);
 +  gap_angle_t_actual = INVERSE_LERP (0, 2 * M_PI * YARU_N_CYCLES, progress);
-+  gap_angle_t = 1 - fabs (2 * gap_angle_t_actual - 1); // pinpong behavior: 0->1 is transformed to 0->1->0
++  /* pinpong behavior: 0->1 is transformed to 0->1->0 */
++  gap_angle_t = 1 - fabs (2 * gap_angle_t_actual - 1);
 +  gap_angle = LERP (min_gap_angle, MAX_GAP_ANGLE, gap_angle_t);
 +
-+  end_angle = progress + START_ANGLE - SEGMENT_ANGLE;
++  end_angle = progress + START_ANGLE - YARU_SEGMENT_ANGLE;
 +  start_angle = progress + START_ANGLE - gap_angle;
 +
 +  do {
@@ -171,8 +185,8 @@ index 76fe3f2..de9adb0 100644
 +    cairo_stroke (cr);
 +
 +    segment_counter++;
-+    start_angle += SEGMENT_ANGLE;
-+    end_angle += SEGMENT_ANGLE;
++    start_angle += YARU_SEGMENT_ANGLE;
++    end_angle += YARU_SEGMENT_ANGLE;
 +
 +    cairo_restore (cr);
 +  } while (segment_counter < 3);
@@ -181,20 +195,15 @@ index 76fe3f2..de9adb0 100644
  static void
  st_spinner_content_redraw (StSpinnerContent *spinner)
  {
-@@ -398,7 +527,10 @@ st_spinner_content_redraw (StSpinnerContent *spinner)
+@@ -398,7 +531,10 @@ st_spinner_content_redraw (StSpinnerContent *spinner)
    cairo_paint (cr);
    cairo_restore (cr);
  
 -  st_spinner_content_draw_spinner (spinner, cr, width, height);
-+  if (!is_target_session_and_icon_theme ())
-+    st_spinner_content_draw_spinner (spinner, cr, width, height);
-+  else
++  if (G_LIKELY (spinner->yaru_mode))
 +    st_spinner_content_draw_yaru_spinner (spinner, cr, width, height);
++  else
++    st_spinner_content_draw_spinner (spinner, cr, width, height);
  
    cairo_destroy (cr);
  
-@@ -446,3 +578,4 @@ st_spinner_content_new (void)
- {
-   return g_object_new (ST_TYPE_SPINNER_CONTENT, NULL);
- }
-+
