@@ -7,7 +7,7 @@ Subject: gdm: Improve detection of unavailable services
  1 file changed, 19 insertions(+), 1 deletion(-)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 1708626..985184c 100644
+index e0c4e61..cc9a4b3 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -878,8 +878,15 @@ export class ShellUserVerifier extends Signals.EventEmitter {

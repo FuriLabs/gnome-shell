@@ -57,7 +57,7 @@ index db64101..fca92a3 100644
          const introAlreadyUp = this._queryingService === serviceName;
  
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 985184c..015ca0d 100644
+index cc9a4b3..14c7905 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -365,6 +365,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
