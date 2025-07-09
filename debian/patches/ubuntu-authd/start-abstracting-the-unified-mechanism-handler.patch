@@ -722,10 +722,10 @@ index 6eec02a..30b2f80 100644
  
      <file>extensions/extension.js</file>
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index 1d51a51..d77c185 100644
+index 5962c9b..712e91f 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
-@@ -847,11 +847,11 @@ export const UnlockDialog = GObject.registerClass({
+@@ -845,11 +845,11 @@ export const UnlockDialog = GObject.registerClass({
  
          mechanisms.sort((a, b) => a.name.localeCompare(b.name));
  

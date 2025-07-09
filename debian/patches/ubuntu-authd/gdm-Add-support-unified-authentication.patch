@@ -429,7 +429,7 @@ index b0d775e..ae085349 100644
              return;
  
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index 9849aec..1d51a51 100644
+index 2d74191..5962c9b 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
 @@ -499,6 +499,7 @@ export const UnlockDialog = GObject.registerClass({
