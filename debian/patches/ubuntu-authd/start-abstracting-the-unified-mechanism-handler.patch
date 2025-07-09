@@ -8,10 +8,10 @@ As we may have different protocols under the hood.
  js/gdm/const.js               |   6 +
  js/gdm/loginDialog.js         |   4 +-
  js/gdm/unifiedMechanism.js    | 145 +++++++++++++++++++++
- js/gdm/util.js                | 285 ++++++++++++++++++++++++++++--------------
+ js/gdm/util.js                | 286 ++++++++++++++++++++++++++++--------------
  js/js-resources.gresource.xml |   2 +
  js/ui/unlockDialog.js         |   4 +-
- 7 files changed, 355 insertions(+), 102 deletions(-)
+ 7 files changed, 356 insertions(+), 102 deletions(-)
  create mode 100644 js/gdm/const.js
  create mode 100644 js/gdm/unifiedMechanism.js
 
@@ -231,7 +231,7 @@ index 0000000..77ba705
 +    }
 +}
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index e76055e..b7b70d3 100644
+index e76055e..1ccc57b 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -11,6 +11,8 @@ import * as Main from '../ui/main.js';
@@ -668,19 +668,20 @@ index e76055e..b7b70d3 100644
          }
      }
  
-@@ -1112,6 +1197,11 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1112,6 +1197,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      _onProblem(client, serviceName, problem) {
          this.emit(`service-request::${serviceName}`);
  
 +        if (serviceName === UNIFIED_AUTH_SERVICE_NAME) {
-+            [...this._unifiedAuthServices.values()].some(service =>
-+                service.handleProblem(problem))
++            if ([...this._unifiedAuthServices.values()].some(service =>
++                service.handleProblem(problem)))
++                return
 +        }
 +
          const isFingerprint = this.serviceIsFingerprint(serviceName);
  
          if (!this.serviceIsForeground(serviceName) && !isFingerprint)
-@@ -1181,8 +1271,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1181,8 +1272,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const unifiedAuthAvailable = this._activeServices.has(UNIFIED_AUTH_SERVICE_NAME) && !this._unavailableServices.has(UNIFIED_AUTH_SERVICE_NAME);
          for (const definition of DiscreteServiceMechanismDefinitions) {
              const enabled = this._isDiscreteServiceEnabled(definition);
@@ -693,7 +694,7 @@ index e76055e..b7b70d3 100644
  
              const mechanismsList = [];
              if (enabled && available && !supportedByUnifiedAuth) {
-@@ -1203,6 +1295,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1203,6 +1296,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._activeServices.clear();
          this._unavailableServices.clear();
          this._activeServices.clear();
