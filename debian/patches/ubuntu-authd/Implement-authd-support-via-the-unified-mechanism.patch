@@ -3,22 +3,22 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authd.js               |  723 ++++++
+ js/gdm/authd.js               |  738 ++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    3 +
  js/gdm/util.js                |    4 +-
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6399 insertions(+), 1 deletion(-)
+ 6 files changed, 6414 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..3a3c24b
+index 0000000..648b4e7
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,723 @@
+@@ -0,0 +1,738 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import {MessageType} from './util.js';
@@ -209,16 +209,10 @@ index 0000000..3a3c24b
 +        if (!this._authMechanisms[mechanism.id])
 +            return true;
 +
-+        if (this._authenticationStarted) {
-+            this._pendingEvents.push(
-+                new AuthdGdm.EventData({
-+                type: AuthdGdm.EventType.isAuthenticatedCancelled,
-+                isAuthenticatedCancelled: new AuthdGdm.Events.IsAuthenticatedCancelled(),
-+            }));
-+        }
++        const maybeSwitchMechanism = () => {
++            if (this._stage !== AuthdPam.Stage.challenge)
++                return
 +
-+        if (this._stage === AuthdPam.Stage.challenge) {
-+            this._stage = AuthdPam.Stage.authModeSelection;
 +            this._pendingStage = AuthdGdm.EventType.challenge;
 +            this._pendingEvents.push(
 +                new AuthdGdm.EventData({
@@ -230,6 +224,18 @@ index 0000000..3a3c24b
 +            );
 +        }
 +
++        if (this._authenticationStarted && this._isWaitingLayout()) {
++            this._authCancelledAction = maybeSwitchMechanism;
++            this._pendingEvents.push(
++                new AuthdGdm.EventData({
++                type: AuthdGdm.EventType.isAuthenticatedCancelled,
++                isAuthenticatedCancelled: new AuthdGdm.Events.IsAuthenticatedCancelled(),
++            }));
++
++            return true;
++        }
++
++        maybeSwitchMechanism();
 +        return true;
 +    }
 +
@@ -435,14 +441,16 @@ index 0000000..3a3c24b
 +            break;
 +
 +        case AuthdPam.Stage.brokerSelection:
++            this._authModes = {};
 +            this._uiLayout = null;
++            this._authenticationStarted = false;
 +            this._selectedAuthMode = null;
 +            this._maybeStartBrokerSelection();
 +            break;
 +
 +        case AuthdPam.Stage.authModeSelection:
-+            this._authenticationStarted = false;
 +            this._uiLayout = null;
++            this._authenticationStarted = false;
 +            this._selectedAuthMode = null;
 +            this._maybeStartAuthModeSelection();
 +            break;
@@ -472,7 +480,7 @@ index 0000000..3a3c24b
 +            if (this._stage === AuthdPam.Stage.brokerSelection)
 +                this.emit('choice-list-selected', this._selectedBroker);
 +
-+            console.log('Broker selected', this._selectedBroker);
++            console.log('authd: Broker selected', this._selectedBroker);
 +            break;
 +
 +        case AuthdGdm.EventType.authModesReceived:
@@ -535,6 +543,9 @@ index 0000000..3a3c24b
 +    }
 +
 +    cancel() {
++        if (this._stage !== undefined)
++            console.log("authd: Cancelling authentication")
++
 +        this._stage = undefined;
 +        this._uiLayout = null;
 +        this._pendingNewChallenge = null;
@@ -542,6 +553,7 @@ index 0000000..3a3c24b
 +        this._authenticationStarted = false;
 +        this._authMechanisms = {};
 +        this._authModes = {};
++        this._authCancelledAction = null;
 +        this.emit('mechanisms-changed', {});
 +    }
 +
@@ -573,6 +585,10 @@ index 0000000..3a3c24b
 +        return 0;
 +    }
 +
++    _isWaitingLayout() {
++        return this._uiLayout?.wait === 'true'
++    }
++
 +    _showChallenge() {
 +        if (!this._selectedAuthMode)
 +            throw new Error('No authentication mode selected');
@@ -583,8 +599,7 @@ index 0000000..3a3c24b
 +        if (!this._uiLayout)
 +            throw new Error('No ui layouts defined');
 +
-+
-+        const hasWait = this._uiLayout.wait === 'true';
++        console.log('authd: Starting challenge request', this._uiLayout.type, this._uiLayout.label);
 +
 +        switch (this._uiLayout.type) {
 +        case UILayoutTypes.Form:
@@ -593,7 +608,7 @@ index 0000000..3a3c24b
 +            let infoMsg;
 +            let prompt;
 +            const mechanism = this._authMechanisms[this._selectedAuthMode];
-+            if (hasWait)
++            if (this._isWaitingLayout())
 +                infoMsg = label;
 +
 +            if (this._uiLayout.entry?.length) {
@@ -635,7 +650,7 @@ index 0000000..3a3c24b
 +            if (infoMsg?.length && mechanism.prompt !== infoMsg)
 +                this.emit('queue-message', infoMsg, MessageType.INFO);
 +
-+            if (!hasWait)
++            if (!this._isWaitingLayout())
 +                break;
 +
 +            this._pendingEvents = this._pendingEvents.filter(ev =>
@@ -666,7 +681,6 @@ index 0000000..3a3c24b
 +                    default: true,
 +                    label: this._uiLayout.button,
 +                    action: () => {
-+                        this._ignoreNextCancellation = true;
 +                        this._pendingEvents.push(
 +                            new AuthdGdm.EventData({
 +                                type: AuthdGdm.EventType.reselectAuthMode,
@@ -687,7 +701,11 @@ index 0000000..3a3c24b
 +    }
 +
 +    _handleAuthResponse(response) {
++        console.log("authd: Access response:", response.access)
++
 +        this._pendingNewChallenge = null;
++        const authCancelledAction = this._authCancelledAction;
++        this._authCancelledAction = null;
 +
 +        if (response.access !== AuthResult.Retry)
 +            this._uiLayout = null;
@@ -713,10 +731,7 @@ index 0000000..3a3c24b
 +        }
 +
 +        case AuthResult.Cancelled: {
-+            if (this._ignoreNextCancellation) {
-+                this._ignoreNextCancellation = false;
-+                return;
-+            }
++            authCancelledAction?.();
 +            break;
 +        }
 +
