@@ -62,10 +62,10 @@ index 0000000..ad854ca
 +export const SMARTCARD_ROLE_NAME = 'smartcard';
 +export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 48c15eb..9420440 100644
+index eaac5fa..0ce44c0 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -1189,11 +1189,11 @@ export const LoginDialog = GObject.registerClass({
+@@ -1197,11 +1197,11 @@ export const LoginDialog = GObject.registerClass({
  
          mechanisms.sort((a, b) => a.name.localeCompare(b.name));
  

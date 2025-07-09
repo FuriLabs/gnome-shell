@@ -10,9 +10,9 @@ speced out in the design here:
 https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/login-authentication.png
 ---
  js/gdm/authPrompt.js  |  19 ++++++++
- js/gdm/loginDialog.js |  51 ++++++++++++++++++++
- js/gdm/util.js        | 128 ++++++++++++++++++++++++++++++++++++++++++++++----
- 3 files changed, 189 insertions(+), 9 deletions(-)
+ js/gdm/loginDialog.js |  93 ++++++++++++++++++++++++++++++++++---
+ js/gdm/util.js        | 126 ++++++++++++++++++++++++++++++++++++++++++++++----
+ 3 files changed, 222 insertions(+), 16 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
 index 1ee0708..e45127a 100644
@@ -80,7 +80,7 @@ index 1ee0708..e45127a 100644
          let {beginRequestType, queryingService} = Params.parse(params, {
              beginRequestType: null,
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 7d83993..4179563 100644
+index 6fb6728..c4db5bd 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -594,6 +594,7 @@ export const LoginDialog = GObject.registerClass({
@@ -91,15 +91,15 @@ index 7d83993..4179563 100644
          this._authPrompt.hide();
          this.add_child(this._authPrompt);
  
-@@ -645,6 +646,7 @@ export const LoginDialog = GObject.registerClass({
-         this._menuButtonBox = new St.BoxLayout({style_class: 'login-dialog-menu-button-box'});
-         this.add_child(this._menuButtonBox);
+@@ -642,6 +643,7 @@ export const LoginDialog = GObject.registerClass({
+         this._updateBannerMessageFile();
+         this._updateBanner().catch(logError);
  
 +        this._createLoginOptionsButton();
          this._createSessionMenuButton();
  
          this._a11yMenuButton = new A11yMenuButton();
-@@ -681,6 +683,22 @@ export const LoginDialog = GObject.registerClass({
+@@ -678,6 +680,21 @@ export const LoginDialog = GObject.registerClass({
              this._updateDisableUserList.bind(this), this);
      }
  
@@ -114,15 +114,87 @@ index 7d83993..4179563 100644
 +                if (activeMechanism)
 +                    this._authPrompt.setForegroundMechanism(activeMechanism);
 +            });
-+        this._loginOptionsButton.opacity = 0;
 +        this._loginOptionsButton.show();
-+        this._menuButtonBox.add_child(this._loginOptionsButton);
++        this.add_child(this._loginOptionsButton);
 +    }
 +
      _createSessionMenuButton() {
          this._sessionMenuButton = new AuthMenuButton.AuthMenuButton({
              title: _('Session'),
-@@ -1155,6 +1173,34 @@ export const LoginDialog = GObject.registerClass({
+@@ -752,13 +769,33 @@ export const LoginDialog = GObject.registerClass({
+         return actorBox;
+     }
+ 
+-    _getSessionMenuButtonAllocation(dialogBox, a11yButtonWidth) {
++    _getSessionMenuButtonAllocation(dialogBox, buttonsOffset) {
+         const actorBox = new Clutter.ActorBox();
+ 
+         // Use half the button width as spacing
+-        const offset = a11yButtonWidth + Math.round(a11yButtonWidth / 2);
++        const offset = buttonsOffset + Math.round(buttonsOffset / 2);
+ 
+-        let [, , natWidth, natHeight] = this._a11yMenuButton.get_preferred_size();
++        let [, , natWidth, natHeight] = this._sessionMenuButton.get_preferred_size();
++
++        if (this.get_text_direction() === Clutter.TextDirection.RTL)
++            actorBox.x1 = dialogBox.x1 + offset + natWidth;
++        else
++            actorBox.x1 = dialogBox.x2 - offset - (natWidth * 2);
++
++        actorBox.y1 = dialogBox.y2 - (natHeight * 2);
++        actorBox.x2 = actorBox.x1 + natWidth;
++        actorBox.y2 = actorBox.y1 + natHeight;
++
++        return actorBox;
++    }
++
++    _getLoginOptionsButtonAllocation(dialogBox, buttonsOffset) {
++        const actorBox = new Clutter.ActorBox();
++
++        // Use half the button width as spacing
++        const offset = buttonsOffset + Math.round(buttonsOffset / 2);
++
++        let [, , natWidth, natHeight] = this._loginOptionsButton.get_preferred_size();
+ 
+         if (this.get_text_direction() === Clutter.TextDirection.RTL)
+             actorBox.x1 = dialogBox.x1 + offset + natWidth;
+@@ -829,15 +866,21 @@ export const LoginDialog = GObject.registerClass({
+         }
+ 
+         let a11yMenuButtonAllocation = null;
+-        let a11yButtonWidth = 0;
++        let buttonsOffset = 0;
+         if (this._a11yMenuButton.visible) {
+             a11yMenuButtonAllocation = this._getA11yMenuButtonAllocation(dialogBox);
+-            a11yButtonWidth = a11yMenuButtonAllocation.get_width();
++            buttonsOffset = a11yMenuButtonAllocation.get_width();
+         }
+ 
+         let sessionMenuButtonAllocation = null;
+-        if (this._sessionMenuButton.visible)
+-            sessionMenuButtonAllocation = this._getSessionMenuButtonAllocation(dialogBox, a11yButtonWidth);
++        if (this._sessionMenuButton.visible) {
++            sessionMenuButtonAllocation = this._getSessionMenuButtonAllocation(dialogBox, buttonsOffset);
++            buttonsOffset += sessionMenuButtonAllocation.get_width();
++        }
++
++        let loginOptionsButtonAllocation = null;
++        if (this._loginOptionsButton.visible)
++            loginOptionsButtonAllocation = this._getLoginOptionsButtonAllocation(dialogBox, buttonsOffset);
+ 
+         // Then figure out if we're overly constrained and need to
+         // try a different layout, or if we have what extra space we
+@@ -941,6 +984,9 @@ export const LoginDialog = GObject.registerClass({
+         if (a11yMenuButtonAllocation)
+             this._a11yMenuButton.allocate(a11yMenuButtonAllocation);
+ 
++        if (loginOptionsButtonAllocation)
++            this._loginOptionsButton.allocate(loginOptionsButtonAllocation);
++
+         if (sessionMenuButtonAllocation)
+             this._sessionMenuButton.allocate(sessionMenuButtonAllocation);
+     }
+@@ -1135,6 +1181,34 @@ export const LoginDialog = GObject.registerClass({
          }
      }
  
@@ -157,7 +229,7 @@ index 7d83993..4179563 100644
      _onDefaultSessionChanged(client, sessionId) {
          this._sessionMenuButton.setActiveItem({id: sessionId});
      }
-@@ -1517,6 +1563,8 @@ export const LoginDialog = GObject.registerClass({
+@@ -1497,6 +1571,8 @@ export const LoginDialog = GObject.registerClass({
          });
  
          this._authPrompt.begin(params);
@@ -166,7 +238,7 @@ index 7d83993..4179563 100644
      }
  
      _setUserListExpanded(expanded) {
-@@ -1525,6 +1573,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1505,6 +1581,7 @@ export const LoginDialog = GObject.registerClass({
      }
  
      _hideUserList() {
@@ -174,7 +246,7 @@ index 7d83993..4179563 100644
          this._setUserListExpanded(false);
          if (this._userSelectionBox.visible)
              GdmUtil.cloneAndFadeOutActor(this._userSelectionBox);
-@@ -1544,6 +1593,8 @@ export const LoginDialog = GObject.registerClass({
+@@ -1524,6 +1601,8 @@ export const LoginDialog = GObject.registerClass({
          this._ensureUserListLoaded();
          this._authPrompt.hide();
          this._hideBannerView();
@@ -184,7 +256,7 @@ index 7d83993..4179563 100644
          this._setUserListExpanded(true);
          this._notListedButton.show();
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index f6b797c..19cd357 100644
+index f6b797c..dd8f4b0 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -28,6 +28,10 @@ export const FINGERPRINT_SERVICE_NAME = 'gdm-fingerprint';
@@ -351,7 +423,7 @@ index f6b797c..19cd357 100644
      async _maybeStartFingerprintVerification() {
          if (this._userName &&
              this._fingerprintReaderType !== FingerprintReaderType.NONE &&
-@@ -709,6 +786,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -709,6 +786,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              await this._startService(FINGERPRINT_SERVICE_NAME);
      }
  
@@ -362,8 +434,6 @@ index f6b797c..19cd357 100644
 +    _beginVerification() {
 +        const foregroundService = this._getForegroundService();
 +
-+        this._synthesizeMechanismsFromServices();
-+
 +        this._startService(foregroundService);
 +        this._startBackgroundServices();
 +    }
@@ -371,7 +441,7 @@ index f6b797c..19cd357 100644
      _onChoiceListQuery(client, serviceName, promptMessage, list) {
          if (!this.serviceIsForeground(serviceName))
              return;
-@@ -796,11 +886,30 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -796,11 +884,30 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this.emit('ask-question', serviceName, secretQuestion, true);
      }
  
@@ -402,7 +472,7 @@ index f6b797c..19cd357 100644
          this._updateDefaultService();
  
          this.emit('reset');
-@@ -895,6 +1004,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -895,6 +1002,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      _onConversationStopped(client, serviceName) {
          this._activeServices.delete(serviceName);
@@ -410,7 +480,7 @@ index f6b797c..19cd357 100644
  
          // If the login failed with the preauthenticated oVirt credentials
          // then discard the credentials and revert to default authentication
-@@ -903,7 +1013,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -903,7 +1011,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const isForeground = this.serviceIsForeground(serviceName);
          if (isCredentialManager && isForeground) {
              this._credentialManagers[serviceName].token = null;

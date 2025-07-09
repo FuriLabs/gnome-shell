@@ -8,10 +8,10 @@ Subject: unlockDialog: Add Login Options menu button
  2 files changed, 67 insertions(+), 14 deletions(-)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 19cd357..dc87dc3 100644
+index dd8f4b0..b0d775e 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -888,7 +888,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -886,7 +886,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      _generateMechanismsFromDiscreteServices() {
          for (const definition of DiscreteServiceMechanismDefinitions) {
