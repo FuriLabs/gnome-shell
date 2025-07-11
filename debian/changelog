@@ -1,8 +1,15 @@
-gnome-shell (49~alpha.1-1) UNRELEASED; urgency=medium
+gnome-shell (49~alpha.1-0ubuntu1) UNRELEASED; urgency=medium
 
-  * New upstream release
+  * Merge with debian, containing a new upstream release
+  * d/patches: Refresh
+  * debian/rules: Update stylesheet regeneration script path
+  * d/p/ubuntu-authd: Ensure that error messages are always shown on failure
+  * d/p/ubuntu-authd: Fix handling of authentication switching for wait layouts
+  * d/p/ubuntu-authd: Drop some delta with upstream and fix greeter buttons
+  * d/p/ubuntu-authd: Move login options button to the leftmost side
+  * d/p: Cleanup the yaru spinner patch
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 08 Jul 2025 04:47:27 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 11 Jul 2025 04:06:05 +0200
 
 gnome-shell (48.2-3) unstable; urgency=medium
 
