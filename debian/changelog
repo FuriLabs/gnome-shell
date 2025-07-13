@@ -1,5 +1,6 @@
-gnome-shell (48.3-1) UNRELEASED; urgency=medium
+gnome-shell (48.3-1) unstable; urgency=medium
 
+  * Team upload
   * New upstream stable release
     - In the Alt+F2 "run" dialog, provide the dialog title to screen readers
       and other accessibility tools
@@ -33,8 +34,7 @@ gnome-shell (48.3-1) UNRELEASED; urgency=medium
     - Avoid the top bar disappearing when doing a 3-finger downward swipe
       gesture on a touchscreen
       (gnome-shell#7456 upstream)
-    - Use the correct filename when configuring Decibels to appear in the
-      Utilities folder instead of at the top level
+    - If Decibels is installed, put it in the Utilities folder as intended
       (Decibels is not yet in Debian, ITP: #1100886)
       (gnome-shell!3728 upstream)
     - If the mouse button modifier (normally Super, i.e. the Windows key)
@@ -55,8 +55,9 @@ gnome-shell (48.3-1) UNRELEASED; urgency=medium
       (gnome-shell!3756 upstream, no practical effect since they're comments)
     - Translation updates
     - CI changes with no effect on Debian
+  * d/patches: Re-export patch series (no functional changes)
 
- -- Simon McVittie <smcv@debian.org>  Sun, 13 Jul 2025 10:48:32 +0100
+ -- Simon McVittie <smcv@debian.org>  Sun, 13 Jul 2025 11:38:09 +0100
 
 gnome-shell (48.2-3) unstable; urgency=medium
 
