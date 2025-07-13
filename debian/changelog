@@ -1,25 +1,21 @@
-gnome-shell (48.3-1) unstable; urgency=medium
+gnome-shell (48.3-1) UNRELEASED; urgency=medium
 
   * Team upload
   * New upstream stable release
-    - In the Alt+F2 "run" dialog, provide the dialog title to screen readers
-      and other accessibility tools
-      (gnome-shell!3736 upstream)
-    - In the calendar/notifications menu, label the Events and Weather areas
-      for accessibility tools
-      (gnome-shell!3769 upstream)
-    - In popup menus, tell accessibility tools that separators are
-      not useful to select
-      (gnome-shell!3773 upstream)
-    - In text entry widgets, send the hint (placeholder text) to
-      accessibility tools
-      (gnome-shell!3179 upstream)
-    - In text entry widgets, make the label available to accessibility
-      tools
-      (gnome-shell!3179 upstream)
-    - When running as a gdm greeter, if there is an error such as a wrong
-      password, send it to the screen reader as well as displaying it
-      (gnome-shell!3765 upstream)
+    - Accessibility improvements (LP: #2115948)
+      + In the Alt+F2 "run" dialog, provide the dialog title to screen
+        readers and other accessibility tools (gnome-shell!3736 upstream)
+      + In the calendar/notifications menu, label the Events and Weather
+        areas for accessibility tools (gnome-shell!3769 upstream)
+      + In popup menus, tell accessibility tools that separators are
+        not useful to select (gnome-shell!3773 upstream)
+      + In text entry widgets, send the hint (placeholder text) to
+        accessibility tools (gnome-shell!3179 upstream)
+      + In text entry widgets, make the label available to accessibility
+        tools (gnome-shell!3179 upstream)
+      + When running as a gdm greeter, if there is an error such as a wrong
+        password, send it to the screen reader as well as displaying it
+        (gnome-shell!3765 upstream)
     - When prompting for a password change via Gcr, if the repeated password
       doesn't match, re-enable the UI widgets so the user can try again
       (gnome-shell!3757 upstream)
