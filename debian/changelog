@@ -1,4 +1,4 @@
-gnome-shell (48.3-1) UNRELEASED; urgency=medium
+gnome-shell (48.3-1) unstable; urgency=medium
 
   * Team upload
   * New upstream stable release
@@ -52,8 +52,9 @@ gnome-shell (48.3-1) UNRELEASED; urgency=medium
     - Translation updates
     - CI changes with no effect on Debian
   * d/patches: Re-export patch series (no functional changes)
+  * d/control: Update Homepage field (Closes: #1100764)
 
- -- Simon McVittie <smcv@debian.org>  Sun, 13 Jul 2025 11:38:09 +0100
+ -- Simon McVittie <smcv@debian.org>  Sun, 13 Jul 2025 12:24:58 +0100
 
 gnome-shell (48.2-3) unstable; urgency=medium
 
