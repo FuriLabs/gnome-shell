@@ -1,6 +1,60 @@
 gnome-shell (48.3-1) UNRELEASED; urgency=medium
 
-  * New upstream release
+  * New upstream stable release
+    - In the Alt+F2 "run" dialog, provide the dialog title to screen readers
+      and other accessibility tools
+      (gnome-shell!3736 upstream)
+    - In the calendar/notifications menu, label the Events and Weather areas
+      for accessibility tools
+      (gnome-shell!3769 upstream)
+    - In popup menus, tell accessibility tools that separators are
+      not useful to select
+      (gnome-shell!3773 upstream)
+    - In text entry widgets, send the hint (placeholder text) to
+      accessibility tools
+      (gnome-shell!3179 upstream)
+    - In text entry widgets, make the label available to accessibility
+      tools
+      (gnome-shell!3179 upstream)
+    - When running as a gdm greeter, if there is an error such as a wrong
+      password, send it to the screen reader as well as displaying it
+      (gnome-shell!3765 upstream)
+    - When prompting for a password change via Gcr, if the repeated password
+      doesn't match, re-enable the UI widgets so the user can try again
+      (gnome-shell!3757 upstream)
+    - Always update on-screen keyboard layout to reflect the purpose hint,
+      so that the expected features appear (alphanumeric vs. numeric-only,
+      emoji chooser shown or hidden, etc.)
+      (gnome-shell#8377 upstream)
+    - Limit the length of the input method indicator by counting grapheme
+      clusters rather than UTF-16 string lengths, allowing input methods like
+      ibus-typing-booster to use emoji as their indicator
+      (gnome-shell#1026 upstream)
+    - Avoid the top bar disappearing when doing a 3-finger downward swipe
+      gesture on a touchscreen
+      (gnome-shell#7456 upstream)
+    - Use the correct filename when configuring Decibels to appear in the
+      Utilities folder instead of at the top level
+      (Decibels is not yet in Debian, ITP: #1100886)
+      (gnome-shell!3728 upstream)
+    - If the mouse button modifier (normally Super, i.e. the Windows key)
+      is set to a combination of modifiers such as <Control><Super>, only
+      make the mouse wheel switch between desktops if *all* of those
+      modifiers are held
+      (mutter#4129 upstream)
+    - Avoid flooding the systemd journal with old time-limit transitions if
+      debug messages are enabled
+      (gnome-shell!3740 upstream)
+    - Reuse one proxy object for all communication with the gdm greeter,
+      which is more efficient and can mitigate per-connection memory
+      leaks in gdm
+      (gnome-shell!3749 upstream)
+    - Better build-time compatibility with non-glibc libc
+      (gnome-shell#8457 upstream, no practical effect on Debian)
+    - Remove redundant eslint hints
+      (gnome-shell!3756 upstream, no practical effect since they're comments)
+    - Translation updates
+    - CI changes with no effect on Debian
 
  -- Simon McVittie <smcv@debian.org>  Sun, 13 Jul 2025 10:48:32 +0100
 
