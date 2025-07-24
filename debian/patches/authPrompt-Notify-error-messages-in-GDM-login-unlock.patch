@@ -1,7 +1,5 @@
 From: Sergio Costas Rodriguez <sergio.costas@canonical.com>
 Date: Tue, 24 Jun 2025 14:31:40 +0200
-Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3765
-Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2115948
 Subject: authPrompt: Notify error messages in GDM login/unlock
 
 When there is an error during GDM login or unlock (for example,
@@ -11,12 +9,15 @@ is said by the screen reader.
 This patch fixes this, by notifying any error set in the auth
 prompt.
 
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3765
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2115948
+
 ---
- js/gdm/authPrompt.js | 2 ++
- 1 file changed, 2 insertions(+)
+ js/gdm/authPrompt.js | 9 +++++++++
+ 1 file changed, 9 insertions(+)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 0609f0c..73c75b0 100644
+index 0609f0c..034116e 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -3,6 +3,7 @@
@@ -27,7 +28,21 @@ index 0609f0c..73c75b0 100644
  import GObject from 'gi://GObject';
  import Pango from 'gi://Pango';
  import Shell from 'gi://Shell';
-@@ -753,6 +754,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -234,6 +235,13 @@ export const AuthPrompt = GObject.registerClass({
+         this._passwordEntry = new St.PasswordEntry(entryParams);
+         ShellEntry.addContextMenu(this._passwordEntry, {actionMode: Shell.ActionMode.NONE});
+ 
++        this._textEntry.connect_after('key-focus-in', () => {
++            this._textEntry.get_accessible().emit('notification', this._message.text, Atk.Live.ASSERTIVE);
++        });
++        this._passwordEntry.connect_after('key-focus-in', () => {
++            this._textEntry.get_accessible().emit('notification', this._message.text, Atk.Live.ASSERTIVE);
++        });
++
+         this._entry = this._passwordEntry;
+         this._mainBox.add_child(this._entry);
+         this._entry.grab_key_focus();
+@@ -753,6 +761,7 @@ export const AuthPrompt = GObject.registerClass({
              this._message.remove_all_transitions();
              this._message.text = message;
              this._message.opacity = 255;
