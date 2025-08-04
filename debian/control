@@ -129,7 +129,6 @@ Recommends: bolt,
             power-profiles-daemon,
             switcheroo-control,
             ubuntu-session | gnome-session,
-            xserver-xorg-legacy,
             unzip
 Suggests: gir1.2-malcontent-0 [linux-any],
           gir1.2-telepathyglib-0.12,
