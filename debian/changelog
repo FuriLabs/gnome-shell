@@ -1,3 +1,9 @@
+gnome-shell (49~alpha.1-0ubuntu2) questing; urgency=medium
+
+  * d/control: Drop dependency xserver-xorg-legacy
+
+ -- Alessandro Astone <alessandro.astone@canonical.com>  Mon, 04 Aug 2025 16:02:00 +0200
+
 gnome-shell (49~alpha.1-0ubuntu1) questing; urgency=medium
 
   * Merge with debian, containing a new upstream release
