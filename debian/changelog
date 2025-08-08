@@ -2,6 +2,9 @@ gnome-shell (49~alpha.1-1) UNRELEASED; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
   * New upstream release
+  * d/watch: Watch for alpha too
+  * d/p: Refresh patches
+  * d/control: Bump build dependencies
 
   [ Simon McVittie ]
   * Revert "d/gbp.conf: Use debian/forky branch for uploads targeting forky"
