@@ -2001,12 +2001,8 @@ StScrollBar {
       icon-size: 1.091em;
       padding: 0 6px;
       margin: 0 4px; }
-    #panel .panel-button .app-menu-icon {
-      -st-icon-style: symbolic; }
-    #panel .panel-button .panel-status-menu-box,
     #panel .panel-button .panel-status-indicators-box {
       spacing: 4px; }
-      #panel .panel-button .panel-status-menu-box > .system-status-icon,
       #panel .panel-button .panel-status-indicators-box > .system-status-icon {
         padding: 0; }
     #panel .panel-button#panelActivities StBoxLayout {
@@ -2192,22 +2188,12 @@ StScrollBar {
         box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.28); }
         #panel:overview .panel-button.clock-display:active .clock:hover, #panel:overview .panel-button.clock-display:checked .clock:hover {
           box-shadow: inset 0 0 0 100px rgba(255, 255, 255, 0.32); }
-  #panel .panel-status-indicators-box,
-  #panel .panel-status-menu-box {
+  #panel .panel-status-indicators-box {
     spacing: 2px; }
   #panel .power-status.panel-status-indicators-box {
     spacing: 0; }
   #panel .privacy-indicator {
     color: #ff7800; }
-
-#appMenu {
-  spacing: 0.409em; }
-  #appMenu .label-shadow {
-    color: transparent; }
-
-#appMenu .panel-status-menu-box {
-  padding: 0 0.409em;
-  spacing: 0.409em; }
 
 .clock-display-box {
   spacing: 2px; }
@@ -3366,6 +3352,13 @@ StScrollBar {
   .unlock-dialog .login-dialog-prompt-layout {
     width: 25em;
     spacing: 9px; }
+
+.login-dialog-bottom-button-group {
+  padding: 32px;
+  spacing: 16px; }
+
+.login-dialog-button.a11y-button, .login-dialog-button.cancel-button, .login-dialog-button.switch-user-button, .login-dialog-button.login-dialog-session-list-button {
+  padding: 1.091em; }
 
 .login-dialog-button.cancel-button {
   padding: 9px; }
