@@ -1,6 +1,35 @@
 gnome-shell (48.4-1) UNRELEASED; urgency=medium
 
   * New upstream release
+    - network: If a network has no ID, don't treat it as available,
+      avoiding breaking the network menu
+      (gnome-shell!3785 upstream)
+    - Improve URL recognition heuristic for notifications so that non-URLs do
+      not become a link
+      (gnome-shell#8517 upstream)
+    - In gdm, improve efficiency of user list
+      (gnome-shell!3799 upstream)
+    - Fix signal order when taking a screenshot interactively is triggered
+      via D-Bus, for example from xdg-desktop-portal
+      (gnome-shell#8499 upstream)
+    - Improve cursor scaling on systems with different-DPI monitors when using
+      the Magnifier accessibility tool
+      (gnome-shell!475 upstream)
+    - In sliders like volume and brightness, avoid drawing part of the bar
+      over the handle in RTL locales
+      (gnome-shell!3817 upstream)
+    - Improve robustness of signal connections in the Thunderbolt and
+      smart-card code
+      (gnome-shell!3796 upstream)
+    - Code cleanups in extensions management service
+      (part of gnome-shell!3750 upstream)
+    - Translation updates
+  * d/control: Bump gjs version to 1.81.2 as per meson.build.
+    No practical effect, 1.82.x is already in trixie.
+  * d/gbp.conf: Use debian/forky branch for uploads targeting forky.
+    We'll stick to 48.x in testing/unstable for now, to get better testing
+    for future 48.x updates in trixie. Preliminary 49.x packaging for
+    experimental is already using the debian/latest branch.
 
  -- Simon McVittie <smcv@debian.org>  Fri, 08 Aug 2025 09:02:07 +0100
 
