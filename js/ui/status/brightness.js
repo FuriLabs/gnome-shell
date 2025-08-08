@@ -1,6 +1,38 @@
+import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
+import St from 'gi://St';
 
 import {QuickSlider, SystemIndicator} from '../quickSettings.js';
+import * as Main from '../main.js';
+import * as PopupMenu from '../popupMenu.js';
+import {Slider} from '../slider.js';
+
+const BRIGHTNESS_NAME = _('Brightness');
+
+class BrightnessSliderMenu extends PopupMenu.PopupMenuSection {
+    addSlider(scale) {
+        const text = new PopupMenu.PopupMenuItem(scale.name, {reactive: false});
+        this.addMenuItem(text);
+
+        const slider = new Slider(0);
+        slider.accessible_name = scale.name;
+
+        const sliderBin = new St.Bin({
+            style_class: 'slider-bin',
+            child: slider,
+            reactive: true,
+            can_focus: true,
+            x_expand: true,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+
+        const sliderMenuItem = new PopupMenu.PopupBaseMenuItem({reactive: false});
+        sliderMenuItem.add_child(sliderBin);
+        this.addMenuItem(sliderMenuItem);
+
+        return slider;
+    }
+}
 
 const BrightnessItem = GObject.registerClass(
 class BrightnessItem extends QuickSlider {
@@ -9,70 +41,59 @@ class BrightnessItem extends QuickSlider {
             iconName: 'display-brightness-symbolic',
         });
 
-        this.slider.accessible_name = _('Brightness');
+        this.slider.accessible_name = BRIGHTNESS_NAME;
 
-        const monitorManager = global.backend.get_monitor_manager();
-        monitorManager.connectObject('monitors-changed',
-            this._monitorsChanged.bind(this), this);
-        this._monitorsChanged();
+        this.menu.setHeader('display-brightness-symbolic', BRIGHTNESS_NAME);
+        this._monitorBrightnessSection = new BrightnessSliderMenu();
+        this.menu.addMenuItem(this._monitorBrightnessSection);
 
-        this._sliderChangedId = this.slider.connect('notify::value',
-            this._sliderChanged.bind(this));
+        this._manager = Main.brightnessManager;
+        this._manager.connectObject('changed',
+            this._onManagerChanged.bind(this), this);
+        this._onManagerChanged();
     }
 
-    _sliderChanged() {
-        this._setBrightness(this.slider.value);
+    _onManagerChanged() {
+        this._manager.globalScale?.disconnectObject(this);
+        this._manager.globalScale?.connectObject('notify::locked',
+            this._sync.bind(this), this);
+        this._sync();
     }
 
-    _changeSlider(value) {
-        this.slider.block_signal_handler(this._sliderChangedId);
-        this.slider.value = value;
-        this.slider.unblock_signal_handler(this._sliderChangedId);
-    }
-
-    _setBrightness(brightness) {
-        this._primaryBacklight?.block_signal_handler(this._brightnessChangedId);
-        this._monitors.forEach(monitor => {
-            const backlight = monitor.get_backlight();
-            const {brightnessMin: min, brightnessMax: max} = backlight;
-            backlight.brightness = min + ((max - min) * brightness);
+    _sync() {
+        const {globalScale} = this._manager;
+        this.set({
+            visible: globalScale && !globalScale.locked,
+            menuEnabled: this._manager.scales.length > 1,
         });
-        this._primaryBacklight?.unblock_signal_handler(this._brightnessChangedId);
 
-        this._changeSlider(brightness);
-    }
+        if (!this.visible)
+            return;
 
-    _primaryBacklightChanged() {
-        const {brightness, brightnessMin: min, brightnessMax: max} =
-            this._primaryBacklight;
-        const target = (brightness - min) / (max - min);
-        this._setBrightness(target);
-    }
+        this._monitorBrightnessSection.removeAll();
 
-    _setPrimaryBacklight(backlight) {
-        if (this._primaryBacklight) {
-            this._primaryBacklight.disconnect(this._brightnessChangedId);
-            this._brightnessChangedId = 0;
-        }
-
-        this._primaryBacklight = backlight;
-        this.visible = !!backlight;
-
-        if (this._primaryBacklight) {
-            this._brightnessChangedId =
-                this._primaryBacklight.connect('notify::brightness',
-                    this._primaryBacklightChanged.bind(this));
-            this._primaryBacklightChanged();
+        this._connectSlider(this.slider, globalScale);
+        for (const scale of this._manager.scales) {
+            const slider = this._monitorBrightnessSection.addSlider(scale);
+            this._connectSlider(slider, scale);
         }
     }
 
-    _monitorsChanged() {
-        this._monitors = global.backend.get_monitor_manager()
-            .get_monitors()
-            .filter(m => m.get_backlight() && m.is_active());
-        const primary = this._monitors.find(m => m.is_primary()) ||
-                        this._monitors[0];
-        this._setPrimaryBacklight(primary?.get_backlight());
+    _connectSlider(slider, scale) {
+        slider.disconnectObject(scale);
+        slider.connectObject('notify::value', () => {
+            if (slider._blockBrightnessAdjust)
+                return;
+            scale.value = slider.value;
+        }, scale);
+
+        const changeBrightness = () => {
+            slider._blockBrightnessAdjust = true;
+            slider.value = scale.value;
+            slider._blockBrightnessAdjust = false;
+        };
+        scale.connectObject('notify::value', changeBrightness, slider);
+        changeBrightness();
     }
 });
 

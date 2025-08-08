@@ -26,6 +26,11 @@ $_gdm_dialog_width: 25em;
   }
 }
 
+.login-dialog-bottom-button-group {
+  padding: 32px;
+  spacing: 16px;
+}
+
 // buttons on login screen
 .login-dialog-button {
 
@@ -35,6 +40,8 @@ $_gdm_dialog_width: 25em;
   &.login-dialog-session-list-button {
     @extend .icon-button;
     @extend %system_button;
+
+    padding: to_em(16px);
   }
 
   &.cancel-button {

@@ -34,7 +34,7 @@ default:
   image: $MUTTER_CI_IMAGE
 
 variables:
-  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/42:x86_64-2025-06-05.umockdev
+  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/42:x86_64-2025-07-21.0
   TARBALL_ARTIFACT_PATH: build/meson-dist/$CI_PROJECT_NAME-$CI_COMMIT_TAG.tar.xz
 
 .pipeline-guard:
@@ -49,7 +49,7 @@ variables:
   variables:
     FDO_UPSTREAM_REPO: GNOME/gnome-shell
     FDO_DISTRIBUTION_VERSION: 42
-    FDO_DISTRIBUTION_TAG: '2025-04-01.0'
+    FDO_DISTRIBUTION_TAG: '2025-06-10.0'
     FDO_DISTRIBUTION_PACKAGES:
       gjs
       nodejs
@@ -62,9 +62,6 @@ variables:
       'pkgconfig(gnome-autoar-0)'
       'pkgconfig(json-glib-1.0)'
     FDO_DISTRIBUTION_EXEC: |
-      # For static analysis with eslint
-      npm install -g eslint@^8.0.0 eslint-plugin-jsdoc@^46.0.0 &&
-
       ./.gitlab-ci/install-meson-project.sh \
         https://gitlab.gnome.org/World/javascript/gjs-ci-tools.git \
         main &&
@@ -142,8 +139,7 @@ eslint:
   variables:
     LINT_LOG: "eslint-report.xml"
   script:
-    - export NODE_PATH=$(npm root -g)
-    - ./.gitlab-ci/run-eslint --output-file ${LINT_LOG} --format junit --stdout
+    - ./tools/run-eslint.sh --output-file ${LINT_LOG} --format junit --stdout
   artifacts:
     reports:
       junit: ${LINT_LOG}
@@ -154,9 +150,14 @@ eslint-doc:
     - .fdo.distribution-image@fedora
     - .gnome-shell.fedora
   stage: review
+  variables:
+    LINT_LOG: "eslint-docs-report.xml"
   script:
-    - export NODE_PATH=$(npm root -g)
-    - ./.gitlab-ci/eslint-coding-style.sh
+    - ./.gitlab-ci/eslint-coding-style.sh --output-file ${LINT_LOG} --format junit --stdout
+  artifacts:
+    reports:
+      junit: ${LINT_LOG}
+    when: always
 
 potfile-c-check:
   extends:

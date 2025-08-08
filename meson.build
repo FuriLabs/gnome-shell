@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '49.alpha.1',
+  version: '49.beta',
   meson_version: '>= 1.3.0',
   license: 'GPL-2.0-or-later',
 )
@@ -10,7 +10,7 @@ split_version = meson.project_version().split('.')
 # the Cogl and Clutter libraries also use this API version.
 # The API version is increased each development cycle,
 # starting with 0 in 3.23.x
-mutter_api_version = '16'
+mutter_api_version = '17'
 
 clutter_pc = 'mutter-clutter-' + mutter_api_version
 cogl_pc = 'mutter-cogl-' + mutter_api_version
@@ -23,11 +23,11 @@ eds_req = '>= 3.33.1'
 gcr_req = '>= 3.90.0'
 gio_req = '>= 2.79.2'
 gi_req = '>= 1.49.1'
-gjs_req = '>= 1.73.1'
+gjs_req = '>= 1.81.2'
 gtk_req = '>= 4.0'
-mutter_req = '>= 49.alpha.1'
+mutter_req = '>= 49.beta'
 polkit_req = '>= 0.100'
-schemas_req = '>= 48.beta'
+schemas_req = '>= 49.alpha'
 systemd_req = '>= 246'
 gnome_desktop_req = '>= 40'
 pipewire_req = '>= 0.3.49'
