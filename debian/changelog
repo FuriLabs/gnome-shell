@@ -1,6 +1,7 @@
-gnome-shell (48.4-1) UNRELEASED; urgency=medium
+gnome-shell (48.4-1) unstable; urgency=medium
 
-  * New upstream release
+  * Team upload
+  * New upstream stable release
     - network: If a network has no ID, don't treat it as available,
       avoiding breaking the network menu
       (gnome-shell!3785 upstream)
@@ -31,7 +32,7 @@ gnome-shell (48.4-1) UNRELEASED; urgency=medium
     for future 48.x updates in trixie. Preliminary 49.x packaging for
     experimental is already using the debian/latest branch.
 
- -- Simon McVittie <smcv@debian.org>  Fri, 08 Aug 2025 09:02:07 +0100
+ -- Simon McVittie <smcv@debian.org>  Fri, 08 Aug 2025 09:19:26 +0100
 
 gnome-shell (48.3-1) unstable; urgency=medium
 
