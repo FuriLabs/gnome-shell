@@ -18,10 +18,10 @@ It will be used later when Web Login support is added.
  2 files changed, 36 insertions(+)
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index 18939ac..56a68a1 100644
+index 7b2fb5c..8d04ccf 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-@@ -376,6 +376,19 @@ $_gdm_dialog_width: 25em;
+@@ -383,6 +383,19 @@ $_gdm_dialog_width: 25em;
    }
  }
  

@@ -242,7 +242,7 @@ index 0000000..ea462ac
 +    }
 +});
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 71d7690..1480edd 100644
+index acdbf2f..882d099 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
 @@ -2,6 +2,7 @@

@@ -18,10 +18,10 @@ Forwarded: not-needed
  create mode 100644 data/org.gnome.shell.ubuntu.gschema.xml.in
 
 diff --git a/data/meson.build b/data/meson.build
-index d59cf05..6b73d3d 100644
+index 90b2df7..62e2e5f 100644
 --- a/data/meson.build
 +++ b/data/meson.build
-@@ -119,6 +119,12 @@ schema = configure_file(
+@@ -108,6 +108,12 @@ schema = configure_file(
    configuration: schemaconf,
    install_dir: schemadir
  )
@@ -34,7 +34,7 @@ index d59cf05..6b73d3d 100644
  schema_ubuntu_login = configure_file(
    input: 'com.ubuntu.login-screen.gschema.xml.in',
    output: 'com.ubuntu.login-screen.gschema.xml',
-@@ -168,7 +174,7 @@ endif
+@@ -157,7 +163,7 @@ endif
  
  # for unit tests - gnome.compile_schemas() only looks in srcdir
  custom_target('compile-schemas',
@@ -67,10 +67,10 @@ index 0000000..6f9cc62
 +  </schema>
 +</schemalist>
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 8a9dd1a..a5fef55 100644
+index da95f13..5bc5c20 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
-@@ -180,6 +180,7 @@ export async function start() {
+@@ -183,6 +183,7 @@ export async function start() {
  
      St.Settings.get().connect('notify::high-contrast', _loadDefaultStylesheet);
      St.Settings.get().connect('notify::color-scheme', _loadDefaultStylesheet);
@@ -78,7 +78,7 @@ index 8a9dd1a..a5fef55 100644
  
      // Initialize ParentalControlsManager before the UI
      ParentalControlsManager.getDefault();
-@@ -471,7 +472,19 @@ function _getStylesheet(name) {
+@@ -462,7 +463,19 @@ function _getStylesheet(name) {
  
  /** @returns {string} */
  export function getStyleVariant() {
@@ -99,7 +99,7 @@ index 8a9dd1a..a5fef55 100644
      switch (sessionMode.colorScheme) {
      case 'force-dark':
          return 'dark';
-@@ -488,6 +501,29 @@ export function getStyleVariant() {
+@@ -479,6 +492,29 @@ export function getStyleVariant() {
      }
  }
  

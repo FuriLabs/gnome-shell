@@ -33,10 +33,10 @@ index 38af437..dab5e2c 100644
          if (this._userVerifier)
              this._userVerifier.cancel();
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index eccf726..f8370b3 100644
+index 59b9848..577228c 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -598,6 +598,8 @@ export const LoginDialog = GObject.registerClass({
+@@ -595,6 +595,8 @@ export const LoginDialog = GObject.registerClass({
          this._authPrompt.connect('prompted', this._onPrompted.bind(this));
          this._authPrompt.connect('reset', this._onReset.bind(this));
          this._authPrompt.connect('mechanisms-changed', this._onMechanismsChanged.bind(this));
@@ -45,7 +45,7 @@ index eccf726..f8370b3 100644
          this._authPrompt.hide();
          this.add_child(this._authPrompt);
  
-@@ -1275,9 +1277,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1218,9 +1220,7 @@ export const LoginDialog = GObject.registerClass({
                  this._user = this._userManager.get_user(answer);
                  this._authPrompt.clear();
                  this._beginVerification({userName: answer});

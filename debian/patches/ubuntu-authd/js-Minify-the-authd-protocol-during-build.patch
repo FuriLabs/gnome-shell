@@ -42,7 +42,7 @@ index 0000000..858cc16
 +  capture: true,
 +)
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 510ad47..115b9d4 100644
+index 559f19e..783347d 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
 @@ -16,7 +16,7 @@

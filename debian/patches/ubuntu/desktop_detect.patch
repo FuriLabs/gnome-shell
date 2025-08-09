@@ -13,10 +13,10 @@ Origin: ubuntu
  create mode 100644 js/misc/desktop.js
 
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index c116810..71d7690 100644
+index dc182cc..acdbf2f 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
-@@ -21,6 +21,7 @@
+@@ -22,6 +22,7 @@
      <file>misc/dbusErrors.js</file>
      <file>misc/dbusUtils.js</file>
      <file>misc/dependencies.js</file>

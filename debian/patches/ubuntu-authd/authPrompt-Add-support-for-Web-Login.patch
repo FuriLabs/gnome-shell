@@ -21,10 +21,10 @@ https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/web-lo
  create mode 100644 js/gdm/webLogin.js
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index 56a68a1..b74573b 100644
+index 8d04ccf..11b9bd1 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-@@ -33,7 +33,8 @@ $_gdm_dialog_width: 25em;
+@@ -38,7 +38,8 @@ $_gdm_dialog_width: 25em;
    &.cancel-button,
    &.switch-user-button,
    &.login-dialog-auth-menu-button,
@@ -33,8 +33,8 @@ index 56a68a1..b74573b 100644
 +  &.web-login-intro-button {
      @extend .icon-button;
      @extend %system_button;
-   }
-@@ -226,8 +227,80 @@ $_gdm_dialog_width: 25em;
+ 
+@@ -233,8 +234,80 @@ $_gdm_dialog_width: 25em;
    }
  }
  
@@ -657,7 +657,7 @@ index 0000000..30697ae
 +    }
 +});
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 1480edd..6eec02a 100644
+index 882d099..98badcd 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
 @@ -11,6 +11,7 @@
@@ -669,7 +669,7 @@ index 1480edd..6eec02a 100644
      <file>extensions/extension.js</file>
      <file>extensions/sharedInternals.js</file>
 diff --git a/po/POTFILES.in b/po/POTFILES.in
-index 1798b87..bc35337 100644
+index ee0829c..5ec7365 100644
 --- a/po/POTFILES.in
 +++ b/po/POTFILES.in
 @@ -13,6 +13,7 @@ js/dbusServices/extensions/ui/extension-error-page.ui
@@ -678,5 +678,5 @@ index 1798b87..bc35337 100644
  js/gdm/util.js
 +js/gdm/webLogin.js
  js/misc/breakManager.js
+ js/misc/brightnessManager.js
  js/misc/systemActions.js
- js/misc/timeLimitsManager.js

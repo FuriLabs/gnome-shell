@@ -25,10 +25,10 @@ index 6f9cc62..10b7dbb 100644
    </schema>
  </schemalist>
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 106ddb2..94f4f9a 100644
+index 24007f2..cf355df 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
-@@ -12,6 +12,7 @@ import * as BreakManager from '../misc/breakManager.js';
+@@ -13,6 +13,7 @@ import * as BrightnessManager from '../misc/brightnessManager.js';
  import * as Config from '../misc/config.js';
  import * as Components from './components.js';
  import * as CtrlAltTab from './ctrlAltTab.js';
@@ -36,7 +36,7 @@ index 106ddb2..94f4f9a 100644
  import * as EndSessionDialog from './endSessionDialog.js';
  import * as ExtensionSystem from './extensionSystem.js';
  import * as ExtensionDownloader from './extensionDownloader.js';
-@@ -389,6 +390,22 @@ async function _initializeUI() {
+@@ -394,6 +395,22 @@ async function _initializeUI() {
              let perfOutput = GLib.getenv('SHELL_PERF_OUTPUT');
              Scripting.runPerfScript(perfModule, perfOutput);
          }
