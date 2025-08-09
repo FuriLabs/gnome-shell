@@ -1,4 +1,4 @@
-gnome-shell (49~beta-0ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (49~beta-0ubuntu1) questing; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
   * New upstream release
@@ -9,7 +9,7 @@ gnome-shell (49~beta-0ubuntu1) UNRELEASED; urgency=medium
     With older gnome-session this is still required.
     Drop the patches as soon as gnome-session 49 will be ready for this.
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sat, 09 Aug 2025 04:13:29 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sat, 09 Aug 2025 04:13:57 +0200
 
 gnome-shell (49~alpha.1-0ubuntu2) questing; urgency=medium
 
