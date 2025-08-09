@@ -9,6 +9,7 @@ import St from 'gi://St';
 import * as AccessDialog from './accessDialog.js';
 import * as AudioDeviceSelection from './audioDeviceSelection.js';
 import * as BreakManager from '../misc/breakManager.js';
+import * as BrightnessManager from '../misc/brightnessManager.js';
 import * as Config from '../misc/config.js';
 import * as Components from './components.js';
 import * as CtrlAltTab from './ctrlAltTab.js';
@@ -96,6 +97,8 @@ export let screenTimeDBus = null;
 export let breakManagerDispatcher = null;
 export let timeLimitsManager = null;
 export let timeLimitsDispatcher = null;
+export let brightnessManager = null;
+export let brightnessDBus = null;
 
 let _startDate;
 let _defaultCssStylesheet = null;
@@ -258,6 +261,9 @@ async function _initializeUI() {
     breakManagerDispatcher = new BreakManager.BreakDispatcher(breakManager);
     timeLimitsDispatcher = new TimeLimitsManager.TimeLimitsDispatcher(timeLimitsManager);
 
+    brightnessManager = new BrightnessManager.BrightnessManager();
+    brightnessDBus = new ShellDBus.BrightnessDBus(brightnessManager);
+
     global.connect('shutdown', () => {
         // Block shutdown until the session history file has been written
         const loop = new GLib.MainLoop(null, false);
@@ -319,7 +325,6 @@ async function _initializeUI() {
     GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
         Shell.util_sd_notify();
         global.context.notify_ready();
-        _notifyGnomeSessionReady();
         return GLib.SOURCE_REMOVE;
     });
 
@@ -382,20 +387,6 @@ async function _initializeUI() {
             Scripting.runPerfScript(perfModule, perfOutput);
         }
     });
-}
-
-async function _notifyGnomeSessionReady() {
-    try {
-        let params = GLib.Variant.new('(ss)', ['org.gnome.Shell.desktop', '']);
-        await Gio.DBus.session.call(
-            'org.gnome.SessionManager',
-            '/org/gnome/SessionManager',
-            'org.gnome.SessionManager',
-            'RegisterClient', params, null,
-            Gio.DBusCallFlags.NONE, -1, null);
-    } catch (e) {
-        log(`Error notifying gnome-session that we're ready: ${e.message}`);
-    }
 }
 
 function _handleShowWelcomeScreen() {

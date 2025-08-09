@@ -32,6 +32,24 @@ const ScreenshotIface = loadInterfaceXML('org.gnome.Shell.Screenshot');
 const ScreencastIface = loadInterfaceXML('org.gnome.Shell.Screencast');
 const ScreencastProxy = Gio.DBusProxy.makeProxyWrapper(ScreencastIface);
 
+let screenshotNotificationSource = null;
+function getScreenshotNotificationSource() {
+    if (!screenshotNotificationSource) {
+        screenshotNotificationSource = new MessageTray.Source({
+            // Translators: notification source name for screenshots and recordings.
+            title: _('Screen Capture'),
+            iconName: 'screenshooter-symbolic',
+        });
+
+        screenshotNotificationSource.connect('destroy', () => {
+            screenshotNotificationSource = null;
+        });
+        Main.messageTray.add(screenshotNotificationSource);
+    }
+
+    return screenshotNotificationSource;
+}
+
 const IconLabelButton = GObject.registerClass(
 class IconLabelButton extends St.Button {
     _init(iconName, label, params) {
@@ -1350,7 +1368,7 @@ export const ScreenshotUI = GObject.registerClass({
             visible: false,
         }));
         this._captureButton.connect('clicked',
-            this._onCaptureButtonClicked.bind(this));
+            () => this._onCaptureButtonClicked().catch(logError));
         this._bottomRowContainer.add_child(this._captureButton);
 
         this._showPointerButtonContainer = new St.BoxLayout({
@@ -1872,9 +1890,13 @@ export const ScreenshotUI = GObject.registerClass({
         return [x, y, w, h];
     }
 
-    _onCaptureButtonClicked() {
+    async _onCaptureButtonClicked() {
         if (this._shotButton.checked) {
-            this._saveScreenshot().catch(logError);
+            try {
+                await this._saveScreenshot();
+            } catch (e) {
+                logError(e);
+            }
             this.close();
         } else {
             // Screencast closes the UI on its own.
@@ -2078,16 +2100,12 @@ export const ScreenshotUI = GObject.registerClass({
     }
 
     _showNotification(title) {
-        const source = new MessageTray.Source({
-            // Translators: notification source name.
-            title: _('Screenshot'),
-            iconName: 'screencast-recorded-symbolic',
-        });
+        const source = getScreenshotNotificationSource();
         const notification = new MessageTray.Notification({
             source,
             title,
             // Translators: notification body when a screencast was recorded.
-            body: this._screencastPath ? _('Click here to view the video.') : '',
+            body: this._screencastPath ? _('Click here to view the video') : '',
             isTransient: true,
         });
 
@@ -2120,7 +2138,6 @@ export const ScreenshotUI = GObject.registerClass({
             Main.panel.closeCalendar();
         }
 
-        Main.messageTray.add(source);
         source.addNotification(notification);
     }
 
@@ -2142,7 +2159,7 @@ export const ScreenshotUI = GObject.registerClass({
             symbol === Clutter.KEY_KP_Enter || symbol === Clutter.KEY_ISO_Enter ||
             ((event.get_state() & Clutter.ModifierType.CONTROL_MASK) &&
              (symbol === Clutter.KEY_c || symbol === Clutter.KEY_C))) {
-            this._onCaptureButtonClicked();
+            this._onCaptureButtonClicked().catch(logError);
             return Clutter.EVENT_STOP;
         }
 
@@ -2325,17 +2342,13 @@ function _storeScreenshot(bytes, pixbuf) {
     );
 
     // Show a notification.
-    const source = new MessageTray.Source({
-        // Translators: notification source name.
-        title: _('Screenshot'),
-        iconName: 'screenshot-recorded-symbolic',
-    });
+    const source = getScreenshotNotificationSource();
     const notification = new MessageTray.Notification({
         source,
         // Translators: notification title.
         title: _('Screenshot captured'),
         // Translators: notification body when a screenshot was captured.
-        body: _('You can paste the image from the clipboard.'),
+        body: _('You can paste the image from the clipboard'),
         datetime: time,
         gicon: content,
         isTransient: true,
@@ -2368,7 +2381,6 @@ function _storeScreenshot(bytes, pixbuf) {
         });
     }
 
-    Main.messageTray.add(source);
     source.addNotification(notification);
 
     return file;
