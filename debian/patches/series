@@ -70,3 +70,4 @@ ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch
 ubuntu-authd/gdm-authPrompt-Grab-key-focus-when-choice-list-is-shown.patch
 Reapply-main-Notify-gnome-session-when-we-re-ready.patch
 Revert-data-Drop-org.gnome.Shell.desktop.patch
+shell-Use-proper-path-to-include-girepository-headers.patch

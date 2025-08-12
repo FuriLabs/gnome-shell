@@ -1,0 +1,46 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 12 Aug 2025 03:59:14 +0200
+Subject: shell: Use proper path to include girepository headers
+
+girepository-2.0 headers are inside ${PREFIX}/include/glib-2.0/girepository
+and the pkg-config file provides the glib-2.0 subpath as include
+directory, so we are required to use the full header path, or we may not
+be able to find them.
+
+This is triggered a build failure in debian (with clean setup where no
+libgirepository-1.0 was installed):
+
+  ../src/shell-global.c:19:10: fatal error: girepository.h: No such file or
+  directory
+     19 | #include <girepository.h>
+---
+ src/shell-global.c       | 2 +-
+ src/shell-tray-manager.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/shell-global.c b/src/shell-global.c
+index c943502..98e8ee0 100644
+--- a/src/shell-global.c
++++ b/src/shell-global.c
+@@ -16,7 +16,7 @@
+ #include <locale.h>
+ 
+ #include <gio/gio.h>
+-#include <girepository.h>
++#include <girepository/girepository.h>
+ #include <meta/meta-backend.h>
+ #include <meta/meta-context.h>
+ #include <meta/display.h>
+diff --git a/src/shell-tray-manager.c b/src/shell-tray-manager.c
+index ddbd176..5455211 100644
+--- a/src/shell-tray-manager.c
++++ b/src/shell-tray-manager.c
+@@ -3,7 +3,7 @@
+ #include "config.h"
+ 
+ #include <clutter/clutter.h>
+-#include <girepository.h>
++#include <girepository/girepository.h>
+ #include <meta/display.h>
+ 
+ #include "shell-tray-manager.h"
