@@ -5,7 +5,7 @@ import Shell from 'gi://Shell';
 
 import * as Main from '../ui/main.js';
 
-const SCALE_VALUE_STEP = 0.1;
+const SCALE_VALUE_N_STEPS = 20;
 const SCALE_VALUE_CHANGE_EPSILON = 0.001;
 
 const KEYBINDING_SCHEMA = 'org.gnome.shell.keybindings';
@@ -140,18 +140,6 @@ export const BrightnessManager = GObject.registerClass({
                     .some(m => m.get_backlight() && m.is_active());
             });
 
-        if (monitors.length === 0) {
-            this._globalScale = null;
-        } else if (!this._globalScale) {
-            this._globalScale = new BrightnessScale(_('Brightness'), 1.0);
-            this._globalScale.connect('notify::value', () => {
-                if (this._inhibitUpdates)
-                    return;
-                this._globalScaleChanged = true;
-                this._sync();
-            });
-        }
-
         this._monitorScales.clear();
 
         for (const monitor of monitors) {
@@ -168,6 +156,23 @@ export const BrightnessManager = GObject.registerClass({
                 }, this);
 
             this._monitorScales.set(monitor, scale);
+        }
+
+        if (monitors.length === 0) {
+            this._globalScale = null;
+        } else if (!this._globalScale) {
+            // Handle scales with just a few steps
+            const maxSteps = Math.max(...[...this._monitorScales.values()]
+                .map(s => s.nSteps));
+            const nSteps = Math.min(maxSteps, SCALE_VALUE_N_STEPS);
+
+            this._globalScale = new BrightnessScale(_('Brightness'), 1.0, nSteps);
+            this._globalScale.connect('notify::value', () => {
+                if (this._inhibitUpdates)
+                    return;
+                this._globalScaleChanged = true;
+                this._sync();
+            });
         }
 
         if (this._globalScale)
@@ -273,13 +278,13 @@ export const BrightnessScale = GObject.registerClass({
             false),
     },
 }, class BrightnessScale extends GObject.Object {
-    constructor(name, value) {
-        super({
-            value,
-            locked: false,
-        });
+    constructor(name, value = 1.0, nSteps = SCALE_VALUE_N_STEPS) {
+        super();
 
         this._name = name;
+        this._value = value;
+        this._locked = false;
+        this._nSteps = nSteps;
     }
 
     get name() {
@@ -305,16 +310,20 @@ export const BrightnessScale = GObject.registerClass({
         this.notify('locked');
     }
 
+    get nSteps() {
+        return this._nSteps;
+    }
+
     stepUp() {
-        this._setValue(Math.min(1.0, this._brightness + SCALE_VALUE_STEP));
+        this._setValue(Math.min(1.0, this._value + (1.0 / this._nSteps)));
     }
 
     stepDown() {
-        this._setValue(Math.max(0.0, this._brightness - SCALE_VALUE_STEP));
+        this._setValue(Math.max(0.0, this._value - (1.0 / this._nSteps)));
     }
 
     cycleUp() {
-        if (Math.abs(1.0 - this._brightness) < SCALE_VALUE_CHANGE_EPSILON)
+        if (Math.abs(1.0 - this._value) < SCALE_VALUE_CHANGE_EPSILON)
             this._setValue(0.0);
         else
             this.stepUp();
@@ -334,10 +343,19 @@ const MonitorBrightnessScale = GObject.registerClass({
         'backlights-changed': {},
     },
 }, class MonitorBrightnessScale extends BrightnessScale {
-    constructor(monitor, value) {
+    constructor(monitor, value = 1.0) {
         const name = monitor.get_monitors()[0].get_display_name();
 
-        super(name, value);
+        // Handle backlights with just a few steps
+        const maxSteps = Math.max(...monitor.get_monitors()
+            .filter(m => m.get_backlight() && m.is_active())
+            .map(m => {
+                const b = m.get_backlight();
+                return b.brightnessMax - b.brightnessMin;
+            }));
+        const nSteps = Math.min(maxSteps, SCALE_VALUE_N_STEPS);
+
+        super(name, value, nSteps);
 
         this._monitor = monitor;
         this._currentBacklightBrightness = -1;
