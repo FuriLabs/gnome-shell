@@ -1,4 +1,4 @@
-gnome-shell (49~beta.1-0ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (49~beta.1-0ubuntu1) questing; urgency=medium
 
   * New upstream release
   * d/p: Refresh
@@ -6,7 +6,7 @@ gnome-shell (49~beta.1-0ubuntu1) UNRELEASED; urgency=medium
   * debian/patches: Cherry pick further upstream fixes
   * d/p: Fix include path for girepository headers
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 12 Aug 2025 04:53:14 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 12 Aug 2025 04:56:37 +0200
 
 gnome-shell (49~beta-0ubuntu1) questing; urgency=medium
 
