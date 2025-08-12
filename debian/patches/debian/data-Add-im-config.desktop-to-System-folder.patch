@@ -16,10 +16,10 @@ Forwarded: not-needed, Debian-specific
  1 file changed, 1 insertion(+)
 
 diff --git a/data/default-apps/system-folder.txt b/data/default-apps/system-folder.txt
-index 2cda554..62cf6ba 100644
+index 88ae53a..d614c43 100644
 --- a/data/default-apps/system-folder.txt
 +++ b/data/default-apps/system-folder.txt
-@@ -2,6 +2,7 @@ nm-connection-editor.desktop              # Advanced Network Configuration
+@@ -3,6 +3,7 @@ nm-connection-editor.desktop              # Advanced Network Configuration
  org.gnome.DejaDup.desktop                 # Backups
  org.gnome.baobab.desktop                  # Disk Usage Analyzer
  org.gnome.DiskUtility.desktop             # Disks
