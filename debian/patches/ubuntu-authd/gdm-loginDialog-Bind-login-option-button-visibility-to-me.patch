@@ -20,10 +20,10 @@ index f89971c..59b9848 100644
              return;
  
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index 712e91f..1c54e2a 100644
+index d6b6471..df42ab9 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
-@@ -838,6 +838,7 @@ export const UnlockDialog = GObject.registerClass({
+@@ -867,6 +867,7 @@ export const UnlockDialog = GObject.registerClass({
          const activeMechanism = this._loginOptionsButton.getActiveItem();
  
          this._loginOptionsButton.clearItems({serviceName});

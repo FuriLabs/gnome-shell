@@ -15,7 +15,7 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  2 files changed, 65 insertions(+), 21 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index a69205e..0ad12ae 100644
+index d0529b5..9cd5948 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -42,16 +42,26 @@ static char *session_mode = NULL;
@@ -49,7 +49,7 @@ index a69205e..0ad12ae 100644
  
  static void
  shell_dbus_acquire_name (GDBusProxy  *bus,
-@@ -359,13 +369,23 @@ shell_a11y_init (void)
+@@ -362,13 +372,23 @@ shell_a11y_init (void)
  static void
  shell_update_debug (const char *debug_string)
  {
@@ -79,7 +79,7 @@ index a69205e..0ad12ae 100644
  }
  
  static GLogWriterOutput
-@@ -476,10 +496,23 @@ reset_signal_handler_to_default (int signo)
+@@ -479,10 +499,23 @@ reset_signal_handler_to_default (int signo)
  static void
  setup_debug_signal_listners (void)
  {
@@ -107,7 +107,7 @@ index a69205e..0ad12ae 100644
  
    if ((_shell_debug & SHELL_DEBUG_BACKTRACE_SEGFAULTS))
      {
-@@ -633,8 +666,9 @@ main (int argc, char **argv)
+@@ -636,8 +669,9 @@ main (int argc, char **argv)
    g_autoptr (MetaContext) context = NULL;
    g_autoptr (GFile) automation_script = NULL;
    g_autofree char *cwd = NULL;
@@ -118,7 +118,7 @@ index a69205e..0ad12ae 100644
    int ecode = EXIT_SUCCESS;
  
    bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
-@@ -678,7 +712,7 @@ main (int argc, char **argv)
+@@ -681,7 +715,7 @@ main (int argc, char **argv)
     * resolve internal modules.
     */
    _shell_global_init ("session-mode", session_mode,
@@ -127,7 +127,7 @@ index a69205e..0ad12ae 100644
                        "force-animations", force_animations,
                        "automation-script", automation_script,
                        NULL);
-@@ -697,8 +731,14 @@ main (int argc, char **argv)
+@@ -700,8 +734,14 @@ main (int argc, char **argv)
        return EXIT_FAILURE;
      }
  

@@ -137,10 +137,10 @@ index 30697ae..2795c3d 100644
  });
  
 diff --git a/meson.build b/meson.build
-index c52bcf5..7a9c070 100644
+index 18053ae..2f257d6 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -32,7 +32,6 @@ systemd_req = '>= 246'
+@@ -31,7 +31,6 @@ systemd_req = '>= 246'
  gnome_desktop_req = '>= 40'
  pipewire_req = '>= 0.3.49'
  pango_req = '>= 1.46.0'
@@ -148,7 +148,7 @@ index c52bcf5..7a9c070 100644
  
  nm_req = '>= 1.10.4'
  secret_req = '>= 0.18'
-@@ -88,7 +87,6 @@ polkit_dep = dependency('polkit-agent-1', version: polkit_req)
+@@ -87,7 +86,6 @@ polkit_dep = dependency('polkit-agent-1', version: polkit_req)
  schemas_dep = dependency('gsettings-desktop-schemas', version: schemas_req)
  gnome_desktop_dep = dependency('gnome-desktop-4', version: gnome_desktop_req)
  pango_dep = dependency('pango', version: pango_req)

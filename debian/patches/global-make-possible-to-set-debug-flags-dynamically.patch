@@ -21,10 +21,10 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  3 files changed, 103 insertions(+), 14 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index 2e585bd..a69205e 100644
+index ee86171..d0529b5 100644
 --- a/src/main.c
 +++ b/src/main.c
-@@ -357,14 +357,14 @@ shell_a11y_init (void)
+@@ -360,14 +360,14 @@ shell_a11y_init (void)
  }
  
  static void
@@ -41,7 +41,7 @@ index 2e585bd..a69205e 100644
                                         G_N_ELEMENTS (keys));
  }
  
-@@ -466,6 +466,42 @@ dump_gjs_stack_on_signal (int signo)
+@@ -469,6 +469,42 @@ dump_gjs_stack_on_signal (int signo)
    _tracked_signals[signo] = TRUE;
  }
  
@@ -84,7 +84,7 @@ index 2e585bd..a69205e 100644
  static gboolean
  list_modes (const char  *option_name,
              const char  *value,
-@@ -598,6 +634,7 @@ main (int argc, char **argv)
+@@ -601,6 +637,7 @@ main (int argc, char **argv)
    g_autoptr (GFile) automation_script = NULL;
    g_autofree char *cwd = NULL;
    GError *error = NULL;
@@ -92,7 +92,7 @@ index 2e585bd..a69205e 100644
    int ecode = EXIT_SUCCESS;
  
    bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
-@@ -633,17 +670,6 @@ main (int argc, char **argv)
+@@ -636,17 +673,6 @@ main (int argc, char **argv)
    if (session_mode == NULL)
      session_mode = is_gdm_mode ? (char *)"gdm" : (char *)"user";
  
@@ -110,7 +110,7 @@ index 2e585bd..a69205e 100644
    if (script_path)
      automation_script = g_file_new_for_commandline_arg_and_cwd (script_path, cwd);
  
-@@ -652,10 +678,16 @@ main (int argc, char **argv)
+@@ -655,10 +681,16 @@ main (int argc, char **argv)
     * resolve internal modules.
     */
    _shell_global_init ("session-mode", session_mode,
@@ -127,7 +127,7 @@ index 2e585bd..a69205e 100644
    /* Setup Meta _after_ the Shell global to avoid GjsContext
     * iterating on the main loop once Meta starts adding events
     */
-@@ -665,7 +697,8 @@ main (int argc, char **argv)
+@@ -668,7 +700,8 @@ main (int argc, char **argv)
        return EXIT_FAILURE;
      }
  
