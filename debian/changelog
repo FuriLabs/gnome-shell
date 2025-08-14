@@ -1,3 +1,10 @@
+gnome-shell (49~beta.1-0ubuntu2) UNRELEASED; urgency=medium
+
+  * d/p: Add missing GDesktopAppIcon methods
+  * d/p: Include gnome-shell snapd prompting extension
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 14 Aug 2025 20:21:12 +0200
+
 gnome-shell (49~beta.1-0ubuntu1) questing; urgency=medium
 
   * New upstream release
