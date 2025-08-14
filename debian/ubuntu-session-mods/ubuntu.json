@@ -9,6 +9,7 @@
         "ubuntu-dock@ubuntu.com",
         "ubuntu-appindicators@ubuntu.com",
         "ding@rastersoft.com",
-        "tiling-assistant@ubuntu.com"
+        "tiling-assistant@ubuntu.com",
+        "snapd-prompting@canonical.com"
     ]
 }

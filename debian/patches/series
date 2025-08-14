@@ -72,3 +72,4 @@ Reapply-main-Notify-gnome-session-when-we-re-ready.patch
 Revert-data-Drop-org.gnome.Shell.desktop.patch
 shell-Use-proper-path-to-include-girepository-headers.patch
 js-environment-Add-implementation-for-GDesktopAppIcon-get.patch
+extensions-Include-snapd-prompting-extension.patch
