@@ -1,0 +1,58 @@
+From: Mitchell Augustin <mitchell.augustin@canonical.com>
+Date: Fri, 15 Aug 2025 12:49:03 -0500
+Subject: status/network: Update Wi-Fi quicksettings icon on disconnect
+
+Prior to this patch, upon a connected AP disconnecting from
+the device, the current quicksettings wi-fi icon will continue
+showing the "network-wireless-connected-symbolic" symbol in
+the time between the initial disconnection and the adapter
+deactivation, even though the connection has been
+degraded by virtue of no longer being routable.
+
+This will also happen in the
+NM.ActiveConnectionState.DEACTIVATING state.
+
+To make this clearer to the user, this change modifies
+quicksettings' wifi icon to reflect the degraded states:
+- An activated adapter with no active AP connection will
+now map to the network-wireless-offline-symbolic icon
+(to indicate that the AP signal is lost)
+
+- NM.ActiveConnectionState.DEACTIVATING will now map to the
+network-wireless-acquiring-symbolic icon (to indicate that
+a state transition is in progress)
+
+Author: Mitchell Augustin <mitchell.augustin@canonical.com>
+Bug-Ubuntu: https://launchpad.net/bugs/2120734
+Origin: upstream, https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/a3b395fdb3e66f7ac70f7b5148191096d56bfcc0
+Forwarded: yes
+Last-Update: 2025-09-2
+
+Closes https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/8605
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3840>
+---
+ js/ui/status/network.js | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/js/ui/status/network.js b/js/ui/status/network.js
+index ddc2a12..a143beb 100644
+--- a/js/ui/status/network.js
++++ b/js/ui/status/network.js
+@@ -1134,6 +1134,7 @@ const NMWirelessDeviceItem = GObject.registerClass({
+ 
+         switch (this.state) {
+         case NM.ActiveConnectionState.ACTIVATING:
++        case NM.ActiveConnectionState.DEACTIVATING:
+             return 'network-wireless-acquiring-symbolic';
+ 
+         case NM.ActiveConnectionState.ACTIVATED: {
+@@ -1147,7 +1148,7 @@ const NMWirelessDeviceItem = GObject.registerClass({
+                 if (this._device.mode !== NM80211Mode.ADHOC)
+                     console.info('An active wireless connection, in infrastructure mode, involves no access point?');
+ 
+-                return 'network-wireless-connected-symbolic';
++                return 'network-wireless-offline-symbolic';
+             }
+ 
+             const {strength} = this._activeAccessPoint;
