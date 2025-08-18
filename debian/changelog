@@ -1,8 +1,9 @@
-gnome-shell (48.4-1~deb13u1) UNRELEASED; urgency=medium
+gnome-shell (48.4-1~deb13u1) trixie; urgency=medium
 
+  * Team upload
   * d/control, d/gbp.conf: Set packaging branch for trixie stable updates
 
- -- Simon McVittie <smcv@debian.org>  Mon, 18 Aug 2025 15:01:48 +0100
+ -- Simon McVittie <smcv@debian.org>  Mon, 18 Aug 2025 15:35:38 +0100
 
 gnome-shell (48.4-1) unstable; urgency=medium
 
