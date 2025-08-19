@@ -15,7 +15,7 @@ Subject: Implement authd support via the unified mechanism
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..648b4e7
+index 0000000..92e933c
 --- /dev/null
 +++ b/js/gdm/authd.js
 @@ -0,0 +1,738 @@
@@ -116,7 +116,7 @@ index 0000000..648b4e7
 +        console.log(`authd: Got a problem: ${problem}`)
 +
 +        this.emit('queue-priority-message', problem, MessageType.ERROR);
-+        this._failVerification();
++        this.reset();
 +
 +        return true
 +    }
