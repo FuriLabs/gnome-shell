@@ -70,4 +70,4 @@ ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch
 ubuntu-authd/gdm-authPrompt-Grab-key-focus-when-choice-list-is-shown.patch
 shell-Use-proper-path-to-include-girepository-headers.patch
 js-environment-Add-implementation-for-GDesktopAppIcon-get.patch
-extensions-Include-snapd-prompting-extension.patch
+ubuntu/extensions-Include-snapd-prompting-extension.patch
