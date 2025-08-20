@@ -1,4 +1,4 @@
-gnome-shell (49~beta.1-0ubuntu3) UNRELEASED; urgency=medium
+gnome-shell (49~beta.1-0ubuntu3) questing; urgency=medium
 
   * Revert "d/p: Keep support being started via legacy desktop file"
     GNOME Shell now can start only via newer gnome-session (>= 49~beta), backed
@@ -20,7 +20,7 @@ gnome-shell (49~beta.1-0ubuntu3) UNRELEASED; urgency=medium
   * d/p: Cherry-pick upstream quicksettings connections to enterprise AP fix
     (LP: #2120331)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 20 Aug 2025 05:40:51 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 20 Aug 2025 05:44:02 +0200
 
 gnome-shell (49~beta.1-0ubuntu2) questing; urgency=medium
 
