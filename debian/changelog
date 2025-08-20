@@ -1,4 +1,4 @@
-gnome-shell (46.3.1-1ubuntu1~24.04.1authd8) UNRELEASED; urgency=medium
+gnome-shell (46.3.1-1ubuntu1~24.04.1authd8) noble; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
   * d/p/ubuntu-authd: Ensure that error messages are always shown on failure.
@@ -27,7 +27,7 @@ gnome-shell (46.3.1-1ubuntu1~24.04.1authd8) UNRELEASED; urgency=medium
     Notify to screen reader users any error during login/unlocking
     Add screen reader compatible labels to St.Entry elements (LP: #2115948)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 20 Aug 2025 06:15:23 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 20 Aug 2025 06:22:03 +0200
 
 gnome-shell (46.3.1-1ubuntu1~24.04.1authd7) noble; urgency=medium
 
