@@ -71,3 +71,4 @@ ubuntu-authd/gdm-authPrompt-Grab-key-focus-when-choice-list-is-shown.patch
 shell-Use-proper-path-to-include-girepository-headers.patch
 js-environment-Add-implementation-for-GDesktopAppIcon-met.patch
 ubuntu/extensions-Include-snapd-prompting-extension.patch
+status-network-Fix-quicksettings-enterprise-connections.patch
