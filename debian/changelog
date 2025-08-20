@@ -1,3 +1,27 @@
+gnome-shell (49~beta.1-0ubuntu3) UNRELEASED; urgency=medium
+
+  * Revert "d/p: Keep support being started via legacy desktop file"
+    GNOME Shell now can start only via newer gnome-session (>= 49~beta), backed
+    by systemd, but we do not depend on it technically, so it's just better to
+    break that.
+  * d/control: Add a Breaks on older gnome and ubuntu sessions.
+    As per the fallback .desktop file removal, gnome shell requires newer
+    gnome session or ubuntu session.
+    However, this is not a dependency, so let's just instruct apt to update
+    the shell together with a newer version of the session
+  * d/p/ubuntu-authd: Do not fail verification on PAM error messages.
+    We used to mimic the old behavior of gnome shell, by failing on any PAM
+    error message, this is breaking PAM stacks where a module fails with a
+    non-fatal error though, such as when a password change is required or
+    when authd is not reachable for whatever reason. (LP: #2120634)
+  * d/p/ubuntu/snapd-prompting-extension: Remove linting not required files.
+    And also move the patch into the ubuntu namespace
+  * d/p: Add more complete re-implementation of Gio.DesktopAppInfo
+  * d/p: Cherry-pick upstream quicksettings connections to enterprise AP fix
+    (LP: #2120331)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 20 Aug 2025 05:40:51 +0200
+
 gnome-shell (49~beta.1-0ubuntu2) questing; urgency=medium
 
   * d/p: Add missing GDesktopAppIcon methods
