@@ -144,6 +144,8 @@ Breaks: gnome-shell-extension-appindicator (<< 50),
         gnome-shell-extension-top-icons-plus (<< 27-3~),
         gnome-shell-extension-workspaces-to-dock (<< 54~),
         gnome-shell-extensions (<< 40.0~),
+        gnome-session (<< 49~beta~),
+        ubuntu-session (<< 49~beta~),
         authd (<< 0.4.2~),
 Provides: notification-daemon,
           polkit-1-auth-agent
