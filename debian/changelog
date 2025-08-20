@@ -1,3 +1,24 @@
+gnome-shell (48.0-1ubuntu2.authd2) UNRELEASED; urgency=medium
+
+  * d/p/ubuntu-authd: Ensure that error messages are always shown on failure.
+    When an error happens at PAM level, queue the message for being shown
+    and eventually return the error.
+    Meanwhile deactivate any authentication method UI-side.
+  * d/p/ubuntu-authd: Fix handling of authentication switching for wait layouts.
+    If a wait layout was selected and then we were switching to another
+    layout using the authentication menu, we ended up unsetting the current
+    UI layout, so do what we are expected to do in such cases:
+     - Cancel the authentication
+     - Wait for the cancellation event to happen
+     - Switch the authentication mode
+  * d/p/ubuntu-authd: Do not fail verification on PAM error messages.
+    We used to mimic the old behavior of gnome shell, by failing on any PAM
+    error message, this is breaking PAM stacks where a module fails with a
+    non-fatal error though, such as when a password change is required or
+    when authd is not reachable for whatever reason. (LP: #2120634)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 20 Aug 2025 15:03:34 +0200
+
 gnome-shell (48.0-1ubuntu2.authd1) plucky; urgency=medium
 
   * debian: Prepare for plucky-authd branching
