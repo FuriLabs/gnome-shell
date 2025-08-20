@@ -1,3 +1,34 @@
+gnome-shell (46.3.1-1ubuntu1~24.04.1authd8) UNRELEASED; urgency=medium
+
+  [ Marco Trevisan (Treviño) ]
+  * d/p/ubuntu-authd: Ensure that error messages are always shown on failure.
+    When an error happens at PAM level, queue the message for being shown
+    and eventually return the error.
+    Meanwhile deactivate any authentication method UI-side.
+  * d/p/ubuntu-authd: Fix handling of authentication switching for wait layouts.
+    If a wait layout was selected and then we were switching to another
+    layout using the authentication menu, we ended up unsetting the current
+    UI layout, so do what we are expected to do in such cases:
+     - Cancel the authentication
+     - Wait for the cancellation event to happen
+     - Switch the authentication mode
+  * d/p/ubuntu-authd: Do not fail verification on PAM error messages.
+    We used to mimic the old behavior of gnome shell, by failing on any PAM
+    error message, this is breaking PAM stacks where a module fails with a
+    non-fatal error though, such as when a password change is required or
+    when authd is not reachable for whatever reason. (LP: #2120634)
+
+  [ Alessandro Astone ]
+  * Backport patches to fix the Shift behaviour in OSK (LP: #2092181)
+
+  [ Sergio Costas Rodriguez ]
+  * a11y: several accessibility patches.
+    Add labels to the Today Events and Weather buttons
+    Notify to screen reader users any error during login/unlocking
+    Add screen reader compatible labels to St.Entry elements (LP: #2115948)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 20 Aug 2025 06:15:23 +0200
+
 gnome-shell (46.3.1-1ubuntu1~24.04.1authd7) noble; urgency=medium
 
   * d/p/authd: Notify messages on authentication Next too
