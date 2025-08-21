@@ -3,22 +3,22 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authd.js               |  738 ++++++
+ js/gdm/authd.js               |  737 ++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    3 +
  js/gdm/util.js                |    4 +-
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6414 insertions(+), 1 deletion(-)
+ 6 files changed, 6413 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..92e933c
+index 0000000..93c8d27
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,738 @@
+@@ -0,0 +1,737 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import {MessageType} from './util.js';
@@ -714,7 +714,6 @@ index 0000000..92e933c
 +
 +        switch (response.access) {
 +        case AuthResult.Granted:
-+            this.emit('verification-complete');
 +            break;
 +
 +        case AuthResult.Retry:
