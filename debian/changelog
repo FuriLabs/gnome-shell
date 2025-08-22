@@ -1,3 +1,40 @@
+gnome-shell (49~beta.1-0ubuntu4~authd1) UNRELEASED; urgency=medium
+
+  * d/p/ubuntu-authd: Do not emit verification-complete signal.
+    When the verification is completed from the authd side, the PAM stack
+    that follows can still fail for some other reasons, so do not
+    preemptively mark the verification as completed until we're really done.
+    This is not a security issue since the signal is not leading to user
+    access until the PAM stack is completed, but it may still make the shell
+    to be in a wrong state in case the authentication does not complete.
+  * d/p/ubuntu-authd: Fix cancel handling with only one broker / auth method.
+    In case only one broker (unlikely, but potentially possible) or an
+    authentication method is available, the "go back" request did not work
+    properly, so fix these cases by checking the current state
+  * d/p/ubuntu-authd: Cleanup the broker and auth mode selection.
+    We can factorize some repeated code
+  * d/p/ubuntu-authd: Autoselect the first broker / auth mode if only received.
+    If we only have one broker or an auth mode, it does not make sense to
+    show a choice list, we can just proceed with it
+  * d/p/ubuntu-authd: Do not explicitly start an auth mechanism.
+    Submitting a changed mechanisms list is enough to trigger the machinery
+    to switch the default mechanism, since we already sort the mechanisms by
+    their priority and gdm will pick them in order.
+    Instead before we might ended up selecting the same mechanism twice
+  * d/p/ubuntu-authd: Do not re-start a challenge for the same auth mode.
+    It may lead to cancelling the current one for no reason
+  * d/p/ubuntu-authd: Do not show intermediate UIs if uneeded
+  * d/p/ubuntu-authd: Never show the QR code intro button.
+    It's just an unnecessary extra step for us
+  * d/p/ubuntu-authd: Do not wait for auto-selection while going back.
+    As per previous commits we are now waiting for potential auto-selection
+    to happen before asking the user to pick a choice, to prevent this to
+    slow down the "going back" experience, we can ignore the timeout when
+    going backwards, since there's no risk of auto-selection to happen
+  * d/p: Use a better fix for the key-focus of the choice list
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 22 Aug 2025 20:03:50 +0200
+
 gnome-shell (49~beta.1-0ubuntu3) questing; urgency=medium
 
   * Revert "d/p: Keep support being started via legacy desktop file"
