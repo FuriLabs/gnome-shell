@@ -16,7 +16,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2115948
  1 file changed, 2 insertions(+)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 46ef236..58cdc7f 100644
+index 049f2d0..0f79ea3 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -3,6 +3,7 @@
@@ -27,7 +27,7 @@ index 46ef236..58cdc7f 100644
  import GObject from 'gi://GObject';
  import Pango from 'gi://Pango';
  import Shell from 'gi://Shell';
-@@ -755,6 +756,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -754,6 +755,7 @@ export const AuthPrompt = GObject.registerClass({
              this._message.remove_all_transitions();
              this._message.text = message;
              this._message.opacity = 255;
