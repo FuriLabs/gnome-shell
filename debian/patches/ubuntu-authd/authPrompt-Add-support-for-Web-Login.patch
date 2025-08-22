@@ -116,7 +116,7 @@ index 8d04ccf..11b9bd1 100644
    background-color: transparent;
  
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 9b2134f..96338b1 100644
+index 9b2134f..87c4376 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -14,6 +14,7 @@ import * as MessageTray from '../ui/messageTray.js';
@@ -180,7 +180,7 @@ index 9b2134f..96338b1 100644
 +        if (this._spinner)
 +            this._spinner.stop();
 +
-+        if (!introAlreadyUp) {
++        if (!introAlreadyUp && introMessage) {
 +            this._webLoginIntro = new WebLogin.WebLoginIntro({message: introMessage});
 +            this._webLoginIntro.set({
 +                x_expand: true,

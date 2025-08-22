@@ -8,7 +8,7 @@ Subject: gdm/loginDialog: Fix cancel button visibility
  2 files changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 38af437..dab5e2c 100644
+index 1dcb929..ae319b3 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -55,6 +55,12 @@ export const AuthPrompt = GObject.registerClass({
