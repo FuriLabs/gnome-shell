@@ -3,22 +3,22 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authd.js               |  753 ++++++
+ js/gdm/authd.js               |  769 ++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    3 +
  js/gdm/util.js                |    4 +-
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6429 insertions(+), 1 deletion(-)
+ 6 files changed, 6445 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..8a9f4f9
+index 0000000..78904b9
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,753 @@
+@@ -0,0 +1,769 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import {MessageType} from './util.js';
@@ -347,10 +347,18 @@ index 0000000..8a9f4f9
 +        if (this._stage === AuthdPam.Stage.brokerSelection)
 +            return;
 +
-+        if (!Object.keys(this._brokers).length)
-+            return;
-+
 +        this._stage = this._pendingStage;
++
++        const brokerIDs = Object.keys(this._brokers);
++        switch (brokerIDs.length) {
++            case 0:
++                return;
++            case 1:
++                if (this._selectedBroker !== brokerIDs[0])
++                    this._selectBroker(brokerIDs[0]);
++                return;
++        }
++
 +        this._showChoiceList(AuthMechanismIDs.BrokerSelection,
 +            _('Select the broker'), this._brokers);
 +    }
@@ -371,13 +379,21 @@ index 0000000..8a9f4f9
 +        if (this._stage === AuthdPam.Stage.authModeSelection)
 +            return;
 +
-+        if (!Object.keys(this._authModes).length)
-+            return;
-+
 +        if (this._authenticationStarted)
 +            return;
 +
 +        this._stage = this._pendingStage;
++
++        const authModesIDs = Object.keys(this._authModes);
++        switch (authModesIDs.length) {
++            case 0:
++                return;
++            case 1:
++                if (this._selectedAuthMode !== authModesIDs[0])
++                    this._selectAuthMode(authModesIDs[0]);
++                return;
++        }
++
 +        this._showChoiceList(AuthMechanismIDs.AuthModeSelection,
 +            _('Select the authentication mode'), this._authModes);
 +    }
