@@ -3,23 +3,24 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authd.js               |  767 ++++++
+ js/gdm/authd.js               |  801 ++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    3 +
  js/gdm/util.js                |    4 +-
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6443 insertions(+), 1 deletion(-)
+ 6 files changed, 6477 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..4bc3129
+index 0000000..767faf9
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,767 @@
+@@ -0,0 +1,801 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
++import GLib from 'gi://GLib';
 +
 +import {MessageType} from './util.js';
 +import {authd as Authd, gdm as AuthdGdm, pam as AuthdPam} from './authdProtocol.js';
@@ -30,6 +31,8 @@ index 0000000..4bc3129
 +
 +const STRING_PROTOCOL_NAME = 'com.ubuntu.authd.gdm';
 +const STRING_PROTOCOL_VERSION_ = 1;
++
++const AUTO_SELECTION_MAX_WAIT = 500;
 +
 +const AuthMechanismIDs = Object.freeze({
 +    BrokerSelection: 'authd-broker-selection',
@@ -359,7 +362,7 @@ index 0000000..4bc3129
 +                return;
 +        }
 +
-+        this._showChoiceList(AuthMechanismIDs.BrokerSelection,
++        this._maybeShowChoiceList(AuthMechanismIDs.BrokerSelection,
 +            _('Select the broker'), this._brokers);
 +    }
 +
@@ -394,7 +397,7 @@ index 0000000..4bc3129
 +                return;
 +        }
 +
-+        this._showChoiceList(AuthMechanismIDs.AuthModeSelection,
++        this._maybeShowChoiceList(AuthMechanismIDs.AuthModeSelection,
 +            _('Select the authentication mode'), this._authModes);
 +    }
 +
@@ -405,6 +408,29 @@ index 0000000..4bc3129
 +                authModeId,
 +            }),
 +        }));
++    }
++
++    _maybeCancelPendingAutoSelection() {
++        if (!this._autoSelectTimeoutID)
++            return;
++
++        GLib.source_remove(this._autoSelectTimeoutID);
++        delete this._autoSelectTimeoutID;
++    }
++
++    _maybeShowChoiceList(id, prompt, choices) {
++        // This is a workaround to handle the cases in which authd is now fast
++        // enough to provide us a choice together with the list.
++        // So let's wait a bit, before asking the user for a choice.
++
++        this._maybeCancelPendingAutoSelection();
++
++        this._autoSelectTimeoutID = GLib.timeout_add(GLib.PRIORITY_DEFAULT,
++            AUTO_SELECTION_MAX_WAIT, () => {
++                delete this._autoSelectTimeoutID;
++                this._showChoiceList(id, prompt, choices);
++                return GLib.SOURCE_REMOVE;
++            });
 +    }
 +
 +    _showChoiceList(id, prompt, choices) {
@@ -464,6 +490,8 @@ index 0000000..4bc3129
 +        if (this._pendingStage !== stage) {
 +            this.emit('clear-message-queue');
 +            this._pendingStage = stage;
++
++            this._maybeCancelPendingAutoSelection();
 +        }
 +
 +        switch (stage) {
@@ -507,6 +535,8 @@ index 0000000..4bc3129
 +            break;
 +
 +        case AuthdGdm.EventType.brokerSelected:
++            this._maybeCancelPendingAutoSelection();
++
 +            this._selectedBroker = event.brokerSelected.brokerId;
 +            if (this._stage === AuthdPam.Stage.brokerSelection)
 +                this.emit('choice-list-selected', this._selectedBroker);
@@ -535,6 +565,8 @@ index 0000000..4bc3129
 +            break;
 +
 +        case AuthdGdm.EventType.authModeSelected:
++            this._maybeCancelPendingAutoSelection();
++
 +            if (this._selectedAuthMode === event.authModeSelected.authModeId)
 +                return;
 +
@@ -577,6 +609,8 @@ index 0000000..4bc3129
 +    cancel() {
 +        if (this._stage !== undefined)
 +            console.log("authd: Cancelling authentication")
++
++        this._maybeCancelPendingAutoSelection();
 +
 +        this._stage = undefined;
 +        this._uiLayout = null;
