@@ -3,22 +3,22 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authd.js               |  766 ++++++
+ js/gdm/authd.js               |  767 ++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    3 +
  js/gdm/util.js                |    4 +-
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6442 insertions(+), 1 deletion(-)
+ 6 files changed, 6443 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..70e62b9
+index 0000000..4bc3129
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,766 @@
+@@ -0,0 +1,767 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import {MessageType} from './util.js';
@@ -535,10 +535,11 @@ index 0000000..70e62b9
 +            break;
 +
 +        case AuthdGdm.EventType.authModeSelected:
-+            if (this._selectedAuthMode !== event.authModeSelected.authModeId) {
-+                this._selectedAuthMode = event.authModeSelected.authModeId;
-+                this.emit('clear-message-queue');
-+            }
++            if (this._selectedAuthMode === event.authModeSelected.authModeId)
++                return;
++
++            this._selectedAuthMode = event.authModeSelected.authModeId;
++            this.emit('clear-message-queue');
 +
 +            if (this._stage >= AuthdPam.Stage.brokerSelection)
 +                this._maybeStartChallenge();
