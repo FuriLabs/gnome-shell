@@ -68,3 +68,4 @@ ubuntu-authd/gdm-authPrompt-Grab-key-focus-when-choice-list-is-shown.patch
 dateMenu-Add-accessibility-to-Events-and-Weather.patch
 authPrompt-Notify-error-messages-in-GDM-login-unlock.patch
 st-entry-Use-hint-actor-as-a11y-description-if-possible.patch
+status-network-Fix-quicksettings-enterprise-connections.patch
