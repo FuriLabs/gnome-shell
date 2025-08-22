@@ -67,7 +67,7 @@ ubuntu-authd/gdm-webLogin-Improve-label-rendering.patch
 ubuntu-authd/Implement-authd-support-via-the-unified-mechanism.patch
 ubuntu-authd/js-Minify-the-authd-protocol-during-build.patch
 ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch
-ubuntu-authd/gdm-authPrompt-Grab-key-focus-when-choice-list-is-shown.patch
+ubuntu-authd/gdm-authPrompt-Fix-key-focus-handling-on-choice-list.patch
 shell-Use-proper-path-to-include-girepository-headers.patch
 js-environment-Add-implementation-for-GDesktopAppIcon-met.patch
 ubuntu/extensions-Include-snapd-prompting-extension.patch
