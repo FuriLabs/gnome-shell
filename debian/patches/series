@@ -104,3 +104,4 @@ keyboard-Switch-back-from-shift-to-default-level-on-more-.patch
 dateMenu-Add-accessibility-to-Events-and-Weather.patch
 authPrompt-Notify-error-messages-in-GDM-login-unlock.patch
 st-entry-Use-hint-actor-as-a11y-description-if-possible.patch
+status-network-Fix-quicksettings-enterprise-connections.patch

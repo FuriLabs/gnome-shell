@@ -1,0 +1,40 @@
+From: Mitchell Augustin <mitchell.augustin@canonical.com>
+Date: Mon, 11 Aug 2025 14:21:40 -0500
+Subject: status/network: Fix quicksettings enterprise connections
+
+In d6779f34dac6c80e178a308314fe59884a65f383, the switch
+to shell_app_activate_action() was made without
+also wrapping the action parameter in an av variant.
+This patch adjusts network.js to use the correct av
+variant type when attempting to connect to an
+enterprise AP from the quicksettings panel.
+
+Author: Mitchell Augustin <mitchell.augustin@canonical.com>
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2120331
+Origin: upstream, https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/ff7f7887c025c0d68f51e679fe9f58299db4c1b0
+Forwarded: yes
+Last-Update: 2025-08-22
+
+Fixes d6779f34dac6c80e178a308314fe59884a65f383
+Closes https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/8590
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3834>
+---
+ js/ui/status/network.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/js/ui/status/network.js b/js/ui/status/network.js
+index a4c6b90..ddc2a12 100644
+--- a/js/ui/status/network.js
++++ b/js/ui/status/network.js
+@@ -64,8 +64,8 @@ function ssidToLabel(ssid) {
+ }
+ 
+ function launchSettingsPanel(panel, ...args) {
+-    const param = new GLib.Variant('(sav)',
+-        [panel, args.map(s => new GLib.Variant('s', s))]);
++    const param = new GLib.Variant('av',
++        [new GLib.Variant('(sav)', [panel, args.map(s => new GLib.Variant('s', s))])]);
+ 
+     const app = Shell.AppSystem.get_default()
+         .lookup_app('org.gnome.Settings.desktop');
