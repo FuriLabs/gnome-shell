@@ -16,7 +16,7 @@ As we may have different protocols under the hood.
  create mode 100644 js/gdm/unifiedMechanism.js
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index edf2cfe..19dd711 100644
+index 4dda514..02b70a7 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -145,12 +145,19 @@ export const AuthPrompt = GObject.registerClass({

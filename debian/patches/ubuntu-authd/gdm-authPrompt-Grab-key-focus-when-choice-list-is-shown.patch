@@ -8,7 +8,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2072716
  1 file changed, 1 insertion(+)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index cf47aa3..348f005 100644
+index d5fbb68..382d9c0 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -700,6 +700,7 @@ export const AuthPrompt = GObject.registerClass({

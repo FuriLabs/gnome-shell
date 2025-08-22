@@ -15,7 +15,7 @@ Subject: Implement authd support via the unified mechanism
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..767faf9
+index 0000000..fe51fdb
 --- /dev/null
 +++ b/js/gdm/authd.js
 @@ -0,0 +1,801 @@
@@ -736,7 +736,7 @@ index 0000000..767faf9
 +            const mechanism = this._authMechanisms[this._selectedAuthMode];
 +            mechanism.role = Const.WEB_LOGIN_ROLE_NAME;
 +            mechanism.link_prompt = this._uiLayout.label;
-+            mechanism.init_prompt = _('Use the qr code to log-in');
++            mechanism.init_prompt = null;
 +            mechanism.uri = this._uiLayout.content;
 +            mechanism.code = this._uiLayout.code;
 +            mechanism.autoAck = true;
