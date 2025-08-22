@@ -3,22 +3,22 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authd.js               |  752 ++++++
+ js/gdm/authd.js               |  753 ++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    3 +
  js/gdm/util.js                |    4 +-
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6428 insertions(+), 1 deletion(-)
+ 6 files changed, 6429 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..412d9f6
+index 0000000..8a9f4f9
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,752 @@
+@@ -0,0 +1,753 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import {MessageType} from './util.js';
@@ -214,14 +214,7 @@ index 0000000..412d9f6
 +                return
 +
 +            this._pendingStage = AuthdGdm.EventType.challenge;
-+            this._pendingEvents.push(
-+                new AuthdGdm.EventData({
-+                    type: AuthdGdm.EventType.authModeSelected,
-+                    authModeSelected: new AuthdGdm.Events.AuthModeSelected({
-+                        authModeId: mechanism.id,
-+                    }),
-+                })
-+            );
++            this._selectAuthMode(mechanism.id);
 +        }
 +
 +        if (this._authenticationStarted && this._isWaitingLayout()) {
@@ -362,6 +355,15 @@ index 0000000..412d9f6
 +            _('Select the broker'), this._brokers);
 +    }
 +
++    _selectBroker(brokerId) {
++        this._pendingEvents.push(new AuthdGdm.EventData({
++            type: AuthdGdm.EventType.brokerSelected,
++            brokerSelected: new AuthdGdm.Events.BrokerSelected({
++                brokerId,
++            }),
++        }))
++    }
++
 +    _maybeStartAuthModeSelection() {
 +        if (this._pendingStage !== AuthdPam.Stage.authModeSelection)
 +            return;
@@ -378,6 +380,15 @@ index 0000000..412d9f6
 +        this._stage = this._pendingStage;
 +        this._showChoiceList(AuthMechanismIDs.AuthModeSelection,
 +            _('Select the authentication mode'), this._authModes);
++    }
++
++    _selectAuthMode(authModeId) {
++        this._pendingEvents.push(new AuthdGdm.EventData({
++            type: AuthdGdm.EventType.authModeSelected,
++            authModeSelected: new AuthdGdm.Events.AuthModeSelected({
++                authModeId,
++            }),
++        }));
 +    }
 +
 +    _showChoiceList(id, prompt, choices) {
@@ -399,21 +410,11 @@ index 0000000..412d9f6
 +    _onChoiceSelected(mechanism, key) {
 +        switch (mechanism.id) {
 +        case AuthMechanismIDs.BrokerSelection:
-+            this._pendingEvents.push(new AuthdGdm.EventData({
-+                type: AuthdGdm.EventType.brokerSelected,
-+                brokerSelected: new AuthdGdm.Events.BrokerSelected({
-+                    brokerId: key,
-+                }),
-+            }));
++            this._selectBroker(key);
 +            break;
 +
 +        case AuthMechanismIDs.AuthModeSelection:
-+            this._pendingEvents.push(new AuthdGdm.EventData({
-+                type: AuthdGdm.EventType.authModeSelected,
-+                authModeSelected: new AuthdGdm.Events.AuthModeSelected({
-+                    authModeId: key,
-+                }),
-+            }));
++            this._selectAuthMode(key);
 +            break;
 +        }
 +    }
