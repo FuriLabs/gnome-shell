@@ -1,0 +1,72 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 22 Aug 2025 15:08:23 +0200
+Subject: gdm/authPrompt: Fix key focus handling on choice list
+
+When a choice list widget is prompted in GDM we call updateSensitivity()
+but this does not act on the currently visible authentication widget but
+rather on the text entry all the times.
+
+And this causes that when a choice list is shown we always set the key
+focus to the (hidden) text entry.
+
+This implies that when the list is finally shown, moving the arrow keys
+leads makes the entry context menu to be shown instead of being able to
+navigate through the entries.
+
+So, make updateSensitivity use the currently visible authorization
+widget instead and use it to control the sensitivity of the choice list
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3849
+---
+ js/gdm/authPrompt.js | 19 ++++++++++++-------
+ 1 file changed, 12 insertions(+), 7 deletions(-)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index d5fbb68..8b21351 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -687,13 +687,13 @@ export const AuthPrompt = GObject.registerClass({
+         this._authList.set({
+             opacity: 0,
+             visible: true,
+-            reactive: false,
+         });
++        this.updateSensitivity(false);
+         this._authList.ease({
+             opacity: 255,
+             duration: MESSAGE_FADE_OUT_ANIMATION_TIME,
+             transition: Clutter.AnimationMode.EASE_OUT_QUAD,
+-            onComplete: () => (this._authList.reactive = true),
++            onComplete: () => this.updateSensitivity(true),
+         });
+     }
+ 
+@@ -762,18 +762,23 @@ export const AuthPrompt = GObject.registerClass({
+         if (this._webLoginDialog)
+             return;
+ 
+-        if (this._entry.reactive === sensitive)
++        let authWidget = this._entry;
++
++        if (this._authList.visible)
++            authWidget = this._authList;
++
++        if (authWidget.reactive === sensitive)
+             return;
+ 
+-        this._entry.reactive = sensitive;
++        authWidget.reactive = sensitive;
+ 
+         if (sensitive) {
+-            this._entry.grab_key_focus();
++            authWidget.grab_key_focus();
+         } else {
+             this.grab_key_focus();
+ 
+-            if (this._entry === this._passwordEntry)
+-                this._entry.password_visible = false;
++            if (authWidget === this._passwordEntry)
++                authWidget.password_visible = false;
+         }
+     }
+ 
