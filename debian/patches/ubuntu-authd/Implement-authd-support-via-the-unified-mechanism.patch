@@ -3,22 +3,22 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authd.js               |  801 ++++++
+ js/gdm/authd.js               |  812 ++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    3 +
  js/gdm/util.js                |    4 +-
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6477 insertions(+), 1 deletion(-)
+ 6 files changed, 6488 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..fe51fdb
+index 0000000..e2f65e9
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,801 @@
+@@ -0,0 +1,812 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +import GLib from 'gi://GLib';
 +
@@ -32,7 +32,7 @@ index 0000000..fe51fdb
 +const STRING_PROTOCOL_NAME = 'com.ubuntu.authd.gdm';
 +const STRING_PROTOCOL_VERSION_ = 1;
 +
-+const AUTO_SELECTION_MAX_WAIT = 500;
++const AUTO_SELECTION_MAX_WAIT = 1000;
 +
 +const AuthMechanismIDs = Object.freeze({
 +    BrokerSelection: 'authd-broker-selection',
@@ -425,6 +425,12 @@ index 0000000..fe51fdb
 +
 +        this._maybeCancelPendingAutoSelection();
 +
++        if (this._skipNextAutoSelection) {
++            this._showChoiceList(id, prompt, choices);
++            delete this._skipNextAutoSelection;
++            return;
++        }
++
 +        this._autoSelectTimeoutID = GLib.timeout_add(GLib.PRIORITY_DEFAULT,
 +            AUTO_SELECTION_MAX_WAIT, () => {
 +                delete this._autoSelectTimeoutID;
@@ -465,15 +471,19 @@ index 0000000..fe51fdb
 +
 +        switch (this._stage) {
 +            case AuthdPam.Stage.challenge:
-+                if (Object.keys(this._authModes).length > 1)
++                if (Object.keys(this._authModes).length > 1) {
++                    this._skipNextAutoSelection = true;
 +                    break;
++                }
 +
 +                prevStage--;
 +                // fallthrough
 +
 +            case AuthdPam.Stage.authModeSelection:
-+                if (Object.keys(this._brokers).length > 1)
++                if (Object.keys(this._brokers).length > 1) {
++                    this._skipNextAutoSelection = true;
 +                    break;
++                }
 +
 +                prevStage--;
 +                // fallthrough
@@ -616,6 +626,7 @@ index 0000000..fe51fdb
 +        this._uiLayout = null;
 +        this._pendingNewChallenge = null;
 +        this._selectedAuthMode = null;
++        this._skipNextAutoSelection = false;
 +        this._authenticationStarted = false;
 +        this._authMechanisms = {};
 +        this._authModes = {};
