@@ -3,22 +3,22 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authd.js               |  769 ++++++
+ js/gdm/authd.js               |  766 ++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    3 +
  js/gdm/util.js                |    4 +-
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6445 insertions(+), 1 deletion(-)
+ 6 files changed, 6442 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..78904b9
+index 0000000..70e62b9
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,769 @@
+@@ -0,0 +1,766 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +
 +import {MessageType} from './util.js';
@@ -420,7 +420,6 @@ index 0000000..78904b9
 +        };
 +
 +        this.emit('mechanisms-changed', {[id]: choiceListMechanism});
-+        this.emit('start-mechanism', choiceListMechanism);
 +    }
 +
 +    _onChoiceSelected(mechanism, key) {
@@ -677,7 +676,6 @@ index 0000000..78904b9
 +
 +            mechanism.prompt = prompt ?? '';
 +            this.emit('mechanisms-changed', this._authMechanisms);
-+            this.emit('start-mechanism', mechanism);
 +
 +            if (infoMsg?.length && mechanism.prompt !== infoMsg)
 +                this.emit('queue-message', infoMsg, MessageType.INFO);
@@ -723,7 +721,6 @@ index 0000000..78904b9
 +            }
 +
 +            this.emit('mechanisms-changed', this._authMechanisms);
-+            this.emit('start-mechanism', mechanism);
 +            break;
 +        }
 +
