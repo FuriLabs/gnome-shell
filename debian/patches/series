@@ -68,6 +68,9 @@ ubuntu-authd/Implement-authd-support-via-the-unified-mechanism.patch
 ubuntu-authd/js-Minify-the-authd-protocol-during-build.patch
 ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch
 ubuntu-authd/gdm-authPrompt-Fix-key-focus-handling-on-choice-list.patch
+ubuntu-authd/gdm-authPrompt-Unset-the-entry-reference-on-destruction.patch
+ubuntu-authd/gdm-authPrompt-Clear-the-inactive-entry-too.patch
+ubuntu-authd/gdm-authPrompt-Preserve-the-text-when-switching-entry-vis.patch
 shell-Use-proper-path-to-include-girepository-headers.patch
 js-environment-Add-implementation-for-GDesktopAppIcon-met.patch
 ubuntu/extensions-Include-snapd-prompting-extension.patch

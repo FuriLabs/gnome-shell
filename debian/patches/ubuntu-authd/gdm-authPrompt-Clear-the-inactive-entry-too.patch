@@ -1,0 +1,27 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Mon, 25 Aug 2025 14:29:55 +0200
+Subject: gdm/authPrompt: Clear the inactive entry too
+
+In multi-factor authentication cases we may end up clearing the current
+entry, but we are potentially leaving a previously filled inactive entry
+as it is.
+
+Avoid this, and clear all the entries we have when clearing the prompt.
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3850
+---
+ js/gdm/authPrompt.js | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index fcc2046..7550021 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -668,6 +668,7 @@ export const AuthPrompt = GObject.registerClass({
+ 
+     clear() {
+         this._entry.text = '';
++        this._inactiveEntry.text = '';
+         this.stopSpinning();
+         this._authList.clear();
+         this._authList.hide();
