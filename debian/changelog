@@ -1,4 +1,4 @@
-gnome-shell (46.3.1-1ubuntu1~24.04.1authd9) UNRELEASED; urgency=medium
+gnome-shell (46.3.1-1ubuntu1~24.04.1authd9) noble; urgency=medium
 
   * d/p/ubuntu-authd: Do not emit verification-complete signal.
     When the verification is completed from the authd side, the PAM stack
@@ -37,7 +37,7 @@ gnome-shell (46.3.1-1ubuntu1~24.04.1authd9) UNRELEASED; urgency=medium
     Avoid replacing lockscreen password entry contents when visibility
     changes
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 25 Aug 2025 19:01:27 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 25 Aug 2025 19:03:46 +0200
 
 gnome-shell (46.3.1-1ubuntu1~24.04.1authd8) noble; urgency=medium
 
