@@ -68,3 +68,4 @@ ubuntu-authd/gdm-authPrompt-Fix-key-focus-handling-on-choice-list.patch
 ubuntu-authd/gdm-authPrompt-Unset-the-entry-reference-on-destruction.patch
 ubuntu-authd/gdm-authPrompt-Clear-the-inactive-entry-too.patch
 ubuntu-authd/gdm-authPrompt-Preserve-the-text-when-switching-entry-vis.patch
+ubuntu-authd/unlockDialog-Do-not-reset-the-auth-prompt-on-every-tap.patch
