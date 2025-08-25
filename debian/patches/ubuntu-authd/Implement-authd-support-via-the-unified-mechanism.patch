@@ -3,22 +3,22 @@ Date: Thu, 29 Feb 2024 21:30:36 +0100
 Subject: Implement authd support via the unified mechanism
 
 ---
- js/gdm/authd.js               |  812 ++++++
+ js/gdm/authd.js               |  815 ++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/const.js               |    3 +
  js/gdm/util.js                |    4 +-
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6488 insertions(+), 1 deletion(-)
+ 6 files changed, 6491 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..e2f65e9
+index 0000000..3395bb3
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,812 @@
+@@ -0,0 +1,815 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +import GLib from 'gi://GLib';
 +
@@ -489,6 +489,9 @@ index 0000000..e2f65e9
 +                // fallthrough
 +
 +            default:
++                // Mark the verification as failed, as we do not to want
++                // to rely on the default allowedFailures value.
++                this.emit('verification-failed', /* should retry */ false);
 +                return false;
 +        }
 +
