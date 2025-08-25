@@ -1,0 +1,27 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Mon, 25 Aug 2025 14:25:49 +0200
+Subject: gdm/authPrompt: Unset the entry reference on destruction
+
+We use the internal entry as the reference to the text entry that is
+currently in use, but during destruction we do not unset it, thus the
+garbage collector may requires further cycles to actually release it.
+
+Simplify its job here, improves 572d011894c9b490b8a17ad7db6adec335fbb017
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3850
+---
+ js/gdm/authPrompt.js | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 8b21351..851db15 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -149,6 +149,7 @@ export const AuthPrompt = GObject.registerClass({
+         this._inactiveEntry = null;
+         this._userVerifier.destroy();
+         this._userVerifier = null;
++        this._entry = null;
+     }
+ 
+     on_key_press_event(event) {
