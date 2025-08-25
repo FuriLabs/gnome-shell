@@ -1,8 +1,8 @@
-gnome-shell (49~beta.1-0ubuntu4~authd2) UNRELEASED; urgency=medium
+gnome-shell (49~beta.1-0ubuntu4~authd2) questing; urgency=medium
 
   * d/p/ubuntu-authd: authPrompt preserve the text when switching entry visibility
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 25 Aug 2025 18:55:14 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 25 Aug 2025 18:55:41 +0200
 
 gnome-shell (49~beta.1-0ubuntu4~authd1) questing; urgency=medium
 
