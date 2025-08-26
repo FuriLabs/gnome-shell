@@ -1,6 +1,14 @@
+gnome-shell (49~beta.1-0ubuntu4~authd3) UNRELEASED; urgency=medium
+
+  * d/p/ubuntu-authd: Do not retry verification on explicit user cancellation
+  * d/p/ubuntu-authd: Do not reset the authentication at every lockscreen tap
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 26 Aug 2025 02:10:30 +0200
+
 gnome-shell (49~beta.1-0ubuntu4~authd2) questing; urgency=medium
 
-  * d/p/ubuntu-authd: authPrompt preserve the text when switching entry visibility
+  * d/p/ubuntu-authd: authPrompt preserve the text when switching entry
+    visibility
 
  -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 25 Aug 2025 18:55:41 +0200
 
