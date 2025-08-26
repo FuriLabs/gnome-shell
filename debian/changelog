@@ -1,9 +1,9 @@
-gnome-shell (46.3.1-1ubuntu1~24.04.1authd10) UNRELEASED; urgency=medium
+gnome-shell (46.3.1-1ubuntu1~24.04.1authd10) noble; urgency=medium
 
   * d/p/ubuntu-authd: Do not retry verification on explicit user cancellation
   * d/p/ubuntu-authd: Do not reset the authentication at every lockscreen tap
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 26 Aug 2025 02:24:47 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 26 Aug 2025 02:25:29 +0200
 
 gnome-shell (46.3.1-1ubuntu1~24.04.1authd9) noble; urgency=medium
 
