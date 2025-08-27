@@ -1,3 +1,13 @@
+gnome-shell (48.0-1ubuntu1.2) plucky; urgency=medium
+
+  [ Mitchell Augustin ]
+  * Fix quicksettings connections to enterprise AP (LP: #2120331)
+
+  [ Alessandro Astone ]
+  * Fix cursor tracking with a11y zoom (LP: #1991001)
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 27 Aug 2025 15:13:10 +0800
+
 gnome-shell (48.0-1ubuntu1.1) plucky; urgency=medium
 
   [ Sergio Costas Rodriguez ]
