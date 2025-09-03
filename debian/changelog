@@ -1,4 +1,4 @@
-gnome-shell (49~rc-0ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (49~rc-0ubuntu1) questing; urgency=medium
 
   * New upstream release:
     - Fix leak with custom themes (LP: #2121786)
@@ -59,7 +59,7 @@ gnome-shell (49~rc-0ubuntu1) UNRELEASED; urgency=medium
     - Update build dependencies
     - Require newer ubuntu mutter package version
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 03 Sep 2025 08:10:52 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 03 Sep 2025 08:17:26 +0200
 
 gnome-shell (49~beta.1-0ubuntu3) questing; urgency=medium
 
