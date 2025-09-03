@@ -1,0 +1,34 @@
+From: Sebastian Keller <skeller@gnome.org>
+Date: Thu, 21 Aug 2025 19:45:21 +0200
+Subject: st/private: Fix texture leak when creating shadow from actor
+
+cogl_pipeline_set_layer_texture() adds its own ref to the texture in
+_cogl_pipeline_set_layer_texture_data() when called via
+_st_create_shadow_pipeline(), so the initial reference is leaked when
+the pointer is stolen.
+
+Fix this by not stealing the pointer, so autoptr can unref the texture.
+Before the code was changed to autoptr in 71accdd97 the texture was also
+manually unrefed after calling _st_create_shadow_pipeline().
+
+Fixes: 71accdd97 ("st: Adapt to CoglObject removal")
+Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/8509
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3854>
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2121786
+---
+ src/st/st-private.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/st/st-private.c b/src/st/st-private.c
+index 1ca9aac..739ce65 100644
+--- a/src/st/st-private.c
++++ b/src/st/st-private.c
+@@ -601,7 +601,7 @@ _st_create_shadow_pipeline_from_actor (StShadow     *shadow_spec,
+       g_object_unref (fb);
+ 
+       shadow_pipeline = _st_create_shadow_pipeline (shadow_spec,
+-                                                    g_steal_pointer (&buffer),
++                                                    buffer,
+                                                     resource_scale);
+     }
+ 
