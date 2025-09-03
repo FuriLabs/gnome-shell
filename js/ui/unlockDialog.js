@@ -16,6 +16,7 @@ import * as MessageTray from './messageTray.js';
 import * as SwipeTracker from './swipeTracker.js';
 import {formatDateWithCFormatString} from '../misc/dateUtils.js';
 import * as AuthPrompt from '../gdm/authPrompt.js';
+import {AuthPromptStatus} from '../gdm/authPrompt.js';
 import {MprisSource} from './mpris.js';
 import {MediaMessage} from './messageList.js';
 
@@ -544,7 +545,10 @@ export const UnlockDialog = GObject.registerClass({
 
         this._swipeTracker = new SwipeTracker.SwipeTracker(this,
             Clutter.Orientation.VERTICAL,
-            Shell.ActionMode.UNLOCK_SCREEN);
+            Shell.ActionMode.UNLOCK_SCREEN,
+            {
+                name: 'UnlockDialog swipe tracker',
+            });
         this._swipeTracker.connect('begin', this._swipeBegin.bind(this));
         this._swipeTracker.connect('update', this._swipeUpdate.bind(this));
         this._swipeTracker.connect('end', this._swipeEnd.bind(this));
@@ -563,9 +567,9 @@ export const UnlockDialog = GObject.registerClass({
 
         this._activePage = null;
 
-        let tapAction = new Clutter.TapAction();
-        tapAction.connect('tap', this._showPrompt.bind(this));
-        this.add_action(tapAction);
+        const clickGesture = new Clutter.ClickGesture();
+        clickGesture.connect('recognize', () => this._showPrompt());
+        this.add_action(clickGesture);
 
         // Background
         this._backgroundGroup = new Clutter.Actor();
@@ -744,8 +748,15 @@ export const UnlockDialog = GObject.registerClass({
             this._promptBox.add_child(this._authPrompt);
         }
 
-        this._authPrompt.reset();
-        this._authPrompt.updateSensitivity(true);
+        const {verificationStatus} = this._authPrompt;
+        switch (verificationStatus) {
+        case AuthPromptStatus.NOT_VERIFYING:
+        case AuthPromptStatus.VERIFICATION_CANCELLED:
+        case AuthPromptStatus.VERIFICATION_FAILED:
+            this._authPrompt.reset();
+            this._authPrompt.updateSensitivity(
+                verificationStatus === AuthPromptStatus.NOT_VERIFYING);
+        }
     }
 
     _maybeDestroyAuthPrompt() {
