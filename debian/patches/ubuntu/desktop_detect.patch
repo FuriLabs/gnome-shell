@@ -13,7 +13,7 @@ Origin: ubuntu
  create mode 100644 js/misc/desktop.js
 
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index dc182cc..acdbf2f 100644
+index e5e6167..8c2b908 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
 @@ -22,6 +22,7 @@

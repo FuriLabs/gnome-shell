@@ -13,10 +13,10 @@ This commit fades it out as well.
  1 file changed, 5 insertions(+)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 87c4376..69d2d51 100644
+index 5053ece..3634e3c 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -541,6 +541,11 @@ export const AuthPrompt = GObject.registerClass({
+@@ -552,6 +552,11 @@ export const AuthPrompt = GObject.registerClass({
          this.verificationStatus = AuthPromptStatus.VERIFICATION_SUCCEEDED;
          this.cancelButton.reactive = false;
          this.cancelButton.can_focus = false;

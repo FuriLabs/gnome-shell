@@ -12,10 +12,10 @@ querying service to be specified at reset time.
  1 file changed, 25 insertions(+), 20 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 8a35efe..1ee0708 100644
+index d737179..833b35b 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -619,7 +619,12 @@ export const AuthPrompt = GObject.registerClass({
+@@ -631,7 +631,12 @@ export const AuthPrompt = GObject.registerClass({
              this._updateEntry(false);
      }
  
@@ -29,7 +29,7 @@ index 8a35efe..1ee0708 100644
          let oldStatus = this.verificationStatus;
          this.verificationStatus = AuthPromptStatus.NOT_VERIFYING;
          this.cancelButton.reactive = this._hasCancelButton;
-@@ -629,7 +634,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -641,7 +646,7 @@ export const AuthPrompt = GObject.registerClass({
          if (this._userVerifier)
              this._userVerifier.cancel();
  
@@ -38,7 +38,7 @@ index 8a35efe..1ee0708 100644
          this.clear();
          this._message.opacity = 0;
          this.setUser(null);
-@@ -641,24 +646,24 @@ export const AuthPrompt = GObject.registerClass({
+@@ -653,24 +658,24 @@ export const AuthPrompt = GObject.registerClass({
          else if (oldStatus === AuthPromptStatus.VERIFICATION_CANCELLED)
              this.emit('cancelled');
  

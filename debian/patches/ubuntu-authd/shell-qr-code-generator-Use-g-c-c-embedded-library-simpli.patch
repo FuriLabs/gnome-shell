@@ -17,10 +17,10 @@ Subject: shell-qr-code-generator: Use g-c-c embedded library,
  create mode 100644 src/qrcodegen.h
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index 11b9bd1..9d1940f 100644
+index 65e2a29..d8e2298 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-@@ -471,8 +471,16 @@ $_gdm_dialog_width: 25em;
+@@ -481,8 +481,16 @@ $_gdm_dialog_width: 25em;
  
  // QR Code
  .qr-code {
@@ -137,7 +137,7 @@ index 30697ae..2795c3d 100644
  });
  
 diff --git a/meson.build b/meson.build
-index 18053ae..2f257d6 100644
+index 2fd3e2e..2553fe7 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -31,7 +31,6 @@ systemd_req = '>= 246'
@@ -157,7 +157,7 @@ index 18053ae..2f257d6 100644
  have_fonts = mutter_dep.get_variable('have_fonts') == 'true'
  have_x11 = mutter_dep.get_variable('have_x11') == 'true'
 diff --git a/src/meson.build b/src/meson.build
-index 2f45319..4b7edb3 100644
+index 4652e6f..498cf37 100644
 --- a/src/meson.build
 +++ b/src/meson.build
 @@ -75,7 +75,6 @@ gnome_shell_deps = [
@@ -168,7 +168,7 @@ index 2f45319..4b7edb3 100644
  ]
  
  if have_x11_client
-@@ -197,6 +196,10 @@ if have_x11_client
+@@ -199,6 +198,10 @@ if have_x11_client
    ]
  endif
  

@@ -6550,7 +6550,7 @@ index 43fe656..0fd61ca 100644
          this._credentialManagers = {};
  
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 76953e1..559f19e 100644
+index 684af12..d57b68e 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
 @@ -15,6 +15,9 @@

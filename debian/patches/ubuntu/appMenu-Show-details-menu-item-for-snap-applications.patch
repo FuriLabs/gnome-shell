@@ -11,7 +11,7 @@ Forwarded: Not-needed
  1 file changed, 32 insertions(+), 1 deletion(-)
 
 diff --git a/js/ui/appMenu.js b/js/ui/appMenu.js
-index f23ae60..c179f74 100644
+index b8d8f64..547331b 100644
 --- a/js/ui/appMenu.js
 +++ b/js/ui/appMenu.js
 @@ -9,6 +9,7 @@ import * as AppFavorites from './appFavorites.js';
@@ -48,7 +48,7 @@ index f23ae60..c179f74 100644
              const args = GLib.Variant.new('(ss)', [id, '']);
              const bus = await Gio.DBus.get(Gio.BusType.SESSION, null);
 @@ -179,7 +196,20 @@ export class AppMenu extends PopupMenu.PopupMenu {
-             : _('Launch using Discrete Graphics Card');
+             : _('Launch Using Discrete Graphics Card');
      }
  
 +    _getSnapStore() {

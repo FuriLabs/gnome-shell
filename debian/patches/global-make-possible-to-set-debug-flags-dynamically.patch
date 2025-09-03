@@ -138,7 +138,7 @@ index ee86171..d0529b5 100644
    shell_dbus_init (meta_context_is_replacing (context));
    shell_a11y_init ();
 diff --git a/src/shell-global.c b/src/shell-global.c
-index c941701..f3a04ec 100644
+index 9a6de28..8a3fbce 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
 @@ -61,6 +61,7 @@ struct _ShellGlobal {

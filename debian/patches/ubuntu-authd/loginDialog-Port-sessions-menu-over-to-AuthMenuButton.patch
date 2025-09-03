@@ -12,7 +12,7 @@ control.
  2 files changed, 60 insertions(+), 12 deletions(-)
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index 85fc6dc..f27a1b5 100644
+index 4ac7c48..1484e98 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 @@ -37,6 +37,7 @@ $_gdm_dialog_width: 25em;
@@ -64,7 +64,7 @@ index 85fc6dc..f27a1b5 100644
    margin: 3em 0;
  }
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index a027f67..38e7e64 100644
+index 1d203ab..ca76132 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -27,9 +27,9 @@ import Pango from 'gi://Pango';
@@ -78,7 +78,7 @@ index a027f67..38e7e64 100644
  import * as CtrlAltTab from '../ui/ctrlAltTab.js';
  import * as GdmUtil from './util.js';
  import * as Layout from '../ui/layout.js';
-@@ -644,14 +644,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -641,14 +641,7 @@ export const LoginDialog = GObject.registerClass({
          });
          this.add_child(this._bottomButtonGroup);
  
@@ -94,7 +94,7 @@ index a027f67..38e7e64 100644
  
          this._a11yMenuButton = new A11yMenuButton();
          this._bottomButtonGroup.add_child(this._a11yMenuButton);
-@@ -687,6 +680,35 @@ export const LoginDialog = GObject.registerClass({
+@@ -684,6 +677,35 @@ export const LoginDialog = GObject.registerClass({
              this._updateDisableUserList.bind(this), this);
      }
  
@@ -130,7 +130,7 @@ index a027f67..38e7e64 100644
      _getBannerAllocation(dialogBox) {
          let actorBox = new Clutter.ActorBox();
  
-@@ -1086,7 +1108,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1083,7 +1105,7 @@ export const LoginDialog = GObject.registerClass({
      }
  
      _onDefaultSessionChanged(client, sessionId) {
@@ -139,7 +139,7 @@ index a027f67..38e7e64 100644
      }
  
      _shouldShowSessionMenuButton() {
-@@ -1474,8 +1496,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1471,8 +1493,7 @@ export const LoginDialog = GObject.registerClass({
          this._ensureUserListLoaded();
          this._authPrompt.hide();
          this._hideBannerView();

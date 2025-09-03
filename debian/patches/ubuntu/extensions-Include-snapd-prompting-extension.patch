@@ -1230,7 +1230,7 @@ index 0000000..7421484
 +    }
 +});
 diff --git a/meson.build b/meson.build
-index 2f257d6..86bcef9 100644
+index 2553fe7..bc04dd6 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -317,6 +317,7 @@ subdir('js')

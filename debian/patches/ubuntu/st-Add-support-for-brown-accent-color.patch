@@ -34,7 +34,7 @@ index 4c00188..796502a 100644
  
  #define ST_TYPE_SETTINGS (st_settings_get_type ())
 diff --git a/src/st/st-theme-context.c b/src/st/st-theme-context.c
-index d28b244..b000103 100644
+index 55220da..e2de219 100644
 --- a/src/st/st-theme-context.c
 +++ b/src/st/st-theme-context.c
 @@ -37,6 +37,7 @@

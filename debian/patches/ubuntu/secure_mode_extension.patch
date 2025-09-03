@@ -54,7 +54,7 @@ index fe687cb..1bb709c 100644
              version: extension.metadata.version,
          };
 diff --git a/js/ui/extensionSystem.js b/js/ui/extensionSystem.js
-index 06f7d96..68b15ef 100644
+index 22121c4..bec5baf 100644
 --- a/js/ui/extensionSystem.js
 +++ b/js/ui/extensionSystem.js
 @@ -6,6 +6,7 @@ import Shell from 'gi://Shell';

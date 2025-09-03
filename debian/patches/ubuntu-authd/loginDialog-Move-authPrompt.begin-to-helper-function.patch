@@ -12,7 +12,7 @@ _beginVerification, that can be easily augmented later.
  1 file changed, 15 insertions(+), 4 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 07238ac..a027f67 100644
+index 02fb16f..1d203ab 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -37,6 +37,7 @@ import * as LoginManager from '../misc/loginManager.js';
@@ -23,7 +23,7 @@ index 07238ac..a027f67 100644
  import * as PopupMenu from '../ui/popupMenu.js';
  import * as Realmd from './realmd.js';
  import * as UserWidget from '../ui/userWidget.js';
-@@ -1073,7 +1074,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1070,7 +1071,7 @@ export const LoginDialog = GObject.registerClass({
          if (previousUser && beginRequest === AuthPrompt.BeginRequestType.REUSE_USERNAME) {
              this._user = previousUser;
              this._authPrompt.setUser(this._user);
@@ -32,7 +32,7 @@ index 07238ac..a027f67 100644
          } else if (beginRequest === AuthPrompt.BeginRequestType.PROVIDE_USERNAME) {
              if (!this._disableUserList)
                  this._showUserList();
-@@ -1145,7 +1146,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1142,7 +1143,7 @@ export const LoginDialog = GObject.registerClass({
                  let answer = this._authPrompt.getAnswer();
                  this._user = this._userManager.get_user(answer);
                  this._authPrompt.clear();
@@ -41,7 +41,7 @@ index 07238ac..a027f67 100644
                  this._updateCancelButton();
              });
          this._updateCancelButton();
-@@ -1439,6 +1440,15 @@ export const LoginDialog = GObject.registerClass({
+@@ -1436,6 +1437,15 @@ export const LoginDialog = GObject.registerClass({
          });
      }
  
@@ -57,7 +57,7 @@ index 07238ac..a027f67 100644
      _setUserListExpanded(expanded) {
          this._userList.updateStyle(expanded);
          this._userSelectionBox.visible = expanded;
-@@ -1457,7 +1467,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1454,7 +1464,7 @@ export const LoginDialog = GObject.registerClass({
  
      _hideUserListAndBeginVerification() {
          this._hideUserList();
@@ -66,7 +66,7 @@ index 07238ac..a027f67 100644
      }
  
      _showUserList() {
-@@ -1477,7 +1487,8 @@ export const LoginDialog = GObject.registerClass({
+@@ -1474,7 +1484,8 @@ export const LoginDialog = GObject.registerClass({
          let userName = item.user.get_user_name();
          let hold = new Batch.Hold();
  

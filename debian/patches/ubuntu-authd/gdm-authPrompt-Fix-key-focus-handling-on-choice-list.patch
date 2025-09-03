@@ -22,10 +22,10 @@ Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3849
  1 file changed, 12 insertions(+), 7 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 88b596d..40b95d3 100644
+index 28b0d4c..293abd5 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -688,13 +688,13 @@ export const AuthPrompt = GObject.registerClass({
+@@ -700,13 +700,13 @@ export const AuthPrompt = GObject.registerClass({
          this._authList.set({
              opacity: 0,
              visible: true,
@@ -41,7 +41,7 @@ index 88b596d..40b95d3 100644
          });
      }
  
-@@ -764,18 +764,23 @@ export const AuthPrompt = GObject.registerClass({
+@@ -776,18 +776,23 @@ export const AuthPrompt = GObject.registerClass({
          if (this._webLoginDialog)
              return;
  

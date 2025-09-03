@@ -7,11 +7,11 @@ the accent colors, so let's use them instead of the default ones
 
 Colors are computed as the $yaru_accent_bg_color in yaru.
 ---
- src/st/st-theme-context.c | 110 +++++++++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 109 insertions(+), 1 deletion(-)
+ src/st/st-theme-context.c | 108 ++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 108 insertions(+)
 
 diff --git a/src/st/st-theme-context.c b/src/st/st-theme-context.c
-index eb24212..d28b244 100644
+index 5b066d2..55220da 100644
 --- a/src/st/st-theme-context.c
 +++ b/src/st/st-theme-context.c
 @@ -40,6 +40,32 @@
@@ -145,10 +145,3 @@ index eb24212..d28b244 100644
  
    switch (accent_color)
      {
-@@ -599,4 +707,4 @@ st_theme_context_get_resolution (StThemeContext *context)
-   g_return_val_if_fail (ST_IS_THEME_CONTEXT (context), -1);
- 
-   return clutter_backend_get_resolution (context->clutter_backend);
--}
-\ No newline at end of file
-+}
