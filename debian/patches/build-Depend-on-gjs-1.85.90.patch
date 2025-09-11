@@ -1,0 +1,25 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 12 Aug 2025 03:45:19 +0200
+Subject: build: Depend on gjs 1.85.90
+
+While the actual version that was ported to libgirepository-2.0 was
+1.85.2, we also rely on Gio wrappers that are part of gjs 1.85.90
+
+See: https://gitlab.gnome.org/GNOME/gjs/-/blob/master/NEWS
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 2553fe7..56f1647 100644
+--- a/meson.build
++++ b/meson.build
+@@ -22,7 +22,7 @@ ecal_req = '>= 3.33.1'
+ eds_req = '>= 3.33.1'
+ gcr_req = '>= 3.90.0'
+ gio_req = '>= 2.85.1'
+-gjs_req = '>= 1.85.1'
++gjs_req = '>= 1.85.90'
+ gtk_req = '>= 4.0'
+ mutter_req = '>= 49.rc'
+ polkit_req = '>= 0.100'

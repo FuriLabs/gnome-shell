@@ -1,3 +1,5 @@
+build-Depend-on-gjs-1.85.90.patch
+build-Depend-on-GLib-2.86.0.patch
 brightnessManager-Handle-absence-of-brightness-control-in.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
 debian/data-Add-im-config.desktop-to-System-folder.patch
