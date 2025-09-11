@@ -11,7 +11,7 @@ Origin: 89b571e3
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index 2553fe7..6067142 100644
+index 6aa77e6..928c7f9 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -313,10 +313,10 @@ endif
