@@ -1230,13 +1230,13 @@ index 0000000..7421484
 +    }
 +});
 diff --git a/meson.build b/meson.build
-index 6aa77e6..1de1963 100644
+index 928c7f9..7576750 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -317,6 +317,7 @@ subdir('js')
+@@ -317,6 +317,7 @@ subdir('data')
+ subdir('js')
  subdir('src')
  subdir('po')
- subdir('data')
 +subdir('extensions')
  
  if get_option('tests') and have_x11_client

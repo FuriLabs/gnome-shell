@@ -94,10 +94,10 @@ index 0000000..ee8b3a2
 +  </schema>
 +</schemalist>
 diff --git a/data/meson.build b/data/meson.build
-index d483087..90b2df7 100644
+index cc7b5e2..fcf1f34 100644
 --- a/data/meson.build
 +++ b/data/meson.build
-@@ -108,6 +108,12 @@ schema = configure_file(
+@@ -109,6 +109,12 @@ schema = configure_file(
    configuration: schemaconf,
    install_dir: schemadir
  )
@@ -110,15 +110,15 @@ index d483087..90b2df7 100644
  install_data('00_org.gnome.shell.gschema.override', install_dir: schemadir)
  
  if have_systemd
-@@ -151,7 +157,7 @@ endif
+@@ -152,7 +158,7 @@ endif
  
  # for unit tests - gnome.compile_schemas() only looks in srcdir
- custom_target('compile-schemas',
+ compiled_schemas = custom_target('compile-schemas',
 -  input: schema,
 +  input: [schema, schema_ubuntu_login],
    output: 'gschemas.compiled',
    command: [find_program('glib-compile-schemas'), '--strict', data_builddir],
-   build_by_default: true)
+ )
 diff --git a/js/ui/background.js b/js/ui/background.js
 index c320300..0454c64 100644
 --- a/js/ui/background.js

@@ -1,5 +1,8 @@
 build-Depend-on-gjs-1.85.90.patch
 build-Depend-on-GLib-2.86.0.patch
+build-Handle-data-as-first-subdir.patch
+build-Define-test-dependencies.patch
+extensions-app-Add-test-dependency-on-generated-desktop-f.patch
 brightnessManager-Handle-absence-of-brightness-control-in.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
 debian/data-Add-im-config.desktop-to-System-folder.patch

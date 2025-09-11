@@ -35,7 +35,7 @@ index 1484e98..f9183f1 100644
 +  border-width: 1em;
 +}
 diff --git a/meson.build b/meson.build
-index 6aa77e6..30cc6fb 100644
+index 928c7f9..5c5d659 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -31,6 +31,7 @@ systemd_req = '>= 246'
@@ -55,7 +55,7 @@ index 6aa77e6..30cc6fb 100644
  have_fonts = mutter_dep.get_variable('have_fonts') == 'true'
  have_x11 = mutter_dep.get_variable('have_x11') == 'true'
 diff --git a/src/meson.build b/src/meson.build
-index b729ec0..4652e6f 100644
+index a4ce889..f7d9bff 100644
 --- a/src/meson.build
 +++ b/src/meson.build
 @@ -75,6 +75,7 @@ gnome_shell_deps = [
