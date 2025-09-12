@@ -64,8 +64,8 @@ function ssidToLabel(ssid) {
 }
 
 function launchSettingsPanel(panel, ...args) {
-    const param = new GLib.Variant('(sav)',
-        [panel, args.map(s => new GLib.Variant('s', s))]);
+    const param = new GLib.Variant('av',
+        [new GLib.Variant('(sav)', [panel, args.map(s => new GLib.Variant('s', s))])]);
 
     const app = Shell.AppSystem.get_default()
         .lookup_app('org.gnome.Settings.desktop');
@@ -1135,6 +1135,7 @@ const NMWirelessDeviceItem = GObject.registerClass({
 
         switch (this.state) {
         case NM.ActiveConnectionState.ACTIVATING:
+        case NM.ActiveConnectionState.DEACTIVATING:
             return 'network-wireless-acquiring-symbolic';
 
         case NM.ActiveConnectionState.ACTIVATED: {
@@ -1148,7 +1149,7 @@ const NMWirelessDeviceItem = GObject.registerClass({
                 if (this._device.mode !== NM80211Mode.ADHOC)
                     console.info('An active wireless connection, in infrastructure mode, involves no access point?');
 
-                return 'network-wireless-connected-symbolic';
+                return 'network-wireless-offline-symbolic';
             }
 
             const {strength} = this._activeAccessPoint;
@@ -1542,6 +1543,7 @@ class NMVpnToggle extends NMToggle {
         super();
 
         this.menu.setHeader('network-vpn-symbolic', _('VPN'));
+        this.menuButtonAccessibleName = _('Open VPN menu');
         this.menu.addSettingsAction(_('VPN Settings'),
             'gnome-network-panel.desktop');
     }
@@ -1803,6 +1805,7 @@ class NMWirelessToggle extends NMDeviceToggle {
         });
 
         this.menu.setHeader('network-wireless-symbolic', _('Wi–Fi'));
+        this.menuButtonAccessibleName = _('Open Wi–Fi menu');
         this.menu.addHeaderSuffix(this._scanningSpinner);
         this.menu.addSettingsAction(_('All Networks'),
             'gnome-wifi-panel.desktop');
@@ -1902,6 +1905,7 @@ class NMWiredToggle extends NMDeviceToggle {
         super(NM.DeviceType.ETHERNET);
 
         this.menu.setHeader('network-wired-symbolic', _('Wired Connections'));
+        this.menuButtonAccessibleName = _('Open wired connections menu');
         this.menu.addSettingsAction(_('Wired Settings'),
             'gnome-network-panel.desktop');
     }
@@ -1917,6 +1921,7 @@ class NMBluetoothToggle extends NMDeviceToggle {
         super(NM.DeviceType.BT);
 
         this.menu.setHeader('network-cellular-symbolic', _('Bluetooth Tethers'));
+        this.menuButtonAccessibleName = _('Open Bluetooth tethers menu');
         this.menu.addSettingsAction(_('Bluetooth Settings'),
             'gnome-network-panel.desktop');
     }
@@ -1937,6 +1942,7 @@ class NMModemToggle extends NMDeviceToggle {
         super(NM.DeviceType.MODEM);
 
         this.menu.setHeader('network-cellular-symbolic', _('Mobile Connections'));
+        this.menuButtonAccessibleName = _('Open mobile connections menu');
 
         const settingsLabel = _('Mobile Broadband Settings');
         this._wwanSettings = this.menu.addSettingsAction(settingsLabel,

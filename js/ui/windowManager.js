@@ -16,7 +16,6 @@ import * as InhibitShortcutsDialog from './inhibitShortcutsDialog.js';
 import * as ModalDialog from './modalDialog.js';
 import * as WindowMenu from './windowMenu.js';
 import * as PadOsd from './padOsd.js';
-import * as EdgeDragAction from './edgeDragAction.js';
 import * as CloseDialog from './closeDialog.js';
 import * as SwitchMonitor from './switchMonitor.js';
 import * as IBusManager from '../misc/ibusManager.js';
@@ -149,7 +148,7 @@ class WindowDimmer extends Clutter.BrightnessContrastEffect {
         });
 
         this.actor.ease_property(`@effects.${this.name}.brightness`, color, {
-            mode: Clutter.AnimationMode.LINEAR,
+            mode: Clutter.AnimationMode.EASE_OUT_QUAD,
             duration: (dimmed ? DIM_TIME : UNDIM_TIME) * (animate ? 1 : 0),
             onStopped: () => this._syncEnabled(dimmed),
         });
@@ -911,9 +910,15 @@ export class WindowManager {
         if (Main.sessionMode.hasWorkspaces)
             this._workspaceTracker = new WorkspaceTracker(this);
 
-        let mode = Shell.ActionMode.NORMAL;
-        let topDragAction = new EdgeDragAction.EdgeDragAction(St.Side.TOP, mode);
-        topDragAction.connect('activated',  () => {
+        const allowedModes = Shell.ActionMode.NORMAL;
+        const topDragGesture = new Shell.EdgeDragGesture({
+            name: 'Window unfullscreen top drag',
+            side: St.Side.TOP,
+        });
+        topDragGesture.connect('may-recognize', () => {
+            return allowedModes & Main.actionMode;
+        });
+        topDragGesture.connect('end', () => {
             let currentWindow = global.display.focus_window;
             if (currentWindow)
                 currentWindow.unmake_fullscreen();
@@ -921,14 +926,14 @@ export class WindowManager {
 
         let updateUnfullscreenGesture = () => {
             let currentWindow = global.display.focus_window;
-            topDragAction.enabled = currentWindow && currentWindow.is_fullscreen();
+            topDragGesture.enabled = currentWindow && currentWindow.is_fullscreen();
         };
 
         global.display.connect('notify::focus-window', updateUnfullscreenGesture);
         global.display.connect('in-fullscreen-changed', updateUnfullscreenGesture);
         updateUnfullscreenGesture();
 
-        global.stage.add_action_full('unfullscreen', Clutter.EventPhase.CAPTURE, topDragAction);
+        global.stage.add_action(topDragGesture);
 
         this._workspaceAnimation =
             new WorkspaceAnimation.WorkspaceAnimationController();
