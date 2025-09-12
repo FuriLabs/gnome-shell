@@ -1,0 +1,42 @@
+From: Mitchell Augustin <mitchell.augustin@canonical.com>
+Date: Fri, 12 Sep 2025 09:04:33 -0500
+Subject: status/network: Fix VPN toggle not working when clicking the switch
+
+VPN activation is triggered by clicking/touching the item, however,
+the switch is reactive and blocks clicking/touching event so item won't
+be activated. Manually activate item when switch is toggled to fix that.
+
+
+Author: Alynx Zhou <alynx.zhou@gmail.com>
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2106813
+Origin: upstream, https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/7b259a67d75b579d95505edbfec11951ff3d52a6
+Last-Update: 2025-09-12
+
+Closes https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/8204
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3711>
+---
+ js/ui/status/network.js | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/js/ui/status/network.js b/js/ui/status/network.js
+index a143beb..df91c9f 100644
+--- a/js/ui/status/network.js
++++ b/js/ui/status/network.js
+@@ -1324,6 +1324,16 @@ const NMVpnConnectionItem = GObject.registerClass({
+         this.bind_property('is-active',
+             this._switch, 'state',
+             GObject.BindingFlags.SYNC_CREATE);
++
++        // Switch handle is reactive, so events don't propagate to the item;
++        // activate it manually in that case
++        this._switch.connect('notify::state', () => {
++            if (this.is_active === this._switch.state)
++                return;
++
++            this.activate();
++        });
++
+         this.bind_property('name',
+             this._label, 'text',
+             GObject.BindingFlags.SYNC_CREATE);

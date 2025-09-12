@@ -72,3 +72,4 @@ status-network-Fix-quicksettings-enterprise-connections.patch
 magnifier-Fix-delayed-variables-checking.patch
 status-network-Update-Wi-Fi-quicksettings-icon-on-disconn.patch
 st-private-Fix-texture-leak-when-creating-shadow-from-actor
+status-network-Fix-VPN-toggle-not-working-when-clicking-the-switch
