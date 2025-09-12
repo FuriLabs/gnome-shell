@@ -9,4 +9,5 @@ Classes: desktop
 # to generate few tools first.
 Depends: @builddeps@,
          gnome-shell,
+         gnome-shell-ubuntu-extensions,
 Restrictions: allow-stderr skippable
