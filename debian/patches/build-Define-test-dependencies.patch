@@ -52,10 +52,10 @@ index d483087..cc7b5e2 100644
 -  build_by_default: true)
 +)
 diff --git a/src/meson.build b/src/meson.build
-index 3e83f29..aea6a1f 100644
+index b729ec0..a4ce889 100644
 --- a/src/meson.build
 +++ b/src/meson.build
-@@ -279,7 +279,7 @@ libshell_gir = gnome.generate_gir(libshell,
+@@ -282,7 +282,7 @@ libshell_gir = gnome.generate_gir(libshell,
    kwargs: introspection_common,
  )
  
@@ -64,7 +64,7 @@ index 3e83f29..aea6a1f 100644
    c_args: gnome_shell_cflags + typelib_cflags,
    dependencies: gnome_shell_deps + [libshell_dep, libst_dep, mutter_dep],
    include_directories: [conf_inc],
-@@ -299,7 +299,7 @@ if have_portal_helper
+@@ -302,7 +302,7 @@ if have_portal_helper
    )
  endif
  
@@ -74,10 +74,10 @@ index 3e83f29..aea6a1f 100644
    include_directories: [conf_inc],
    install_dir: libexecdir,
 diff --git a/src/st/meson.build b/src/st/meson.build
-index 5279455..22be0e0 100644
+index 5fb742b..693a143 100644
 --- a/src/st/meson.build
 +++ b/src/st/meson.build
-@@ -223,6 +223,7 @@ if get_option('tests') and have_x11_client
+@@ -225,6 +225,7 @@ if get_option('tests') and have_x11_client
  
    test('css-styling', test_theme,
      suite: 'st',
