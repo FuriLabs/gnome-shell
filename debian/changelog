@@ -1,15 +1,22 @@
-gnome-shell (49~beta.1-1) UNRELEASED; urgency=medium
+gnome-shell (49~rc-1) UNRELEASED; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
   * New upstream release
   * d/watch: Watch for alpha too
-  * d/p: Refresh patches
-  * d/control: Bump build dependencies
+  * debian/control: Bump build dependencies
+  * d/patches:
+    - Add patches to fix tests compilation dependencies
+    - Drop patches applied upstream
+  * d/control: Add a Breaks on older gnome session
+  * debian/tests:
+    - Add autopkgtests for GNOME Shell
+    - Run tests on the installed gnome-shell.
+      Run the autopkgtests running the upstream-provided test scripts using
+      the gnome-shell in the archive installed as it is.
+      When in ubuntu, we are also using the ubuntu profile.
+  * debian/salsa-ci: Enable i386 autopkg-tests
 
-  [ Simon McVittie ]
-  * Revert "d/gbp.conf: Use debian/forky branch for uploads targeting forky"
-
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 12 Aug 2025 03:36:29 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 12 Sep 2025 17:14:08 +0200
 
 gnome-shell (48.4-1) unstable; urgency=medium
 
