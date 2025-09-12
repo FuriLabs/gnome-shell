@@ -1,4 +1,4 @@
-gnome-shell (49~rc-0ubuntu2) UNRELEASED; urgency=medium
+gnome-shell (49~rc-0ubuntu2) questing; urgency=medium
 
   * debian/patch: Add fix for brightness manager handle globalScale
   * debian/control: Require glib 2.86.0 as build dependency
@@ -23,7 +23,7 @@ gnome-shell (49~rc-0ubuntu2) UNRELEASED; urgency=medium
   * d/p/prompting-extension: Improve error if snap application PID has not
     been found
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 12 Sep 2025 18:28:44 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 12 Sep 2025 18:34:30 +0200
 
 gnome-shell (49~rc-0ubuntu1) questing; urgency=medium
 
