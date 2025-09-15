@@ -2,15 +2,6 @@ build-Handle-data-as-first-subdir.patch
 build-Define-test-dependencies.patch
 extensions-app-Add-test-dependency-on-generated-desktop-f.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
-tray-icons/build-Add-explicit-dependency-on-Xfixes.patch
-tray-icons/tray-na-xembed-Use-XShape-to-remove-input-on-socket-windo.patch
-tray-icons/shell-tray-icon-Use-available-space-when-that-s-defined.patch
-tray-icons/shell-tray-Ensure-that-only-a-child-can-be-added.patch
-tray-icons/shell-tray-icon-Trigger-a-relayout-when-the-underneath-xe.patch
-tray-icons/tray-Zero-initialize-the-event-structures-on-initializati.patch
-tray-icons/tray-na-xembed-Use-proper-indentation-style-header.patch
-tray-icons/tray-na-xembed-Destroy-socket-window-when-ending-the-embe.patch
-tray-icons/tray-na-tray-manager-Remove-outdated-comment-and-return-v.patch
 shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
 st-theme-node-Forget-properties-cache-on-stylesheet-chang.patch
 debian/data-Add-im-config.desktop-to-System-folder.patch
