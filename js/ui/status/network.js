@@ -64,8 +64,8 @@ function ssidToLabel(ssid) {
 }
 
 function launchSettingsPanel(panel, ...args) {
-    const param = new GLib.Variant('(sav)',
-        [panel, args.map(s => new GLib.Variant('s', s))]);
+    const param = new GLib.Variant('av',
+        [new GLib.Variant('(sav)', [panel, args.map(s => new GLib.Variant('s', s))])]);
 
     const app = Shell.AppSystem.get_default()
         .lookup_app('org.gnome.Settings.desktop');
@@ -2015,7 +2015,7 @@ class CaptivePortalHandler extends Signals.EventEmitter {
         Main.panel.closeCalendar();
     }
 
-    _portalHelperDone(parameters) {
+    _portalHelperStatusChanged(parameters) {
         const [path, result] = parameters;
 
         if (result === PortalHelperResult.CANCELLED) {
@@ -2041,9 +2041,9 @@ class CaptivePortalHandler extends Signals.EventEmitter {
                 g_interface_name: PortalHelperInfo.name,
                 g_interface_info: PortalHelperInfo,
             });
-            this._portalHelperProxy.connectSignal('Done',
+            this._portalHelperProxy.connectSignal('StatusChanged',
                 (proxy, emitter, params) => {
-                    this._portalHelperDone(params);
+                    this._portalHelperStatusChanged(params);
                 });
 
             try {
@@ -2209,6 +2209,9 @@ class Indicator extends SystemIndicator {
             return;
         }
 
+        if (Main.sessionMode.isGreeter)
+            return;
+
         let isPortal = this._client.connectivity === NM.ConnectivityState.PORTAL;
         // For testing, allow interpreting any value != FULL as PORTAL, because
         // LIMITED (no upstream route after the default gateway) is easy to obtain
@@ -2217,12 +2220,14 @@ class Indicator extends SystemIndicator {
         // (but in general we should only prompt a portal if we know there is a portal)
         if (GLib.getenv('GNOME_SHELL_CONNECTIVITY_TEST') != null)
             isPortal ||= this._client.connectivity < NM.ConnectivityState.FULL;
-        if (!isPortal || Main.sessionMode.isGreeter)
-            return;
 
-        this._portalHandler.addConnection(
-            this._mainConnection.get_id(),
-            this._mainConnection.get_path());
+        if (isPortal) {
+            this._portalHandler.addConnection(
+                this._mainConnection.get_id(),
+                this._mainConnection.get_path());
+        } else {
+            this._portalHandler.clear();
+        }
     }
 
     _updateIcon() {
