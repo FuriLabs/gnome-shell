@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '48.4',
+  version: '48.5',
   meson_version: '>= 1.3.0',
   license: 'GPL-2.0-or-later',
 )
@@ -93,6 +93,8 @@ have_x11 = mutter_dep.get_variable('have_x11') == 'true'
 have_x11_client = mutter_dep.get_variable('have_x11_client') == 'true'
 if have_x11_client or have_x11
   x11_dep = dependency('x11')
+  xext_dep = dependency('xext')
+  xfixes_dep = dependency('xfixes')
 endif
 
 if not have_fonts
@@ -316,10 +318,10 @@ endif
 
 po_dir = join_paths(meson.current_source_dir(), 'po')
 
+subdir('data')
 subdir('js')
 subdir('src')
 subdir('po')
-subdir('data')
 
 if get_option('tests') and have_x11_client
   subdir('tests')
