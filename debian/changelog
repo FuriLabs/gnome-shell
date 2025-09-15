@@ -1,3 +1,9 @@
+gnome-shell (48.5-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 15 Sep 2025 18:31:50 -0400
+
 gnome-shell (48.4-1) unstable; urgency=medium
 
   * Team upload
