@@ -1,4 +1,4 @@
-gnome-shell (49~rc-1) UNRELEASED; urgency=medium
+gnome-shell (49.0-1) UNRELEASED; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
   * New upstream release
@@ -16,7 +16,7 @@ gnome-shell (49~rc-1) UNRELEASED; urgency=medium
       When in ubuntu, we are also using the ubuntu profile.
   * debian/salsa-ci: Enable i386 autopkg-tests
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 12 Sep 2025 17:14:08 +0200
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 16 Sep 2025 20:15:24 -0400
 
 gnome-shell (48.4-1) unstable; urgency=medium
 
