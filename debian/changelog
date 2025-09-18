@@ -17,6 +17,19 @@ gnome-shell (49.0-1) experimental; urgency=medium
 
  -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 16 Sep 2025 20:49:15 -0400
 
+gnome-shell (48.5-2) unstable; urgency=medium
+
+  * Team upload
+  * Generate a versioned dependency for the GLib 2.86 transition.
+    GNOME Shell will need to be rebuilt after GLib 2.86 is uploaded to
+    unstable, so that its typelibs declare a dependency on GioUnix,
+    which they do not when built against older GLib. Generate a
+    versioned dependency so that this can be done via either a binNMU
+    or a sourceful upload.
+  * d/rules: Use a more robust xvfb-run command-line (Mitigates: #981201)
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 18 Sep 2025 17:32:19 +0100
+
 gnome-shell (48.5-1) unstable; urgency=medium
 
   * New upstream release
