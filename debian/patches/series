@@ -1,3 +1,4 @@
+slider-Use-the-sprite-of-the-touch-event-not-the-pointer.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
 shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
 debian/data-Add-im-config.desktop-to-System-folder.patch
