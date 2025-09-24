@@ -1,4 +1,4 @@
-gnome-shell (49.0-1ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (49.0-1ubuntu1) questing; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
   * debian/patches: Drop applied upstream
@@ -11,7 +11,7 @@ gnome-shell (49.0-1ubuntu1) UNRELEASED; urgency=medium
     sliders (volume, brightness) on a touchscreen (LP: #2125013)
   * d/rules: Use a more robust xvfb-run command-line in tests
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 24 Sep 2025 18:11:02 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 24 Sep 2025 18:23:55 +0200
 
 gnome-shell (49.0-1) experimental; urgency=medium
 
