@@ -1,6 +1,6 @@
 debian/Revert-tests-Fail-on-warnings-too.patch
-shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
 debian/data-Add-im-config.desktop-to-System-folder.patch
+shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
 ubuntu/desktop_detect.patch
 ubuntu/lightdm-user-switching.patch
 ubuntu/lock_on_suspend.patch

@@ -67,10 +67,10 @@ index 0000000..6f9cc62
 +  </schema>
 +</schemalist>
 diff --git a/js/ui/main.js b/js/ui/main.js
-index da95f13..5bc5c20 100644
+index de9b716..d3ec8a1 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
-@@ -183,6 +183,7 @@ export async function start() {
+@@ -184,6 +184,7 @@ export async function start() {
  
      St.Settings.get().connect('notify::high-contrast', _loadDefaultStylesheet);
      St.Settings.get().connect('notify::color-scheme', _loadDefaultStylesheet);
@@ -78,7 +78,7 @@ index da95f13..5bc5c20 100644
  
      // Initialize ParentalControlsManager before the UI
      ParentalControlsManager.getDefault();
-@@ -462,7 +463,19 @@ function _getStylesheet(name) {
+@@ -463,7 +464,19 @@ function _getStylesheet(name) {
  
  /** @returns {string} */
  export function getStyleVariant() {
@@ -99,7 +99,7 @@ index da95f13..5bc5c20 100644
      switch (sessionMode.colorScheme) {
      case 'force-dark':
          return 'dark';
-@@ -479,6 +492,29 @@ export function getStyleVariant() {
+@@ -480,6 +493,29 @@ export function getStyleVariant() {
      }
  }
  

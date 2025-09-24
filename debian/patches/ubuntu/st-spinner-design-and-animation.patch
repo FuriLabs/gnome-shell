@@ -6,14 +6,12 @@ Subject: Align StSpinnerContent Design and Animation to
 Forwarded: no, ubuntu only.
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/2114899
 Last-Update: 2025-06-28
-
-Last-Update: 2025-06-28
 ---
  src/st/st-spinner-content.c | 138 +++++++++++++++++++++++++++++++++++++++++++-
  1 file changed, 137 insertions(+), 1 deletion(-)
 
 diff --git a/src/st/st-spinner-content.c b/src/st/st-spinner-content.c
-index 76fe3f2..1c2883d 100644
+index 925667c..ae4ef76 100644
 --- a/src/st/st-spinner-content.c
 +++ b/src/st/st-spinner-content.c
 @@ -20,7 +20,9 @@
@@ -106,7 +104,7 @@ index 76fe3f2..1c2883d 100644
 +          clutter_timeline_set_duration (spinner->timeline, YARU_SPIN_DURATION_MS);
 +        }
 +
-       g_signal_connect (spinner->timeline, "new-frame", G_CALLBACK (new_frame_cb), spinner);
+       g_signal_connect_object (spinner->timeline, "new-frame", G_CALLBACK (new_frame_cb), spinner, 0);
  
        if (clutter_actor_is_mapped (actor))
 @@ -315,6 +369,85 @@ st_spinner_content_draw_spinner (StSpinnerContent *spinner,

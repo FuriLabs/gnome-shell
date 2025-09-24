@@ -54,10 +54,10 @@ index 9502340..8141bc0 100644
    </interface>
  </node>
 diff --git a/js/ui/remoteSearch.js b/js/ui/remoteSearch.js
-index dbd0494..60c8255 100644
+index b7247ca..f20c876 100644
 --- a/js/ui/remoteSearch.js
 +++ b/js/ui/remoteSearch.js
-@@ -27,6 +27,7 @@ const SearchProviderIface = `
+@@ -28,6 +28,7 @@ const SearchProviderIface = `
  <method name="ActivateResult">
      <arg type="s" direction="in" />
  </method>
@@ -65,7 +65,7 @@ index dbd0494..60c8255 100644
  </interface>
  </node>`;
  
-@@ -55,6 +56,7 @@ const SearchProvider2Iface = `
+@@ -56,6 +57,7 @@ const SearchProvider2Iface = `
      <arg type="as" direction="in" />
      <arg type="u" direction="in" />
  </method>
@@ -73,7 +73,7 @@ index dbd0494..60c8255 100644
  </interface>
  </node>`;
  
-@@ -305,6 +307,16 @@ class RemoteSearchProvider {
+@@ -306,6 +308,16 @@ class RemoteSearchProvider {
          return resultMetas;
      }
  
@@ -91,7 +91,7 @@ index dbd0494..60c8255 100644
          this.proxy.ActivateResultAsync(id).catch(logError);
      }
 diff --git a/js/ui/search.js b/js/ui/search.js
-index 8ac9288..a791691 100644
+index d7f1df3..1c1a936 100644
 --- a/js/ui/search.js
 +++ b/js/ui/search.js
 @@ -227,7 +227,9 @@ const SearchResultsBase = GObject.registerClass({
@@ -104,7 +104,7 @@ index 8ac9288..a791691 100644
  
          if (this._cancellable.is_cancelled()) {
              if (metas.length > 0)
-@@ -625,6 +627,10 @@ export const SearchResultsView = GObject.registerClass({
+@@ -630,6 +632,10 @@ export const SearchResultsView = GObject.registerClass({
  
          this._searchTimeoutId = 0;
          this._cancellable = new Gio.Cancellable();
@@ -115,7 +115,7 @@ index 8ac9288..a791691 100644
  
          this._registerProvider(new AppDisplay.AppSearchProvider());
  
-@@ -673,11 +679,31 @@ export const SearchResultsView = GObject.registerClass({
+@@ -678,11 +684,31 @@ export const SearchResultsView = GObject.registerClass({
          }
      }
  
@@ -147,7 +147,7 @@ index 8ac9288..a791691 100644
          this._defaultResult = null;
          this._startingSearch = false;
  
-@@ -749,6 +775,13 @@ export const SearchResultsView = GObject.registerClass({
+@@ -754,6 +780,13 @@ export const SearchResultsView = GObject.registerClass({
          if (this._terms.length > 0)
              isSubSearch = searchString.indexOf(previousSearchString) === 0;
  
