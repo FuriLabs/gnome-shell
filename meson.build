@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '49.rc',
+  version: '49.0',
   meson_version: '>= 1.3.0',
   license: 'GPL-2.0-or-later',
 )
@@ -21,10 +21,10 @@ libmutter_test_pc = 'libmutter-test-' + mutter_api_version
 ecal_req = '>= 3.33.1'
 eds_req = '>= 3.33.1'
 gcr_req = '>= 3.90.0'
-gio_req = '>= 2.85.1'
-gjs_req = '>= 1.85.1'
+gio_req = '>= 2.86.0'
+gjs_req = '>= 1.85.90'
 gtk_req = '>= 4.0'
-mutter_req = '>= 49.rc'
+mutter_req = '>= 49.0'
 polkit_req = '>= 0.100'
 schemas_req = '>= 49.alpha'
 systemd_req = '>= 246'
@@ -313,10 +313,10 @@ endif
 
 po_dir = join_paths(meson.current_source_dir(), 'po')
 
+subdir('data')
 subdir('js')
 subdir('src')
 subdir('po')
-subdir('data')
 
 if get_option('tests') and have_x11_client
   subdir('tests')

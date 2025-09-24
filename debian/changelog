@@ -1,3 +1,22 @@
+gnome-shell (49.0-1) experimental; urgency=medium
+
+  [ Jeremy Bícha ]
+  * New upstream release
+  * Bump minimum glib and mutter
+
+  [ Marco Trevisan (Treviño) ]
+  * debian/control: Bump build dependencies
+  * d/control: Add a Breaks on older gnome session
+  * debian/tests:
+    - Add autopkgtests for GNOME Shell
+    - Run tests on the installed gnome-shell.
+      Run the autopkgtests running the upstream-provided test scripts using
+      the gnome-shell in the archive installed as it is.
+      When in ubuntu, we are also using the ubuntu profile.
+  * debian/salsa-ci: Enable i386 autopkg-tests
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Tue, 16 Sep 2025 20:49:15 -0400
+
 gnome-shell (49~rc-0ubuntu2) questing; urgency=medium
 
   * debian/patch: Add fix for brightness manager handle globalScale
@@ -148,6 +167,7 @@ gnome-shell (49~alpha.1-0ubuntu2) questing; urgency=medium
 
  -- Alessandro Astone <alessandro.astone@canonical.com>  Mon, 04 Aug 2025 16:02:00 +0200
 
+<<<<<<<
 gnome-shell (49~alpha.1-0ubuntu1) questing; urgency=medium
 
   * Merge with debian, containing a new upstream release
@@ -160,6 +180,17 @@ gnome-shell (49~alpha.1-0ubuntu1) questing; urgency=medium
   * d/p: Cleanup the yaru spinner patch
 
  -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 11 Jul 2025 06:16:31 +0200
+
+=======
+>>>>>>>
+gnome-shell (48.5-1) unstable; urgency=medium
+
+  * New upstream release
+  * debian/gnome-shell.gsettings-override: update Yelp to org.gnome.Yelp
+  * Remove tray-icons patches applied in new release
+  * Remove st-theme-node patch: alternative fix applied in new release
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Mon, 15 Sep 2025 18:41:10 -0400
 
 gnome-shell (48.2-3) unstable; urgency=medium
 
