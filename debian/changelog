@@ -1,3 +1,18 @@
+gnome-shell (49.0-1ubuntu1) UNRELEASED; urgency=medium
+
+  [ Marco Trevisan (Treviño) ]
+  * debian/patches: Drop applied upstream
+  * debian/patches: Refresh
+  * d/tests/control: Use a more robust xvfb-run command-line
+
+  [ Simon McVittie ]
+  * d/p/slider-Use-the-sprite-of-the-touch-event-not-the-pointer.patch:
+    Add patch from upstream to fix a UI freeze when touching quick menu
+    sliders (volume, brightness) on a touchscreen (LP: #2125013)
+  * d/rules: Use a more robust xvfb-run command-line in tests
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Wed, 24 Sep 2025 18:11:02 +0200
+
 gnome-shell (49.0-1) experimental; urgency=medium
 
   [ Jeremy Bícha ]
