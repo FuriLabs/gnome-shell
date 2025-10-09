@@ -1,3 +1,15 @@
+gnome-shell (48.0-1ubuntu1.3) plucky; urgency=medium
+
+  [ Mitchell Augustin ]
+  * Update Wi-Fi icons between disconnect and adapter deactivation
+    (LP: #2120734)
+  * st/private: Fix texture leak when creating shadow from actor
+    (LP: #2121786)
+  * status/network: Fix VPN toggle not working when clicking the switch
+    (LP: #2106813)
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Thu, 09 Oct 2025 11:25:04 +0800
+
 gnome-shell (48.0-1ubuntu1.2) plucky; urgency=medium
 
   [ Mitchell Augustin ]
