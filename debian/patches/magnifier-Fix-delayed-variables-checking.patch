@@ -1,0 +1,29 @@
+From: Jerome Brenier <j.brenier@ik.me>
+Date: Thu, 10 Apr 2025 20:04:22 +0200
+Subject: magnifier : Fix delayed variables checking
+
+A type-safe comparision against null can be incorrectly positive with never initialized
+variables (undefined).
+As spotted in https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3688#note_2407551,
+allowing for type coercion avoids this situation.
+
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7854
+Bug-Ubuntu: https://launchpad.net/bugs/1991001
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3688
+---
+ js/ui/magnifier.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/magnifier.js b/js/ui/magnifier.js
+index b2e3b37..1ab8cd3 100644
+--- a/js/ui/magnifier.js
++++ b/js/ui/magnifier.js
+@@ -1339,7 +1339,7 @@ class ZoomRegion {
+         this._clearScrollContentsTimer();
+         this._scrollContentsTimerId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, POINTER_REST_TIME, () => {
+             this._followingCursor = false;
+-            if (this._xDelayed !== null && this._yDelayed !== null) {
++            if (this._xDelayed != null && this._yDelayed != null) {
+                 this._scrollContentsToDelayed(this._xDelayed, this._yDelayed);
+                 this._xDelayed = null;
+                 this._yDelayed = null;
