@@ -1,3 +1,11 @@
+gnome-shell (48.5-3) unstable; urgency=medium
+
+  * Team upload
+  * Revert "Generate a versioned dependency for the GLib 2.86 transition"
+  * Bump glib2.0 dependency to 2.86 unconditionally (part of #1115340)
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 13 Oct 2025 15:22:55 +0100
+
 gnome-shell (48.5-2) unstable; urgency=medium
 
   * Team upload
