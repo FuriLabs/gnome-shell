@@ -111,7 +111,6 @@ Depends: gir1.2-accountsservice-1.0,
          python3,
          tecla,
          ${gir:Depends},
-         ${local:Depends},
          ${misc:Depends},
          ${shlibs:Depends}
 Recommends: bolt,

@@ -69,9 +69,3 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 endif
 
 override_dh_gnome_clean:
-
-debian/local.substvars:
-	dpkg-architecture -c debian/extra-substvars.sh > $@
-
-override_dh_gencontrol: debian/local.substvars
-	dh_gencontrol -- -Tdebian/local.substvars
