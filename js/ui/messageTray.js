@@ -1077,6 +1077,7 @@ export const MessageTray = GObject.registerClass({
         } else if (this._notificationState === State.SHOWING ||
                    this._notificationState === State.SHOWN) {
             let expired = (this._userActiveWhileNotificationShown &&
+                           this._notificationState === State.SHOWN &&
                            this._notificationTimeoutId === 0 &&
                            this._notification.urgency !== Urgency.CRITICAL &&
                            !this._pointerInNotification) || this._notificationExpired;
@@ -1175,10 +1176,15 @@ export const MessageTray = GObject.registerClass({
         this._bannerBin.ease({
             opacity: 255,
             duration: ANIMATION_TIME,
-            mode: Clutter.AnimationMode.LINEAR,
+            mode: Clutter.AnimationMode.EASE_OUT_QUAD,
         });
+        this._bannerBin.set_pivot_point(0.5, 0.5);
+        this._bannerBin.scale_x = 0.9;
+        this._bannerBin.scale_y = 0.9;
         this._bannerBin.ease({
             y: 0,
+            scale_x: 1,
+            scale_y: 1,
             duration: ANIMATION_TIME,
             mode: Clutter.AnimationMode.EASE_OUT_BACK,
             onComplete: () => {
@@ -1250,7 +1256,7 @@ export const MessageTray = GObject.registerClass({
             y: -this._bannerBin.height,
             duration,
             mode: Clutter.AnimationMode.EASE_OUT_BACK,
-            onComplete: () => {
+            onStopped: () => {
                 this._notificationState = State.HIDDEN;
                 this._hideNotificationCompleted();
                 this._updateState();

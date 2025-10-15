@@ -455,7 +455,8 @@ export const TimeLimitsManager = GObject.registerClass({
         }
     }
 
-    _addTransition(oldState, newState, wallTimeSecs, recalculateState = true) {
+    _addTransition(oldState, newState, wallTimeSecs,
+        {recalculateState = true, debugLog = true} = {}) {
         this._stateTransitions.push({
             oldState,
             newState,
@@ -464,8 +465,10 @@ export const TimeLimitsManager = GObject.registerClass({
 
         this._userState = newState;
 
-        console.debug('TimeLimitsManager: User state changed from ' +
-            `${userStateToString(oldState)} to ${userStateToString(newState)} at ${wallTimeSecs}s`);
+        if (debugLog) {
+            console.debug('TimeLimitsManager: User state changed from ' +
+                `${userStateToString(oldState)} to ${userStateToString(newState)} at ${wallTimeSecs}s`);
+        }
 
         // This potentially changed the limit time and timeout calculations.
         if (recalculateState && this._state !== TimeLimitsState.DISABLED) {
@@ -542,10 +545,14 @@ export const TimeLimitsManager = GObject.registerClass({
             this._addTransition(
                 entry['oldState'],
                 entry['newState'],
-                entry['wallTimeSecs'],
-                i === history.length - 1);
+                entry['wallTimeSecs'], {
+                    recalculateState: i === history.length - 1,
+                    debugLog: false,
+                });
             previousWallTimeSecs = entry['wallTimeSecs'];
         }
+
+        console.debug(`TimeLimitsManager: Loaded ${history.length} transitions from history`);
 
         this.thaw_notify();
     }
@@ -629,8 +636,9 @@ export const TimeLimitsManager = GObject.registerClass({
      * Get the Unix timestamp (in real seconds since the epoch) for the start of
      * today and the start of tomorrow.
      *
-     * To avoid problems due to 24:00-01:00 not existing on leap days,
-     * arbitrarily say that the day starts at 03:00.
+     * To avoid problems due to 01:00-02:00 not existing (or existing twice) on
+     * daylight savings time transition days, arbitrarily say that the day
+     * starts at 03:00.
      *
      * @param {number} nowSecs ‘Current’ time to calculate from.
      * @returns {number}

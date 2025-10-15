@@ -1,5 +1,6 @@
 import Clutter from 'gi://Clutter';
 import GLib from 'gi://GLib';
+import Atk from 'gi://Atk';
 import GObject from 'gi://GObject';
 import Pango from 'gi://Pango';
 import Shell from 'gi://Shell';
@@ -133,6 +134,7 @@ export const AuthPrompt = GObject.registerClass({
         this._inactiveEntry = null;
         this._userVerifier.destroy();
         this._userVerifier = null;
+        this._entry = null;
     }
 
     on_key_press_event(event) {
@@ -291,15 +293,25 @@ export const AuthPrompt = GObject.registerClass({
     }
 
     _updateEntry(secret) {
+        let newEntry, inactiveEntry;
+
         if (secret && this._entry !== this._passwordEntry) {
-            this._mainBox.replace_child(this._entry, this._passwordEntry);
-            this._entry = this._passwordEntry;
-            this._inactiveEntry = this._textEntry;
+            newEntry = this._passwordEntry;
+            inactiveEntry = this._textEntry;
         } else if (!secret && this._entry !== this._textEntry) {
-            this._mainBox.replace_child(this._entry, this._textEntry);
-            this._entry = this._textEntry;
-            this._inactiveEntry = this._passwordEntry;
+            newEntry = this._textEntry;
+            inactiveEntry = this._passwordEntry;
         }
+
+        if (newEntry) {
+            this._mainBox.replace_child(this._entry, newEntry);
+            this._entry = newEntry;
+            this._inactiveEntry = inactiveEntry;
+
+            const {text, cursorPosition, selectionBound} = inactiveEntry.clutterText;
+            this._entry.clutterText.set({text, cursorPosition, selectionBound});
+        }
+
         this._capsLockWarningLabel.visible = secret;
     }
 
@@ -490,6 +502,7 @@ export const AuthPrompt = GObject.registerClass({
 
     clear() {
         this._entry.text = '';
+        this._inactiveEntry.text = '';
         this.stopSpinning();
         this._authList.clear();
         this._authList.hide();
@@ -507,13 +520,13 @@ export const AuthPrompt = GObject.registerClass({
         this._authList.set({
             opacity: 0,
             visible: true,
-            reactive: false,
         });
+        this.updateSensitivity(false);
         this._authList.ease({
             opacity: 255,
             duration: MESSAGE_FADE_OUT_ANIMATION_TIME,
             transition: Clutter.AnimationMode.EASE_OUT_QUAD,
-            onComplete: () => (this._authList.reactive = true),
+            onComplete: () => this.updateSensitivity(true),
         });
     }
 
@@ -571,6 +584,7 @@ export const AuthPrompt = GObject.registerClass({
             this._message.remove_all_transitions();
             this._message.text = message;
             this._message.opacity = 255;
+            this.get_accessible().emit('notification', message, Atk.Live.ASSERTIVE);
         } else {
             this._message.opacity = 0;
         }
@@ -579,18 +593,25 @@ export const AuthPrompt = GObject.registerClass({
     }
 
     updateSensitivity(sensitive) {
-        if (this._entry.reactive === sensitive)
+        let authWidget;
+
+        if (this._authList.visible)
+            authWidget = this._authList;
+        else
+            authWidget = this._entry;
+
+        if (authWidget.reactive === sensitive)
             return;
 
-        this._entry.reactive = sensitive;
+        authWidget.reactive = sensitive;
 
         if (sensitive) {
-            this._entry.grab_key_focus();
+            authWidget.grab_key_focus();
         } else {
             this.grab_key_focus();
 
-            if (this._entry === this._passwordEntry)
-                this._entry.password_visible = false;
+            if (authWidget === this._passwordEntry)
+                authWidget.password_visible = false;
         }
     }
 

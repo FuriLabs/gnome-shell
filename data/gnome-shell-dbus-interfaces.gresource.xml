@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/org/gnome/shell/dbus-interfaces">
-    <file preprocess="xml-stripblanks">net.hadess.SensorProxy.xml</file>
     <file preprocess="xml-stripblanks">net.reactivated.Fprint.Device.xml</file>
     <file preprocess="xml-stripblanks">net.reactivated.Fprint.Manager.xml</file>
-    <file preprocess="xml-stripblanks">org.freedesktop.Application.xml</file>
     <file preprocess="xml-stripblanks">org.freedesktop.background.Monitor.xml</file>
     <file preprocess="xml-stripblanks">org.freedesktop.bolt1.Device.xml</file>
     <file preprocess="xml-stripblanks">org.freedesktop.bolt1.Manager.xml</file>
@@ -38,10 +36,9 @@
     <file preprocess="xml-stripblanks">org.gnome.SessionManager.xml</file>
     <file preprocess="xml-stripblanks">org.gnome.SettingsDaemon.Color.xml</file>
     <file preprocess="xml-stripblanks">org.gnome.SettingsDaemon.Power.Keyboard.xml</file>
-    <file preprocess="xml-stripblanks">org.gnome.SettingsDaemon.Power.Screen.xml</file>
     <file preprocess="xml-stripblanks">org.gnome.SettingsDaemon.Rfkill.xml</file>
-    <file preprocess="xml-stripblanks">org.gnome.SettingsDaemon.Wacom.xml</file>
     <file preprocess="xml-stripblanks">org.gnome.Shell.AudioDeviceSelection.xml</file>
+    <file preprocess="xml-stripblanks">org.gnome.Shell.Brightness.xml</file>
     <file preprocess="xml-stripblanks">org.gnome.Shell.CalendarServer.xml</file>
     <file preprocess="xml-stripblanks">org.gnome.Shell.ClocksIntegration.xml</file>
     <file preprocess="xml-stripblanks">org.gnome.Shell.Extensions.xml</file>

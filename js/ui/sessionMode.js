@@ -59,7 +59,7 @@ const _modes = {
         panel: {
             left: [],
             center: ['dateMenu'],
-            right: ['dwellClick', 'a11y', 'keyboard', 'quickSettings'],
+            right: ['dwellClick', 'keyboard', 'quickSettings'],
         },
         panelStyle: 'login-screen',
     },
@@ -130,8 +130,8 @@ function _loadMode(file, info) {
  * Loads external session modes from the system data directories.
  */
 function _loadModes() {
-    for (const {dir, info} of FileUtils.collectFromDatadirs('modes', false))
-        _loadMode(dir, info);
+    for (const {file, info} of FileUtils.collectFromDatadirs('modes', false))
+        _loadMode(file, info);
 }
 
 export function listModes() {

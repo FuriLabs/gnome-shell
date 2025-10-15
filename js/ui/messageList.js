@@ -770,7 +770,7 @@ class NotificationMessage extends Message {
     }
 });
 
-const MediaMessage = GObject.registerClass(
+export const MediaMessage = GObject.registerClass(
 class MediaMessage extends Message {
     constructor(player) {
         super(player.source);
@@ -793,13 +793,24 @@ class MediaMessage extends Message {
                 this._player.next();
             });
 
+        Main.sessionMode.connectObject('updated',
+            () => this._applyPolicy(), this);
         this._player.connectObject('changed', this._update.bind(this), this);
         this._update();
     }
 
     vfunc_clicked() {
+        if (Main.sessionMode.isLocked)
+            return;
+
         this._player.raise();
         Main.panel.closeCalendar();
+    }
+
+    _applyPolicy() {
+        this.visible =
+            this._policy.enable &&
+            (!Main.sessionMode.isLocked || this._policy.showInLockScreen);
     }
 
     _updateNavButton(button, sensitive) {
@@ -829,6 +840,22 @@ class MediaMessage extends Message {
 
         this._updateNavButton(this._prevButton, this._player.canGoPrevious);
         this._updateNavButton(this._nextButton, this._player.canGoNext);
+
+        const appId = this._player.app?.id.replace(/\.desktop$/, '');
+        if (this._policy?.id !== appId) {
+            this._policy?.disconnectObject(this);
+
+            this._policy = MessageTray.NotificationPolicy.newForApp(this._player.app);
+
+            // Register notification source
+            this._policy.store();
+
+            this._policy.connectObject(
+                'notify::enable', () => this._applyPolicy(),
+                'notify::show-in-lock-screen', () => this._applyPolicy(),
+                this);
+            this._applyPolicy();
+        }
     }
 });
 
@@ -853,7 +880,7 @@ export const NotificationMessageGroup = GObject.registerClass({
     },
 }, class NotificationMessageGroup extends St.Widget {
     constructor(source) {
-        const action =  new Clutter.ClickAction();
+        const action =  new Clutter.ClickGesture();
 
         // A widget that covers stacked messages so that they don't receive events
         const cover = new St.Widget({
@@ -909,7 +936,7 @@ export const NotificationMessageGroup = GObject.registerClass({
         });
 
         this._unexpandButton.connect('clicked', () => this.emit('expand-toggle-requested'));
-        action.connect('clicked', () => this.emit('expand-toggle-requested'));
+        action.connect('recognize', () => this.emit('expand-toggle-requested'));
 
         this._headerBox.add_child(this._unexpandButton);
         this.add_child(this._headerBox);

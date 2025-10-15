@@ -380,6 +380,7 @@ export class InputSourceManager extends Signals.EventEmitter {
         this._ibusManager.connect('set-content-type', this._ibusSetContentType.bind(this));
 
         global.display.connect('modifiers-accelerator-activated', this._modifiersSwitcher.bind(this));
+        global.backend.connect('keymap-layout-group-changed', this._layoutGroupChanged.bind(this));
 
         this._sourcesPerWindow = false;
         this._focusWindowNotifyId = 0;
@@ -426,6 +427,12 @@ export class InputSourceManager extends Signals.EventEmitter {
 
         is.activate(true);
         return true;
+    }
+
+    _layoutGroupChanged(backend, idx) {
+        const is = this._inputSources[idx];
+        this._currentInputSourceChanged(is);
+        this._keyboardManager.apply(is.xkbId);
     }
 
     _switchInputSource(display, window, event, binding) {
@@ -998,6 +1005,12 @@ class InputSourceIndicator extends PanelMenu.Button {
         }
     }
 
+    _getGraphemeClusters(text = '') {
+        const segmenter = new Intl.Segmenter(undefined, {granularity: 'grapheme'});
+        const segments = [...segmenter.segment(text)].map(o => o.segment);
+        return segments;
+    }
+
     _buildPropSubMenu(menu, props) {
         if (!props)
             return;
@@ -1021,7 +1034,8 @@ class InputSourceIndicator extends PanelMenu.Button {
                 let currentSource = this._inputSourceManager.currentSource;
                 if (currentSource) {
                     let indicatorLabel = this._indicatorLabels[currentSource.index];
-                    if (text && text.length > 0 && text.length < 3)
+                    const graphemeClusters = this._getGraphemeClusters(text);
+                    if (graphemeClusters.length > 0 && graphemeClusters.length < 3)
                         indicatorLabel.set_text(text);
                 }
             }
