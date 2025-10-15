@@ -1,7 +1,5 @@
 From: Sergio Costas Rodriguez <sergio.costas@canonical.com>
 Date: Tue, 24 Jun 2025 18:20:21 +0200
-Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3769
-Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2115948
 Subject: dateMenu: Add accessibility to Events and Weather
 
 The Events element, with today events, and the Weather element,
@@ -9,6 +7,8 @@ with the weather in our location, lack accessibility names.
 
 This patch fixes it.
 
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3769
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2115948
 ---
  js/ui/dateMenu.js | 2 ++
  1 file changed, 2 insertions(+)

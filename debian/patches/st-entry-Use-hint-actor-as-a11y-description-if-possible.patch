@@ -1,7 +1,5 @@
 From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
 Date: Fri, 9 Feb 2024 18:38:15 +0100
-Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3179
-Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2115948
 Subject: st/entry: Use hint-actor as a11y description if possible
 
 The hint-actor is used as a placeholder to explain the purpose
@@ -10,6 +8,8 @@ of an entry, but it currently isn't exposed to accessibility.
 There is no good reason to not do that, so also use the actor
 as described-by relationship, provided the actor is a label.
 
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3179
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2115948
 ---
  src/st/st-entry.c | 58 +++++++++++++++++++++++++++++++++++++++++++++++++++++++
  1 file changed, 58 insertions(+)

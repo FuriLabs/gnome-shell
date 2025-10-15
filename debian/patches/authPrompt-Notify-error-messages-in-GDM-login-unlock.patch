@@ -11,7 +11,6 @@ prompt.
 
 Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3765
 Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2115948
-
 ---
  js/gdm/authPrompt.js | 9 +++++++++
  1 file changed, 9 insertions(+)
