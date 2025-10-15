@@ -1,8 +1,9 @@
-gnome-shell (49.0-3) UNRELEASED; urgency=medium
+gnome-shell (49.1-1) UNRELEASED; urgency=medium
 
   * Merge packaging changes from unstable (no functional change)
+  * New upstream release
 
- -- Simon McVittie <smcv@debian.org>  Mon, 13 Oct 2025 20:41:53 +0100
+ -- Simon McVittie <smcv@debian.org>  Wed, 15 Oct 2025 11:49:02 +0100
 
 gnome-shell (49.0-2) experimental; urgency=medium
 
