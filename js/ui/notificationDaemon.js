@@ -188,8 +188,12 @@ class FdoNotificationDaemon {
                 case MessageTray.NotificationDestroyedReason.SOURCE_CLOSED:
                     notificationClosedReason = NotificationClosedReason.APP_CLOSED;
                     break;
+                default:
+                    notificationClosedReason = NotificationClosedReason.UNDEFINED;
+                    break;
                 }
                 this._emitNotificationClosed(id, notificationClosedReason);
+                notification.disconnectObject(this);
             });
         }
 
@@ -207,6 +211,7 @@ class FdoNotificationDaemon {
             acknowledged: false,
         });
         notification.clearActions();
+        notification.disconnectObject(this);
 
         let hasDefaultAction = false;
 
@@ -225,14 +230,14 @@ class FdoNotificationDaemon {
         }
 
         if (hasDefaultAction) {
-            notification.connect('activated', () => {
+            notification.connectObject('activated', () => {
                 this._emitActivationToken(source, id);
                 this._emitActionInvoked(id, 'default');
-            });
+            }, this);
         } else {
-            notification.connect('activated', () => {
+            notification.connectObject('activated', () => {
                 source.open();
-            });
+            }, this);
         }
 
         switch (hints.urgency) {
@@ -304,12 +309,10 @@ class FdoNotificationDaemon {
 
     _emitActivationToken(source, id) {
         const context = global.create_app_launch_context(0, -1);
-        const info = source.app?.get_app_info();
-        if (info) {
-            const token = context.get_startup_notify_id(info, []);
-            this._dbusImpl.emit_signal('ActivationToken',
-                GLib.Variant.new('(us)', [id, token]));
-        }
+        const appInfo = source.app?.get_app_info() ?? null;
+        const token = context.get_startup_notify_id(appInfo, []);
+        this._dbusImpl.emit_signal('ActivationToken',
+            GLib.Variant.new('(us)', [id, token]));
     }
 }
 
