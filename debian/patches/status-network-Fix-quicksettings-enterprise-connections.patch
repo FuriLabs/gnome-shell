@@ -24,10 +24,10 @@ Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3834>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/js/ui/status/network.js b/js/ui/status/network.js
-index a4c6b90..ddc2a12 100644
+index f9aee79..b2f9c93 100644
 --- a/js/ui/status/network.js
 +++ b/js/ui/status/network.js
-@@ -64,8 +64,8 @@ function ssidToLabel(ssid) {
+@@ -66,8 +66,8 @@ function ssidToLabel(ssid) {
  }
  
  function launchSettingsPanel(panel, ...args) {

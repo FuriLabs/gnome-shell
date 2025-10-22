@@ -36,10 +36,10 @@ Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3840>
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/js/ui/status/network.js b/js/ui/status/network.js
-index ddc2a12..a143beb 100644
+index b2f9c93..d1908d1 100644
 --- a/js/ui/status/network.js
 +++ b/js/ui/status/network.js
-@@ -1134,6 +1134,7 @@ const NMWirelessDeviceItem = GObject.registerClass({
+@@ -1136,6 +1136,7 @@ const NMWirelessDeviceItem = GObject.registerClass({
  
          switch (this.state) {
          case NM.ActiveConnectionState.ACTIVATING:
@@ -47,7 +47,7 @@ index ddc2a12..a143beb 100644
              return 'network-wireless-acquiring-symbolic';
  
          case NM.ActiveConnectionState.ACTIVATED: {
-@@ -1147,7 +1148,7 @@ const NMWirelessDeviceItem = GObject.registerClass({
+@@ -1149,7 +1150,7 @@ const NMWirelessDeviceItem = GObject.registerClass({
                  if (this._device.mode !== NM80211Mode.ADHOC)
                      console.info('An active wireless connection, in infrastructure mode, involves no access point?');
  
