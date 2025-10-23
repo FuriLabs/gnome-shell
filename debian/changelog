@@ -7,7 +7,6 @@ gnome-shell (46.0-0ubuntu6~24.04.11) UNRELEASED; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
   * d/p: Fix memory leak when using a custom theme (LP: #2121786)
-  * d/p: Never close a notification banner that is about to show (LP: TODO)
 
   [ Sergio Costas Rodriguez ]
   * authPrompt: Notify error messages in GDM login/unlock (LP: #2115948)
