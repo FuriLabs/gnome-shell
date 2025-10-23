@@ -1,4 +1,4 @@
-gnome-shell (46.0-0ubuntu6~24.04.11) UNRELEASED; urgency=medium
+gnome-shell (46.0-0ubuntu6~24.04.11) noble; urgency=medium
 
   [ Mitchell Augustin ]
   * Fix quicksettings connections to enterprise AP (LP: #2120331)
@@ -11,7 +11,7 @@ gnome-shell (46.0-0ubuntu6~24.04.11) UNRELEASED; urgency=medium
   [ Sergio Costas Rodriguez ]
   * authPrompt: Notify error messages in GDM login/unlock (LP: #2115948)
 
- -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 22 Oct 2025 11:45:17 +0800
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Thu, 23 Oct 2025 13:20:48 +0800
 
 gnome-shell (46.0-0ubuntu6~24.04.10) noble; urgency=medium
 
