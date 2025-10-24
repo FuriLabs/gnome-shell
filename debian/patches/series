@@ -106,4 +106,5 @@ authPrompt-Notify-error-messages-in-GDM-login-unlock.patch
 st-entry-Use-hint-actor-as-a11y-description-if-possible.patch
 status-network-Fix-quicksettings-enterprise-connections.patch
 st-private-Fix-texture-leak-when-creating-shadow-from-act.patch
+messageTray-Never-close-a-notification-banner-that-is-abo.patch
 status-network-Update-Wi-Fi-quicksettings-icon-on-disconn.patch
