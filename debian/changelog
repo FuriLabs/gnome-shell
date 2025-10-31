@@ -1,3 +1,10 @@
+gnome-shell (49.1-2) unstable; urgency=medium
+
+  * Team upload
+  * Release to unstable (transition: #1116394)
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 31 Oct 2025 11:18:17 +0000
+
 gnome-shell (49.1-1) experimental; urgency=medium
 
   * Team upload
