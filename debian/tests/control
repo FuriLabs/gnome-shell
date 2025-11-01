@@ -9,4 +9,5 @@ Classes: desktop
 # to generate few tools first.
 Depends: @builddeps@,
          gnome-shell,
+Architecture: !riscv64
 Restrictions: allow-stderr skippable
