@@ -1,3 +1,10 @@
+gnome-shell (49.1-3) unstable; urgency=high
+
+  * autopkgtest: don't run shell tests on riscv64 since we don't during
+    build tests
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sat, 01 Nov 2025 19:36:23 -0400
+
 gnome-shell (49.1-2) unstable; urgency=medium
 
   * Team upload
