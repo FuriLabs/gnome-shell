@@ -1,4 +1,4 @@
-gnome-shell (48.5-0+deb13u1) UNRELEASED; urgency=medium
+gnome-shell (48.6-0+deb13u1) UNRELEASED; urgency=medium
 
   * New upstream release 48.5
     - Avoid a crash when using the Draw-On-Gnome extension, fixing a
@@ -26,7 +26,7 @@ gnome-shell (48.5-0+deb13u1) UNRELEASED; urgency=medium
       (gnome-shell!3220 upstream)
     - Fix a memory leak with custom themes
       (gnome-shell#8509 upstream, LP: #2121786)
-    - During gdm3 authentication, don't discard typeahead when changing
+    - During authentication, don't discard typeahead when changing
       entry visibility
       (gnome-shell!3850 upstream)
     - Fix a crash when using a CSS-only Shell extension
@@ -46,6 +46,33 @@ gnome-shell (48.5-0+deb13u1) UNRELEASED; urgency=medium
       (gnome-shell#4253 upstream)
     - Documentation/comment fixes
     - Translation updates: de, fi, th, zh_TW
+  * New upstream release 48.6
+    - During authentication, move keyboard focus to the currently-visible
+      widget, not always the text entry box
+      (gnome-shell!3849 upstream)
+    - Ensure that workspace selector reappears promptly when cancelling
+      a search in the overview (gnome-shell#7985 upstream)
+    - Always send the activation token when a notification is activated, even
+      if the notification comes from a non-application like
+      gnome-settings-daemon
+      (gnome-shell!3891 upstream)
+    - Warn instead of crashing if an unsupported accent colour is set,
+      for example when swapping between Ubuntu's patched gnome-shell and
+      an upstream gnome-shell (gnome-shell!3892 upstream)
+    - Update the keyboard layout status icon if the layout group
+      is changed without UI interaction (gnome-shell!3895 upstream)
+    - Always send a valid value for the reason a notification was closed
+      (gnome-shell!3907 upstream)
+    - In the UI for screenshots, if a button doesn't have any other label,
+      use its tooltip as the label for accessibility purposes
+      (gnome-shell!3908 upstream)
+    - When a notification instance is reused, don't send its activation
+      event multiple times (gnome-shell!3904 upstream)
+    - Don't emit spurious dotted circles when using the on-screen keyboard
+      in the Hindi (Bolnagri) layout (gnome-shell#8719 upstream)
+    - Remove unused argument to PopupMenu constructor
+      (gnome-shell!3894 upstream)
+    - Translation updates: ug
   * Interface change: the misleadingly-named org.gnome.Shell.PortalHelper.Done
     signal has been renamed to org.gnome.Shell.PortalHelper.StatusChanged.
     In practice no other Debian package appears to subscribe to this signal,
