@@ -2,7 +2,7 @@ From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
 Date: Thu, 11 Sep 2025 14:12:02 +0200
 Subject: extensions-app: Add test dependency on generated desktop file
 
-Origin: 8e6e76a6
+Applied-upstream: 49.0, commit:8e6e76a62b20430d02cea20656ab988345a9e271
 ---
  subprojects/extensions-app/data/meson.build | 10 +++++-----
  1 file changed, 5 insertions(+), 5 deletions(-)

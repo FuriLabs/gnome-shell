@@ -5,13 +5,14 @@ Subject: build: Handle data as first subdir
 We generate resources and files that may be required in next stages, so
 lets do it as first thing
 
-Origin: 89b571e3
+Applied-upstream: 49.0, commit:89b571e3cbcaa82e79274339dd015cd8c46d6fce
+Applied-upstream: 48.5, commit:3710de43319528eefc5e31aef51c5d026ee45172
 ---
  meson.build | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/meson.build b/meson.build
-index ffae529..0b053ce 100644
+index 1f3c33f..58a69ef 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -316,10 +316,10 @@ endif

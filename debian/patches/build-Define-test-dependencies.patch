@@ -14,7 +14,7 @@ So add test dependencies on test cases. We do not need to have per-test
 dependencies right now since most of them share just the same
 requirements, and this makes it easier to maintain
 
-Origin: e014efca
+Applied-upstream: 49.0, commit:e014efcab228812ef0751e4706d648c19add1ab1
 ---
  data/meson.build   |  7 ++++---
  src/meson.build    |  4 ++--
