@@ -1,8 +1,62 @@
-gnome-shell (48.4-1~deb13u2) UNRELEASED; urgency=medium
+gnome-shell (48.5-0+deb13u1) UNRELEASED; urgency=medium
+
+  * New upstream release 48.5
+    - Avoid a crash when using the Draw-On-Gnome extension, fixing a
+      regression in 48.3
+      (gnome-shell#8602 upstream)
+    - Close the captive-portal authentication dialog when full network
+      connectivity is detected
+      (gnome-shell#7790 upstream)
+    - Fix connecting to WPA Enterprise or WPA2 Enterprise networks from the
+      quick settings menu
+      (gnome-shell#8590 upstream)
+    - Disable unneeded extensions before enabling new extensions, ensuring
+      that there is never a time when two conflicting extensions are active
+      (gnome-shell!3835 upstream)
+    - Fix position of IBus candidate panel when using a scaled display
+      (gnome-shell#8424 upstream)
+    - During authentication, don't reset the authentication prompt on
+      every tap/click, only when the prompt should change from hidden to
+      visible
+      (gnome-shell!3852 upstream)
+    - Incorporate previously Debian-specific patches fixing X11 tray icon
+      handling
+      (gnome-shell!3818 upstream)
+    - Avoid a possible source of lockups in keyboard focus handling
+      (gnome-shell!3220 upstream)
+    - Fix a memory leak with custom themes
+      (gnome-shell#8509 upstream, LP: #2121786)
+    - During gdm3 authentication, don't discard typeahead when changing
+      entry visibility
+      (gnome-shell!3850 upstream)
+    - Fix a crash when using a CSS-only Shell extension
+      (gnome-shell#7339 upstream, previously fixed differently by a
+      Debian-specific patch)
+    - Improve debuggability of the actor tree (gnome-shell!3863 upstream)
+    - Improve display of overview application search results in
+      right-to-left locales (Arabic/Hebrew)
+      (gnome-shell!3851 upstream)
+    - Fix a crash during searches
+      (gnome-shell#8651 upstream, LP: #2104113)
+    - Fix a race condition causing intermittent stuck notifications
+      (gnome-shell#6006 upstream)
+    - Better forward-compatibility with post-trixie GLib versions
+      (gnome-shell!3846, gnome-shell!3855 upstream)
+    - Better forward-compatibility with post-trixie mutter versions
+      (gnome-shell#4253 upstream)
+    - Documentation/comment fixes
+    - Translation updates: de, fi, th, zh_TW
+  * Interface change: the misleadingly-named org.gnome.Shell.PortalHelper.Done
+    signal has been renamed to org.gnome.Shell.PortalHelper.StatusChanged.
+    In practice no other Debian package appears to subscribe to this signal,
+    so this shouldn't have any effect.
+
+  [ Jeremy Bícha ]
+  * Remove tray-icons patches: applied in 48.5
+  * Remove st-theme-node patch: alternative fix applied in 48.5
 
   [ Marco Trevisan (Treviño) ]
-  * d/p/build-Handle-data-as-first-subdir.patch,
-    d/p/build-Define-test-dependencies.patch,
+  * d/p/build-Define-test-dependencies.patch,
     d/p/extensions-app-Add-test-dependency-on-generated-desktop-f.patch:
     Add patches to fix tests' compilation dependencies
   * debian/tests: Add autopkgtests for GNOME Shell.
@@ -16,7 +70,14 @@ gnome-shell (48.4-1~deb13u2) UNRELEASED; urgency=medium
     i386 is kinda special in desktop, so better to track potential
     breakages.
 
- -- Simon McVittie <smcv@debian.org>  Sun, 16 Nov 2025 14:19:55 +0000
+  [ Simon McVittie ]
+  * Document upstream changes in detail
+  * Rebase patch series
+    - Drop one of Marco's new test-related build system patches (see
+      above), applied in 48.5
+  * Slightly improve patch metadata
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 16 Nov 2025 14:39:56 +0000
 
 gnome-shell (48.4-1~deb13u1) trixie; urgency=medium
 
