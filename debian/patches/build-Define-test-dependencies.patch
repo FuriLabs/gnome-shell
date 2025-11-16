@@ -52,10 +52,10 @@ index 114dd20..76a32ca 100644
 -  build_by_default: true)
 +)
 diff --git a/src/meson.build b/src/meson.build
-index 6b24535..19d8b58 100644
+index 9691ef8..1099204 100644
 --- a/src/meson.build
 +++ b/src/meson.build
-@@ -279,7 +279,7 @@ libshell_gir = gnome.generate_gir(libshell,
+@@ -280,7 +280,7 @@ libshell_gir = gnome.generate_gir(libshell,
    kwargs: introspection_common,
  )
  
@@ -64,7 +64,7 @@ index 6b24535..19d8b58 100644
    c_args: gnome_shell_cflags + typelib_cflags,
    dependencies: gnome_shell_deps + [libshell_dep, libst_dep, mutter_dep],
    include_directories: [conf_inc],
-@@ -299,7 +299,7 @@ if have_portal_helper
+@@ -300,7 +300,7 @@ if have_portal_helper
    )
  endif
  

@@ -1,4 +1,3 @@
-build-Handle-data-as-first-subdir.patch
 build-Define-test-dependencies.patch
 extensions-app-Add-test-dependency-on-generated-desktop-f.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
