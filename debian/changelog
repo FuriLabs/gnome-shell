@@ -1,3 +1,23 @@
+gnome-shell (48.4-1~deb13u2) UNRELEASED; urgency=medium
+
+  [ Marco Trevisan (Treviño) ]
+  * d/p/build-Handle-data-as-first-subdir.patch,
+    d/p/build-Define-test-dependencies.patch,
+    d/p/extensions-app-Add-test-dependency-on-generated-desktop-f.patch:
+    Add patches to fix tests' compilation dependencies
+  * debian/tests: Add autopkgtests for GNOME Shell.
+    We can just recompile gnome-shell and run the tests provided
+    by upstream.
+  * debian/tests: Run tests on the installed gnome-shell.
+    Run the autopkgtests running the upstream-provided test scripts using
+    the gnome-shell in the archive installed as it is. When in Ubuntu,
+    we are also using the Ubuntu profile.
+  * debian/salsa-ci: Enable i386 autopkgtests.
+    i386 is kinda special in desktop, so better to track potential
+    breakages.
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 16 Nov 2025 14:19:55 +0000
+
 gnome-shell (48.4-1~deb13u1) trixie; urgency=medium
 
   * Team upload
