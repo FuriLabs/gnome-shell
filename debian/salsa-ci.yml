@@ -2,6 +2,7 @@
 
 variables:
   SALSA_CI_DISABLE_AUTOPKGTEST_I386: 0
+  RELEASE: 'questing'
 
 include:
   - https://salsa.debian.org/salsa-ci-team/pipeline/raw/master/recipes/ubuntu.yml
