@@ -2366,6 +2366,14 @@ gnome-shell (43.0-1ubuntu2) kinetic; urgency=medium
 
   [ Daniel van Vugt ]
   * Avoid deadlocking in gst_init_check() on startup (LP: #1988488)
+
+  [ Jeremy Bicha ]
+  * debian/source_gnome-shell.py: Don't try to report nonexistent mouse
+    gsettings schema
+  * Cherry-pick 4 patches from the future gnome-shell 43.1 to fix various issues
+
+ -- Jeremy Bicha <jbicha@ubuntu.com>  Wed, 12 Oct 2022 11:25:50 -0400
+
 gnome-shell (43.0-1ubuntu1) kinetic; urgency=medium
 
   * Merge with Debian, remaining changes:
