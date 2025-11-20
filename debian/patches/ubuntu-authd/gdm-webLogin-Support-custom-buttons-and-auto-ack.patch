@@ -9,7 +9,7 @@ Subject: gdm/webLogin: Support custom buttons and auto-ack
  3 files changed, 55 insertions(+), 24 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 3d3c5bc..28b0d4c 100644
+index fa5a999..17485ce 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -411,7 +411,7 @@ export const AuthPrompt = GObject.registerClass({

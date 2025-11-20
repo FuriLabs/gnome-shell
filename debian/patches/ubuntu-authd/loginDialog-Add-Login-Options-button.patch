@@ -15,7 +15,7 @@ https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/login-
  3 files changed, 186 insertions(+), 9 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 833b35b..eb28eb0 100644
+index 5d77dd7..64b5837 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -50,6 +50,7 @@ export const AuthPrompt = GObject.registerClass({
@@ -67,7 +67,7 @@ index 833b35b..eb28eb0 100644
      _onShowMessage(_userVerifier, serviceName, message, type) {
          let wiggleParameters = {duration: 0};
  
-@@ -631,6 +645,11 @@ export const AuthPrompt = GObject.registerClass({
+@@ -638,6 +652,11 @@ export const AuthPrompt = GObject.registerClass({
              this._updateEntry(false);
      }
  

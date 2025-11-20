@@ -11,7 +11,7 @@ This commit fixes that.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index b9d3535..d737179 100644
+index 800e2f1..710819c 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -158,7 +158,7 @@ export const AuthPrompt = GObject.registerClass({

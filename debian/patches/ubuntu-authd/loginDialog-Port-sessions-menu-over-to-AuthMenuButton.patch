@@ -12,7 +12,7 @@ control.
  2 files changed, 60 insertions(+), 12 deletions(-)
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index 4ac7c48..1484e98 100644
+index b661e93..3c7edaa 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 @@ -37,6 +37,7 @@ $_gdm_dialog_width: 25em;
@@ -49,7 +49,7 @@ index 4ac7c48..1484e98 100644
  .login-dialog-button-box {
    spacing: $base_padding * 2;
  }
-@@ -72,6 +92,13 @@ $_gdm_dialog_width: 25em;
+@@ -76,6 +96,13 @@ $_gdm_dialog_width: 25em;
    }
  }
  

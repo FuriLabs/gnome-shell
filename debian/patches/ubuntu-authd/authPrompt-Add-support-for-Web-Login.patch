@@ -21,7 +21,7 @@ https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/web-lo
  create mode 100644 js/gdm/webLogin.js
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index c7411d0..65e2a29 100644
+index 505cc34..097d10e 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 @@ -38,7 +38,8 @@ $_gdm_dialog_width: 25em;
@@ -34,7 +34,7 @@ index c7411d0..65e2a29 100644
      @extend .icon-button;
      @extend %system_button;
  
-@@ -233,8 +234,80 @@ $_gdm_dialog_width: 25em;
+@@ -237,8 +238,80 @@ $_gdm_dialog_width: 25em;
    }
  }
  
@@ -116,7 +116,7 @@ index c7411d0..65e2a29 100644
    background-color: transparent;
  
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 3c8e1f6..5053ece 100644
+index e1ff169..3ce046a 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -14,6 +14,7 @@ import * as MessageTray from '../ui/messageTray.js';
@@ -295,10 +295,10 @@ index 3c8e1f6..5053ece 100644
 +        if (this._webLoginDialog)
 +            return;
 +
-         if (this._entry.reactive === sensitive)
-             return;
+         let authWidget;
  
-@@ -737,6 +861,7 @@ export const AuthPrompt = GObject.registerClass({
+         if (this._authList.visible)
+@@ -744,6 +868,7 @@ export const AuthPrompt = GObject.registerClass({
              hold: null,
          });
  
