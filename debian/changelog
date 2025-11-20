@@ -1,3 +1,52 @@
+gnome-shell (49.1-5) unstable; urgency=high
+
+  * autopkgtest: Don't run shell tests for build-and-test
+    since they're already being run separately
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sun, 02 Nov 2025 07:40:33 -0500
+
+gnome-shell (49.1-4) unstable; urgency=high
+
+  * autopkgtest: don't run shell tests on riscv64 since we don't during
+    build tests
+  * Bump minimum gnome-settings-daemon to 49
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Sat, 01 Nov 2025 19:36:23 -0400
+
+gnome-shell (49.1-2) unstable; urgency=medium
+
+  * Team upload
+  * Release to unstable (transition: #1116394)
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 31 Oct 2025 11:18:17 +0000
+
+gnome-shell (49.1-1) experimental; urgency=medium
+
+  * Team upload
+  * New upstream stable release
+    - Drop patch that was included in the release
+  * Merge packaging changes from unstable (no functional change)
+  * Update Lintian overrides
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 15 Oct 2025 13:48:33 +0100
+
+gnome-shell (49.0-2) experimental; urgency=medium
+
+  * Team upload
+
+  [ Simon McVittie ]
+  * d/p/slider-Use-the-sprite-of-the-touch-event-not-the-pointer.patch:
+    Add patch from upstream to fix a UI freeze when touching quick menu
+    sliders (volume, brightness) on a touchscreen (LP: #2125013)
+  * Merge packaging changes from unstable
+    - d/rules: Use a more robust xvfb-run command-line (Mitigates: #981201)
+    - Revert other changes from 48.5-2, no longer relevant in experimental
+
+  [ Marco Trevisan (Treviño) ]
+  * d/tests/shell-tests: Use a more robust xvfb-run command-line here, too
+
+ -- Simon McVittie <smcv@debian.org>  Fri, 26 Sep 2025 18:37:05 +0100
+
 gnome-shell (49.0-1ubuntu1) questing; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
@@ -182,7 +231,6 @@ gnome-shell (49~alpha.1-0ubuntu2) questing; urgency=medium
 
  -- Alessandro Astone <alessandro.astone@canonical.com>  Mon, 04 Aug 2025 16:02:00 +0200
 
-<<<<<<<
 gnome-shell (49~alpha.1-0ubuntu1) questing; urgency=medium
 
   * Merge with debian, containing a new upstream release
@@ -196,8 +244,27 @@ gnome-shell (49~alpha.1-0ubuntu1) questing; urgency=medium
 
  -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Fri, 11 Jul 2025 06:16:31 +0200
 
-=======
->>>>>>>
+gnome-shell (48.5-3) unstable; urgency=medium
+
+  * Team upload
+  * Revert "Generate a versioned dependency for the GLib 2.86 transition"
+  * Bump glib2.0 dependency to 2.86 unconditionally (part of #1115340)
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 13 Oct 2025 15:22:55 +0100
+
+gnome-shell (48.5-2) unstable; urgency=medium
+
+  * Team upload
+  * Generate a versioned dependency for the GLib 2.86 transition.
+    GNOME Shell will need to be rebuilt after GLib 2.86 is uploaded to
+    unstable, so that its typelibs declare a dependency on GioUnix,
+    which they do not when built against older GLib. Generate a
+    versioned dependency so that this can be done via either a binNMU
+    or a sourceful upload.
+  * d/rules: Use a more robust xvfb-run command-line (Mitigates: #981201)
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 18 Sep 2025 17:32:19 +0100
+
 gnome-shell (48.5-1) unstable; urgency=medium
 
   * New upstream release

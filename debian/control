@@ -24,7 +24,7 @@ Build-Depends: appstream,
                gir1.2-rsvg-2.0 <!nocheck>,
                gir1.2-upowerglib-1.0 <!nocheck>,
                gnome-control-center-dev,
-               gnome-settings-daemon-common (>= 47~rc) <!nocheck>,
+               gnome-settings-daemon-common (>= 49) <!nocheck>,
                gsettings-desktop-schemas-dev (>= 49~alpha),
                gtk-doc-tools,
                libasound2-dev,
@@ -69,7 +69,6 @@ Build-Depends: appstream,
                xauth <!nocheck>,
                xvfb <!nocheck>,
                xwayland <!nocheck>
-Rules-Requires-Root: no
 Standards-Version: 4.7.2
 Homepage: https://gitlab.gnome.org/GNOME/gnome-shell
 XS-Debian-Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git
@@ -108,7 +107,7 @@ Depends: gir1.2-accountsservice-1.0,
          gir1.2-upowerglib-1.0,
          gjs (>= 1.85.90),
          gnome-control-center (>= 1:46),
-         gnome-settings-daemon (>= 47~rc),
+         gnome-settings-daemon (>= 49),
          gnome-shell-common (= ${source:Version}),
          gsettings-desktop-schemas (>= 49~alpha),
          gstreamer1.0-pipewire (>= 0.3.49) [linux-any],

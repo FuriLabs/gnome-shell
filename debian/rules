@@ -63,6 +63,8 @@ ifneq ($(filter mips64el riscv64,$(DEB_HOST_ARCH_CPU)),)
 # and skip the tests that would run the whole Shell. See discussion in
 # https://salsa.debian.org/gnome-team/gnome-shell/-/merge_requests/71
 meson_test_options += --no-suite shell
+else ifneq ($(filter mips64el riscv64,$(AUTOPKGTEST_TEST_ARCH)),)
+meson_test_options += --no-suite shell
 endif
 
 override_dh_auto_test:
