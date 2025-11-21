@@ -1,3 +1,14 @@
+gnome-shell (46.0-0ubuntu6~24.04.12) noble; urgency=medium
+
+  [ Marco Trevisan (Treviño) ]
+  * d/p: Never close a notification banner that is about to show (LP: #2116717)
+
+  [ Alessandro Astone ]
+  * d/p: Fix magnifier zoom in 'cursor pushes content around' mode
+    (LP: #1991001)
+
+ -- Alessandro Astone <alessandro.astone@canonical.com>  Fri, 21 Nov 2025 09:49:03 +0100
+
 gnome-shell (46.0-0ubuntu6~24.04.11) noble; urgency=medium
 
   [ Mitchell Augustin ]
