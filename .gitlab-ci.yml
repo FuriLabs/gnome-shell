@@ -8,7 +8,7 @@ include:
     ref: '057b052e682d8e5a20c1eb2dd60d5b87d2b56856'
   - project: 'Infrastructure/freedesktop-ci-templates'
     file: 'templates/ci-fairy.yml'
-    ref: 'bc70242ffb8402243e934659ecc1a2d1c89eca2b'
+    ref: 'aec7a6ce7bb38902c70641526f6611e27141784a'
   - component: "gitlab.gnome.org/GNOME/citemplates/release-service@25.5"
     inputs:
       job-stage: deploy
@@ -87,26 +87,6 @@ check-commit-log:
     - if [[ x"$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" != "x" ]] ;
       then
         ci-fairy check-commits --junit-xml=$JUNIT_REPORT ;
-      else
-        echo "Not a merge request" ;
-      fi
-  rules:
-    - !reference [.pipeline-guard, rules]
-  artifacts:
-    expire_in: 1 week
-    reports:
-      junit: $JUNIT_REPORT
-
-check-merge-request:
-  extends:
-    - .fdo.ci-fairy
-  stage: pre-review
-  variables:
-    JUNIT_REPORT: check-merge-request-report.xml
-  script:
-    - if [[ x"$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" != "x" ]] ;
-      then
-        ci-fairy check-merge-request --require-allow-collaboration --junit-xml=$JUNIT_REPORT ;
       else
         echo "Not a merge request" ;
       fi

@@ -42,7 +42,7 @@ export function holdKeyboard() {
 
 class KeyboardManager {
     constructor() {
-        // The XKB protocol doesn't allow for more that 4 layouts in a
+        // The XKB protocol doesn't allow for more than 4 layouts in a
         // keymap. Wayland doesn't impose this limit and libxkbcommon can
         // handle up to 32 layouts but since we need to support X clients
         // even as a Wayland compositor, we can't bump this.
@@ -103,10 +103,10 @@ class KeyboardManager {
         this._current = null;
         this._layoutInfos = {};
 
-        for (let i = 0; i < ids.length; ++i) {
-            let [found, , , _layout, _variant] = this._xkbInfo.get_layout_info(ids[i]);
+        for (const id of ids) {
+            let [found, , , layout, variant] = this._xkbInfo.get_layout_info(id);
             if (found)
-                this._layoutInfos[ids[i]] = {id: ids[i], layout: _layout, variant: _variant};
+                this._layoutInfos[id] = {id, layout, variant};
         }
 
         let i = 0;
@@ -139,10 +139,10 @@ class KeyboardManager {
         if (!found)
             [, , id] = GnomeDesktop.get_input_source_from_locale(DEFAULT_LOCALE);
 
-        let _layout, _variant;
-        [found, , , _layout, _variant] = this._xkbInfo.get_layout_info(id);
+        let layout, variant;
+        [found, , , layout, variant] = this._xkbInfo.get_layout_info(id);
         if (found)
-            return {layout: _layout, variant: _variant};
+            return {layout, variant};
         else
             return {layout: DEFAULT_LAYOUT, variant: DEFAULT_VARIANT};
     }

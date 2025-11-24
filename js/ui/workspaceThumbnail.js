@@ -685,6 +685,7 @@ export const ThumbnailsBox = GObject.registerClass({
     _onDestroy() {
         this._destroyThumbnails();
         this._unqueueUpdateStates();
+        this._clearDropPlaceholderLater();
 
         if (this._settings)
             this._settings.run_dispose();
@@ -766,6 +767,14 @@ export const ThumbnailsBox = GObject.registerClass({
 
         this._dropPlaceholderPos = -1;
         this.queue_relayout();
+    }
+
+    _clearDropPlaceholderLater() {
+        if (!this._dropPlaceholderLater)
+            return;
+
+        global.compositor.get_laters().remove(this._dropPlaceholderLater);
+        delete this._dropPlaceholderLater;
     }
 
     _getPlaceholderTarget(index, spacing, rtl) {
@@ -1178,7 +1187,10 @@ export const ThumbnailsBox = GObject.registerClass({
 
         const laters = global.compositor.get_laters();
         this._updateStateId = laters.add(
-            Meta.LaterType.BEFORE_REDRAW, () => this._updateStates());
+            Meta.LaterType.BEFORE_REDRAW, () => {
+                this._updateStates();
+                return GLib.SOURCE_REMOVE;
+            });
     }
 
     _unqueueUpdateStates() {
@@ -1328,10 +1340,16 @@ export const ThumbnailsBox = GObject.registerClass({
             this._dropPlaceholder.allocate_preferred_size(
                 ...this._dropPlaceholder.get_position());
 
-            const laters = global.compositor.get_laters();
-            laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
-                this._dropPlaceholder.hide();
-            });
+            this._clearDropPlaceholderLater();
+            if (this._dropPlaceholder.visible) {
+                const laters = global.compositor.get_laters();
+                this._dropPlaceholderLater = laters.add(
+                    Meta.LaterType.BEFORE_REDRAW, () => {
+                        this._dropPlaceholder.hide();
+                        delete this._dropPlaceholderLater;
+                        return GLib.SOURCE_REMOVE;
+                    });
+            }
         }
 
         let childBox = new Clutter.ActorBox();
@@ -1359,10 +1377,16 @@ export const ThumbnailsBox = GObject.registerClass({
 
                 this._dropPlaceholder.allocate(childBox);
 
-                const laters = global.compositor.get_laters();
-                laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
-                    this._dropPlaceholder.show();
-                });
+                this._clearDropPlaceholderLater();
+                if (!this._dropPlaceholder.visible) {
+                    const laters = global.compositor.get_laters();
+                    this._dropPlaceholderLater = laters.add(
+                        Meta.LaterType.BEFORE_REDRAW, () => {
+                            this._dropPlaceholder.show();
+                            delete this._dropPlaceholderLater;
+                            return GLib.SOURCE_REMOVE;
+                        });
+                }
                 x += placeholderWidth + spacing;
             }
 
