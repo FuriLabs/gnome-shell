@@ -1,8 +1,9 @@
-gnome-shell (49.2-1) UNRELEASED; urgency=medium
+gnome-shell (49.2-1) unstable; urgency=medium
 
+  * Team upload
   * New upstream release
 
- -- Simon McVittie <smcv@debian.org>  Mon, 24 Nov 2025 14:43:49 +0000
+ -- Simon McVittie <smcv@debian.org>  Mon, 24 Nov 2025 16:37:36 +0000
 
 gnome-shell (49.1-5) unstable; urgency=high
 
