@@ -1,3 +1,9 @@
+gnome-shell (49.2-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 24 Nov 2025 14:43:49 +0000
+
 gnome-shell (49.1-5) unstable; urgency=high
 
   * autopkgtest: Don't run shell tests for build-and-test
