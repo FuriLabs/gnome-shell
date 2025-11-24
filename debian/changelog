@@ -1,4 +1,4 @@
-gnome-shell (48.6-0+deb13u1) UNRELEASED; urgency=medium
+gnome-shell (48.7-0+deb13u1) UNRELEASED; urgency=medium
 
   * New upstream release 48.5
     - Avoid a crash when using the Draw-On-Gnome extension, fixing a
@@ -73,6 +73,8 @@ gnome-shell (48.6-0+deb13u1) UNRELEASED; urgency=medium
     - Remove unused argument to PopupMenu constructor
       (gnome-shell!3894 upstream)
     - Translation updates: ug
+  * New upstream release 48.7
+    - TODO: Summarize changes here
   * Interface change: the misleadingly-named org.gnome.Shell.PortalHelper.Done
     signal has been renamed to org.gnome.Shell.PortalHelper.StatusChanged.
     In practice no other Debian package appears to subscribe to this signal,
@@ -104,7 +106,7 @@ gnome-shell (48.6-0+deb13u1) UNRELEASED; urgency=medium
       above), applied in 48.5
   * Slightly improve patch metadata
 
- -- Simon McVittie <smcv@debian.org>  Sun, 16 Nov 2025 14:39:56 +0000
+ -- Simon McVittie <smcv@debian.org>  Mon, 24 Nov 2025 14:49:06 +0000
 
 gnome-shell (48.4-1~deb13u1) trixie; urgency=medium
 
