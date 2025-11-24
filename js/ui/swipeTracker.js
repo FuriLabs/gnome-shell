@@ -523,8 +523,7 @@ export const SwipeTracker = GObject.registerClass({
     }
 
     _findPreviousPoint(pos) {
-        const reversedIndex = this._snapPoints.slice().reverse().findIndex(p => p <= pos);
-        return this._snapPoints.length - 1 - reversedIndex;
+        return this._snapPoints.findLastIndex(p => p <= pos);
     }
 
     _findPointForProjection(pos, velocity) {
@@ -562,10 +561,6 @@ export const SwipeTracker = GObject.registerClass({
         if (this._state !== State.SCROLLING)
             return;
 
-        if (this.orientation === Clutter.Orientation.HORIZONTAL &&
-            Clutter.get_default_text_direction() === Clutter.TextDirection.RTL)
-            delta = -delta;
-
         this._progress += delta / distance;
 
         this._progress = Math.clamp(this._progress, ...this._getBounds(this._initialProgress));
@@ -576,8 +571,8 @@ export const SwipeTracker = GObject.registerClass({
     _updatePanGesture(panGesture) {
         const deltaVec = panGesture.get_delta_abs();
         const delta = this.orientation === Clutter.Orientation.HORIZONTAL
-            ? -deltaVec.get_x()
-            : -deltaVec.get_y();
+            ? this._getGestureDirFactor() * deltaVec.get_x()
+            : this._getGestureDirFactor() * deltaVec.get_y();
 
         this._updateGesture(delta, this._distance);
     }
@@ -587,6 +582,10 @@ export const SwipeTracker = GObject.registerClass({
             this._interrupt();
             return;
         }
+
+        if (this.orientation === Clutter.Orientation.HORIZONTAL &&
+            Clutter.get_default_text_direction() === Clutter.TextDirection.RTL)
+            delta = -delta;
 
         this._history.append(time, delta);
         this._updateGesture(delta, distance);
@@ -654,8 +653,8 @@ export const SwipeTracker = GObject.registerClass({
     _endPanGesture(panGesture) {
         const velocity = panGesture.get_velocity();
         const v = this.orientation === Clutter.Orientation.HORIZONTAL
-            ? -velocity.get_x()
-            : -velocity.get_y();
+            ? this._getGestureDirFactor() * velocity.get_x()
+            : this._getGestureDirFactor() * velocity.get_y();
 
         this._endGesture(v, this._distance, false);
     }
@@ -678,6 +677,14 @@ export const SwipeTracker = GObject.registerClass({
 
         this._cancelled = true;
         this._endGesture(0, this._distance, false);
+    }
+
+    _getGestureDirFactor() {
+        if (this.orientation === Clutter.Orientation.HORIZONTAL &&
+            Clutter.get_default_text_direction() === Clutter.TextDirection.RTL)
+            return 1;
+
+        return -1;
     }
 
     /**

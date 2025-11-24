@@ -208,7 +208,7 @@ const UserList = GObject.registerClass({
             const laters = global.compositor.get_laters();
             laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
                 this._moveFocusToItems();
-                return false;
+                return GLib.SOURCE_REMOVE;
             });
         }
     }
@@ -385,17 +385,20 @@ const SessionMenuButton = GObject.registerClass({
 
     _populate() {
         let ids = Gdm.get_session_ids();
-        ids.sort();
 
         if (ids.length <= 1) {
             this._button.hide();
             return;
         }
 
-        for (let i = 0; i < ids.length; i++) {
-            let [sessionName, sessionDescription_] = Gdm.get_session_name_and_description(ids[i]);
+        const sessions = ids.map(id => {
+            const [sessionName] = Gdm.get_session_name_and_description(id);
+            return {id, sessionName};
+        });
 
-            let id = ids[i];
+        sessions.sort((a, b) => a.sessionName.localeCompare(b.sessionName));
+
+        for (const {id, sessionName} of sessions) {
             let item = new PopupMenu.PopupMenuItem(sessionName);
             this._menu.addMenuItem(item);
             this._items.set(id, item);
