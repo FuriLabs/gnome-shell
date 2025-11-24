@@ -52,15 +52,9 @@ gnome-shell (48.7-0+deb13u1) UNRELEASED; urgency=medium
       (gnome-shell!3849 upstream)
     - Ensure that workspace selector reappears promptly when cancelling
       a search in the overview (gnome-shell#7985 upstream)
-    - Always send the activation token when a notification is activated, even
-      if the notification comes from a non-application like
-      gnome-settings-daemon
-      (gnome-shell!3891 upstream)
     - Warn instead of crashing if an unsupported accent colour is set,
       for example when swapping between Ubuntu's patched gnome-shell and
       an upstream gnome-shell (gnome-shell!3892 upstream)
-    - Update the keyboard layout status icon if the layout group
-      is changed without UI interaction (gnome-shell!3895 upstream)
     - Always send a valid value for the reason a notification was closed
       (gnome-shell!3907 upstream)
     - In the UI for screenshots, if a button doesn't have any other label,
@@ -74,7 +68,49 @@ gnome-shell (48.7-0+deb13u1) UNRELEASED; urgency=medium
       (gnome-shell!3894 upstream)
     - Translation updates: ug
   * New upstream release 48.7
-    - TODO: Summarize changes here
+    - Revert some changes in 48.6 that could cause regressions
+      (not shown in the above summary)
+    - Ensure network icon is updated on connectivity changes
+      (gnome-shell#7357, gnome-shell#8549 upstream)
+    - In gdm, sort the available sessions by their localized name,
+      as displayed, and not by their internal IDs
+      (gnome-shell!3920 upstream)
+    - Add on-screen keyboard layouts for German (extended) and
+      German (Austria, extended)
+      (gnome-shell!3923 upstream)
+    - Avoid zombie networkmanager-openvpn-auth processes when a VPN connection
+      is stopped
+      (gnome-shell#7083 upstream)
+    - Avoid a warning on drag-and-drop when animations are disabled
+      (gnome-shell!3922 upstream)
+    - When logout, reboot or shutdown is prevented by a systemd inhibitor,
+      don't log the cancellation with a stack trace as though it was an
+      internal error
+      (gnome-shell#8749 upstream)
+    - Fix a crash when a window is closed immediately after losing on-screen
+      keyboard focus
+      (gnome-shell#8752 upstream)
+    - Fix handling of multiple gdm greeter instances
+      (gnome-shell!3942 upstream)
+    - Fix warnings and potential use-after-free when the Shell exits in
+      certain states
+      (gnome-shell!3943 upstream)
+    - Improve code clarity by using symbolic constants for SOURCE_CONTINUE,
+      SOURCE_REMOVE
+      (gnome-shell!3950 upstream)
+    - Always return a result from "later" handlers
+      (gnome-shell!3950 upstream)
+    - Align search results' provider name better
+      (gnome-shell!3951 upstream)
+    - Always register the session with GDM on startup, even if no monitor is
+      connected
+      (gnome-shell!3708 upstream)
+    - Fix misplaced separator in dash after unpinning running app
+      (gnome-shell#3966, #3799 upstream)
+    - Fix swipe gestures behaving incorrectly in RTL locales
+      (gnome-shell!3967 upstream)
+    - Fix some typos in documentation/comments
+    - Translation updates: ro
   * Interface change: the misleadingly-named org.gnome.Shell.PortalHelper.Done
     signal has been renamed to org.gnome.Shell.PortalHelper.StatusChanged.
     In practice no other Debian package appears to subscribe to this signal,
