@@ -86,7 +86,7 @@ index 5279455..22be0e0 100644
    )
  endif
 diff --git a/tests/meson.build b/tests/meson.build
-index 7a09f3b..815afbe 100644
+index a12cf2f..06174c4 100644
 --- a/tests/meson.build
 +++ b/tests/meson.build
 @@ -13,6 +13,15 @@ gvc_typelib_path = fs.parent(libgvc.get_variable('libgvc_gir')[1].full_path())
@@ -105,7 +105,7 @@ index 7a09f3b..815afbe 100644
  unit_testenv = environment()
  unit_testenv.set('GNOME_SHELL_DATADIR', data_builddir)
  unit_testenv.append('GI_TYPELIB_PATH', gvc_typelib_path, separator: ':')
-@@ -53,6 +62,7 @@ foreach test, extra_args : unit_tests
+@@ -54,6 +63,7 @@ foreach test, extra_args : unit_tests
        'unit/@0@.js'.format(test),
      ],
      suite: 'unit',
@@ -113,7 +113,7 @@ index 7a09f3b..815afbe 100644
      env: local_test_env,
      protocol: 'tap',
      workdir: meson.current_source_dir())
-@@ -100,6 +110,11 @@ foreach shell_test : shell_tests
+@@ -101,6 +111,11 @@ foreach shell_test : shell_tests
        options,
        '@0@/shell/@1@.js'.format(meson.current_source_dir(), test_name),
      ],
