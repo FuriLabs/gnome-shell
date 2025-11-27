@@ -619,6 +619,9 @@ export const Message = GObject.registerClass({
     }
 
     expand(animate) {
+        if (this.expanded)
+            return;
+
         this.expanded = true;
 
         this._actionBin.visible = !!this._actionBin.child;
@@ -841,7 +844,7 @@ class MediaMessage extends Message {
         this._updateNavButton(this._prevButton, this._player.canGoPrevious);
         this._updateNavButton(this._nextButton, this._player.canGoNext);
 
-        const appId = this._player.app?.id.replace(/\.desktop$/, '');
+        const appId = this._player.app?.id.replace(/\.desktop$/, '') ?? 'generic';
         if (this._policy?.id !== appId) {
             this._policy?.disconnectObject(this);
 
