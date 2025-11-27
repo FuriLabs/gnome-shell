@@ -109,3 +109,4 @@ st-private-Fix-texture-leak-when-creating-shadow-from-act.patch
 messageTray-Never-close-a-notification-banner-that-is-abo.patch
 status-network-Update-Wi-Fi-quicksettings-icon-on-disconn.patch
 magnifier-Fix-delayed-variables-checking.patch
+lp-2127933-fix-unattended-ethernet-icon.patch

@@ -1,0 +1,41 @@
+From: Antoine Lassagne <antoine.lassagne@canonical.com>
+Date: Fri, 10 Oct 2025 14:55:40 +0200
+Subject: [PATCH] status/network: Update indicator icon on connectivity
+ changes
+
+When there is no active main connection or it uses a device type we do
+not handle, the indicator icon and its visibility depend on the global
+connectivity.
+
+However we currently don't update the icon on connectivity changes,
+with the result that we sometimes show the fallback connection icon
+when the network is in fact disconnected.
+
+To fix this, update the icon whenever the (global) connectivity changes.
+
+Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7357
+Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/8549
+---
+ js/ui/status/network.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/status/network.js b/js/ui/status/network.js
+index d1908d1..4807e93 100644
+--- a/js/ui/status/network.js
++++ b/js/ui/status/network.js
+@@ -2185,7 +2185,6 @@ class Indicator extends SystemIndicator {
+             this._mainConnectionStateChanged();
+         }
+ 
+-        this._updateIcon();
+         this._syncConnectivity();
+     }
+ 
+@@ -2195,6 +2194,7 @@ class Indicator extends SystemIndicator {
+     }
+ 
+     _syncConnectivity() {
++        this._updateIcon();
+         if (this._mainConnection == null ||
+             this._mainConnection.state !== NM.ActiveConnectionState.ACTIVATED) {
+             this._portalHandler.clear();
