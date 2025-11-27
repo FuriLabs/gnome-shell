@@ -1,3 +1,10 @@
+gnome-shell (49.0-1ubuntu1.2) questing; urgency=medium
+
+  * d/p/lp-2127933-fix-unattended-ethernet-icon.patch:
+    Update indicator icon on connectivity changes (LP: #2127933)
+
+ -- Antoine Lassagne <antoine.lassagne@canonical.com>  Thu, 27 Nov 2025 10:53:23 +0200
+
 gnome-shell (49.0-1ubuntu1.1) questing; urgency=medium
 
   * d: Branch for ubuntu/questing
