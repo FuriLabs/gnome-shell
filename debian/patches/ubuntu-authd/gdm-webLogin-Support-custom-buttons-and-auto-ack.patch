@@ -94,7 +94,7 @@ index fa5a999..17485ce 100644
          if (this._spinner)
              this._spinner.stop();
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 435226c..43fe656 100644
+index d6e49bd..f54b857 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -1143,7 +1143,11 @@ export class ShellUserVerifier extends Signals.EventEmitter {

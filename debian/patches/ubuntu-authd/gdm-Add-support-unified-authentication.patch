@@ -19,10 +19,10 @@ commits will add support for mechanisms that support other authentication
  3 files changed, 255 insertions(+), 13 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index b3a4a3f..c9d6fbf 100644
+index 091f087..5c25ba2 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -544,7 +544,10 @@ export const LoginDialog = GObject.registerClass({
+@@ -547,7 +547,10 @@ export const LoginDialog = GObject.registerClass({
          this._gdmClient = new Gdm.Client();
  
          try {
@@ -35,10 +35,10 @@ index b3a4a3f..c9d6fbf 100644
          }
  
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index b0d775e..ae085349 100644
+index 17e95c0..3b5b459 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -23,6 +23,7 @@ Gio._promisify(Gdm.UserVerifierProxy.prototype,
+@@ -24,6 +24,7 @@ Gio._promisify(Gdm.UserVerifierProxy.prototype,
      'call_begin_verification_for_user');
  Gio._promisify(Gdm.UserVerifierProxy.prototype, 'call_begin_verification');
  
@@ -46,7 +46,7 @@ index b0d775e..ae085349 100644
  export const PASSWORD_SERVICE_NAME = 'gdm-password';
  export const FINGERPRINT_SERVICE_NAME = 'gdm-fingerprint';
  export const SMARTCARD_SERVICE_NAME = 'gdm-smartcard';
-@@ -31,8 +32,12 @@ const CLONE_FADE_ANIMATION_TIME = 250;
+@@ -32,8 +33,12 @@ const CLONE_FADE_ANIMATION_TIME = 250;
  export const PASSWORD_ROLE_NAME = 'password';
  export const SMARTCARD_ROLE_NAME = 'smartcard';
  export const FINGERPRINT_ROLE_NAME = 'fingerprint';
@@ -59,7 +59,7 @@ index b0d775e..ae085349 100644
  export const PASSWORD_AUTHENTICATION_KEY = 'enable-password-authentication';
  export const FINGERPRINT_AUTHENTICATION_KEY = 'enable-fingerprint-authentication';
  export const SMARTCARD_AUTHENTICATION_KEY = 'enable-smartcard-authentication';
-@@ -45,6 +50,13 @@ export const ALLOWED_FAILURES_KEY = 'allowed-failures';
+@@ -46,6 +51,13 @@ export const ALLOWED_FAILURES_KEY = 'allowed-failures';
  export const LOGO_KEY = 'logo';
  export const DISABLE_USER_LIST_KEY = 'disable-user-list';
  
@@ -73,7 +73,7 @@ index b0d775e..ae085349 100644
  // Give user 48ms to read each character of a PAM message
  const USER_READ_TIME = 48;
  const FINGERPRINT_SERVICE_PROXY_TIMEOUT = 5000;
-@@ -151,6 +163,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -152,6 +164,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._activeServices = new Set();
          this._unavailableServices = new Set();
          this._activeServices = new Set();
@@ -81,7 +81,7 @@ index b0d775e..ae085349 100644
          this._pendingMechanisms = new Map();
  
          this._credentialManagers = {};
-@@ -239,6 +252,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -240,6 +253,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                  this._userVerifierChoiceList.run_dispose();
                  this._userVerifierChoiceList = null;
              }
@@ -92,7 +92,7 @@ index b0d775e..ae085349 100644
          }
      }
  
-@@ -275,7 +292,20 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -276,7 +293,20 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      async answerQuery(serviceName, answer) {
          try {
              await this._handlePendingMessages();
@@ -112,8 +112,8 @@ index b0d775e..ae085349 100644
 +            await this._handlePendingMessages();
 +            this._userVerifierCustomJSON.call_reply(serviceName, json, this._cancellable, null);
          } catch (e) {
-             if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
-                 logError(e);
+             logErrorUnlessCancelled(e);
+         }
 @@ -537,6 +567,18 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._verificationFailed(serviceName, false);
      }
@@ -418,7 +418,7 @@ index b0d775e..ae085349 100644
          this._updateDefaultService();
  
          this.emit('reset');
-@@ -989,6 +1224,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -988,6 +1223,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      _onServiceUnavailable(_client, serviceName, errorMessage) {
          this._unavailableServices.add(serviceName);
  

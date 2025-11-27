@@ -57,10 +57,10 @@ index 03ce0e4..fa5a999 100644
          const introAlreadyUp = this._queryingService === serviceName;
  
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index dcef546..435226c 100644
+index b1ded97..d6e49bd 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -365,6 +365,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -366,6 +366,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      selectChoice(serviceName, key) {
@@ -73,7 +73,7 @@ index dcef546..435226c 100644
          this._userVerifierChoiceList.call_select_choice(serviceName, key, this._cancellable, null);
      }
  
-@@ -373,6 +379,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -374,6 +380,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              await this._handlePendingMessages();
              if (this._pendingMechanisms.has(PASSWORD_ROLE_NAME))
                  this._replyWithAuthSelectionResponse(serviceName, PASSWORD_ROLE_NAME, {password: answer});

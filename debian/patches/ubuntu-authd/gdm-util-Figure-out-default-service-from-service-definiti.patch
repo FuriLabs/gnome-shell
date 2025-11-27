@@ -14,10 +14,10 @@ long if/else if code that was there before
  1 file changed, 18 insertions(+), 7 deletions(-)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index ae085349..296d2ac 100644
+index 3b5b459..cb1b65c 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -62,6 +62,7 @@ const USER_READ_TIME = 48;
+@@ -63,6 +63,7 @@ const USER_READ_TIME = 48;
  const FINGERPRINT_SERVICE_PROXY_TIMEOUT = 5000;
  const FINGERPRINT_ERROR_TIMEOUT_WAIT = 15;
  

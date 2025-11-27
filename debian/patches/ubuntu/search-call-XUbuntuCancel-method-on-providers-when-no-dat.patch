@@ -91,7 +91,7 @@ index b7247ca..f20c876 100644
          this.proxy.ActivateResultAsync(id).catch(logError);
      }
 diff --git a/js/ui/search.js b/js/ui/search.js
-index d7f1df3..1c1a936 100644
+index 3333e04..2f785be 100644
 --- a/js/ui/search.js
 +++ b/js/ui/search.js
 @@ -227,7 +227,9 @@ const SearchResultsBase = GObject.registerClass({

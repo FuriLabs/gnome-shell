@@ -6521,7 +6521,7 @@ index ad854ca..b6ed4cd 100644
  export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 +export const CHOICE_LIST_ROLE_NAME = 'choice-list';
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 43fe656..0fd61ca 100644
+index f54b857..0a29cf3 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -4,6 +4,7 @@ import Gio from 'gi://Gio';
@@ -6532,7 +6532,7 @@ index 43fe656..0fd61ca 100644
  import * as Batch from './batch.js';
  import * as OVirt from './oVirt.js';
  import * as Vmware from './vmware.js';
-@@ -25,7 +26,7 @@ Gio._promisify(Gdm.UserVerifierProxy.prototype,
+@@ -26,7 +27,7 @@ Gio._promisify(Gdm.UserVerifierProxy.prototype,
      'call_begin_verification_for_user');
  Gio._promisify(Gdm.UserVerifierProxy.prototype, 'call_begin_verification');
  
@@ -6541,7 +6541,7 @@ index 43fe656..0fd61ca 100644
  export const PASSWORD_SERVICE_NAME = 'gdm-password';
  export const FINGERPRINT_SERVICE_NAME = 'gdm-fingerprint';
  export const SMARTCARD_SERVICE_NAME = 'gdm-smartcard';
-@@ -167,6 +168,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -168,6 +169,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
          this._unifiedAuthServices = new Map();
          this.addUnifiedAuthService(new UnifiedMechanism.UnifiedMechanismProtocolHandler());

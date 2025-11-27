@@ -136,7 +136,7 @@ index c320300..0454c64 100644
                  backgroundColor = dummyBgActor.get_theme_node().get_background_color();
                  dummyBgActor.destroy();
 diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js
-index b3bbcac..720b98a 100644
+index ac3970c..9727ccf 100644
 --- a/js/ui/screenShield.js
 +++ b/js/ui/screenShield.js
 @@ -31,6 +31,12 @@ const DISABLE_LOCK_KEY = 'disable-lock-screen';

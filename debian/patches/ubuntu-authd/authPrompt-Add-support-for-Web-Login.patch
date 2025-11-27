@@ -307,10 +307,10 @@ index e1ff169..3ce046a 100644
  
          let hold = params.hold;
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index e5b469b..e28445d 100644
+index eb7919b..dd888fd 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -39,6 +39,7 @@ export const AUTH_MECHANISM_PROTOCOL = 'auth-mechanisms';
+@@ -40,6 +40,7 @@ export const AUTH_MECHANISM_PROTOCOL = 'auth-mechanisms';
  export const LOGIN_SCREEN_SCHEMA = 'org.gnome.login-screen';
  export const UNIFIED_AUTHENTICATION_KEY = 'enable-unified-authentication';
  export const PASSWORD_AUTHENTICATION_KEY = 'enable-password-authentication';
@@ -318,7 +318,7 @@ index e5b469b..e28445d 100644
  export const FINGERPRINT_AUTHENTICATION_KEY = 'enable-fingerprint-authentication';
  export const SMARTCARD_AUTHENTICATION_KEY = 'enable-smartcard-authentication';
  export const BANNER_MESSAGE_KEY = 'banner-message-enable';
-@@ -266,6 +267,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -267,6 +268,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              this._cancellable = null;
          }
  
