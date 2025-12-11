@@ -1,4 +1,4 @@
-gnome-shell (46.0-0ubuntu6~24.04.13) UNRELEASED; urgency=medium
+gnome-shell (46.0-0ubuntu6~24.04.13) noble; urgency=medium
 
   * d/p/lp-2127933-fix-unattended-ethernet-icon.patch:
     Update indicator icon on connectivity changes (LP: #2127933)
