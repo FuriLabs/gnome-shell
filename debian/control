@@ -1,6 +1,5 @@
 Source: gnome-shell
 Section: gnome
-Priority: optional
 Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
 Uploaders: Jeremy Bícha <jbicha@ubuntu.com>, Marco Trevisan (Treviño) <marco@ubuntu.com>
 Build-Depends: appstream,
@@ -67,7 +66,7 @@ Build-Depends: appstream,
                xauth <!nocheck>,
                xvfb <!nocheck>,
                xwayland <!nocheck>
-Standards-Version: 4.7.2
+Standards-Version: 4.7.3
 Homepage: https://gitlab.gnome.org/GNOME/gnome-shell
 Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git
 Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell
