@@ -1,3 +1,11 @@
+gnome-shell (49.2-2) unstable; urgency=medium
+
+  * Add Build-Depends: libxml2-utils for xmllint
+  * Remove direct Build-Depends: dbus
+  * Bump Standards Version to 4.7.3
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 25 Dec 2025 20:49:01 -0500
+
 gnome-shell (49.2-1) unstable; urgency=medium
 
   * Team upload
