@@ -70,4 +70,5 @@ ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	dh_auto_test -- $(meson_test_options)
 endif
 
-override_dh_gnome_clean:
+# Skip. We only use dh_gnome for dh_translations for Ubuntu
+override_dh_gnome:
