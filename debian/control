@@ -3,7 +3,6 @@ Section: gnome
 Priority: optional
 Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.org>
 Uploaders: Jeremy Bícha <jbicha@ubuntu.com>, Marco Trevisan (Treviño) <marco@ubuntu.com>
-XS-FuriOS-Force-Staging: true
 Build-Depends: appstream,
                bash-completion,
                dbus-daemon <!nocheck>,
