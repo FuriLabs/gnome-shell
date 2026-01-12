@@ -4,6 +4,7 @@ Maintainer: Debian GNOME Maintainers <pkg-gnome-maintainers@lists.alioth.debian.
 Uploaders: Jeremy Bícha <jbicha@ubuntu.com>, Marco Trevisan (Treviño) <marco@ubuntu.com>
 Build-Depends: appstream,
                bash-completion,
+               dbus-daemon <!nocheck>,
                debhelper-compat (= 13),
                dh-sequence-gir,
                dh-sequence-gnome,
