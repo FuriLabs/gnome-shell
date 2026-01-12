@@ -1,3 +1,13 @@
+gnome-shell (49.2-3) UNRELEASED; urgency=medium
+
+  * Reinstate direct Build-Depends on the dbus-daemon package.
+    gnome-shell's test suite explicitly invokes dbus-run-session, which
+    is in the dbus-daemon package. If the dependency had been on dbus, that
+    would have been incompatible with dbus-broker, but a test dependency
+    on dbus-daemon is fine.
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 12 Jan 2026 14:19:39 +0000
+
 gnome-shell (49.2-2) unstable; urgency=medium
 
   * Add Build-Depends: libxml2-utils for xmllint
