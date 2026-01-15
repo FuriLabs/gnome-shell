@@ -1,3 +1,11 @@
+gnome-shell (49.2-1ubuntu2) resolute; urgency=medium
+
+  * d/p/gvc-Don-t-crash-with-newer-pipewire-and-fix-device-select.patch:
+    Fix a crash in GNOME shell when switching to HFP profile of
+    Bluetooth headset. (LP: #2137545)
+
+ -- Charles <charles05@canonical.com>  Thu, 15 Jan 2026 11:12:30 +0000
+
 gnome-shell (49.2-1ubuntu1) resolute; urgency=medium
 
   * Merge with Debian. Remaining changes:
