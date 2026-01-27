@@ -1,13 +1,25 @@
 gnome-shell (49.3-1) UNRELEASED; urgency=medium
 
   * New upstream release
-  * Reinstate direct Build-Depends on the dbus-daemon package.
+  * d/p/Revert-main-Register-session-with-GDM-on-startup.patch:
+    Revert a change that shouldn't have been backported to 49.x.
+    Upstream suggested this as a possible trigger for regressions in
+    modesetting during first login on some systems (the regression seems to
+    be specific to AMD GPUs, but not all AMD GPUs are affected) and it
+    seems that it was developed for v50, under the assumption that gdm3
+    changes from v50 would be present.
+    For whatever reason (possibly timing-dependent), this was reported
+    in Debian 13 but not in testing/unstable.
+    (Closes: #1125941, #1125273, #1125275, #1126174)
+  * d/control: Reinstate direct Build-Depends on the dbus-daemon package.
     gnome-shell's test suite explicitly invokes dbus-run-session, which
     is in the dbus-daemon package. If the dependency had been on dbus, that
     would have been incompatible with dbus-broker, but a test dependency
     on dbus-daemon is fine.
+  * d/patches/series: Sort with closest-to-upstream first.
+    No functional change.
 
- -- Simon McVittie <smcv@debian.org>  Tue, 27 Jan 2026 16:23:44 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 27 Jan 2026 16:39:13 +0000
 
 gnome-shell (49.2-2) unstable; urgency=medium
 
