@@ -1,5 +1,6 @@
-gnome-shell (49.3-1) UNRELEASED; urgency=medium
+gnome-shell (49.3-1) unstable; urgency=medium
 
+  * Team upload
   * New upstream release
   * d/p/Revert-main-Register-session-with-GDM-on-startup.patch:
     Revert a change that shouldn't have been backported to 49.x.
@@ -19,7 +20,7 @@ gnome-shell (49.3-1) UNRELEASED; urgency=medium
   * d/patches/series: Sort with closest-to-upstream first.
     No functional change.
 
- -- Simon McVittie <smcv@debian.org>  Tue, 27 Jan 2026 16:39:13 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 27 Jan 2026 16:42:32 +0000
 
 gnome-shell (49.2-2) unstable; urgency=medium
 
