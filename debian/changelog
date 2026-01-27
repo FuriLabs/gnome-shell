@@ -1,12 +1,13 @@
-gnome-shell (49.2-3) UNRELEASED; urgency=medium
+gnome-shell (49.3-1) UNRELEASED; urgency=medium
 
+  * New upstream release
   * Reinstate direct Build-Depends on the dbus-daemon package.
     gnome-shell's test suite explicitly invokes dbus-run-session, which
     is in the dbus-daemon package. If the dependency had been on dbus, that
     would have been incompatible with dbus-broker, but a test dependency
     on dbus-daemon is fine.
 
- -- Simon McVittie <smcv@debian.org>  Mon, 12 Jan 2026 14:19:39 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 27 Jan 2026 16:23:44 +0000
 
 gnome-shell (49.2-2) unstable; urgency=medium
 
