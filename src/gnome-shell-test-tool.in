@@ -2,7 +2,6 @@
 # -*- mode: Python; indent-tabs-mode: nil; -*-
 
 import datetime
-from gi.repository import GLib, GObject, Gio
 try:
     import json
 except ImportError:
@@ -21,7 +20,7 @@ from http import client
 from urllib import parse
 
 def show_version(option, opt_str, value, parser):
-    print("GNOME Shell Performance Test @VERSION@")
+    print("GNOME Shell Test Tool @VERSION@")
     sys.exit()
 
 def start_shell(wrap=None, perf_output=None):
