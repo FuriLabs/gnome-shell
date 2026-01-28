@@ -1,0 +1,50 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Sun, 4 Jan 2026 13:07:29 +0100
+Subject: mixer-control: Let sink update handle active output change
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+A signal is emitted when the output changes so don't set it right away
+as the stream might change port.
+
+Signed-off-by: Guido Günther <agx@sigxcpu.org>
+Origin: https://gitlab.gnome.org/GNOME/libgnome-volume-control/-/merge_requests/31
+Bug: https://gitlab.gnome.org/GNOME/libgnome-volume-control/-/issues/34
+Bug-Debian: https://bugs.debian.org/1126514
+Applied-upstream: gnome-shell 50, commit:798230599950607ec285daecd070f5bcb28580e4
+---
+ subprojects/gvc/gvc-mixer-control.c | 18 +++---------------
+ 1 file changed, 3 insertions(+), 15 deletions(-)
+
+diff --git a/subprojects/gvc/gvc-mixer-control.c b/subprojects/gvc/gvc-mixer-control.c
+index 74f9193..45ae314 100644
+--- a/subprojects/gvc/gvc-mixer-control.c
++++ b/subprojects/gvc/gvc-mixer-control.c
+@@ -639,23 +639,11 @@ gvc_mixer_control_change_output (GvcMixerControl *control,
+ 
+         /* Finally if we are not on the correct stream, swap over. */
+         if (stream != default_stream) {
+-                GvcMixerUIDevice* device;
+-
+                 g_debug ("Attempting to swap over to stream %s ",
+                          gvc_mixer_stream_get_description (stream));
+-                if (gvc_mixer_control_set_default_sink (control, stream)) {
+-                        device = gvc_mixer_control_lookup_device_from_stream (control, stream);
+-                        g_signal_emit (G_OBJECT (control),
+-                                       signals[ACTIVE_OUTPUT_UPDATE],
+-                                       0,
+-                                       gvc_mixer_ui_device_get_id (device));
+-                } else {
+-                        /* If the move failed for some reason reset the UI. */
+-                        device = gvc_mixer_control_lookup_device_from_stream (control, default_stream);
+-                        g_signal_emit (G_OBJECT (control),
+-                                       signals[ACTIVE_OUTPUT_UPDATE],
+-                                       0,
+-                                       gvc_mixer_ui_device_get_id (device));
++                if (!gvc_mixer_control_set_default_sink (control, stream)) {
++                        g_warning ("Failed to set default sink from output %s",
++                                   gvc_mixer_ui_device_get_description (output));
+                 }
+         }
+ }

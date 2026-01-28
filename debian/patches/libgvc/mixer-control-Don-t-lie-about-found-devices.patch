@@ -1,0 +1,33 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Sun, 4 Jan 2026 13:07:25 +0100
+Subject: mixer-control: Don't lie about found devices
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+We should only print that a device wasn't found when it is actually
+the case.
+
+Signed-off-by: Guido Günther <agx@sigxcpu.org>
+Origin: https://gitlab.gnome.org/GNOME/libgnome-volume-control/-/merge_requests/31
+Bug: https://gitlab.gnome.org/GNOME/libgnome-volume-control/-/issues/34
+Bug-Debian: https://bugs.debian.org/1126514
+Applied-upstream: gnome-shell 50, commit:798230599950607ec285daecd070f5bcb28580e4
+---
+ subprojects/gvc/gvc-mixer-control.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/subprojects/gvc/gvc-mixer-control.c b/subprojects/gvc/gvc-mixer-control.c
+index 383a74f..7cdb909 100644
+--- a/subprojects/gvc/gvc-mixer-control.c
++++ b/subprojects/gvc/gvc-mixer-control.c
+@@ -289,7 +289,8 @@ gvc_mixer_control_lookup_device_from_stream (GvcMixerControl *control,
+                 }
+         }
+ 
+-        g_debug ("lookup-device-from-stream - Could not find a device for stream '%s'", gvc_mixer_stream_get_description (stream));
++        if (!ret)
++                g_debug ("lookup-device-from-stream - Could not find a device for stream '%s'", gvc_mixer_stream_get_description (stream));
+ 
+         g_list_free (devices);
+ 

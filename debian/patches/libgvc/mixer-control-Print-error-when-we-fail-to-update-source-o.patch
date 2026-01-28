@@ -1,0 +1,44 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Sun, 4 Jan 2026 13:07:24 +0100
+Subject: mixer-control: Print error when we fail to update source or sink
+ port
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Since we allow for port lookups to fail we should check if the update
+worked.
+
+Signed-off-by: Guido Günther <agx@sigxcpu.org>
+Origin: https://gitlab.gnome.org/GNOME/libgnome-volume-control/-/merge_requests/31
+Bug: https://gitlab.gnome.org/GNOME/libgnome-volume-control/-/issues/34
+Bug-Debian: https://bugs.debian.org/1126514
+Applied-upstream: gnome-shell 50, commit:798230599950607ec285daecd070f5bcb28580e4
+---
+ subprojects/gvc/gvc-mixer-control.c | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/subprojects/gvc/gvc-mixer-control.c b/subprojects/gvc/gvc-mixer-control.c
+index f41c2c1..15eb5e8 100644
+--- a/subprojects/gvc/gvc-mixer-control.c
++++ b/subprojects/gvc/gvc-mixer-control.c
+@@ -1525,7 +1525,8 @@ update_sink (GvcMixerControl    *control,
+                         if (active_port == NULL ||
+                             g_strcmp0 (active_port->port, info->active_port->name) != 0) {
+                                 g_debug ("update sink - apparently a port update");
+-                                gvc_mixer_stream_set_port (stream, info->active_port->name);
++                                if (!gvc_mixer_stream_set_port (stream, info->active_port->name))
++                                        g_warning ("Port update to of %d '%s' failed", info->index, info->active_port->name);
+                         }
+                 }
+         }
+@@ -1654,7 +1655,8 @@ update_source (GvcMixerControl      *control,
+                         if (active_port == NULL ||
+                             g_strcmp0 (active_port->port, info->active_port->name) != 0) {
+                                 g_debug ("update source - apparently a port update");
+-                                gvc_mixer_stream_set_port (stream, info->active_port->name);
++                                if (!gvc_mixer_stream_set_port (stream, info->active_port->name))
++                                        g_warning ("Port update to of %d '%s' failed", info->index, info->active_port->name);
+                         }
+                 }
+         }

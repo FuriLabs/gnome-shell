@@ -1,0 +1,34 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Sun, 4 Jan 2026 13:36:27 +0100
+Subject: mixer-control: Print error when we fail to set default source
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Makes is consistent with error handling for setting default sink
+
+Signed-off-by: Guido Günther <agx@sigxcpu.org>
+Origin: https://gitlab.gnome.org/GNOME/libgnome-volume-control/-/merge_requests/31
+Bug: https://gitlab.gnome.org/GNOME/libgnome-volume-control/-/issues/34
+Bug-Debian: https://bugs.debian.org/1126514
+Applied-upstream: gnome-shell 50, commit:798230599950607ec285daecd070f5bcb28580e4
+---
+ subprojects/gvc/gvc-mixer-control.c | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/subprojects/gvc/gvc-mixer-control.c b/subprojects/gvc/gvc-mixer-control.c
+index 15eb5e8..acac0ca 100644
+--- a/subprojects/gvc/gvc-mixer-control.c
++++ b/subprojects/gvc/gvc-mixer-control.c
+@@ -729,7 +729,10 @@ gvc_mixer_control_change_input (GvcMixerControl *control,
+         if (stream != default_stream) {
+                 g_debug ("change-input - attempting to swap over to stream %s",
+                          gvc_mixer_stream_get_description (stream));
+-                gvc_mixer_control_set_default_source (control, stream);
++                if (!gvc_mixer_control_set_default_source (control, stream)) {
++                        g_warning ("Failed to set default source from input %s",
++                                   gvc_mixer_ui_device_get_description (input));
++                }
+         }
+ }
+ 
