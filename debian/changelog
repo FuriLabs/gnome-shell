@@ -1,3 +1,12 @@
+gnome-shell (49.3-2) UNRELEASED; urgency=medium
+
+  * d/patches/libgvc: Update libgvc to prevent crashes with newer Pipewire.
+    This updates it to 47c47a42 (2026-01-23) which is the latest version,
+    and the version currently used in gnome-shell's main branch.
+    (Closes: #1126514)
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 28 Jan 2026 11:16:11 +0000
+
 gnome-shell (49.3-1) unstable; urgency=medium
 
   * Team upload
