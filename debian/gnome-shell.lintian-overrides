@@ -4,4 +4,3 @@ gnome-shell: custom-library-search-path RUNPATH /usr/lib/*/mutter-* [usr/lib/gno
 
 # gnome-shell ships some desktop files only to provide metadata and icons to some apps
 gnome-shell: desktop-command-not-in-package false [usr/share/applications/org.gnome.Shell.Extensions.desktop]
-gnome-shell: desktop-entry-lacks-keywords-entry [usr/share/applications/org.gnome.Extensions.desktop]
