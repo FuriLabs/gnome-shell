@@ -18,10 +18,10 @@ Bug-Debian: https://bugs.debian.org/1126174
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
-index bd39063..4a011f2 100644
+index 90e78a1..c911ab2 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
-@@ -335,8 +335,6 @@ async function _initializeUI() {
+@@ -323,8 +323,6 @@ async function _initializeUI() {
      extensionManager = new ExtensionSystem.ExtensionManager();
      extensionManager.init();
  
@@ -30,12 +30,12 @@ index bd39063..4a011f2 100644
      if (sessionMode.isGreeter && screenShield) {
          layoutManager.connect('startup-prepared', () => {
              screenShield.showDialog();
-@@ -383,6 +381,8 @@ async function _initializeUI() {
+@@ -371,6 +369,8 @@ async function _initializeUI() {
              sessionMode.currentMode !== 'initial-setup')
              _handleLockScreenWarning();
  
 +        LoginManager.registerSessionWithGDM();
 +
          if (perfModule) {
-             let perfOutput = GLib.getenv('SHELL_PERF_OUTPUT');
+             const perfOutput = GLib.getenv('SHELL_PERF_OUTPUT');
              Scripting.runPerfScript(perfModule, perfOutput);
