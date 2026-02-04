@@ -1,0 +1,68 @@
+# SPDX-FileCopyrightText: 2025 Florian Müllner <fmuellner@gnome.org>
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+include:
+  - project: GNOME/citemplates
+    file: templates/default-rules.yml
+  - component: gitlab.gnome.org/GNOME/citemplates/gnomeos-basic-ci@master
+    inputs:
+      meson-sourcedir: test-project
+      meson-test-options: --setup plain
+      asan: disabled
+      lsan-options: suppressions=$CI_PROJECT_DIR/.gitlab-ci/lsan-suppressions.txt
+  - project: Infrastructure/freedesktop-ci-templates
+    file: templates/ci-fairy.yml
+
+stages:
+ - review
+ - build
+
+.skip-git-clone:
+  variables:
+    GIT_STRATEGY: none
+
+.only-merge-requests:
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME =~ /^$/'
+      when: never
+    - if: $CI_MERGE_REQUEST_TARGET_BRANCH_NAME
+      when: on_success
+
+check-merge-request:
+  extends:
+    - .fdo.ci-fairy
+    - .skip-git-clone
+  stage: review
+  script:
+    ci-fairy check-merge-request --require-allow-collaboration --junit-xml=check-merge-request-report.xml
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - check-merge-request-report.xml
+    reports:
+      junit: check-merge-request-report.xml
+  rules:
+    - !reference [.only-merge-requests, rules]
+
+check-commit-log:
+  extends:
+    - .fdo.ci-fairy
+  stage: review
+  script:
+    ci-fairy check-commits --junit-xml=commit-messages-report.xml
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - commit-messages-report.xml
+    reports:
+      junit: commit-messages-report.xml
+  rules:
+    - !reference [.only-merge-requests, rules]
+
+check-reuse:
+  stage: review
+  image:
+    name: fsfe/reuse:latest
+    entrypoint: ['']
+  script:
+    - reuse lint

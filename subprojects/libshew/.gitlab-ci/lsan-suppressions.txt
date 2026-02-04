@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2025 Florian Müllner <fmuellner@gnome.org>
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+leak:get_wayland_display
+
+# Fontconfig
+leak:FcFontSetList
+leak:FcPatternObjectInsertElt
+leak:FcPatternObjectInsertElt2
+leak:FcFontRenderPrepare
+leak:FcDefaultSubstitute
+leak:FcDefaultSubstituteWithPat
+leak:FcConfigSubstituteWithPat
+
+# pango
+leak:pango_cairo_fc_font_map_fontset_key_substitute
