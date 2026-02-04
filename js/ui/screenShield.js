@@ -154,7 +154,7 @@ export class ScreenShield extends Signals.EventEmitter {
     }
 
     _setActive(active) {
-        let prevIsActive = this._isActive;
+        const prevIsActive = this._isActive;
         this._isActive = active;
 
         if (prevIsActive !== this._isActive)
@@ -164,7 +164,7 @@ export class ScreenShield extends Signals.EventEmitter {
     }
 
     _setLocked(locked) {
-        let prevIsLocked = this._isLocked;
+        const prevIsLocked = this._isLocked;
         this._isLocked = locked;
 
         if (prevIsLocked !== this._isLocked)
@@ -194,7 +194,7 @@ export class ScreenShield extends Signals.EventEmitter {
         if (this._isModal)
             return true;
 
-        let grab = Main.pushModal(Main.uiGroup, {actionMode: Shell.ActionMode.LOCK_SCREEN});
+        const grab = Main.pushModal(Main.uiGroup, {actionMode: Shell.ActionMode.LOCK_SCREEN});
 
         // We expect at least a keyboard grab here
         this._isModal = (grab.get_seat_state() & Clutter.GrabState.KEYBOARD) !== 0;
@@ -274,10 +274,10 @@ export class ScreenShield extends Signals.EventEmitter {
         if (this._activationTime === 0)
             this._activationTime = GLib.get_monotonic_time();
 
-        let shouldLock = this._settings.get_boolean(LOCK_ENABLED_KEY) && !this._isLocked;
+        const shouldLock = this._settings.get_boolean(LOCK_ENABLED_KEY) && !this._isLocked;
 
         if (shouldLock) {
-            let lockTimeout = Math.max(
+            const lockTimeout = Math.max(
                 adjustAnimationTime(STANDARD_FADE_TIME),
                 this._settings.get_uint(LOCK_DELAY_KEY) * 1000);
             this._lockTimeoutId = GLib.timeout_add(
@@ -426,7 +426,7 @@ export class ScreenShield extends Signals.EventEmitter {
 
     _ensureUnlockDialog(allowCancel) {
         if (!this._dialog) {
-            let constructor = Main.sessionMode.unlockDialog;
+            const constructor = Main.sessionMode.unlockDialog;
             if (!constructor) {
                 // This session mode has no locking capabilities
                 this.deactivate(true);
@@ -474,7 +474,7 @@ export class ScreenShield extends Signals.EventEmitter {
         this._lockScreenGroup.show();
         this._lockScreenState = MessageTray.State.SHOWING;
 
-        let fadeToBlack = params.fadeToBlack;
+        const fadeToBlack = params.fadeToBlack;
 
         if (params.animateLockScreen) {
             this._lockDialogGroup.translation_y = -global.screen_height;
@@ -506,7 +506,7 @@ export class ScreenShield extends Signals.EventEmitter {
         if (params.fadeToBlack && params.animateFade) {
             // Take a beat
 
-            let id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, MANUAL_FADE_TIME, () => {
+            const id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, MANUAL_FADE_TIME, () => {
                 this._activateFade(this._shortLightbox, MANUAL_FADE_TIME);
                 return GLib.SOURCE_REMOVE;
             });
@@ -631,11 +631,6 @@ export class ScreenShield extends Signals.EventEmitter {
             animateLockScreen: animate,
             fadeToBlack: true,
         });
-        // On wayland, a crash brings down the entire session, so we don't
-        // need to defend against being restarted unlocked
-        if (!Meta.is_wayland_compositor())
-            global.set_runtime_state(LOCKED_STATE_STR, GLib.Variant.new('b', true));
-
         // We used to set isActive and emit active-changed here,
         // but now we do that from lockScreenShown, which means
         // there is a 0.3 seconds window during which the lock
@@ -660,7 +655,7 @@ export class ScreenShield extends Signals.EventEmitter {
     }
 
     removeCredentialManager(serviceName) {
-        let credentialManager = this._credentialManagers[serviceName];
+        const credentialManager = this._credentialManagers[serviceName];
         if (!credentialManager)
             return;
 
@@ -688,8 +683,8 @@ export class ScreenShield extends Signals.EventEmitter {
         St.Clipboard.get_default().set_text(St.ClipboardType.CLIPBOARD, '');
         St.Clipboard.get_default().set_text(St.ClipboardType.PRIMARY, '');
 
-        let userManager = AccountsService.UserManager.get_default();
-        let user = userManager.get_user(GLib.get_user_name());
+        const userManager = AccountsService.UserManager.get_default();
+        const user = userManager.get_user(GLib.get_user_name());
 
         this.activate(animate);
 
@@ -703,7 +698,7 @@ export class ScreenShield extends Signals.EventEmitter {
     lockIfWasLocked() {
         if (!this._settings.get_boolean(LOCK_ENABLED_KEY))
             return;
-        let wasLocked = global.get_runtime_state('b', LOCKED_STATE_STR);
+        const wasLocked = global.get_runtime_state('b', LOCKED_STATE_STR);
         if (wasLocked === null)
             return;
         const laters = global.compositor.get_laters();

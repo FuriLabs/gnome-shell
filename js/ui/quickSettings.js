@@ -16,7 +16,7 @@ import {Slider} from './slider.js';
 import {PopupAnimation} from './boxpointer.js';
 
 const DIM_BRIGHTNESS = -0.4;
-const POPUP_ANIMATION_TIME = 400;
+export const POPUP_ANIMATION_TIME = 400;
 
 export const QuickSettingsItem = GObject.registerClass({
     Properties: {
@@ -180,7 +180,7 @@ export const QuickMenuToggle = GObject.registerClass({
         });
         this._box.add_child(contents);
 
-        let separator = new St.Widget({style_class: 'quick-toggle-separator'});
+        const separator = new St.Widget({style_class: 'quick-toggle-separator'});
         this._box.add_child(separator);
 
         this._menuButton = new St.Button({

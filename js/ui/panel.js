@@ -218,6 +218,13 @@ class ActivitiesButton extends PanelMenu.Button {
             this);
 
         this._xdndTimeOut = 0;
+
+        this._clickGesture = new Clutter.ClickGesture();
+        this._clickGesture.connect('recognize', () => {
+            if (Main.overview.shouldToggleByCornerOrButton())
+                Main.overview.toggle();
+        });
+        this.add_action(this._clickGesture);
     }
 
     handleDragOver(source, _actor, _x, _y, _time) {
@@ -234,18 +241,12 @@ class ActivitiesButton extends PanelMenu.Button {
         return DND.DragMotionResult.CONTINUE;
     }
 
-    vfunc_event(event) {
-        if (event.type() === Clutter.EventType.TOUCH_END ||
-            event.type() === Clutter.EventType.BUTTON_RELEASE) {
-            if (Main.overview.shouldToggleByCornerOrButton())
-                Main.overview.toggle();
-        }
-
+    vfunc_scroll_event(event) {
         return Main.wm.handleWorkspaceScroll(event);
     }
 
     vfunc_key_release_event(event) {
-        let symbol = event.get_key_symbol();
+        const symbol = event.get_key_symbol();
         if (symbol === Clutter.KEY_Return || symbol === Clutter.KEY_space) {
             if (Main.overview.shouldToggleByCornerOrButton()) {
                 Main.overview.toggle();
@@ -257,8 +258,8 @@ class ActivitiesButton extends PanelMenu.Button {
     }
 
     _xdndToggleOverview() {
-        let [x, y] = global.get_pointer();
-        let pickedActor = global.stage.get_actor_at_pos(Clutter.PickMode.REACTIVE, x, y);
+        const [x, y] = global.get_pointer();
+        const pickedActor = global.stage.get_actor_at_pos(Clutter.PickMode.REACTIVE, x, y);
 
         if (pickedActor === this && Main.overview.shouldToggleByCornerOrButton())
             Main.overview.toggle();
@@ -352,13 +353,13 @@ class QuickSettings extends PanelMenu.Button {
         this._indicators.add_child(this._darkMode);
         this._indicators.add_child(this._doNotDisturb);
         this._indicators.add_child(this._backlight);
-        this._indicators.add_child(this._powerProfiles);
         if (this._bluetooth)
             this._indicators.add_child(this._bluetooth);
         this._indicators.add_child(this._rfkill);
         this._indicators.add_child(this._autoRotate);
         this._indicators.add_child(this._volumeOutput);
         this._indicators.add_child(this._unsafeMode);
+        this._indicators.add_child(this._powerProfiles);
         this._indicators.add_child(this._system);
 
         // add our quick settings items before any external ones
@@ -476,7 +477,7 @@ class Panel extends St.Widget {
     }
 
     vfunc_get_preferred_width(_forHeight) {
-        let primaryMonitor = Main.layoutManager.primaryMonitor;
+        const primaryMonitor = Main.layoutManager.primaryMonitor;
 
         if (primaryMonitor)
             return [0, primaryMonitor.width];
@@ -487,27 +488,26 @@ class Panel extends St.Widget {
     vfunc_allocate(box) {
         this.set_allocation(box);
 
-        let allocWidth = box.x2 - box.x1;
-        let allocHeight = box.y2 - box.y1;
+        const allocWidth = box.x2 - box.x1;
+        const allocHeight = box.y2 - box.y1;
 
-        let [, leftNaturalWidth] = this._leftBox.get_preferred_width(-1);
-        let [, centerNaturalWidth] = this._centerBox.get_preferred_width(-1);
-        let [, rightNaturalWidth] = this._rightBox.get_preferred_width(-1);
+        const [, leftNaturalWidth] = this._leftBox.get_preferred_width(-1);
+        const [, centerNaturalWidth] = this._centerBox.get_preferred_width(-1);
+        const [, rightNaturalWidth] = this._rightBox.get_preferred_width(-1);
 
-        let sideWidth, centerWidth;
-        centerWidth = centerNaturalWidth;
+        const centerWidth = centerNaturalWidth;
 
         // get workspace area and center date entry relative to it
-        let monitor = Main.layoutManager.findMonitorForActor(this);
+        const monitor = Main.layoutManager.findMonitorForActor(this);
         let centerOffset = 0;
         if (monitor) {
-            let workArea = Main.layoutManager.getWorkAreaForMonitor(monitor.index);
+            const workArea = Main.layoutManager.getWorkAreaForMonitor(monitor.index);
             centerOffset = 2 * (workArea.x - monitor.x) + workArea.width - monitor.width;
         }
 
-        sideWidth = Math.max(0, (allocWidth - centerWidth + centerOffset) / 2);
+        const sideWidth = Math.max(0, (allocWidth - centerWidth + centerOffset) / 2);
 
-        let childBox = new Clutter.ActorBox();
+        const childBox = new Clutter.ActorBox();
 
         childBox.y1 = 0;
         childBox.y2 = allocHeight;
@@ -554,7 +554,7 @@ class Panel extends St.Widget {
             return Clutter.EVENT_PROPAGATE;
 
         const [x, y] = event.get_coords();
-        let dragWindow = this._getDraggableWindowForPosition(x);
+        const dragWindow = this._getDraggableWindowForPosition(x);
 
         if (!dragWindow)
             return Clutter.EVENT_PROPAGATE;
@@ -582,7 +582,7 @@ class Panel extends St.Widget {
     }
 
     vfunc_key_press_event(event) {
-        let symbol = event.get_key_symbol();
+        const symbol = event.get_key_symbol();
         if (symbol === Clutter.KEY_Escape) {
             global.display.focus_default_window(event.get_time());
             return Clutter.EVENT_STOP;
@@ -595,7 +595,7 @@ class Panel extends St.Widget {
         if (!indicator || !indicator.mapped)
             return; // menu not supported by current session mode
 
-        let menu = indicator.menu;
+        const menu = indicator.menu;
         if (!indicator.reactive)
             return;
 
@@ -631,7 +631,7 @@ class Panel extends St.Widget {
     }
 
     set boxOpacity(value) {
-        let isReactive = value > 0;
+        const isReactive = value > 0;
 
         this._leftBox.opacity = value;
         this._leftBox.reactive = isReactive;
@@ -646,7 +646,7 @@ class Panel extends St.Widget {
     }
 
     _updatePanel() {
-        let panel = Main.sessionMode.panel;
+        const panel = Main.sessionMode.panel;
         this._hideIndicators();
         this._updateBox(panel.left, this._leftBox);
         this._updateBox(panel.center, this._centerBox);
@@ -669,8 +669,8 @@ class Panel extends St.Widget {
     }
 
     _hideIndicators() {
-        for (let role in PANEL_ITEM_IMPLEMENTATIONS) {
-            let indicator = this.statusArea[role];
+        for (const role in PANEL_ITEM_IMPLEMENTATIONS) {
+            const indicator = this.statusArea[role];
             if (!indicator)
                 continue;
             indicator.container.hide();
@@ -680,7 +680,7 @@ class Panel extends St.Widget {
     _ensureIndicator(role) {
         let indicator = this.statusArea[role];
         if (!indicator) {
-            let constructor = PANEL_ITEM_IMPLEMENTATIONS[role];
+            const constructor = PANEL_ITEM_IMPLEMENTATIONS[role];
             if (!constructor) {
                 // This icon is not implemented (this is a bug)
                 return null;
@@ -692,11 +692,11 @@ class Panel extends St.Widget {
     }
 
     _updateBox(elements, box) {
-        let nChildren = box.get_n_children();
+        const nChildren = box.get_n_children();
 
         for (let i = 0; i < elements.length; i++) {
-            let role = elements[i];
-            let indicator = this._ensureIndicator(role);
+            const role = elements[i];
+            const indicator = this._ensureIndicator(role);
             if (indicator == null)
                 continue;
 
@@ -705,17 +705,17 @@ class Panel extends St.Widget {
     }
 
     _addToPanelBox(role, indicator, position, box) {
-        let container = indicator.container;
+        const container = indicator.container;
         container.show();
 
-        let parent = container.get_parent();
+        const parent = container.get_parent();
         if (parent)
             parent.remove_child(container);
 
 
         box.insert_child_at_index(container, position);
         this.statusArea[role] = indicator;
-        let destroyId = indicator.connect('destroy', emitter => {
+        const destroyId = indicator.connect('destroy', emitter => {
             delete this.statusArea[role];
             emitter.disconnect(destroyId);
         });
@@ -731,12 +731,12 @@ class Panel extends St.Widget {
             throw new TypeError('Status indicator must be an instance of PanelMenu.Button');
 
         position ??= 0;
-        let boxes = {
+        const boxes = {
             left: this._leftBox,
             center: this._centerBox,
             right: this._rightBox,
         };
-        let boxContainer = boxes[box] || this._rightBox;
+        const boxContainer = boxes[box] || this._rightBox;
         this.statusArea[role] = indicator;
         this._addToPanelBox(role, indicator, position, boxContainer);
         return indicator;
@@ -765,13 +765,13 @@ class Panel extends St.Widget {
     }
 
     _getDraggableWindowForPosition(stageX) {
-        let workspaceManager = global.workspace_manager;
+        const workspaceManager = global.workspace_manager;
         const windows = workspaceManager.get_active_workspace().list_windows();
         const allWindowsByStacking =
             global.display.sort_windows_by_stacking(windows).reverse();
 
         return allWindowsByStacking.find(metaWindow => {
-            let rect = metaWindow.get_frame_rect();
+            const rect = metaWindow.get_frame_rect();
             return metaWindow.is_on_primary_monitor() &&
                    metaWindow.showing_on_its_workspace() &&
                    metaWindow.get_window_type() !== Meta.WindowType.DESKTOP &&

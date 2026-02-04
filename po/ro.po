@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnome-shell master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-shell/issues/\n"
-"POT-Creation-Date: 2025-11-24 13:53+0000\n"
-"PO-Revision-Date: 2026-01-09 10:12+0100\n"
+"POT-Creation-Date: 2026-01-06 06:34+0000\n"
+"PO-Revision-Date: 2026-01-09 10:10+0100\n"
 "Last-Translator: Antonio Marin <gnmer.6qxyg@slmail.me>\n"
 "Language-Team: Romanian <gnomero-list@lists.sourceforge.net>\n"
 "Language: ro\n"
@@ -105,7 +105,7 @@ msgstr "Deschide o fereastră nouă a aplicației fixate 9"
 
 # Instantaneu=Imagine sau fotografie obținută printr-o expunere foarte scurtă. Captură=Totalitatea bunurilor materiale capturate de la inamic.
 #. Translators: name of the folder under ~/Pictures for screenshots.
-#: data/50-gnome-shell-screenshots.xml:6 js/ui/screenshot.js:2290
+#: data/50-gnome-shell-screenshots.xml:6 js/ui/screenshot.js:2297
 msgid "Screenshots"
 msgstr "Instantanee de ecran"
 
@@ -130,7 +130,7 @@ msgid "Record a screencast interactively"
 msgstr "Fă o înregistrare de ecran în mod interactiv"
 
 #: data/50-gnome-shell-system.xml:6
-#: data/X-GNOME-Shell-System.directory.desktop.in:2 js/ui/messageTray.js:1313
+#: data/X-GNOME-Shell-System.directory.desktop.in:2 js/ui/messageTray.js:1314
 msgid "System"
 msgstr "Sistem"
 
@@ -1039,12 +1039,24 @@ msgctxt "search-result"
 msgid "Lock Screen Rotation"
 msgstr "Blochează rotația ecranului"
 
-#: js/misc/timeLimitsManager.js:342
+#: js/misc/timeLimitsManager.js:468
 msgid "GNOME needs to save screen time data"
 msgstr ""
 "GNOME trebuie să înregistreze datele privind timpul de utilizare a ecranului"
 
-#: js/misc/timeLimitsManager.js:1123
+#: js/misc/timeLimitsManager.js:1393
+msgid "Screen Time Limit is almost up"
+msgstr "Limita de utilizare a ecranului este aproape"
+
+#: js/misc/timeLimitsManager.js:1395
+#, javascript-format
+msgid "The computer will lock in %d second."
+msgid_plural "The computer will lock in %d seconds."
+msgstr[0] "Calculatorul se va bloca peste %d secundă"
+msgstr[1] "Calculatorul se va bloca peste %d secunde"
+msgstr[2] "Calculatorul se va bloca peste %d de secunde"
+
+#: js/misc/timeLimitsManager.js:1403
 #, javascript-format
 msgid "Screen Time Limit in %d Minute"
 msgid_plural "Screen Time Limit in %d Minutes"
@@ -1052,23 +1064,23 @@ msgstr[0] "Limită de utilizare a ecranului peste %d minut"
 msgstr[1] "Limită de utilizare a ecranului peste %d minute"
 msgstr[2] "Limită de utilizare a ecranului peste %d de minute"
 
-#: js/misc/timeLimitsManager.js:1130
+#: js/misc/timeLimitsManager.js:1407
 msgid "Your screen time limit is approaching"
 msgstr "Limita de utilizare a ecranului se apropie"
 
-#: js/misc/timeLimitsManager.js:1144
+#: js/misc/timeLimitsManager.js:1428
 msgid "Screen Time Limit Reached"
 msgstr "Limita de utilizare a ecranului a fost atinsă"
 
-#: js/misc/timeLimitsManager.js:1145
+#: js/misc/timeLimitsManager.js:1429
 msgid "It’s time to stop using the device"
 msgstr "Este timpul să nu mai folosești aparatul"
 
-#: js/misc/util.js:130
+#: js/misc/util.js:131
 msgid "Command not found"
 msgstr "Comanda nu a fost găsită"
 
-#: js/misc/util.js:168
+#: js/misc/util.js:169
 #, javascript-format
 msgid "Execution of “%s” failed:"
 msgstr "Executarea comenzii „%s” a eșuat:"
@@ -1241,7 +1253,7 @@ msgstr "%s a fost fixat în Preferate."
 msgid "%s has been unpinned from the dash."
 msgstr "%s a fost desprins din Preferate."
 
-#: js/ui/appFavorites.js:134 js/ui/main.js:316
+#: js/ui/appFavorites.js:134 js/ui/main.js:304
 msgid "Undo"
 msgstr "Anulează"
 
@@ -1403,36 +1415,36 @@ msgstr "%d"
 msgid "Week %V"
 msgstr "Săptămâna %V"
 
-#: js/ui/calendar.js:773
+#: js/ui/calendar.js:774
 msgid "No Notifications"
 msgstr "Nicio notificare"
 
-#: js/ui/calendar.js:812
+#: js/ui/calendar.js:815
 msgid "Clear"
 msgstr "Șterge"
 
-#: js/ui/calendar.js:816
+#: js/ui/calendar.js:819
 msgctxt "action"
 msgid "Clear all notifications"
 msgstr "Șterge notificările"
 
 #. Translators: %s is an application name
-#: js/ui/closeDialog.js:42
+#: js/ui/closeDialog.js:40
 #, javascript-format
 msgid "“%s” Is Not Responding"
 msgstr "„%s” nu răspunde"
 
-#: js/ui/closeDialog.js:43
+#: js/ui/closeDialog.js:41
 msgid ""
 "You may choose to wait a short while for it to continue or force the app to "
 "quit entirely"
 msgstr "Se poate aștepta puțin timp sau se poate închide forțat aplicația"
 
-#: js/ui/closeDialog.js:71
+#: js/ui/closeDialog.js:69
 msgid "Force Quit"
 msgstr "Forțează închiderea"
 
-#: js/ui/closeDialog.js:76
+#: js/ui/closeDialog.js:74
 msgid "Wait"
 msgstr "Așteaptă"
 
@@ -1561,7 +1573,7 @@ msgstr "Autentificare"
 msgid "Sorry, that didn’t work. Please try again."
 msgstr "Nu a funcționat. Încearcă din nou."
 
-#: js/ui/ctrlAltTab.js:23 js/ui/overviewControls.js:406
+#: js/ui/ctrlAltTab.js:23 js/ui/overviewControls.js:407
 msgid "Windows"
 msgstr "Ferestre"
 
@@ -1924,7 +1936,7 @@ msgstr "Oprește"
 msgid "Leave Off"
 msgstr "Lasă oprit"
 
-#: js/ui/keyboard.js:179 js/ui/status/keyboard.js:901
+#: js/ui/keyboard.js:179 js/ui/status/keyboard.js:898
 msgid "Keyboard Settings"
 msgstr "Opțiuni tastatură"
 
@@ -1982,19 +1994,19 @@ msgstr "Arată sursa"
 msgid "Web Page"
 msgstr "Pagina Web"
 
-#: js/ui/main.js:312
+#: js/ui/main.js:300
 msgid "System was put in unsafe mode"
 msgstr "Sistemul a fost pus în modul nesigur"
 
-#: js/ui/main.js:313
+#: js/ui/main.js:301
 msgid "Apps now have unrestricted access"
 msgstr "Aplicațiile au acum acces nerestricționat"
 
-#: js/ui/main.js:375
+#: js/ui/main.js:363
 msgid "Logged in as a privileged user"
 msgstr "Autentificat ca utilizator privilegiat"
 
-#: js/ui/main.js:376
+#: js/ui/main.js:364
 msgid ""
 "Running a session as a privileged user should be avoided for security "
 "reasons. If possible, you should log in as a normal user."
@@ -2003,17 +2015,17 @@ msgstr ""
 "motive de securitate. Dacă este posibil, autentificarea ar trebui făcută ca "
 "utilizator normal."
 
-#: js/ui/main.js:422
+#: js/ui/main.js:410
 msgid "Screen Lock disabled"
 msgstr "Blocarea ecranului este dezactivată"
 
-#: js/ui/main.js:423
+#: js/ui/main.js:411
 msgid "Screen Locking requires the GNOME display manager"
 msgstr "Blocarea ecranului are nevoie de administratorul de afișaj GNOME"
 
 #. Translators: this is the string displayed in the header when a message
 #. source doesn't have a name
-#: js/ui/messageList.js:409
+#: js/ui/messageList.js:404
 msgid "Unknown App"
 msgstr "Aplicație necunoscută"
 
@@ -2033,11 +2045,11 @@ msgstr "Titlu necunoscut"
 #. in the search entry when no search is
 #. active; it should not exceed ~30
 #. characters.
-#: js/ui/overviewControls.js:329
+#: js/ui/overviewControls.js:330
 msgid "Type to search"
 msgstr "Scrie pentru a căuta"
 
-#: js/ui/overviewControls.js:394
+#: js/ui/overviewControls.js:395
 msgid "Apps"
 msgstr "Aplicații"
 
@@ -2097,12 +2109,12 @@ msgstr "Apasă orice tastă pentru a ieși"
 msgid "Activities"
 msgstr "Activități"
 
-#: js/ui/panel.js:289
+#: js/ui/panel.js:290
 msgctxt "System menu in the top bar"
 msgid "System"
 msgstr "Sistem"
 
-#: js/ui/panel.js:465
+#: js/ui/panel.js:466
 msgid "Top Bar"
 msgstr "Parte de sus"
 
@@ -2118,23 +2130,15 @@ msgstr "Execută o comandă"
 msgid "Press ESC to close"
 msgstr "Apasă ESC pentru a închide"
 
-#: js/ui/runDialog.js:256
-msgid "Restart is not available on Wayland"
-msgstr "Repornirea nu este disponibilă în Wayland"
-
-#: js/ui/runDialog.js:261
-msgid "Restarting…"
-msgstr "Se repornește…"
-
-#: js/ui/screenShield.js:233
+#: js/ui/screenShield.js:227
 msgid "GNOME needs to lock the screen"
 msgstr "GNOME trebuie să blocheze ecranul"
 
-#: js/ui/screenShield.js:274 js/ui/screenShield.js:679
+#: js/ui/screenShield.js:269 js/ui/screenShield.js:675
 msgid "Unable to lock"
 msgstr "Blocare nereușită"
 
-#: js/ui/screenShield.js:275 js/ui/screenShield.js:680
+#: js/ui/screenShield.js:270 js/ui/screenShield.js:676
 msgid "Lock was blocked by an app"
 msgstr "Blocarea a fost împiedicată de o aplicație"
 
@@ -2143,118 +2147,118 @@ msgstr "Blocarea a fost împiedicată de o aplicație"
 msgid "Screen Capture"
 msgstr "Înregistrare ecran"
 
-#: js/ui/screenshot.js:1266
+#: js/ui/screenshot.js:1268
 msgid "Selection"
 msgstr "Zonă"
 
-#: js/ui/screenshot.js:1276
+#: js/ui/screenshot.js:1278
 msgid "Area Selection"
 msgstr "Alege zona"
 
-#: js/ui/screenshot.js:1281
+#: js/ui/screenshot.js:1283
 msgid "Screen"
 msgstr "Ecran"
 
-#: js/ui/screenshot.js:1291
+#: js/ui/screenshot.js:1293
 msgid "Screen Selection"
 msgstr "Alege ecranul"
 
-#: js/ui/screenshot.js:1296
+#: js/ui/screenshot.js:1298
 msgid "Window"
 msgstr "Fereastră"
 
-#: js/ui/screenshot.js:1306
+#: js/ui/screenshot.js:1308
 msgid "Window Selection"
 msgstr "Alege fereastra"
 
-#: js/ui/screenshot.js:1331 js/ui/status/system.js:118
+#: js/ui/screenshot.js:1333 js/ui/status/system.js:118
 msgid "Take Screenshot"
 msgstr "Instantaneu de ecran"
 
-#: js/ui/screenshot.js:1347
+#: js/ui/screenshot.js:1349
 msgid "Record Screen"
 msgstr "Înregistrează ecranul"
 
 #. Translators: since this string refers to an action,
 #. it needs to be phrased as a verb.
-#: js/ui/screenshot.js:1364
+#: js/ui/screenshot.js:1366
 msgid "Capture"
 msgstr "Apasă"
 
-#: js/ui/screenshot.js:1386
+#: js/ui/screenshot.js:1388
 msgid "Show Pointer"
 msgstr "Arată indicatorul"
 
 #. Translators: this is the folder where recorded
 #. screencasts are stored.
-#: js/ui/screenshot.js:2014
+#: js/ui/screenshot.js:2021
 msgid "Screencasts"
 msgstr "Înregistrări de ecran"
 
 #. Translators: this is a filename used for screencast
 #. * recording, where "%d" and "%t" date and time, e.g.
 #. * "Screencast From 07-17-2013 10:00:46 PM"
-#: js/ui/screenshot.js:2019
+#: js/ui/screenshot.js:2026
 #, no-c-format
 msgid "Screencast From %d %t"
 msgstr "Video %d %t"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2065
+#: js/ui/screenshot.js:2072
 msgid "Screencast recorded"
 msgstr "Înregistrare de ecran efectuată"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2078
+#: js/ui/screenshot.js:2085
 msgid "Screencast failed to start"
 msgstr "Înregistrarea ecranului nu a putut începe"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2084
+#: js/ui/screenshot.js:2091
 msgid "Screencast ended: Out of disk space"
 msgstr "Înregistrarea ecranului s-a terminat: nu mai există spațiu pe disc"
 
 #. We can encourage user to try again on service crashes since the
 #. recorder will auto-blocklist the pipeline that crashed.
 #. Translators: notification title.
-#: js/ui/screenshot.js:2090
+#: js/ui/screenshot.js:2097
 msgid "Screencast ended unexpectedly, please try again"
 msgstr "Înregistrarea ecranului s-a terminat neașteptat, încearcă din nou"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2093
+#: js/ui/screenshot.js:2100
 msgid "Screencast ended unexpectedly"
 msgstr "Înregistrarea de ecran s-a terminat neașteptat"
 
 #. Translators: notification body when a screencast was recorded.
-#: js/ui/screenshot.js:2106
+#: js/ui/screenshot.js:2113
 msgid "Click here to view the video"
 msgstr "Clic aici pentru a vedea înregistrarea"
 
 #. Translators: button on the screencast notification.
 #. Translators: button on the screenshot notification.
-#: js/ui/screenshot.js:2114 js/ui/screenshot.js:2357
+#: js/ui/screenshot.js:2121 js/ui/screenshot.js:2364
 msgid "Show in Files"
 msgstr "Arată în Fișiere"
 
 #. Translators: this is the name of the file that the screenshot is
 #. saved to. The placeholder is a timestamp, e.g. "2017-05-21 12-24-03".
-#: js/ui/screenshot.js:2303
+#: js/ui/screenshot.js:2310
 #, javascript-format
 msgid "Screenshot From %s"
 msgstr "Imagine %s"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2347
+#: js/ui/screenshot.js:2354
 msgid "Screenshot captured"
 msgstr "Instantaneu de ecran efectuat"
 
 #. Translators: notification body when a screenshot was captured.
-#: js/ui/screenshot.js:2349
+#: js/ui/screenshot.js:2356
 msgid "You can paste the image from the clipboard"
 msgstr "Imaginea copiată poate fi lipită"
 
-#: js/ui/screenshot.js:2407 js/ui/screenshot.js:2569
+#: js/ui/screenshot.js:2414 js/ui/screenshot.js:2576
 msgid "Screenshot taken"
 msgstr "Instantaneu de ecran efectuat"
 
@@ -2274,28 +2278,28 @@ msgstr[0] "încă %d"
 msgstr[1] "încă %d"
 msgstr[2] "încă %d"
 
-#: js/ui/searchController.js:87
+#: js/ui/searchController.js:86
 #: subprojects/extensions-app/data/ui/extensions-window.ui:73
 msgid "Search"
 msgstr "Caută"
 
-#: js/ui/shellEntry.js:21
+#: js/ui/shellEntry.js:22
 msgid "Copy"
 msgstr "Copiază"
 
-#: js/ui/shellEntry.js:26
+#: js/ui/shellEntry.js:27
 msgid "Paste"
 msgstr "Lipește"
 
-#: js/ui/shellEntry.js:78
+#: js/ui/shellEntry.js:79
 msgid "Show Text"
 msgstr "Arată textul"
 
-#: js/ui/shellEntry.js:80
+#: js/ui/shellEntry.js:81
 msgid "Hide Text"
 msgstr "Ascunde textul"
 
-#: js/ui/shellEntry.js:174
+#: js/ui/shellEntry.js:170
 msgid "Caps lock is on"
 msgstr "Blocarea majusculelor este activată"
 
@@ -2439,7 +2443,7 @@ msgstr "Scăzută"
 msgid "High"
 msgstr "Ridicată"
 
-#: js/ui/status/backlight.js:162 js/ui/status/keyboard.js:883
+#: js/ui/status/backlight.js:162 js/ui/status/keyboard.js:880
 msgid "Keyboard"
 msgstr "Tastatură"
 
@@ -2524,7 +2528,7 @@ msgstr "Clic-dreapta"
 msgid "Dwell Click"
 msgstr "Clic prelungit"
 
-#: js/ui/status/keyboard.js:900
+#: js/ui/status/keyboard.js:897
 msgid "Show Keyboard Layout"
 msgstr "Afișează aranjamentul tastaturii"
 
@@ -2690,7 +2694,8 @@ msgctxt "Power profile"
 msgid "Custom"
 msgstr "Personalizat"
 
-#: js/ui/status/powerProfiles.js:45 js/ui/status/powerProfiles.js:77
+#: js/ui/status/powerProfiles.js:45
+msgctxt "Quick settings button title"
 msgid "Power Mode"
 msgstr "Profil energetic"
 
@@ -2698,15 +2703,20 @@ msgstr "Profil energetic"
 msgid "Open power profiles menu"
 msgstr "Opțiuni Profiluri energetice"
 
+#: js/ui/status/powerProfiles.js:77
+msgctxt "Quick settings menu header"
+msgid "Power Mode"
+msgstr "Profil energetic"
+
 #: js/ui/status/powerProfiles.js:79
 msgid "Power Settings"
 msgstr "Gestionare energie"
 
-#: js/ui/status/remoteAccess.js:74
+#: js/ui/status/remoteAccess.js:73
 msgid "Stop Screencast"
 msgstr "Oprește înregistrarea ecranului"
 
-#: js/ui/status/remoteAccess.js:144
+#: js/ui/status/remoteAccess.js:141
 msgid "Stop Screen Sharing"
 msgstr "Oprește distribuirea ecranului"
 
@@ -2908,93 +2918,93 @@ msgid "%d × %d"
 msgstr "%d × %d"
 
 #. Translators: entry in the window right click menu.
-#: js/ui/windowMenu.js:27
+#: js/ui/windowMenu.js:28
 msgctxt "window-menu"
 msgid "Take Screenshot"
 msgstr "Instantaneu de ecran"
 
-#: js/ui/windowMenu.js:39
+#: js/ui/windowMenu.js:40
 msgid "Hide"
 msgstr "Ascunde"
 
-#: js/ui/windowMenu.js:46
+#: js/ui/windowMenu.js:47
 msgid "Restore"
 msgstr "Restabilește"
 
-#: js/ui/windowMenu.js:50
+#: js/ui/windowMenu.js:51
 msgid "Maximize"
 msgstr "Maximizează"
 
-#: js/ui/windowMenu.js:57
+#: js/ui/windowMenu.js:58
 msgid "Move"
 msgstr "Mută"
 
-#: js/ui/windowMenu.js:71
+#: js/ui/windowMenu.js:72
 msgid "Resize"
 msgstr "Redimensionează"
 
-#: js/ui/windowMenu.js:85
+#: js/ui/windowMenu.js:86
 msgid "Always on Top"
 msgstr "Mereu în prim-plan"
 
-#: js/ui/windowMenu.js:104
+#: js/ui/windowMenu.js:105
 msgid "Always on Visible Workspace"
 msgstr "Mereu pe spațiul de lucru vizibil"
 
-#: js/ui/windowMenu.js:118
+#: js/ui/windowMenu.js:119
 msgid "Move to Workspace Left"
 msgstr "Mută pe spațiul de lucru din stânga"
 
-#: js/ui/windowMenu.js:124
+#: js/ui/windowMenu.js:125
 msgid "Move to Workspace Right"
 msgstr "Mută pe spațiul de lucru din dreapta"
 
-#: js/ui/windowMenu.js:130
+#: js/ui/windowMenu.js:131
 msgid "Move to Workspace Up"
 msgstr "Mută pe spațiul de lucru de sus"
 
-#: js/ui/windowMenu.js:136
+#: js/ui/windowMenu.js:137
 msgid "Move to Workspace Down"
 msgstr "Mută pe spațiul de lucru de jos"
 
-#: js/ui/windowMenu.js:154
+#: js/ui/windowMenu.js:155
 msgid "Move to Monitor Up"
 msgstr "Mută pe ecranul de sus"
 
-#: js/ui/windowMenu.js:163
+#: js/ui/windowMenu.js:164
 msgid "Move to Monitor Down"
 msgstr "Mută pe ecranul de jos"
 
-#: js/ui/windowMenu.js:172
+#: js/ui/windowMenu.js:173
 msgid "Move to Monitor Left"
 msgstr "Mută pe ecranul din stânga"
 
-#: js/ui/windowMenu.js:181
+#: js/ui/windowMenu.js:182
 msgid "Move to Monitor Right"
 msgstr "Mută pe ecranul din dreapta"
 
-#: js/ui/windowMenu.js:189
+#: js/ui/windowMenu.js:190
 msgid "Close"
 msgstr "Închide"
 
-#: src/main.c:515 subprojects/extensions-tool/src/main.c:336
+#: src/main.c:513 subprojects/extensions-tool/src/main.c:336
 msgid "Print version"
 msgstr "Afișează versiunea"
 
-#: src/main.c:521
+#: src/main.c:519
 msgid "Mode used by GDM for login screen"
 msgstr "Mod folosit de GDM pentru autentificare"
 
-#: src/main.c:527
+#: src/main.c:525
 msgid "Use a specific mode, e.g. “gdm” for login screen"
 msgstr ""
 "Folosește un mod specific, de exemplu „gdm” pentru pagina de autentificare"
 
-#: src/main.c:533
+#: src/main.c:531
 msgid "List possible modes"
 msgstr "Enumeră modurile posibile"
 
-#: src/main.c:539
+#: src/main.c:537
 msgid "Force animations to be enabled"
 msgstr "Forțează activarea animațiilor"
 
@@ -3046,15 +3056,15 @@ msgstr ""
 "Exensii GNOME gestionează actualizarea extensiilor, configurarea "
 "preferințelor extensiei și eliminarea sau dezactivarea extensiilor nedorite."
 
-#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:71
+#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:70
 msgid "Main Window"
 msgstr "Fereastra principală"
 
-#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:75
+#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:74
 msgid "Available Updates"
 msgstr "Actualizări disponibile"
 
-#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:79
+#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:78
 msgid "Search View"
 msgstr "Vizualizarea căutării"
 
@@ -3439,23 +3449,27 @@ msgstr "Extensia „%s” nu există\n"
 msgid "Show extensions info"
 msgstr "Arată informații despre extensii"
 
-#: subprojects/extensions-tool/src/command-install.c:190
+#: subprojects/extensions-tool/src/command-install.c:195
 msgid "Overwrite an existing extension"
 msgstr "Suprascrie o extensie existentă"
 
-#: subprojects/extensions-tool/src/command-install.c:192
+#: subprojects/extensions-tool/src/command-install.c:198
+msgid "Print extension UUID on success"
+msgstr "Afișează UUID-ul extensiei în caz de succes"
+
+#: subprojects/extensions-tool/src/command-install.c:200
 msgid "EXTENSION_BUNDLE"
 msgstr "PACHET_EXTENSIE"
 
-#: subprojects/extensions-tool/src/command-install.c:201
+#: subprojects/extensions-tool/src/command-install.c:209
 msgid "Install an extension bundle"
 msgstr "Instalează o extensie împachetată"
 
-#: subprojects/extensions-tool/src/command-install.c:219
+#: subprojects/extensions-tool/src/command-install.c:227
 msgid "No extension bundle specified"
 msgstr "Nicio extensie împachetată specificată"
 
-#: subprojects/extensions-tool/src/command-install.c:225
+#: subprojects/extensions-tool/src/command-install.c:233
 msgid "More than one extension bundle specified"
 msgstr "Mai mult de o extensie împachetată specificată"
 

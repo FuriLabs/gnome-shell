@@ -23,8 +23,8 @@ function versionCompare(required, reference) {
     reference = reference.split('.');
 
     for (let i = 0; i < required.length; i++) {
-        let requiredInt = parseInt(required[i]);
-        let referenceInt = parseInt(reference[i]);
+        const requiredInt = parseInt(required[i]);
+        const referenceInt = parseInt(reference[i]);
         if (requiredInt !== referenceInt)
             return requiredInt < referenceInt;
     }
@@ -37,8 +37,8 @@ function versionCompare(required, reference) {
  */
 export function canLock() {
     try {
-        let params = GLib.Variant.new('(ss)', ['org.gnome.DisplayManager.Manager', 'Version']);
-        let result = Gio.DBus.system.call_sync(
+        const params = GLib.Variant.new('(ss)', ['org.gnome.DisplayManager.Manager', 'Version']);
+        const result = Gio.DBus.system.call_sync(
             'org.gnome.DisplayManager',
             '/org/gnome/DisplayManager/Manager',
             'org.freedesktop.DBus.Properties',
@@ -46,7 +46,7 @@ export function canLock() {
             Gio.DBusCallFlags.NONE,
             -1, null);
 
-        let version = result.deepUnpack()[0].deepUnpack();
+        const version = result.deepUnpack()[0].deepUnpack();
         return haveSystemd() && versionCompare('3.5.91', version);
     } catch {
         return false;

@@ -17,6 +17,7 @@ import St from 'gi://St';
 
 import * as SignalTracker from '../misc/signalTracker.js';
 import {adjustAnimationTime} from '../misc/animationUtils.js';
+import {logErrorUnlessCancelled} from '../misc/errorUtils.js';
 
 const sessionSignalHolder = new SignalTracker.TransientSignalHolder();
 
@@ -43,9 +44,9 @@ function _patchLayoutClass(layoutClass, styleProps) {
     if (styleProps) {
         layoutClass.prototype.hookup_style = function (container) {
             container.connect('style-changed', () => {
-                let node = container.get_theme_node();
-                for (let prop in styleProps) {
-                    let [found, length] = node.lookup_length(styleProps[prop], false);
+                const node = container.get_theme_node();
+                for (const prop in styleProps) {
+                    const [found, length] = node.lookup_length(styleProps[prop], false);
                     if (found)
                         this[prop] = length;
                 }
@@ -55,20 +56,30 @@ function _patchLayoutClass(layoutClass, styleProps) {
 }
 
 function _makeEaseCallback(params, cleanup) {
-    let onComplete = params.onComplete;
+    const onComplete = params.onComplete;
     delete params.onComplete;
 
-    let onStopped = params.onStopped;
+    const onStopped = params.onStopped;
     delete params.onStopped;
 
-    return isFinished => {
+    const {promise, resolve, reject} = Promise.withResolvers();
+    const callback = isFinished => {
         cleanup?.();
 
         if (onStopped)
             onStopped(isFinished);
         if (onComplete && isFinished)
             onComplete();
+
+        if (isFinished) {
+            resolve();
+        } else {
+            reject(new GLib.Error(Gio.IOErrorEnum,
+                Gio.IOErrorEnum.CANCELLED, 'Transition was stopped before completing'));
+        }
     };
+
+    return {promise, callback};
 }
 
 function _makeEasePrepareAndCleanup(duration) {
@@ -91,7 +102,7 @@ function _getPropertyTarget(actor, propName) {
     if (!propName.startsWith('@'))
         return [actor, propName];
 
-    let [type, name, prop] = propName.split('.');
+    const [type, name, prop] = propName.split('.');
     switch (type) {
     case '@layout':
         return [actor.layout_manager, name];
@@ -146,10 +157,10 @@ function _easeActor(actor, params) {
 
     const easingDuration = actor.get_easing_duration();
     const {prepare, cleanup} = _makeEasePrepareAndCleanup(easingDuration);
-    const callback = _makeEaseCallback(params, cleanup);
+    const {promise, callback} = _makeEaseCallback(params, cleanup);
 
     // cancel overwritten transitions
-    let animatedProps = Object.keys(params).map(p => p.replace('_', '-', 'g'));
+    const animatedProps = Object.keys(params).map(p => p.replace('_', '-', 'g'));
     animatedProps.forEach(p => actor.remove_transition(p));
 
     if (easingDuration > 0 || !isReversed)
@@ -177,6 +188,8 @@ function _easeActor(actor, params) {
     } else {
         callback(true);
     }
+
+    return promise;
 }
 
 function _easeAnimatableProperty(animatable, propName, target, params) {
@@ -222,7 +235,7 @@ function _easeAnimatableProperty(animatable, propName, target, params) {
         duration = 0;
 
     const {prepare, cleanup} = _makeEasePrepareAndCleanup(duration);
-    const callback = _makeEaseCallback(params, cleanup);
+    const {promise, callback} = _makeEaseCallback(params, cleanup);
 
     // cancel overwritten transition
     animatable.remove_transition(propName);
@@ -236,7 +249,7 @@ function _easeAnimatableProperty(animatable, propName, target, params) {
         prepare?.();
         callback(true);
 
-        return;
+        return promise;
     }
 
     const pspec = animatable.find_property(propName);
@@ -261,6 +274,7 @@ function _easeAnimatableProperty(animatable, propName, target, params) {
 
     transition.connectObject('stopped',
         (t, finished) => callback(finished), sessionSignalHolder);
+    return promise;
 }
 
 // Add some bindings to the global JS namespace
@@ -318,15 +332,27 @@ Clutter.Actor.prototype.set_easing_delay = function (msecs, params = {}) {
 };
 
 Clutter.Actor.prototype.ease = function (props) {
-    _easeActor(this, props);
+    _easeActor(this, props).catch(logErrorUnlessCancelled);
 };
 Clutter.Actor.prototype.ease_property = function (propName, target, params) {
-    _easeAnimatableProperty(this, propName, target, params);
+    _easeAnimatableProperty(this, propName, target, params).catch(logErrorUnlessCancelled);
 };
 St.Adjustment.prototype.ease = function (target, params) {
     // we're not an actor of course, but we implement the same
     // transition API as Clutter.Actor, so this works anyway
-    _easeAnimatableProperty(this, 'value', target, params);
+    _easeAnimatableProperty(this, 'value', target, params).catch(logErrorUnlessCancelled);
+};
+
+Clutter.Actor.prototype.easeAsync = async function (props) {
+    await _easeActor(this, props);
+};
+Clutter.Actor.prototype.ease_property_async = async function (propName, target, params) {
+    await _easeAnimatableProperty(this, propName, target, params);
+};
+St.Adjustment.prototype.easeAsync = async function (target, params) {
+    // we're not an actor of course, but we implement the same
+    // transition API as Clutter.Actor, so this works anyway
+    await _easeAnimatableProperty(this, 'value', target, params).catch(() => {});
 };
 
 Clutter.Actor.prototype[Symbol.iterator] = function* () {
@@ -347,7 +373,7 @@ Gio.File.prototype.touch_finish = function (result) {
 
 const origToString = Object.prototype.toString;
 Object.prototype.toString = function () {
-    let base = origToString.call(this);
+    const base = origToString.call(this);
     try {
         if ('actor' in this && this.actor instanceof Clutter.Actor)
             return base.replace(/\]$/, ` delegate for ${this.actor.toString().substring(1)}`);
@@ -360,7 +386,7 @@ Object.prototype.toString = function () {
 
 const slowdownEnv = GLib.getenv('GNOME_SHELL_SLOWDOWN_FACTOR');
 if (slowdownEnv) {
-    let factor = parseFloat(slowdownEnv);
+    const factor = parseFloat(slowdownEnv);
     if (!isNaN(factor) && factor > 0.0)
         St.Settings.get().slow_down_factor = factor;
 }
