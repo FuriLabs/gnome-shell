@@ -66,7 +66,6 @@ override_dh_auto_test:
 ifeq (,$(filter nocheck,$(DEB_BUILD_OPTIONS)))
 	env XDG_CACHE_HOME="$(shell mktemp -d -t cache-XXXXXXXX)" \
 	dbus-run-session -- \
-	xvfb-run -a -e /proc/self/fd/2 -s '-noreset -screen 0 1280x1024x24' \
 	dh_auto_test -- $(meson_test_options)
 endif
 

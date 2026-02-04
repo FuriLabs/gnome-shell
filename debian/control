@@ -65,7 +65,6 @@ Build-Depends: appstream,
                sassc,
                systemd-dev [linux-any],
                xauth <!nocheck>,
-               xvfb <!nocheck>,
                xwayland <!nocheck>
 Standards-Version: 4.7.3
 Homepage: https://gitlab.gnome.org/GNOME/gnome-shell
