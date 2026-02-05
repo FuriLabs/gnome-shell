@@ -334,17 +334,15 @@ const AuthenticationDialog = GObject.registerClass({
             this._sessionRequestTimeoutId = 0;
 
             if (this.state !== ModalDialog.State.OPENED)
-                return GLib.SOURCE_REMOVE;
+                return;
 
             this._passwordEntry.hide();
             this._cancelButton.grab_key_focus();
             this._okButton.reactive = false;
-
-            return GLib.SOURCE_REMOVE;
         };
 
         if (delay) {
-            this._sessionRequestTimeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, delay, resetDialog);
+            this._sessionRequestTimeoutId = GLib.timeout_add_once(GLib.PRIORITY_DEFAULT, delay, resetDialog);
             GLib.Source.set_name_by_id(this._sessionRequestTimeoutId, '[gnome-shell] this._sessionRequestTimeoutId');
         } else {
             resetDialog();
@@ -439,8 +437,10 @@ class AuthenticationAgent extends Shell.PolkitAuthenticationAgent {
     }
 
     _onInitiate(nativeAgent, actionId, message, iconName, cookie, userNames) {
-        // Don't pop up a dialog while locked
-        if (Main.sessionMode.isLocked) {
+        // Don't pop up a dialog while locked, unless it's triggered by user
+        // action from the lock screen, such as extending the session limits
+        if (Main.sessionMode.isLocked &&
+            actionId !== 'org.freedesktop.Malcontent.SessionLimits.Extend') {
             Main.sessionMode.connectObject('updated', () => {
                 Main.sessionMode.disconnectObject(this);
 

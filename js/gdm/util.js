@@ -43,7 +43,10 @@ export const LOGO_KEY = 'logo';
 export const DISABLE_USER_LIST_KEY = 'disable-user-list';
 
 // Give user 48ms to read each character of a PAM message
+// or 2 seconds, whichever is longer
 const USER_READ_TIME = 48;
+const USER_READ_TIME_MIN = 2000;
+
 const FINGERPRINT_SERVICE_PROXY_TIMEOUT = 5000;
 const FINGERPRINT_ERROR_TIMEOUT_WAIT = 15;
 
@@ -197,12 +200,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
     _clearUserVerifier() {
         if (this._userVerifier) {
             this._disconnectSignals();
-            this._userVerifier.run_dispose();
+            this._userVerifier.get_connection().disconnectObject(this);
             this._userVerifier = null;
-            if (this._userVerifierChoiceList) {
-                this._userVerifierChoiceList.run_dispose();
-                this._userVerifierChoiceList = null;
-            }
+            this._userVerifierChoiceList = null;
         }
     }
 
@@ -250,7 +250,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
             return 0;
 
         // We probably could be smarter here
-        return message.length * USER_READ_TIME;
+        return Math.max(message.length * USER_READ_TIME, USER_READ_TIME_MIN);
     }
 
     finishMessageQueue() {
@@ -288,7 +288,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
         delete this._currentMessageExtraInterval;
         this.emit('show-message', message.serviceName, message.text, message.type);
 
-        this._messageQueueTimeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT,
+        this._messageQueueTimeoutId = GLib.timeout_add_once(GLib.PRIORITY_DEFAULT,
             message.interval + (this._currentMessageExtraInterval | 0), () => {
                 this._messageQueueTimeoutId = 0;
 
@@ -298,8 +298,6 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                 } else {
                     this.finishMessageQueue();
                 }
-
-                return GLib.SOURCE_REMOVE;
             });
         GLib.Source.set_name_by_id(this._messageQueueTimeoutId, '[gnome-shell] this._queueMessageTimeout');
     }
@@ -505,6 +503,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
             this._clearUserVerifier();
             this._userVerifier = await this._client.open_reauthentication_channel(
                 userName, this._cancellable);
+            this._userVerifier.get_connection().connectObject('closed',
+                () => this.clear(), this);
         } catch (e) {
             if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
                 return;
@@ -537,6 +537,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
             this._clearUserVerifier();
             this._userVerifier =
                 await this._client.get_user_verifier(this._cancellable);
+            this._userVerifier.get_connection().connectObject('closed',
+                () => this.clear(), this);
         } catch (e) {
             if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
                 return;
@@ -762,12 +764,11 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                     GLib.source_remove(this._fingerprintFailedId);
 
                 const cancellable = this._cancellable;
-                this._fingerprintFailedId = GLib.timeout_add(GLib.PRIORITY_DEFAULT,
+                this._fingerprintFailedId = GLib.timeout_add_once(GLib.PRIORITY_DEFAULT,
                     FINGERPRINT_ERROR_TIMEOUT_WAIT, () => {
                         this._fingerprintFailedId = 0;
                         if (!cancellable.is_cancelled())
                             this._verificationFailed(serviceName, false);
-                        return GLib.SOURCE_REMOVE;
                     });
             }
         }

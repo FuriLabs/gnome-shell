@@ -15,6 +15,7 @@ import * as Main from './main.js';
 import * as MessageTray from './messageTray.js';
 import * as SwipeTracker from './swipeTracker.js';
 import {formatDateWithCFormatString} from '../misc/dateUtils.js';
+import {TimeLimitsState} from '../misc/timeLimitsManager.js';
 import * as AuthPrompt from '../gdm/authPrompt.js';
 import {AuthPromptStatus} from '../gdm/authPrompt.js';
 import {MprisSource} from './mpris.js';
@@ -642,6 +643,14 @@ export const UnlockDialog = GObject.registerClass({
 
         this._updateUserSwitchVisibility();
 
+        // When parental controls session limits are enabled, the screen will be
+        // locked upon reaching the time limit. In those cases, tweak the lock screen,
+        // so that the children cannot unlock without parental supervision.
+        Main.timeLimitsManager.connectObject(
+            'notify::state', () => this._updateAuthBlocked(),
+            this);
+        this._updateAuthBlocked();
+
         // Main Box
         const mainBox = new St.Widget();
         mainBox.add_constraint(new Layout.MonitorConstraint({primary: true}));
@@ -757,6 +766,8 @@ export const UnlockDialog = GObject.registerClass({
             this._authPrompt.updateSensitivity(
                 verificationStatus === AuthPromptStatus.NOT_VERIFYING);
         }
+
+        this._updateAuthBlocked();
     }
 
     _maybeDestroyAuthPrompt() {
@@ -914,6 +925,11 @@ export const UnlockDialog = GObject.registerClass({
             !this._lockdownSettings.get_boolean('disable-user-switching');
     }
 
+    _updateAuthBlocked() {
+        this._authPrompt?.setAuthBlocked(
+            Main.timeLimitsManager.state === TimeLimitsState.LIMIT_REACHED);
+    }
+
     cancel() {
         if (this._authPrompt)
             this._authPrompt.cancel();
@@ -936,11 +952,6 @@ export const UnlockDialog = GObject.registerClass({
 
         const grab = Main.pushModal(Main.uiGroup,
             {actionMode: Shell.ActionMode.UNLOCK_SCREEN});
-        if (grab.get_seat_state() !== Clutter.GrabState.ALL) {
-            Main.popModal(grab);
-            return false;
-        }
-
         this._grab = grab;
         this._isModal = true;
 

@@ -61,13 +61,31 @@ export async function registerSessionWithGDM() {
             '/org/gnome/DisplayManager/Manager',
             'org.gnome.DisplayManager.Manager',
             'RegisterSession',
-            GLib.Variant.new('(a{sv})', [{}]), null,
+            null, null,
             Gio.DBusCallFlags.NONE, -1, null);
     } catch (e) {
         if (!e.matches(Gio.DBusError, Gio.DBusError.UNKNOWN_METHOD))
             log(`Error registering session with GDM: ${e.message}`);
         else
             log('Not calling RegisterSession(): method not exported, GDM too old?');
+    }
+}
+
+export async function registerDisplayWithGDM() {
+    log('Registering display with GDM');
+    try {
+        await Gio.DBus.system.call(
+            'org.gnome.DisplayManager',
+            '/org/gnome/DisplayManager/Manager',
+            'org.gnome.DisplayManager.Manager',
+            'RegisterDisplay',
+            null, null,
+            Gio.DBusCallFlags.NONE, -1, null);
+    } catch (e) {
+        if (!e.matches(Gio.DBusError, Gio.DBusError.UNKNOWN_METHOD))
+            log(`Error registering display with GDM: ${e.message}`);
+        else
+            log('Not calling RegisterDisplay(): method not exported, GDM too old?');
     }
 }
 
