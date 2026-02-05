@@ -150,6 +150,7 @@ Description: graphical shell for the GNOME desktop
 Package: gnome-shell-common
 Architecture: all
 Depends: ${misc:Depends}
+Breaks: gnome-session-common (<< 50~alpha)
 Description: common files for the GNOME graphical shell
  This package contains translations and data files for the GNOME shell.
 

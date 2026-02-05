@@ -9,6 +9,8 @@ gnome-shell (50~beta-1) UNRELEASED; urgency=medium
     - libgvc/* because 50.beta includes a new snapshot of the subproject
       which includes all those changes.
     - Revert-main-Register-session-with-GDM-on-startup.patch
+  * Declare gnome-shell-common breaks old versions of gnome-session-common,
+    since the systemd services changed: gnome-shell!3960, gnome-session!167
 
  -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 04 Feb 2026 16:21:27 +0800
 
