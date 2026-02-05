@@ -4,6 +4,9 @@ gnome-shell (50~beta-1) UNRELEASED; urgency=medium
   * Refresh patches and fix conflicts:
     - Revert-main-Register-session-with-GDM-on-startup.patch
     - Revert-tests-Fail-on-warnings-too.patch
+  * Drop upstreamed patches:
+    - libgvc/* because 50.beta includes a new snapshot of the subproject
+      which includes all those changes.
 
  -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 04 Feb 2026 16:21:27 +0800
 
