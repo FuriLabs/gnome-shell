@@ -483,11 +483,6 @@ class ObjInspector extends St.ScrollView {
             return;
 
         const grab = Main.pushModal(this, {actionMode: Shell.ActionMode.LOOKING_GLASS});
-        if (grab.get_seat_state() !== Clutter.GrabState.ALL) {
-            Main.popModal(grab);
-            return;
-        }
-
         this._grab = grab;
         this._previousObj = null;
         this._open = true;
@@ -1384,10 +1379,9 @@ class LookingGlass extends St.BoxLayout {
         gcButton.connect('clicked', () => {
             gcButton.child.icon_name = 'user-trash-symbolic';
             System.gc();
-            this._timeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 500, () => {
+            this._timeoutId = GLib.timeout_add_once(GLib.PRIORITY_DEFAULT, 500, () => {
                 gcButton.child.icon_name = 'user-trash-full-symbolic';
                 this._timeoutId = 0;
-                return GLib.SOURCE_REMOVE;
             });
             GLib.Source.set_name_by_id(
                 this._timeoutId,
@@ -1657,11 +1651,6 @@ class LookingGlass extends St.BoxLayout {
             return;
 
         const grab = Main.pushModal(this, {actionMode: Shell.ActionMode.LOOKING_GLASS});
-        if (grab.get_seat_state() !== Clutter.GrabState.ALL) {
-            Main.popModal(grab);
-            return;
-        }
-
         this._grab = grab;
         this.show();
         this._open = true;

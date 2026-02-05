@@ -112,7 +112,7 @@ export class ScreenShield extends Signals.EventEmitter {
         this._lockSettings = new Gio.Settings({schema_id: LOCKDOWN_SCHEMA});
         this._lockSettings.connect(`changed::${DISABLE_LOCK_KEY}`, this._syncInhibitor.bind(this));
 
-        this._isModal = false;
+        this._grab = null;
         this._isGreeter = false;
         this._isActive = false;
         this._isLocked = false;
@@ -191,19 +191,12 @@ export class ScreenShield extends Signals.EventEmitter {
     }
 
     _becomeModal() {
-        if (this._isModal)
-            return true;
+        if (this._grab)
+            return;
 
-        const grab = Main.pushModal(Main.uiGroup, {actionMode: Shell.ActionMode.LOCK_SCREEN});
-
-        // We expect at least a keyboard grab here
-        this._isModal = (grab.get_seat_state() & Clutter.GrabState.KEYBOARD) !== 0;
-        if (this._isModal)
-            this._grab = grab;
-        else
-            Main.popModal(grab);
-
-        return this._isModal;
+        this._grab = Main.pushModal(Main.uiGroup, {
+            actionMode: Shell.ActionMode.LOCK_SCREEN,
+        });
     }
 
     async _syncInhibitor() {
@@ -257,19 +250,7 @@ export class ScreenShield extends Signals.EventEmitter {
             return;
         }
 
-        if (!this._becomeModal()) {
-            // We could not become modal, so we can't activate the
-            // screenshield. The user is probably very upset at this
-            // point, but any application using global grabs is broken
-            // Just tell them to stop using this app
-            //
-            // XXX: another option is to kick the user into the gdm login
-            // screen, where we're not affected by grabs
-            Main.notifyError(
-                _('Unable to lock'),
-                _('Lock was blocked by an app'));
-            return;
-        }
+        this._becomeModal();
 
         if (this._activationTime === 0)
             this._activationTime = GLib.get_monotonic_time();
@@ -280,13 +261,12 @@ export class ScreenShield extends Signals.EventEmitter {
             const lockTimeout = Math.max(
                 adjustAnimationTime(STANDARD_FADE_TIME),
                 this._settings.get_uint(LOCK_DELAY_KEY) * 1000);
-            this._lockTimeoutId = GLib.timeout_add(
+            this._lockTimeoutId = GLib.timeout_add_once(
                 GLib.PRIORITY_DEFAULT,
                 lockTimeout,
                 () => {
                     this._lockTimeoutId = 0;
                     this.lock(false);
-                    return GLib.SOURCE_REMOVE;
                 });
             GLib.Source.set_name_by_id(this._lockTimeoutId, '[gnome-shell] this.lock');
         }
@@ -339,14 +319,7 @@ export class ScreenShield extends Signals.EventEmitter {
     }
 
     showDialog() {
-        if (!this._becomeModal()) {
-            // In the login screen, this is a hard error. Fail-whale
-            const error = new GLib.Error(
-                Gio.IOErrorEnum, Gio.IOErrorEnum.FAILED,
-                'Could not acquire modal grab for the login screen. Aborting login process.');
-            global.context.terminate_with_error(error);
-        }
-
+        this._becomeModal();
         this.actor.show();
         this._isGreeter = Main.sessionMode.isGreeter;
         this._isLocked = true;
@@ -506,9 +479,8 @@ export class ScreenShield extends Signals.EventEmitter {
         if (params.fadeToBlack && params.animateFade) {
             // Take a beat
 
-            const id = GLib.timeout_add(GLib.PRIORITY_DEFAULT, MANUAL_FADE_TIME, () => {
+            const id = GLib.timeout_add_once(GLib.PRIORITY_DEFAULT, MANUAL_FADE_TIME, () => {
                 this._activateFade(this._shortLightbox, MANUAL_FADE_TIME);
-                return GLib.SOURCE_REMOVE;
             });
             GLib.Source.set_name_by_id(id, '[gnome-shell] this._activateFade');
         } else {
@@ -571,10 +543,9 @@ export class ScreenShield extends Signals.EventEmitter {
         if (this._dialog && !this._isGreeter)
             this._dialog.popModal();
 
-        if (this._isModal) {
+        if (this._grab) {
             Main.popModal(this._grab);
             this._grab = null;
-            this._isModal = false;
         }
 
         this._longLightbox.lightOff();
@@ -669,13 +640,7 @@ export class ScreenShield extends Signals.EventEmitter {
             return;
         }
 
-        // Warn the user if we can't become modal
-        if (!this._becomeModal()) {
-            Main.notifyError(
-                _('Unable to lock'),
-                _('Lock was blocked by an app'));
-            return;
-        }
+        this._becomeModal();
 
         // Clear the clipboard - otherwise, its contents may be leaked
         // to unauthorized parties by pasting into the unlock dialog's
