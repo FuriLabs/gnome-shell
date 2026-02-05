@@ -1,6 +1,6 @@
-gnome-shell (50~alpha-1) UNRELEASED; urgency=medium
+gnome-shell (50~beta-1) UNRELEASED; urgency=medium
 
-  * New upstream release: 50.alpha
+  * New upstream release: 50.beta
   * Refresh patches and fix conflicts:
     - Revert-main-Register-session-with-GDM-on-startup.patch
     - Revert-tests-Fail-on-warnings-too.patch
