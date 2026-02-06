@@ -56,4 +56,3 @@ ubuntu-authd/Implement-authd-support-via-the-unified-mechanism.patch
 ubuntu-authd/js-Minify-the-authd-protocol-during-build.patch
 ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch
 ubuntu/extensions-Include-snapd-prompting-extension.patch
-gvc-Don-t-crash-with-newer-pipewire-and-fix-device-select.patch
