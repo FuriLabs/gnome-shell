@@ -33,6 +33,9 @@ gnome-shell (50~beta-0ubuntu1) UNRELEASED; urgency=medium
     - libgvc/* because 50.beta includes a new snapshot of the subproject
       which includes all those changes.
     - Revert-main-Register-session-with-GDM-on-startup.patch
+  * Add patches:
+    - ubuntu/layout-Make-starting-in-the-overview-configurable-not-imp.patch
+      to restore Ubuntu's traditional login animation.
   * Declare gnome-shell-common breaks old versions of gnome-session-common,
     since the systemd services changed: gnome-shell!3960, gnome-session!167
 

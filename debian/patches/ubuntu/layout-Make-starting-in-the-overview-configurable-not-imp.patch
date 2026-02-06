@@ -1,0 +1,65 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Fri, 19 Dec 2025 15:12:12 +0800
+Subject: layout: Make starting in the overview configurable, not implied
+
+Ubuntu needs this starting in GNOME 50 to implement its traditional
+login animation.
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4009
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/8917
+---
+ data/org.gnome.shell.gschema.xml.in | 8 ++++++++
+ js/ui/layout.js                     | 7 +++++--
+ 2 files changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/data/org.gnome.shell.gschema.xml.in b/data/org.gnome.shell.gschema.xml.in
+index 9a55ee7..650d9fa 100644
+--- a/data/org.gnome.shell.gschema.xml.in
++++ b/data/org.gnome.shell.gschema.xml.in
+@@ -131,6 +131,14 @@
+           • “position”: the position of the application icon in the page
+       </description>
+     </key>
++    <key name="start-in-overview" type="b">
++      <default>true</default>
++      <summary>Start the shell with the overview visible (if any)</summary>
++      <description>
++        Determines the initial mode of the shell on startup/login, and
++        therefore which startup animation is used.
++      </description>
++    </key>
+     <child name="keybindings" schema="org.gnome.shell.keybindings"/>
+     <child name="app-switcher" schema="org.gnome.shell.app-switcher"/>
+     <child name="window-switcher" schema="org.gnome.shell.window-switcher"/>
+diff --git a/js/ui/layout.js b/js/ui/layout.js
+index 11f8608..34ff7d6 100644
+--- a/js/ui/layout.js
++++ b/js/ui/layout.js
+@@ -217,6 +217,9 @@ export const LayoutManager = GObject.registerClass({
+         this._topActors = [];
+         this._isPopupWindowVisible = false;
+         this._startingUp = true;
++        this._startInOverview =
++            Main.sessionMode.hasOverview &&
++            global.settings.get_boolean('start-in-overview');
+ 
+         // Set up stage hierarchy to group all UI actors under one container.
+         this.uiGroup = new UiActor({name: 'uiGroup'});
+@@ -746,7 +749,7 @@ export const LayoutManager = GObject.registerClass({
+ 
+             const monitor = this.primaryMonitor;
+ 
+-            if (!Main.sessionMode.hasOverview) {
++            if (!this._startInOverview) {
+                 const x = monitor.x + monitor.width / 2.0;
+                 const y = monitor.y + monitor.height / 2.0;
+ 
+@@ -785,7 +788,7 @@ export const LayoutManager = GObject.registerClass({
+     }
+ 
+     async _startupAnimationSession() {
+-        if (Main.sessionMode.hasOverview) {
++        if (this._startInOverview) {
+             await Main.overview.runStartupAnimation();
+         } else {
+             await this.uiGroup.easeAsync({
