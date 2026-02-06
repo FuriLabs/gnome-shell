@@ -4,23 +4,31 @@
 #
 # Julen Ruiz Aizpuru <julenx@gmail.com>, 2011.
 # Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2011, 2012, 2013, 2014, 2015, 2016, 2017.
-# Ibai Oihanguren Sala <ibai@oihanguren.com>, 2020.
 # Asier Saratsua Garmendia <asiersarasua@ni.eus>, 2013, 2019, 2020, 2021, 2022, 2023, 2024.
 # Asier Saratsua Garmendia <asiersarasua@ni.eus>, 2025.
+# Ibai Oihanguren Sala <ibaios@disroot.org>, 2020-2026.
 #
 msgid ""
-msgstr "Project-Id-Version: gnome-shell master\n"
+msgstr ""
+"Project-Id-Version: gnome-shell master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/gnome-shell/issues/\n"
-"POT-Creation-Date: 2025-09-06 01:38+0000\n"
-"PO-Revision-Date: 2025-09-06 12:15+0100\n"
-"Last-Translator: Asier Saratsua Garmendia <asiersarasua@ni.eus>\n"
-"Language-Team: Basque <librezale@librezale.eus>\n"
+"POT-Creation-Date: 2026-01-06 06:34+0000\n"
+"PO-Revision-Date: 2026-01-11 21:03+0100\n"
+"Last-Translator: Ibai Oihanguren Sala <ibaios@disroot.org>\n"
+"Language-Team: Basque\n"
 "Language: eu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Project-Style: gnome\n"
+"X-DL-VCS-Web: https://gitlab.gnome.org/GNOME/gnome-shell/\n"
+"X-DL-Lang: eu\n"
+"X-DL-Module: gnome-shell\n"
+"X-DL-Branch: main\n"
+"X-DL-Domain: po\n"
+"X-DL-State: None\n"
+"X-Generator: Gtranslator 49.0\n"
 
 #: data/50-gnome-shell-launchers.xml:6
 msgid "Launchers"
@@ -99,7 +107,7 @@ msgid "Open new window of pinned app 9"
 msgstr "Ireki leiho berria ainguratutako 9. aplikaziorako"
 
 #. Translators: name of the folder under ~/Pictures for screenshots.
-#: data/50-gnome-shell-screenshots.xml:6 js/ui/screenshot.js:2292
+#: data/50-gnome-shell-screenshots.xml:6 js/ui/screenshot.js:2297
 msgid "Screenshots"
 msgstr "Pantaila-argazkiak"
 
@@ -124,7 +132,7 @@ msgid "Record a screencast interactively"
 msgstr "Grabatu pantailaren bideo labur bat modu dinamikoan"
 
 #: data/50-gnome-shell-system.xml:6
-#: data/X-GNOME-Shell-System.directory.desktop.in:2 js/ui/messageTray.js:1312
+#: data/X-GNOME-Shell-System.directory.desktop.in:2 js/ui/messageTray.js:1314
 msgid "System"
 msgstr "Sistema"
 
@@ -156,7 +164,9 @@ msgstr "Gaitu garatzaile eta probatzaileentzako barne-tresnak Alt-F2 bitartez"
 msgid ""
 "Allows access to internal debugging and monitoring tools using the Alt-F2 "
 "dialog."
-msgstr "Barneko arazte- eta gainbegiraketa-tresnen atzipena onartzen du Alt-F2 elkarrizketa-koadroa erabiliz."
+msgstr ""
+"Barneko arazte- eta gainbegiraketa-tresnen atzipena onartzen du Alt-F2 "
+"elkarrizketa-koadroa erabiliz."
 
 #: data/org.gnome.shell.gschema.xml.in:16
 msgid "UUIDs of extensions to enable"
@@ -168,7 +178,12 @@ msgid ""
 "should be loaded. Any extension that wants to be loaded needs to be in this "
 "list. You can also manipulate this list with the EnableExtension and "
 "DisableExtension D-Bus methods on org.gnome.Shell."
-msgstr "GNOME Shell gehigarriek UUID propietatea dute; kargatu beharko liratekeen gehigarriak zerrendatzen ditu gako honek. Kargatzea nahi diren gehigarri guztiak zerrenda honetan agertu behar dute. Zerrenda hau alda dezakezu DBus-eko 'EnableExtension' (gaitu hedapena) eta 'DisableExtension' (desgaitu hedapena) metodoekin 'org.gnome.Shell'-en."
+msgstr ""
+"GNOME Shell gehigarriek UUID propietatea dute; kargatu beharko liratekeen "
+"gehigarriak zerrendatzen ditu gako honek. Kargatzea nahi diren gehigarri "
+"guztiak zerrenda honetan agertu behar dute. Zerrenda hau alda dezakezu DBus-"
+"eko 'EnableExtension' (gaitu hedapena) eta 'DisableExtension' (desgaitu "
+"hedapena) metodoekin 'org.gnome.Shell'-en."
 
 #: data/org.gnome.shell.gschema.xml.in:26
 msgid "UUIDs of extensions to force disabling"
@@ -181,7 +196,13 @@ msgid ""
 "manipulate this list with the EnableExtension and DisableExtension D-Bus "
 "methods on org.gnome.Shell. This key takes precedence over the “enabled-"
 "extensions” setting."
-msgstr "GNOME Shell gehigarriek UUID propietatea dute; nahiz eta uneko moduan kargatuak izan, desgaitu egin beharko liratekeen gehigarriak zerrendatzen ditu gako honek. Zerrenda hau alda dezakezu DBus-eko 'EnableExtension' (gaitu hedapena) eta 'DisableExtension' (desgaitu hedapena) metodoekin 'org.gnome.Shell'-en. Gako honek lehentasuna du “enabled-extensions” ezarpenaren gainetik."
+msgstr ""
+"GNOME Shell gehigarriek UUID propietatea dute; nahiz eta uneko moduan "
+"kargatuak izan, desgaitu egin beharko liratekeen gehigarriak zerrendatzen "
+"ditu gako honek. Zerrenda hau alda dezakezu DBus-eko 'EnableExtension' "
+"(gaitu hedapena) eta 'DisableExtension' (desgaitu hedapena) metodoekin "
+"'org.gnome.Shell'-en. Gako honek lehentasuna du “enabled-extensions” "
+"ezarpenaren gainetik."
 
 #: data/org.gnome.shell.gschema.xml.in:37
 msgid "Disable user extensions"
@@ -191,7 +212,9 @@ msgstr "Desgaitu erabiltzailearen gehigarriak"
 msgid ""
 "Disable all extensions the user has enabled without affecting the “enabled-"
 "extension” setting."
-msgstr "“enabled-extension” ezarpenari eragin gabe erabiltzaileak gaitutako gehigarri guztiak desgaitu."
+msgstr ""
+"“enabled-extension” ezarpenari eragin gabe erabiltzaileak gaitutako "
+"gehigarri guztiak desgaitu."
 
 #: data/org.gnome.shell.gschema.xml.in:45
 msgid "Allow extension installation"
@@ -204,7 +227,12 @@ msgid ""
 "loaded from system directories on startup. It does not affect extensions "
 "that are already loaded, so a change only takes full effect on the next "
 "login."
-msgstr "Baimendu erabiltzaileek hedapenak beren karpeta nagusian instalatu ditzaten. Desgaituta badago, InstallRemoteExtension D-Bus metodoak huts egingo da eta hedapenak sistemaren direktorioetatik soilik kargatuko dira abioan. Ez du eraginik jadanik kargatuta dauden hedapenetan; beraz, ez hurrengo saioa hasten denean soilik sartzen da indarrean."
+msgstr ""
+"Baimendu erabiltzaileek hedapenak beren karpeta nagusian instalatu ditzaten. "
+"Desgaituta badago, InstallRemoteExtension D-Bus metodoak huts egingo da eta "
+"hedapenak sistemaren direktorioetatik soilik kargatuko dira abioan. Ez du "
+"eraginik jadanik kargatuta dauden hedapenetan; beraz, ez hurrengo saioa "
+"hasten denean soilik sartzen da indarrean."
 
 #: data/org.gnome.shell.gschema.xml.in:56
 msgid "Disables the validation of extension version compatibility"
@@ -215,7 +243,11 @@ msgid ""
 "GNOME Shell will only load extensions that claim to support the current "
 "running version. Enabling this option will disable this check and try to "
 "load all extensions regardless of the versions they claim to support."
-msgstr "GNOME Shell-ek unean exekutatzen ari den bertsioarekin bat datozen hedapenak soilik kargatzen ditu. Aukera hau gaitzean egiaztapen hau desgaitzen da eta hedapen guztiak kargatzen saiatzen da, onartzen duten bertsioari ez ikusi eginez."
+msgstr ""
+"GNOME Shell-ek unean exekutatzen ari den bertsioarekin bat datozen hedapenak "
+"soilik kargatzen ditu. Aukera hau gaitzean egiaztapen hau desgaitzen da eta "
+"hedapen guztiak kargatzen saiatzen da, onartzen duten bertsioari ez ikusi "
+"eginez."
 
 #: data/org.gnome.shell.gschema.xml.in:67
 msgid "List of desktop file IDs for favorite applications"
@@ -225,7 +257,8 @@ msgstr "Gogoko aplikazioen mahaigaineko fitxategien IDen zerrenda"
 msgid ""
 "The applications corresponding to these identifiers will be displayed in the "
 "favorites area."
-msgstr "Identifikadore horiei dagozkien aplikazioak bistaratuko dira gogokoen arean."
+msgstr ""
+"Identifikadore horiei dagozkien aplikazioak bistaratuko dira gogokoen arean."
 
 #: data/org.gnome.shell.gschema.xml.in:75
 msgid "History for command (Alt-F2) dialog"
@@ -245,12 +278,18 @@ msgid ""
 "This key overrides the automatic hiding of the “Log out” action in the "
 "system menu for logged-in situations where there is a single, local, non-"
 "system user and only a single available session type (e.g. GNOME on Wayland)."
-msgstr "Gako honek sistema-menuko “Amaitu saioa” ekintza automatikoki ezkutatzea indargabetzen du saioa hasitako egoeratan, sistemarena ez den erabiltzaile lokal bakarra eta saio mota erabilgarri bakarra (adibidez, GNOME Wayland gainean) dagoenean."
+msgstr ""
+"Gako honek sistema-menuko “Amaitu saioa” ekintza automatikoki ezkutatzea "
+"indargabetzen du saioa hasitako egoeratan, sistemarena ez den erabiltzaile "
+"lokal bakarra eta saio mota erabilgarri bakarra (adibidez, GNOME Wayland "
+"gainean) dagoenean."
 
 #: data/org.gnome.shell.gschema.xml.in:94
 msgid ""
 "Whether to remember password for mounting encrypted or remote filesystems"
-msgstr "Zifratutako edo urruneko fitxategi-sistemak muntatzeko pasahitza gogoratuko den ala ez"
+msgstr ""
+"Zifratutako edo urruneko fitxategi-sistemak muntatzeko pasahitza gogoratuko "
+"den ala ez"
 
 #: data/org.gnome.shell.gschema.xml.in:95
 msgid ""
@@ -258,7 +297,11 @@ msgid ""
 "filesystem is mounted. If the password can be saved for future use a "
 "“Remember Password” checkbox will be present. This key sets the default "
 "state of the checkbox."
-msgstr "Shell-ak pasahitza eskatuko du zifratutako gailu bat edo urruneko fitxategi-sistema bat muntatzen denean. Pasahitza geroago erabiltzeko gorde badaiteke, “Gogoratu pasahitza” kontrol-laukia agertuko da. Gako honek kontrol-laukiaren egoera lehenetsia ezartzen du."
+msgstr ""
+"Shell-ak pasahitza eskatuko du zifratutako gailu bat edo urruneko fitxategi-"
+"sistema bat muntatzen denean. Pasahitza geroago erabiltzeko gorde badaiteke, "
+"“Gogoratu pasahitza” kontrol-laukia agertuko da. Gako honek kontrol-"
+"laukiaren egoera lehenetsia ezartzen du."
 
 #: data/org.gnome.shell.gschema.xml.in:104
 msgid "The last selected non-default power profile"
@@ -269,11 +312,16 @@ msgid ""
 "Some systems support more than two power profiles. In order to still support "
 "toggling between two profiles, this key records the last selected non-"
 "default profile."
-msgstr "Zenbait sistemak bi energia-profil baino gehiago onartzen dituzte. Bi profilen artean txandakatzea ahalbidetzeko, gako honek hautatutako azken profil ez lehenetsia erregistratzen du."
+msgstr ""
+"Zenbait sistemak bi energia-profil baino gehiago onartzen dituzte. Bi "
+"profilen artean txandakatzea ahalbidetzeko, gako honek hautatutako azken "
+"profil ez lehenetsia erregistratzen du."
 
 #: data/org.gnome.shell.gschema.xml.in:113
 msgid "The last version the “Welcome to GNOME” dialog was shown for"
-msgstr "“Ongi etorri GNOMEra“ elkarrizketa-koadroa zein bertsioarekin erakutsi zen azken aldian"
+msgstr ""
+"“Ongi etorri GNOMEra“ elkarrizketa-koadroa zein bertsioarekin erakutsi zen "
+"azken aldian"
 
 #: data/org.gnome.shell.gschema.xml.in:114
 msgid ""
@@ -281,7 +329,12 @@ msgid ""
 "shown. An empty string represents the oldest possible version, and a huge "
 "number will represent versions that do not exist yet. This huge number can "
 "be used to effectively disable the dialog."
-msgstr "Gako honek zehazten du “Ongi etorri GNOMEra“ elkarrizketa-koadroa zein bertsiorekin erakutsi zen azken aldian. Kate hutsak adierazten du bertsio zaharrena, eta zenbaki handi batek adierazten du oraindik exisititzen ez den bertsio bat. Zenbaki handi hori elkarrizketa-koadroa desgaitzeko erabili daiteke."
+msgstr ""
+"Gako honek zehazten du “Ongi etorri GNOMEra“ elkarrizketa-koadroa zein "
+"bertsiorekin erakutsi zen azken aldian. Kate hutsak adierazten du bertsio "
+"zaharrena, eta zenbaki handi batek adierazten du oraindik exisititzen ez den "
+"bertsio bat. Zenbaki handi hori elkarrizketa-koadroa desgaitzeko erabili "
+"daiteke."
 
 #: data/org.gnome.shell.gschema.xml.in:125
 msgid "Layout of the app picker"
@@ -293,7 +346,12 @@ msgid ""
 "stored in the order they appear in GNOME Shell. Each page contains an "
 "“application id” → 'data' pair. Currently, the following values are stored "
 "as 'data': • “position”: the position of the application icon in the page"
-msgstr "Aplikazio-hautatzailearen diseinua. Matrizeko sarrera bakoitza orri bat da. Orriak GNOME Shell-en agertzen diren ordenan biltegiratzen dira. Orri bakoizak “aplikazioaren ida” → 'datuak' bikote bat du. Une honetan, honako balioak gordetzen dira 'datuak': • “posizioa” moduan: aplikazio-ikonoak orrian duen posizioa."
+msgstr ""
+"Aplikazio-hautatzailearen diseinua. Matrizeko sarrera bakoitza orri bat da. "
+"Orriak GNOME Shell-en agertzen diren ordenan biltegiratzen dira. Orri "
+"bakoizak “aplikazioaren ida” → 'datuak' bikote bat du. Une honetan, honako "
+"balioak gordetzen dira 'datuak': • “posizioa” moduan: aplikazio-ikonoak "
+"orrian duen posizioa."
 
 #: data/org.gnome.shell.gschema.xml.in:145
 #: data/org.gnome.shell.gschema.xml.in:152
@@ -302,11 +360,15 @@ msgstr "Ikuspegi orokorraren egoeren artean aldatzeko laster-tekla"
 
 #: data/org.gnome.shell.gschema.xml.in:146
 msgid "Keybinding to shift between session, window picker and app grid"
-msgstr "Saioaren, leiho-aukeratzailearen eta aplikazio-saretaren artean aldatzeko laster-tekla"
+msgstr ""
+"Saioaren, leiho-aukeratzailearen eta aplikazio-saretaren artean aldatzeko "
+"laster-tekla"
 
 #: data/org.gnome.shell.gschema.xml.in:153
 msgid "Keybinding to shift between app grid, window picker and session"
-msgstr "Aplikazio-saretaren, leiho-aukeratzailearen eta saioaren artean aldatzeko laster-tekla"
+msgstr ""
+"Aplikazio-saretaren, leiho-aukeratzailearen eta saioaren artean aldatzeko "
+"laster-tekla"
 
 #: data/org.gnome.shell.gschema.xml.in:159
 msgid "Keybinding to open the “Show Applications” view"
@@ -315,7 +377,9 @@ msgstr "“Erakutsi aplikazioak” bista irekitzeko laster-tekla"
 #: data/org.gnome.shell.gschema.xml.in:160
 msgid ""
 "Keybinding to open the “Show Applications” view of the Activities Overview."
-msgstr "Jarduerak ikuspegi orokorraren “Erakutsi aplikazioak” ikuspegia irekitzeko laster-tekla."
+msgstr ""
+"Jarduerak ikuspegi orokorraren “Erakutsi aplikazioak” ikuspegia irekitzeko "
+"laster-tekla."
 
 #: data/org.gnome.shell.gschema.xml.in:167
 msgid "Keybinding to open the overview"
@@ -351,39 +415,39 @@ msgstr "Jakinarazpen aktiboa fokuratzeko laster-tekla."
 
 #: data/org.gnome.shell.gschema.xml.in:195
 msgid "Switch to application 1"
-msgstr "Aldatu 1 aplikaziora"
+msgstr "Aldatu 1. aplikaziora"
 
 #: data/org.gnome.shell.gschema.xml.in:199
 msgid "Switch to application 2"
-msgstr "Aldatu 2 aplikaziora"
+msgstr "Aldatu 2. aplikaziora"
 
 #: data/org.gnome.shell.gschema.xml.in:203
 msgid "Switch to application 3"
-msgstr "Aldatu 3 aplikaziora"
+msgstr "Aldatu 3. aplikaziora"
 
 #: data/org.gnome.shell.gschema.xml.in:207
 msgid "Switch to application 4"
-msgstr "Aldatu 4 aplikaziora"
+msgstr "Aldatu 4. aplikaziora"
 
 #: data/org.gnome.shell.gschema.xml.in:211
 msgid "Switch to application 5"
-msgstr "Aldatu 5 aplikaziora"
+msgstr "Aldatu 5. aplikaziora"
 
 #: data/org.gnome.shell.gschema.xml.in:215
 msgid "Switch to application 6"
-msgstr "Aldatu 6 aplikaziora"
+msgstr "Aldatu 6. aplikaziora"
 
 #: data/org.gnome.shell.gschema.xml.in:219
 msgid "Switch to application 7"
-msgstr "Aldatu 7 aplikaziora"
+msgstr "Aldatu 7. aplikaziora"
 
 #: data/org.gnome.shell.gschema.xml.in:223
 msgid "Switch to application 8"
-msgstr "Aldatu 8 aplikaziora"
+msgstr "Aldatu 8. aplikaziora"
 
 #: data/org.gnome.shell.gschema.xml.in:227
 msgid "Switch to application 9"
-msgstr "Aldatu 9 aplikaziora"
+msgstr "Aldatu 9. aplikaziora"
 
 #: data/org.gnome.shell.gschema.xml.in:231
 msgid "Open a new instance of application 1"
@@ -454,7 +518,9 @@ msgstr "Mugatu aldatzailea uneko laneko areara."
 msgid ""
 "If true, only applications that have windows on the current workspace are "
 "shown in the switcher. Otherwise, all applications are included."
-msgstr "TRUE (egia) bada, uneko laneko arean leihoak dituzten aplikazioak soilik erakutsiko dira aldatzailean. Bestela, aplikazio guztiak egongo dira."
+msgstr ""
+"TRUE (egia) bada, uneko laneko arean leihoak dituzten aplikazioak soilik "
+"erakutsiko dira aldatzailean. Bestela, aplikazio guztiak egongo dira."
 
 #: data/org.gnome.shell.gschema.xml.in:330
 msgid "The application icon mode."
@@ -465,13 +531,18 @@ msgid ""
 "Configures how the windows are shown in the switcher. Valid possibilities "
 "are “thumbnail-only” (shows a thumbnail of the window), “app-icon-only” "
 "(shows only the application icon) or “both”."
-msgstr "Leihoak aldatzaileak nola erakusten diren konfiguratzen du. Aukera posibleak “thumbnail-only” (leihoaren miniatura erakustea), “app-icon-only” (aplikazio-ikonoa erakustea soilik) edo “both” (biak)."
+msgstr ""
+"Leihoak aldatzaileak nola erakusten diren konfiguratzen du. Aukera posibleak "
+"“thumbnail-only” (leihoaren miniatura erakustea), “app-icon-only” (aplikazio-"
+"ikonoa erakustea soilik) edo “both” (biak)."
 
 #: data/org.gnome.shell.gschema.xml.in:340
 msgid ""
 "If true, only windows from the current workspace are shown in the switcher. "
 "Otherwise, all windows are included."
-msgstr "TRUE (egia) bada, uneko laneko arean leihoak soilik erakutsiko dira aldatzailean. Bestela, leiho guztiak egongo dira."
+msgstr ""
+"TRUE (egia) bada, uneko laneko arean leihoak soilik erakutsiko dira "
+"aldatzailean. Bestela, leiho guztiak egongo dira."
 
 #: data/org.gnome.shell.gschema.xml.in:350
 msgid "Locations"
@@ -544,7 +615,7 @@ msgstr "Errorearen xehetasunak"
 msgid "Copy Error"
 msgstr "Kopiatze-errorea"
 
-#: js/gdm/authPrompt.js:157 js/gdm/loginDialog.js:511
+#: js/gdm/authPrompt.js:157 js/gdm/loginDialog.js:514
 #: js/ui/audioDeviceSelection.js:60 js/ui/components/networkAgent.js:114
 #: js/ui/components/polkitAgent.js:144 js/ui/endSessionDialog.js:437
 #: js/ui/extensionDownloader.js:276 js/ui/shellMountOperation.js:382
@@ -565,84 +636,99 @@ msgstr "Pasahitza"
 msgid "Choose Session"
 msgstr "Aukeratu saioa"
 
-#: js/gdm/loginDialog.js:417 js/ui/status/accessibility.js:35
+#: js/gdm/loginDialog.js:420 js/ui/status/accessibility.js:35
 msgid "Accessibility"
 msgstr "Erabilerraztasuna"
-
-#. Translators: is running for <username>
-#: js/gdm/loginDialog.js:469
-#, javascript-format
-msgid ""
-"Remote login is not possible because a remote session is already running for "
-"%s. To login remotely, you must log out from the remote session or force "
-"stop it."
-msgstr "Ezin da urrunetik saioa hasi urruneko saio bat jadanik exekutatzen ari delako %s erabiltzailearentzako. Urruneko saio-hasiera ahalbidetzeko, lehenago abian dagoen urruneko saioa amaitu behar da edo hura geldiarazi behar da."
 
 #. Translators: is running for <username>
 #: js/gdm/loginDialog.js:472
 #, javascript-format
 msgid ""
-"Login is not possible because a remote session is already running for %s. To "
-"login, you must log out from the remote session or force stop it."
-msgstr "Ezin da saioa hasi urruneko saio bat jadanik exekutatzen ari delako %s erabiltzailearentzako. Saio-hasiera ahalbidetzeko, lehenago abian dagoen urruneko saioa amaitu behar da edo hura geldiarazi behar da."
+"Remote login is not possible because a remote session is already running for "
+"%s. To login remotely, you must log out from the remote session or force "
+"stop it."
+msgstr ""
+"Ezin da urrunetik saioa hasi urruneko saio bat jadanik exekutatzen ari "
+"delako %s erabiltzailearentzako. Urruneko saio-hasiera ahalbidetzeko, "
+"lehenago abian dagoen urruneko saioa amaitu behar da edo hura geldiarazi "
+"behar da."
 
 #. Translators: is running for <username>
 #: js/gdm/loginDialog.js:475
 #, javascript-format
 msgid ""
-"Remote login is not possible because a local session is already running for "
-"%s. To login remotely, you must log out from the local session or force stop "
-"it."
-msgstr "Ezin da urrunetik saioa hasi saio lokal bat jadanik exekutatzen ari delako %s erabiltzailearentzako. Urruneko saio-hasiera ahalbidetzeko, lehenago abian dagoen saio lokala amaitu behar da edo hura geldiarazi behar da."
+"Login is not possible because a remote session is already running for %s. To "
+"login, you must log out from the remote session or force stop it."
+msgstr ""
+"Ezin da saioa hasi urruneko saio bat jadanik exekutatzen ari delako %s "
+"erabiltzailearentzako. Saio-hasiera ahalbidetzeko, lehenago abian dagoen "
+"urruneko saioa amaitu behar da edo hura geldiarazi behar da."
 
 #. Translators: is running for <username>
 #: js/gdm/loginDialog.js:478
 #, javascript-format
 msgid ""
+"Remote login is not possible because a local session is already running for "
+"%s. To login remotely, you must log out from the local session or force stop "
+"it."
+msgstr ""
+"Ezin da urrunetik saioa hasi saio lokal bat jadanik exekutatzen ari delako "
+"%s erabiltzailearentzako. Urruneko saio-hasiera ahalbidetzeko, lehenago "
+"abian dagoen saio lokala amaitu behar da edo hura geldiarazi behar da."
+
+#. Translators: is running for <username>
+#: js/gdm/loginDialog.js:481
+#, javascript-format
+msgid ""
 "Login is not possible because a session is already running for %s. To login, "
 "you must log out from the session or force stop it."
-msgstr "Ezin da saioa hasi beste saio bat jadanik exekutatzen ari delako %s erabiltzailearentzako. Saio-hasiera ahalbidetzeko, lehenago abian dagoen saioa amaitu behar da edo hura geldiarazi behar da."
+msgstr ""
+"Ezin da saioa hasi beste saio bat jadanik exekutatzen ari delako %s "
+"erabiltzailearentzako. Saio-hasiera ahalbidetzeko, lehenago abian dagoen "
+"saioa amaitu behar da edo hura geldiarazi behar da."
 
-#: js/gdm/loginDialog.js:487
+#: js/gdm/loginDialog.js:490
 msgid "Session Already Running"
 msgstr "Saio bat jadanik abian dago"
 
-#: js/gdm/loginDialog.js:499
+#: js/gdm/loginDialog.js:502
 msgid ""
 "Force stopping will quit any running apps and processes, and could result in "
 "data loss"
-msgstr "Gelditzea behartzen bada, exekutatzen ari diren aplikazio eta prozesu guztiak amaituko dira eta datuak galdu daitezke"
+msgstr ""
+"Gelditzea behartzen bada, exekutatzen ari diren aplikazio eta prozesu "
+"guztiak amaituko dira eta datuak galdu daitezke"
 
-#: js/gdm/loginDialog.js:519
+#: js/gdm/loginDialog.js:522
 msgid "Force Stop"
 msgstr "Behartu gelditzea"
 
-#: js/gdm/loginDialog.js:597
+#: js/gdm/loginDialog.js:600
 msgid "Not listed?"
 msgstr "Ez zaude zerrendan?"
 
 #. Translators: this message is shown below the username entry field
 #. to clue the user in on how to login to the local network realm
-#: js/gdm/loginDialog.js:1126
+#: js/gdm/loginDialog.js:1129
 #, javascript-format
 msgid "(e.g., user or %s)"
 msgstr "(adib., erabiltzailea edo %s)"
 
-#: js/gdm/loginDialog.js:1131 js/ui/components/networkAgent.js:258
+#: js/gdm/loginDialog.js:1134 js/ui/components/networkAgent.js:258
 #: js/ui/components/networkAgent.js:293 js/ui/components/networkAgent.js:327
 #: subprojects/extensions-tool/src/command-upload.c:234
 msgid "Username"
 msgstr "Erabiltzaile-izena"
 
-#: js/gdm/loginDialog.js:1197
+#: js/gdm/loginDialog.js:1200
 msgid "Login Attempt Timed Out"
 msgstr "Saio-hasieraren denbora agortu da"
 
-#: js/gdm/loginDialog.js:1198
+#: js/gdm/loginDialog.js:1201
 msgid "Login took too long, please try again"
 msgstr "Saio-hasierak denbora gehiegi hartu du, saiatu berriro"
 
-#: js/gdm/loginDialog.js:1547
+#: js/gdm/loginDialog.js:1550
 msgid "Login Window"
 msgstr "Saio-hasierako leihoa"
 
@@ -840,125 +926,136 @@ msgid "Brightness"
 msgstr "Distira"
 
 #. Translators: The name of the power-off action in search
-#: js/misc/systemActions.js:93
+#: js/misc/systemActions.js:94
 msgctxt "search-result"
 msgid "Power Off"
 msgstr "Itzali"
 
 #. Translators: A list of keywords that match the power-off action, separated by semicolons
-#: js/misc/systemActions.js:96
+#: js/misc/systemActions.js:97
 msgid "power off;poweroff;shutdown;halt;stop"
 msgstr "itzali;amatatu;gelditu;geratu;utzi"
 
 #. Translators: The name of the restart action in search
-#: js/misc/systemActions.js:101
+#: js/misc/systemActions.js:102
 msgctxt "search-result"
 msgid "Restart"
 msgstr "Berrabiarazi"
 
 #. Translators: A list of keywords that match the restart action, separated by semicolons
-#: js/misc/systemActions.js:104
+#: js/misc/systemActions.js:105
 msgid "reboot;restart;"
 msgstr "berrabiarazi;berrekin;"
 
 #. Translators: The name of the lock screen action in search
-#: js/misc/systemActions.js:109
+#: js/misc/systemActions.js:110
 msgctxt "search-result"
 msgid "Lock Screen"
 msgstr "Blokeatu pantaila"
 
 #. Translators: A list of keywords that match the lock screen action, separated by semicolons
-#: js/misc/systemActions.js:112
+#: js/misc/systemActions.js:113
 msgid "lock screen"
 msgstr "blokeatu pantaila"
 
 #. Translators: The name of the logout action in search
-#: js/misc/systemActions.js:117
+#: js/misc/systemActions.js:118
 msgctxt "search-result"
 msgid "Log Out"
 msgstr "Amaitu saioa"
 
 #. Translators: A list of keywords that match the logout action, separated by semicolons
-#: js/misc/systemActions.js:120
+#: js/misc/systemActions.js:121
 msgid "logout;log out;sign off"
 msgstr "amaitu saioa;saioa amaitu;deskonektatu"
 
 #. Translators: The name of the suspend action in search
-#: js/misc/systemActions.js:125
+#: js/misc/systemActions.js:126
 msgctxt "search-result"
 msgid "Suspend"
 msgstr "Eseki"
 
 #. Translators: A list of keywords that match the suspend action, separated by semicolons
-#: js/misc/systemActions.js:128
+#: js/misc/systemActions.js:129
 msgid "suspend;sleep"
 msgstr "eseki;lo"
 
 #. Translators: The name of the switch user action in search
-#: js/misc/systemActions.js:133
+#: js/misc/systemActions.js:134
 msgctxt "search-result"
 msgid "Switch User"
 msgstr "Aldatu erabiltzailea"
 
 #. Translators: A list of keywords that match the switch user action, separated by semicolons
-#: js/misc/systemActions.js:136
+#: js/misc/systemActions.js:137
 msgid "switch user"
 msgstr "aldatu erabiltzailea"
 
 #. Translators: A list of keywords that match the lock orientation action, separated by semicolons
-#: js/misc/systemActions.js:143
+#: js/misc/systemActions.js:144
 msgid "lock orientation;unlock orientation;screen;rotation"
 msgstr "blokeatu orientazioa;desblokeatu orientazioa;pantaila;biraketa"
 
 #. Translators: The name of the screenshot UI action in search
-#: js/misc/systemActions.js:148
+#: js/misc/systemActions.js:149
 msgctxt "search-result"
 msgid "Take a Screenshot"
 msgstr "Atera pantaila-argazki bat"
 
 #. Translators: A list of keywords that match the screenshot UI action, separated by semicolons
-#: js/misc/systemActions.js:151
+#: js/misc/systemActions.js:152
 msgid "screenshot;screencast;snip;capture;record"
 msgstr "pantaila-argazkia;pantaila-bideoa;mozketa;kaptura;grabazioa"
 
-#: js/misc/systemActions.js:255
+#: js/misc/systemActions.js:256
 msgctxt "search-result"
 msgid "Unlock Screen Rotation"
 msgstr "Desblokeatu pantailaren biraketa"
 
-#: js/misc/systemActions.js:256
+#: js/misc/systemActions.js:257
 msgctxt "search-result"
 msgid "Lock Screen Rotation"
 msgstr "Pantailaren blokeoaren biraketa"
 
-#: js/misc/timeLimitsManager.js:342
+#: js/misc/timeLimitsManager.js:468
 msgid "GNOME needs to save screen time data"
 msgstr "GNOMEk pantaila-denboraren datuak gorde behar ditu"
 
-#: js/misc/timeLimitsManager.js:1124
+#: js/misc/timeLimitsManager.js:1393
+msgid "Screen Time Limit is almost up"
+msgstr "Pantaila-denbora ia mugara iritsi da"
+
+#: js/misc/timeLimitsManager.js:1395
+#, javascript-format
+msgid "The computer will lock in %d second."
+msgid_plural "The computer will lock in %d seconds."
+msgstr[0] "Ordenagailua blokeatuko da segundo %d barru."
+msgstr[1] "Ordenagailua blokeatuko da %d segundo barru."
+
+#: js/misc/timeLimitsManager.js:1403
 #, javascript-format
 msgid "Screen Time Limit in %d Minute"
 msgid_plural "Screen Time Limit in %d Minutes"
 msgstr[0] "Pantaila-denboraren muga minutu %dean"
 msgstr[1] "Pantaila-denboraren muga %d minututan"
 
-#: js/misc/timeLimitsManager.js:1131
+#: js/misc/timeLimitsManager.js:1407
 msgid "Your screen time limit is approaching"
 msgstr "Pantaila-denboraren muga iristen ari da"
 
-#: js/misc/timeLimitsManager.js:1145
+#: js/misc/timeLimitsManager.js:1428
 msgid "Screen Time Limit Reached"
 msgstr "Pantaila-denboraren muga iritsi da"
 
-#: js/misc/timeLimitsManager.js:1146
+#: js/misc/timeLimitsManager.js:1429
 msgid "It’s time to stop using the device"
 msgstr "Gailua erabiltzeari uzteko ordua da"
 
-#: js/misc/util.js:130
+#: js/misc/util.js:131
 msgid "Command not found"
 msgstr "Ez da komandoa aurkitu"
 
-#: js/misc/util.js:168
+#: js/misc/util.js:169
 #, javascript-format
 msgid "Execution of “%s” failed:"
 msgstr "Huts egin du '%s' exekutatzeak:"
@@ -1093,7 +1190,10 @@ msgstr "Zure konexioa segurua dela dirudi"
 msgid ""
 "Your connection to this hotspot login is not secure. Passwords or other "
 "information you enter on this page can be viewed by people nearby."
-msgstr "Wifigune honetarako saio-hasierako zure konexioa ez da segurua. Orri honetan sartzen dituzun pasahitzak edo bestelako informazioak inguruko beste jendeek ikus ditzakete."
+msgstr ""
+"Wifigune honetarako saio-hasierako zure konexioa ez da segurua. Orri honetan "
+"sartzen dituzun pasahitzak edo bestelako informazioak inguruko beste jendeek "
+"ikus ditzakete."
 
 #: js/portalHelper/main.js:115
 msgid "Hotspot Login"
@@ -1123,7 +1223,7 @@ msgstr "%s panelean ainguratu da."
 msgid "%s has been unpinned from the dash."
 msgstr "%s paneletik askatu da."
 
-#: js/ui/appFavorites.js:134 js/ui/main.js:316
+#: js/ui/appFavorites.js:134 js/ui/main.js:304
 msgid "Undo"
 msgstr "Desegin"
 
@@ -1230,7 +1330,7 @@ msgstr "A"
 #: js/ui/calendar.js:66
 msgctxt "grid thursday"
 msgid "T"
-msgstr "A"
+msgstr "O"
 
 #. Translators: Calendar grid abbreviation for Friday
 #: js/ui/calendar.js:68
@@ -1242,7 +1342,7 @@ msgstr "O"
 #: js/ui/calendar.js:70
 msgctxt "grid saturday"
 msgid "S"
-msgstr "I"
+msgstr "L"
 
 #. *
 #. * Translators: The header displaying just the month name
@@ -1285,36 +1385,38 @@ msgstr "%d"
 msgid "Week %V"
 msgstr "%V. astea"
 
-#: js/ui/calendar.js:773
+#: js/ui/calendar.js:774
 msgid "No Notifications"
 msgstr "Jakinarazpenik ez"
 
-#: js/ui/calendar.js:812
+#: js/ui/calendar.js:815
 msgid "Clear"
 msgstr "Garbitu"
 
-#: js/ui/calendar.js:816
+#: js/ui/calendar.js:819
 msgctxt "action"
 msgid "Clear all notifications"
 msgstr "Garbitu jakinarazpen guztiak"
 
 #. Translators: %s is an application name
-#: js/ui/closeDialog.js:42
+#: js/ui/closeDialog.js:40
 #, javascript-format
 msgid "“%s” Is Not Responding"
 msgstr "“%s” aplikazioak ez du erantzuten"
 
-#: js/ui/closeDialog.js:43
+#: js/ui/closeDialog.js:41
 msgid ""
 "You may choose to wait a short while for it to continue or force the app to "
 "quit entirely"
-msgstr "Pixka bat itxaron dezakezu ea jarraitzen duen edo aplikazioaren amaiera behartu dezakezu"
+msgstr ""
+"Pixka bat itxaron dezakezu ea jarraitzen duen edo aplikazioaren amaiera "
+"behartu dezakezu"
 
-#: js/ui/closeDialog.js:71
+#: js/ui/closeDialog.js:69
 msgid "Force Quit"
 msgstr "Behartu irtetera"
 
-#: js/ui/closeDialog.js:76
+#: js/ui/closeDialog.js:74
 msgid "Wait"
 msgstr "Itxaron"
 
@@ -1376,17 +1478,18 @@ msgid "Service"
 msgstr "Zerbitzua"
 
 #: js/ui/components/networkAgent.js:371 js/ui/components/networkAgent.js:407
-#: js/ui/components/networkAgent.js:745 js/ui/components/networkAgent.js:766
+#: js/ui/components/networkAgent.js:744 js/ui/components/networkAgent.js:765
 msgid "Authentication required"
 msgstr "Autentifikazioa behar da"
 
-#: js/ui/components/networkAgent.js:372 js/ui/components/networkAgent.js:746
+#: js/ui/components/networkAgent.js:372 js/ui/components/networkAgent.js:745
 #, javascript-format
 msgid ""
 "Passwords or encryption keys are required to access the wireless network “%s”"
-msgstr "Pasahitzak edo zifratze-gakoak behar dira haririk gabeko “%s” sarera sartzeko"
+msgstr ""
+"Pasahitzak edo zifratze-gakoak behar dira haririk gabeko “%s” sarera sartzeko"
 
-#: js/ui/components/networkAgent.js:376 js/ui/components/networkAgent.js:750
+#: js/ui/components/networkAgent.js:376 js/ui/components/networkAgent.js:749
 msgid "Wired 802.1X authentication"
 msgstr "Haridun 802.1X autentifikazioa"
 
@@ -1394,15 +1497,15 @@ msgstr "Haridun 802.1X autentifikazioa"
 msgid "Network name"
 msgstr "Sarearen izena"
 
-#: js/ui/components/networkAgent.js:387 js/ui/components/networkAgent.js:754
+#: js/ui/components/networkAgent.js:387 js/ui/components/networkAgent.js:753
 msgid "DSL authentication"
 msgstr "DSL autentifikazioa"
 
-#: js/ui/components/networkAgent.js:394 js/ui/components/networkAgent.js:759
+#: js/ui/components/networkAgent.js:394 js/ui/components/networkAgent.js:758
 msgid "PIN code required"
 msgstr "PIN kodea behar da"
 
-#: js/ui/components/networkAgent.js:395 js/ui/components/networkAgent.js:760
+#: js/ui/components/networkAgent.js:395 js/ui/components/networkAgent.js:759
 msgid "PIN code is needed for the mobile broadband device"
 msgstr "PIN kodea behar da banda zabal mugikorreko gailuarentzako"
 
@@ -1410,14 +1513,14 @@ msgstr "PIN kodea behar da banda zabal mugikorreko gailuarentzako"
 msgid "PIN"
 msgstr "PINa"
 
-#: js/ui/components/networkAgent.js:408 js/ui/components/networkAgent.js:751
-#: js/ui/components/networkAgent.js:755 js/ui/components/networkAgent.js:767
-#: js/ui/components/networkAgent.js:771
+#: js/ui/components/networkAgent.js:408 js/ui/components/networkAgent.js:750
+#: js/ui/components/networkAgent.js:754 js/ui/components/networkAgent.js:766
+#: js/ui/components/networkAgent.js:770
 #, javascript-format
 msgid "A password is required to connect to “%s”"
 msgstr "Pasahitza behar da '%s' sarearekin konektatzeko"
 
-#: js/ui/components/networkAgent.js:770
+#: js/ui/components/networkAgent.js:769
 msgid "VPN password"
 msgstr "VPN pasahitza"
 
@@ -1441,7 +1544,7 @@ msgstr "Autentifikatu"
 msgid "Sorry, that didn’t work. Please try again."
 msgstr "Huts egin du. Saiatu berriro."
 
-#: js/ui/ctrlAltTab.js:23 js/ui/overviewControls.js:404
+#: js/ui/ctrlAltTab.js:23 js/ui/overviewControls.js:407
 msgid "Windows"
 msgstr "Leihoak"
 
@@ -1628,8 +1731,12 @@ msgstr "Berrabiarazi eta instalatu eguneratzeak"
 msgid "The system will automatically restart and install updates in %d second"
 msgid_plural ""
 "The system will automatically restart and install updates in %d seconds"
-msgstr[0] "Sistema automatikoki berrabiaraziko da  eta eguneratzeak instalatuko ditu segundo %dean"
-msgstr[1] "Sistema automatikoki berrabiaraziko da  eta eguneratzeak instalatuko ditu %d segundotan"
+msgstr[0] ""
+"Sistema automatikoki berrabiaraziko da  eta eguneratzeak instalatuko ditu "
+"segundo %dean"
+msgstr[1] ""
+"Sistema automatikoki berrabiaraziko da  eta eguneratzeak instalatuko ditu %d "
+"segundotan"
 
 #: js/ui/endSessionDialog.js:119 js/ui/endSessionDialog.js:140
 msgctxt "button"
@@ -1659,7 +1766,10 @@ msgstr "Berrabiarazi eta instalatu bertsio-berritzea"
 msgid ""
 "%s %s will be installed after restart. Upgrade installation can take a long "
 "time: ensure that you have backed up and that the computer is plugged in."
-msgstr "%s %s instalatuko da berrabiarazi ondoren. Bertsio-berritzearen instalazioak denbora luzea beharko du, ziurtatu zaitez babeskopia eginda daukazula eta ordenagailua entxufatuta dagoela."
+msgstr ""
+"%s %s instalatuko da berrabiarazi ondoren. Bertsio-berritzearen instalazioak "
+"denbora luzea beharko du, ziurtatu zaitez babeskopia eginda daukazula eta "
+"ordenagailua entxufatuta dagoela."
 
 #: js/ui/endSessionDialog.js:283
 msgid "Low battery power: please plug in before installing updates"
@@ -1743,7 +1853,10 @@ msgstr "Tekla motelak desaktibatuta"
 msgid ""
 "You just held down the Shift key for 8 seconds. This is the shortcut for the "
 "Slow Keys feature, which affects the way your keyboard works."
-msgstr "Shift teklari 8 segundo baino denbora gehiago eutsi diozu sakatuta. Hori tekla motelen eginbidea aktibatzeko lasterbidea da, eta zure teklatuaren funtzionamendua aldatzen du."
+msgstr ""
+"Shift teklari 8 segundo baino denbora gehiago eutsi diozu sakatuta. Hori "
+"tekla motelen eginbidea aktibatzeko lasterbidea da, eta zure teklatuaren "
+"funtzionamendua aldatzen du."
 
 #: js/ui/kbdA11yDialog.js:42
 msgid "Sticky Keys Turned On"
@@ -1757,14 +1870,20 @@ msgstr "Tekla itsaskorrak desaktibatuta"
 msgid ""
 "You just pressed the Shift key 5 times in a row. This is the shortcut for "
 "the Sticky Keys feature, which affects the way your keyboard works."
-msgstr "Shift teklari 5 aldiz jarraian sakatu diozu. Hori tekla itsaskorren eginbidea aktibatzeko lasterbidea da, eta zure teklatuaren funtzionamendua aldatzen du."
+msgstr ""
+"Shift teklari 5 aldiz jarraian sakatu diozu. Hori tekla itsaskorren "
+"eginbidea aktibatzeko lasterbidea da, eta zure teklatuaren funtzionamendua "
+"aldatzen du."
 
 #: js/ui/kbdA11yDialog.js:47
 msgid ""
 "You just pressed two keys at once, or pressed the Shift key 5 times in a "
 "row. This turns off the Sticky Keys feature, which affects the way your "
 "keyboard works."
-msgstr "Bi tekla aldi berean sakatu dituzu, edo Shift teklari 5 aldiz jarraian sakatu diozu. Hori tekla itsaskorren eginbidea desaktibatzeko lasterbidea da, eta zure teklatuaren funtzionamendua aldatzen du."
+msgstr ""
+"Bi tekla aldi berean sakatu dituzu, edo Shift teklari 5 aldiz jarraian "
+"sakatu diozu. Hori tekla itsaskorren eginbidea desaktibatzeko lasterbidea "
+"da, eta zure teklatuaren funtzionamendua aldatzen du."
 
 #: js/ui/kbdA11yDialog.js:57
 msgid "Leave On"
@@ -1782,7 +1901,7 @@ msgstr "Itzali"
 msgid "Leave Off"
 msgstr "Utzi itzalita"
 
-#: js/ui/keyboard.js:179 js/ui/status/keyboard.js:901
+#: js/ui/keyboard.js:179 js/ui/status/keyboard.js:898
 msgid "Keyboard Settings"
 msgstr "Teklatuaren ezarpenak"
 
@@ -1840,35 +1959,38 @@ msgstr "Ikusi iturburua"
 msgid "Web Page"
 msgstr "Web orria"
 
-#: js/ui/main.js:312
+#: js/ui/main.js:300
 msgid "System was put in unsafe mode"
 msgstr "Sistema segurua ez den moduan jarri da"
 
-#: js/ui/main.js:313
+#: js/ui/main.js:301
 msgid "Apps now have unrestricted access"
 msgstr "Orain aplikazioek mugarik gabeko sarbidea dute"
 
-#: js/ui/main.js:373
+#: js/ui/main.js:363
 msgid "Logged in as a privileged user"
 msgstr "Erabiltzaile pribilegiatu gisa saioa hasita"
 
-#: js/ui/main.js:374
+#: js/ui/main.js:364
 msgid ""
 "Running a session as a privileged user should be avoided for security "
 "reasons. If possible, you should log in as a normal user."
-msgstr "Erabiltzaile pribilegiatu gisa saio bat exekutatzea saihestu beharko litzateke segurtasuneko arrazoiak direla eta. Posible bada, erabiltzaile arrunt gisa hasi beharko zenuke saioa."
+msgstr ""
+"Erabiltzaile pribilegiatu gisa saio bat exekutatzea saihestu beharko "
+"litzateke segurtasuneko arrazoiak direla eta. Posible bada, erabiltzaile "
+"arrunt gisa hasi beharko zenuke saioa."
 
-#: js/ui/main.js:422
+#: js/ui/main.js:410
 msgid "Screen Lock disabled"
 msgstr "Pantailaren blokeoa desgaituta dago"
 
-#: js/ui/main.js:423
+#: js/ui/main.js:411
 msgid "Screen Locking requires the GNOME display manager"
 msgstr "Pantaila blokeatzeko GNOMEren pantaila-kudeatzailea behar da"
 
 #. Translators: this is the string displayed in the header when a message
 #. source doesn't have a name
-#: js/ui/messageList.js:409
+#: js/ui/messageList.js:404
 msgid "Unknown App"
 msgstr "Aplikazio ezezaguna"
 
@@ -1888,11 +2010,11 @@ msgstr "Titulu ezezaguna"
 #. in the search entry when no search is
 #. active; it should not exceed ~30
 #. characters.
-#: js/ui/overviewControls.js:328
+#: js/ui/overviewControls.js:330
 msgid "Type to search"
 msgstr "Idatzi bilatzeko"
 
-#: js/ui/overviewControls.js:392
+#: js/ui/overviewControls.js:395
 msgid "Apps"
 msgstr "Aplikazioak"
 
@@ -1952,12 +2074,12 @@ msgstr "Sakatu edozer tekla irteteko"
 msgid "Activities"
 msgstr "Jarduerak"
 
-#: js/ui/panel.js:289
+#: js/ui/panel.js:290
 msgctxt "System menu in the top bar"
 msgid "System"
 msgstr "Sistema"
 
-#: js/ui/panel.js:465
+#: js/ui/panel.js:466
 msgid "Top Bar"
 msgstr "Goiko barra"
 
@@ -1973,23 +2095,15 @@ msgstr "Exekutatu komando bat"
 msgid "Press ESC to close"
 msgstr "Sakatu Esc ixteko"
 
-#: js/ui/runDialog.js:256
-msgid "Restart is not available on Wayland"
-msgstr "Berrabiaraztea ez dago erabilgarri Wayland-en"
-
-#: js/ui/runDialog.js:261
-msgid "Restarting…"
-msgstr "Berrabiarazten…"
-
-#: js/ui/screenShield.js:233
+#: js/ui/screenShield.js:227
 msgid "GNOME needs to lock the screen"
 msgstr "GNOMEk pantaila blokeatzea behar du"
 
-#: js/ui/screenShield.js:274 js/ui/screenShield.js:682
+#: js/ui/screenShield.js:269 js/ui/screenShield.js:675
 msgid "Unable to lock"
 msgstr "Ezin da blokeatu"
 
-#: js/ui/screenShield.js:275 js/ui/screenShield.js:683
+#: js/ui/screenShield.js:270 js/ui/screenShield.js:676
 msgid "Lock was blocked by an app"
 msgstr "Aplikazio batek blokeatu du"
 
@@ -2042,114 +2156,114 @@ msgstr "Erakutsi erakuslea"
 
 #. Translators: this is the folder where recorded
 #. screencasts are stored.
-#: js/ui/screenshot.js:2016
+#: js/ui/screenshot.js:2021
 msgid "Screencasts"
 msgstr "Pantaila-bideoak"
 
 #. Translators: this is a filename used for screencast
 #. * recording, where "%d" and "%t" date and time, e.g.
 #. * "Screencast From 07-17-2013 10:00:46 PM"
-#: js/ui/screenshot.js:2021
+#: js/ui/screenshot.js:2026
 #, no-c-format
 msgid "Screencast From %d %t"
 msgstr "Pantaila-bideoa %d %t"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2067
+#: js/ui/screenshot.js:2072
 msgid "Screencast recorded"
 msgstr "Pantaila-bideoa grabatu da"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2080
+#: js/ui/screenshot.js:2085
 msgid "Screencast failed to start"
 msgstr "Pantaila-bideoaren abioak huts egin du"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2086
+#: js/ui/screenshot.js:2091
 msgid "Screencast ended: Out of disk space"
 msgstr "Pantaila-bideoa amaitu da: Disko-espaziorik ez"
 
 #. We can encourage user to try again on service crashes since the
 #. recorder will auto-blocklist the pipeline that crashed.
 #. Translators: notification title.
-#: js/ui/screenshot.js:2092
+#: js/ui/screenshot.js:2097
 msgid "Screencast ended unexpectedly, please try again"
 msgstr "Pantaila-bideoa ustekabean amaitu da, saiatu berriro"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2095
+#: js/ui/screenshot.js:2100
 msgid "Screencast ended unexpectedly"
 msgstr "Pantaila-bideoa ustekabean amaitu da"
 
 #. Translators: notification body when a screencast was recorded.
-#: js/ui/screenshot.js:2108
+#: js/ui/screenshot.js:2113
 msgid "Click here to view the video"
 msgstr "Klik hemen bideoa ikusteko"
 
 #. Translators: button on the screencast notification.
 #. Translators: button on the screenshot notification.
-#: js/ui/screenshot.js:2116 js/ui/screenshot.js:2359
+#: js/ui/screenshot.js:2121 js/ui/screenshot.js:2364
 msgid "Show in Files"
 msgstr "Erakutsi Fitxategiak aplikazioan"
 
 #. Translators: this is the name of the file that the screenshot is
 #. saved to. The placeholder is a timestamp, e.g. "2017-05-21 12-24-03".
-#: js/ui/screenshot.js:2305
+#: js/ui/screenshot.js:2310
 #, javascript-format
 msgid "Screenshot From %s"
 msgstr "Pantaila-argazkia %s"
 
 #. Translators: notification title.
-#: js/ui/screenshot.js:2349
+#: js/ui/screenshot.js:2354
 msgid "Screenshot captured"
 msgstr "Pantaila-argazkia hartu da"
 
 #. Translators: notification body when a screenshot was captured.
-#: js/ui/screenshot.js:2351
+#: js/ui/screenshot.js:2356
 msgid "You can paste the image from the clipboard"
 msgstr "Irudia arbeletik itsatsi daiteke"
 
-#: js/ui/screenshot.js:2409 js/ui/screenshot.js:2571
+#: js/ui/screenshot.js:2414 js/ui/screenshot.js:2576
 msgid "Screenshot taken"
 msgstr "Pantaila-argazkia hartu da"
 
-#: js/ui/search.js:842
+#: js/ui/search.js:847
 msgid "Searching"
 msgstr "Bilatzen"
 
-#: js/ui/search.js:845
+#: js/ui/search.js:850
 msgid "No results"
 msgstr "Ez dago emaitzarik"
 
-#: js/ui/search.js:977
+#: js/ui/search.js:985
 #, javascript-format
 msgid "%d more"
 msgid_plural "%d more"
 msgstr[0] "%d gehiago"
 msgstr[1] "%d gehiago"
 
-#: js/ui/searchController.js:87
+#: js/ui/searchController.js:86
 #: subprojects/extensions-app/data/ui/extensions-window.ui:73
 msgid "Search"
 msgstr "Bilatu"
 
-#: js/ui/shellEntry.js:21
+#: js/ui/shellEntry.js:22
 msgid "Copy"
 msgstr "Kopiatu"
 
-#: js/ui/shellEntry.js:26
+#: js/ui/shellEntry.js:27
 msgid "Paste"
 msgstr "Itsatsi"
 
-#: js/ui/shellEntry.js:78
+#: js/ui/shellEntry.js:79
 msgid "Show Text"
 msgstr "Erakutsi testua"
 
-#: js/ui/shellEntry.js:80
+#: js/ui/shellEntry.js:81
 msgid "Hide Text"
 msgstr "Ezkutatu testua"
 
-#: js/ui/shellEntry.js:174
+#: js/ui/shellEntry.js:170
 msgid "Caps lock is on"
 msgstr "Maiuskulen blokeoa aktibatuta dago"
 
@@ -2170,13 +2284,17 @@ msgstr "Gako-fitxategiak erabiltzen ditu"
 #, javascript-format
 msgid ""
 "To unlock a volume that uses keyfiles, use the <i>%s</i> utility instead"
-msgstr "Gako-fitxategiak erabiltzen dituen bolumen bat desmuntatzeko, erabili <i>%s</i> utilitatea"
+msgstr ""
+"Gako-fitxategiak erabiltzen dituen bolumen bat desmuntatzeko, erabili <i>%s</"
+"i> utilitatea"
 
 #: js/ui/shellMountOperation.js:304
 msgid ""
 "You need an external utility like <i>Disks</i> to unlock a volume that uses "
 "keyfiles"
-msgstr "Kanpoko utilitate bat behar da, adibidez <i>Diskoal</i>, gako-fitxategiak erabiltzen dituen bolumen bat desblokeatzeko"
+msgstr ""
+"Kanpoko utilitate bat behar da, adibidez <i>Diskoal</i>, gako-fitxategiak "
+"erabiltzen dituen bolumen bat desblokeatzeko"
 
 #: js/ui/shellMountOperation.js:312
 msgid "PIM Number"
@@ -2288,7 +2406,7 @@ msgstr "Baxua"
 msgid "High"
 msgstr "Altua"
 
-#: js/ui/status/backlight.js:162 js/ui/status/keyboard.js:883
+#: js/ui/status/backlight.js:162 js/ui/status/keyboard.js:880
 msgid "Keyboard"
 msgstr "Teklatua"
 
@@ -2352,27 +2470,27 @@ msgstr "Estilo iluna"
 msgid "Do Not Disturb"
 msgstr "Ez gogaitu"
 
-#: js/ui/status/dwellClick.js:15
+#: js/ui/status/dwellClick.js:14
 msgid "Single Click"
 msgstr "Klik bakuna"
 
-#: js/ui/status/dwellClick.js:20
+#: js/ui/status/dwellClick.js:19
 msgid "Double Click"
 msgstr "Klik bikoitza"
 
-#: js/ui/status/dwellClick.js:25
+#: js/ui/status/dwellClick.js:24
 msgid "Drag"
 msgstr "Arrastatu"
 
-#: js/ui/status/dwellClick.js:30
+#: js/ui/status/dwellClick.js:29
 msgid "Secondary Click"
 msgstr "2. mailako klik egitea"
 
-#: js/ui/status/dwellClick.js:39
+#: js/ui/status/dwellClick.js:38
 msgid "Dwell Click"
 msgstr "Ordezko klika"
 
-#: js/ui/status/keyboard.js:900
+#: js/ui/status/keyboard.js:897
 msgid "Show Keyboard Layout"
 msgstr "Erakutsi teklatuaren diseinua"
 
@@ -2388,7 +2506,8 @@ msgstr "%s aplikazioak zure kokalekua atzitu nahi du"
 
 #: js/ui/status/location.js:349
 msgid "Location access can be changed at any time from the privacy settings"
-msgstr "Kokalekuaren sarbidea edozein unetan alda daiteke pribatutasun-ezarpenetan"
+msgstr ""
+"Kokalekuaren sarbidea edozein unetan alda daiteke pribatutasun-ezarpenetan"
 
 #: js/ui/status/location.js:357
 msgid "Deny Access"
@@ -2536,7 +2655,8 @@ msgctxt "Power profile"
 msgid "Custom"
 msgstr "Pertsonalizatua"
 
-#: js/ui/status/powerProfiles.js:45 js/ui/status/powerProfiles.js:77
+#: js/ui/status/powerProfiles.js:45
+msgctxt "Quick settings button title"
 msgid "Power Mode"
 msgstr "Energiaren modua"
 
@@ -2544,15 +2664,20 @@ msgstr "Energiaren modua"
 msgid "Open power profiles menu"
 msgstr "Ireki energia-profilen menua"
 
+#: js/ui/status/powerProfiles.js:77
+msgctxt "Quick settings menu header"
+msgid "Power Mode"
+msgstr "Energiaren modua"
+
 #: js/ui/status/powerProfiles.js:79
 msgid "Power Settings"
 msgstr "Energiaren ezarpenak"
 
-#: js/ui/status/remoteAccess.js:74
+#: js/ui/status/remoteAccess.js:73
 msgid "Stop Screencast"
 msgstr "Gelditu pantaila-bideoa"
 
-#: js/ui/status/remoteAccess.js:144
+#: js/ui/status/remoteAccess.js:141
 msgid "Stop Screen Sharing"
 msgstr "Gelditu pantaila partekatzea"
 
@@ -2597,7 +2722,9 @@ msgstr "Thunderbolt gailu ezezaguna"
 msgid ""
 "New device has been detected while you were away. Please disconnect and "
 "reconnect the device to start using it."
-msgstr "Gailu berria detektatu da ez zeunden bitartean. Deskonektatu eta berriro konektatu gailua hura erabiltzen hasi ahal izateko."
+msgstr ""
+"Gailu berria detektatu da ez zeunden bitartean. Deskonektatu eta berriro "
+"konektatu gailua hura erabiltzen hasi ahal izateko."
 
 #: js/ui/status/thunderbolt.js:315
 msgid "Unauthorized Thunderbolt device"
@@ -2606,7 +2733,8 @@ msgstr "Baimenik gabeko Thunderbolt gailua"
 #: js/ui/status/thunderbolt.js:316
 msgid ""
 "New device has been detected and needs to be authorized by an administrator"
-msgstr "Gailu berria detektatu da eta administratzaile batek baimena eman behar dio"
+msgstr ""
+"Gailu berria detektatu da eta administratzaile batek baimena eman behar dio"
 
 #: js/ui/status/thunderbolt.js:322
 msgid "Thunderbolt authorization error"
@@ -2750,92 +2878,92 @@ msgid "%d × %d"
 msgstr "%d × %d"
 
 #. Translators: entry in the window right click menu.
-#: js/ui/windowMenu.js:27
+#: js/ui/windowMenu.js:28
 msgctxt "window-menu"
 msgid "Take Screenshot"
 msgstr "Atera pantaila-argazkia"
 
-#: js/ui/windowMenu.js:39
+#: js/ui/windowMenu.js:40
 msgid "Hide"
 msgstr "Ezkutatu"
 
-#: js/ui/windowMenu.js:46
+#: js/ui/windowMenu.js:47
 msgid "Restore"
 msgstr "Leheneratu"
 
-#: js/ui/windowMenu.js:50
+#: js/ui/windowMenu.js:51
 msgid "Maximize"
 msgstr "Maximizatu"
 
-#: js/ui/windowMenu.js:57
+#: js/ui/windowMenu.js:58
 msgid "Move"
 msgstr "Mugitu"
 
-#: js/ui/windowMenu.js:71
+#: js/ui/windowMenu.js:72
 msgid "Resize"
 msgstr "Aldatu tamaina"
 
-#: js/ui/windowMenu.js:85
+#: js/ui/windowMenu.js:86
 msgid "Always on Top"
 msgstr "Beti gainean"
 
-#: js/ui/windowMenu.js:104
+#: js/ui/windowMenu.js:105
 msgid "Always on Visible Workspace"
 msgstr "Beti laneko area ikusgaian"
 
-#: js/ui/windowMenu.js:118
+#: js/ui/windowMenu.js:119
 msgid "Move to Workspace Left"
 msgstr "Eraman ezkerreko laneko areara"
 
-#: js/ui/windowMenu.js:124
+#: js/ui/windowMenu.js:125
 msgid "Move to Workspace Right"
 msgstr "Eraman eskuineko laneko areara"
 
-#: js/ui/windowMenu.js:130
+#: js/ui/windowMenu.js:131
 msgid "Move to Workspace Up"
 msgstr "Eraman gaineko laneko areara"
 
-#: js/ui/windowMenu.js:136
+#: js/ui/windowMenu.js:137
 msgid "Move to Workspace Down"
 msgstr "Eraman azpiko laneko areara"
 
-#: js/ui/windowMenu.js:154
+#: js/ui/windowMenu.js:155
 msgid "Move to Monitor Up"
 msgstr "Eraman gaineko pantailara"
 
-#: js/ui/windowMenu.js:163
+#: js/ui/windowMenu.js:164
 msgid "Move to Monitor Down"
 msgstr "Eraman azpiko pantailara"
 
-#: js/ui/windowMenu.js:172
+#: js/ui/windowMenu.js:173
 msgid "Move to Monitor Left"
 msgstr "Eraman ezkerreko pantailara"
 
-#: js/ui/windowMenu.js:181
+#: js/ui/windowMenu.js:182
 msgid "Move to Monitor Right"
 msgstr "Eraman eskuineko pantailara"
 
-#: js/ui/windowMenu.js:189
+#: js/ui/windowMenu.js:190
 msgid "Close"
 msgstr "Itxi"
 
-#: src/main.c:515 subprojects/extensions-tool/src/main.c:336
+#: src/main.c:513 subprojects/extensions-tool/src/main.c:336
 msgid "Print version"
 msgstr "Bistaratu bertsioa"
 
-#: src/main.c:521
+#: src/main.c:519
 msgid "Mode used by GDM for login screen"
 msgstr "GDMk erabiltzen duen modua saio-hasierako pantailarako"
 
-#: src/main.c:527
+#: src/main.c:525
 msgid "Use a specific mode, e.g. “gdm” for login screen"
 msgstr "Erabili modu jakin bat, adib. “gdm“, saioa hasteko pantailarako"
 
-#: src/main.c:533
+#: src/main.c:531
 msgid "List possible modes"
 msgstr "Zerrendatu modu posibleak"
 
-#: src/main.c:539
+#: src/main.c:537
 msgid "Force animations to be enabled"
 msgstr "Behartu animazioa gaitzea"
 
@@ -2883,17 +3011,20 @@ msgstr "GNOME proiektua"
 msgid ""
 "GNOME Extensions handles updating extensions, configuring extension "
 "preferences and removing or disabling unwanted extensions."
-msgstr "GNOME Hedapenak aplikazioak hedapenak eguneratzea, hedapenen hobespenak konfiguratzea eta gehiago nahi ez diren hedapenak kentzea edo desgaitzea ahalbidetzen du."
+msgstr ""
+"GNOME Hedapenak aplikazioak hedapenak eguneratzea, hedapenen hobespenak "
+"konfiguratzea eta gehiago nahi ez diren hedapenak kentzea edo desgaitzea "
+"ahalbidetzen du."
 
-#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:79
+#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:70
 msgid "Main Window"
 msgstr "Leiho nagusia"
 
-#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:83
+#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:74
 msgid "Available Updates"
 msgstr "Eguneratze eskuragarriak"
 
-#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:87
+#: subprojects/extensions-app/data/metainfo/org.gnome.Extensions.metainfo.xml.in:78
 msgid "Search View"
 msgstr "Bilaketa-ikuspegia"
 
@@ -2906,21 +3037,27 @@ msgstr "Konfiguratu GNOME Shell-eko gehigarriak"
 msgid ""
 "The installed version of this extension (%s) is incompatible with the "
 "current version of GNOME (%s). The extension has been disabled."
-msgstr "Hedapen honetatik instalatutako bertsioa (%s) ez da bateragarria GNOMEren uneko bertsioarekin (%s). Hedapena desgaitu da."
+msgstr ""
+"Hedapen honetatik instalatutako bertsioa (%s) ez da bateragarria GNOMEren "
+"uneko bertsioarekin (%s). Hedapena desgaitu da."
 
 #: subprojects/extensions-app/js/extensionManager.js:238
 #, javascript-format
 msgid ""
 "The installed version of this extension is incompatible with the current "
 "version of GNOME (%s). The extension has been disabled."
-msgstr "Hedapen honetatik instalatutako bertsioa ez da bateragarria GNOMEren uneko bertsioarekin (%s). Hedapena desgaitu da."
+msgstr ""
+"Hedapen honetatik instalatutako bertsioa ez da bateragarria GNOMEren uneko "
+"bertsioarekin (%s). Hedapena desgaitu da."
 
 #: subprojects/extensions-app/js/extensionManager.js:242
 msgid ""
 "An error has occurred in this extension. This could cause issues elsewhere "
 "in the system. It is recommended to turn the extension off until the error "
 "is resolved."
-msgstr "Errorea gertatu da hedapen honekin. Horrek arazoak sortu ditzake sisteman. Hobe da hedapena desaktibatzen baduzu errorea konpondu arte."
+msgstr ""
+"Errorea gertatu da hedapen honekin. Horrek arazoak sortu ditzake sisteman. "
+"Hobe da hedapena desaktibatzen baduzu errorea konpondu arte."
 
 #. translators: Details for an extension error
 #: subprojects/extensions-app/js/extensionManager.js:248
@@ -2941,7 +3078,8 @@ msgstr "Kendu “%s”?"
 msgid ""
 "If you remove the extension, you need to return to download it if you want "
 "to enable it again"
-msgstr "Hedapena kentzen bada, berriro deskargatu beharko da atzera gaitu nahi bada."
+msgstr ""
+"Hedapena kentzen bada, berriro deskargatu beharko da atzera gaitu nahi bada."
 
 #: subprojects/extensions-app/js/extensionsWindow.js:112
 msgid "_Cancel"
@@ -2969,7 +3107,8 @@ msgstr "Eguneratzearen xehetasunak"
 #: subprojects/extensions-app/data/ui/extension-row.ui:68
 msgid ""
 "A new version of this extension is ready and will be loaded on next login."
-msgstr "Hedapen honen bertsio berria dago eta hurrengo saio-hasieran kargatuko da."
+msgstr ""
+"Hedapen honen bertsio berria dago eta hurrengo saio-hasieran kargatuko da."
 
 #: subprojects/extensions-app/data/ui/extension-row.ui:100
 msgid "Extension Details"
@@ -3019,7 +3158,9 @@ msgstr "Informazio gehiago"
 msgid ""
 "Extensions can cause performance and stability issues. It is recommended to "
 "disable all extensions if you experience problems with your system."
-msgstr "Hedapenek errendimendu- eta egonkortasun-arazoak sortu ditzakete. Gomendagarria hedapenak desgaitzea sistemak arazoak baditu."
+msgstr ""
+"Hedapenek errendimendu- eta egonkortasun-arazoak sortu ditzakete. "
+"Gomendagarria hedapenak desgaitzea sistemak arazoak baditu."
 
 #: subprojects/extensions-app/data/ui/extensions-window.ui:175
 msgid "User Extensions"
@@ -3049,7 +3190,9 @@ msgstr "Instalatu gabeko luzapenak"
 msgid ""
 "To find and add extensions, visit <a href=\"https://"
 "extensions.gnome.org\">extensions.gnome.org</a>."
-msgstr "Hedapenak aurkitu eta gehitzeko, bisitatu <a href=\"https://extensions.gnome.org\">extensions.gnome.org</a>."
+msgstr ""
+"Hedapenak aurkitu eta gehitzeko, bisitatu <a href=\"https://"
+"extensions.gnome.org\">extensions.gnome.org</a>."
 
 #: subprojects/extensions-app/data/ui/extensions-window.ui:240
 msgid "Something’s gone wrong"
@@ -3059,7 +3202,9 @@ msgstr "Zerbait gaizki joan da"
 msgid ""
 "We’re very sorry, but it was not possible to get the list of installed "
 "extensions. Make sure you are logged into GNOME and try again."
-msgstr "Barkatu, ezin izan da instalatutako hedapenen zerrenda eskuratu. Ziurtatu GNOMEn saioa hasi duzula eta saiatu berriro."
+msgstr ""
+"Barkatu, ezin izan da instalatutako hedapenen zerrenda eskuratu. Ziurtatu "
+"GNOMEn saioa hasi duzula eta saiatu berriro."
 
 #: subprojects/extensions-app/data/ui/shortcuts-dialog.ui:6
 msgctxt "shortcut window"
@@ -3097,7 +3242,8 @@ msgstr "Hedapen berria ongi sortu da %s kokalekuan.\n"
 msgid ""
 "Name should be a very short (ideally descriptive) string.\n"
 "Examples are: %s"
-msgstr "Izenak kate laburra izan behar du (hobe deskribatzailea bada).\n"
+msgstr ""
+"Izenak kate laburra izan behar du (hobe deskribatzailea bada).\n"
 "Adibideak: %s"
 
 #: subprojects/extensions-tool/src/command-create.c:382
@@ -3110,7 +3256,8 @@ msgstr "Izena"
 msgid ""
 "Description is a single-sentence explanation of what your extension does.\n"
 "Examples are: %s"
-msgstr "Deskribapena zure hedapenak egiten duena azaltzen duen esaldi bakarra da.\n"
+msgstr ""
+"Deskribapena zure hedapenak egiten duena azaltzen duen esaldi bakarra da.\n"
 "Adibideak: %s"
 
 #: subprojects/extensions-tool/src/command-create.c:402
@@ -3119,14 +3266,18 @@ msgid "Description"
 msgstr "Azalpena"
 
 #: subprojects/extensions-tool/src/command-create.c:416
+#, c-format
 msgid ""
 "UUID is a globally-unique identifier for your extension.\n"
 "This should be in the format of an email address "
 "(clicktofocus@janedoe.example.com)\n"
-msgstr "UUIDa zure hedapenaren identifikatzaile esklusiboa da.\n"
-"Posta elektronikoko helbide baten formatukoa izan behar du (klikirekitzeko@asier.adibidea.com)\n"
+msgstr ""
+"UUIDa zure hedapenaren identifikatzaile esklusiboa da.\n"
+"Posta elektronikoko helbide baten formatukoa izan behar du "
+"(klikirekitzeko@asier.adibidea.com)\n"
 
 #: subprojects/extensions-tool/src/command-create.c:443
+#, c-format
 msgid "Choose one of the available templates:\n"
 msgstr "Aukeratu erabilgarri dauden txantiloietako bat:\n"
 
@@ -3236,6 +3387,7 @@ msgstr "Gaitu hedapen bat"
 #: subprojects/extensions-tool/src/command-info.c:50
 #: subprojects/extensions-tool/src/command-list.c:66
 #: subprojects/extensions-tool/src/main.c:150
+#, c-format
 msgid "Failed to connect to GNOME Shell\n"
 msgstr "Huts egin du GNOME Shell-ekin konektatzeak\n"
 
@@ -3249,23 +3401,27 @@ msgstr "Ez dago “%s” hedapenik.\n"
 msgid "Show extensions info"
 msgstr "Hedapenen informazioa erakusten du"
 
-#: subprojects/extensions-tool/src/command-install.c:190
+#: subprojects/extensions-tool/src/command-install.c:195
 msgid "Overwrite an existing extension"
 msgstr "Gainidatzi lehendik dagoen hedapena"
 
-#: subprojects/extensions-tool/src/command-install.c:192
+#: subprojects/extensions-tool/src/command-install.c:198
+msgid "Print extension UUID on success"
+msgstr "Inprimatu hedapenaren UUIDa ongi sortzean"
+
+#: subprojects/extensions-tool/src/command-install.c:200
 msgid "EXTENSION_BUNDLE"
 msgstr "HEDAPEN_BILDUMA"
 
-#: subprojects/extensions-tool/src/command-install.c:201
+#: subprojects/extensions-tool/src/command-install.c:209
 msgid "Install an extension bundle"
 msgstr "Instalatu hedapen-bilduma"
 
-#: subprojects/extensions-tool/src/command-install.c:219
+#: subprojects/extensions-tool/src/command-install.c:227
 msgid "No extension bundle specified"
 msgstr "Ez da hedapen-bildumarik zehaztu"
 
-#: subprojects/extensions-tool/src/command-install.c:225
+#: subprojects/extensions-tool/src/command-install.c:233
 msgid "More than one extension bundle specified"
 msgstr "Hedapen-bilduma bat baino gehiago zehaztu da"
 
@@ -3374,6 +3530,7 @@ msgid "Reset an extension"
 msgstr "Berrezarri hedapen bat"
 
 #: subprojects/extensions-tool/src/command-uninstall.c:49
+#, c-format
 msgid "Cannot uninstall system extensions\n"
 msgstr "Ezin dira sistemaren hedapenak desinstalatu\n"
 
@@ -3387,10 +3544,12 @@ msgid "Uninstall an extension"
 msgstr "Desinstalatu hedapen bat"
 
 #: subprojects/extensions-tool/src/command-upload.c:226
+#, c-format
 msgid "Login to extensions.gnome.org\n"
 msgstr "Hasi saioa extensions.gnome.org gunean\n"
 
 #: subprojects/extensions-tool/src/command-upload.c:256
+#, c-format
 msgid "Warning! Password will be echoed"
 msgstr "Abisua! Pasahitza argitaratuko da"
 
@@ -3413,11 +3572,14 @@ msgstr "https://extensions.gnome.org gunean saioa hasteko pasahitza"
 #: subprojects/extensions-tool/src/command-upload.c:429
 msgid ""
 "Read https://extensions.gnome.org password from file, use \"-\" for stdin"
-msgstr "Irakurri https://extensions.gnome.org pasahitza fitxategitik, erabili \"-\" stdin-erako"
+msgstr ""
+"Irakurri https://extensions.gnome.org pasahitza fitxategitik, erabili \"-\" "
+"stdin-erako"
 
 #: subprojects/extensions-tool/src/command-upload.c:432
 msgid "Accept the terms of service at https://extensions.gnome.org/upload/"
-msgstr "Onartu https://extensions.gnome.org/upload/ guneko erabilera-baldintzak"
+msgstr ""
+"Onartu https://extensions.gnome.org/upload/ guneko erabilera-baldintzak"
 
 #: subprojects/extensions-tool/src/command-upload.c:434
 msgid "FILE…"
@@ -3604,6 +3766,12 @@ msgstr[1] "%u sarrera"
 #: subprojects/gvc/gvc-mixer-control.c:2872
 msgid "System Sounds"
 msgstr "Sistemaren soinuak"
+
+#~ msgid "Restart is not available on Wayland"
+#~ msgstr "Berrabiaraztea ez dago erabilgarri Wayland-en"
+
+#~ msgid "Restarting…"
+#~ msgstr "Berrabiarazten…"
 
 #~ msgid "GNOME Shell"
 #~ msgstr "GNOME Shell"

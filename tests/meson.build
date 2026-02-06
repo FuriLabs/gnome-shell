@@ -77,10 +77,16 @@ endforeach
 
 shell_tests = [
   {
+    'name': 'minimal',
+  },
+  {
     'name': 'basic',
   },
   {
     'name': 'closeWithActiveWindows',
+  },
+  {
+    'name': 'multiMonitor',
   },
   {
     'name': 'headlessStart',

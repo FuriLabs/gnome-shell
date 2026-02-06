@@ -56,24 +56,6 @@ test_exporter_wayland (void)
   g_test_trap_assert_stdout ("wayland:*");
 }
 
-static void
-test_exporter_x11 (void)
-{
-  g_auto (GStrv) envp = NULL;
-
-  if (g_test_subprocess ())
-    {
-      test_exporter ();
-      return;
-    }
-
-  envp = g_get_environ ();
-  envp = g_environ_setenv (g_steal_pointer (&envp), "GDK_BACKEND", "x11", TRUE);
-  g_test_trap_subprocess_with_envp (NULL, (const char * const *)envp, 0, G_TEST_SUBPROCESS_DEFAULT);
-  g_test_trap_assert_passed ();
-  g_test_trap_assert_stdout ("x11:*");
-}
-
 int
 main (int    argc,
       char **argv)
@@ -82,7 +64,6 @@ main (int    argc,
   gtk_test_init (&argc, &argv, NULL);
 
   g_test_add_func ("/Shew/Exporter/wayland", test_exporter_wayland);
-  g_test_add_func ("/Shew/Exporter/x11", test_exporter_x11);
 
   return g_test_run ();
 }

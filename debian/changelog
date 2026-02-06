@@ -1,3 +1,63 @@
+gnome-shell (50~beta-0ubuntu1) UNRELEASED; urgency=medium
+
+  * New upstream release: 50.beta
+  * Refresh patches and fix conflicts:
+    - Revert-main-Register-session-with-GDM-on-startup.patch
+    - Revert-tests-Fail-on-warnings-too.patch
+    - shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
+  * Drop upstreamed patches:
+    - libgvc/* because 50.beta includes a new snapshot of the subproject
+      which includes all those changes.
+    - Revert-main-Register-session-with-GDM-on-startup.patch
+  * Declare gnome-shell-common breaks old versions of gnome-session-common,
+    since the systemd services changed: gnome-shell!3960, gnome-session!167
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 04 Feb 2026 16:21:27 +0800
+
+gnome-shell (49.3-2) unstable; urgency=medium
+
+  * Team upload
+  * d/patches/libgvc: Update libgvc to prevent crashes with newer Pipewire.
+    This updates it to 47c47a42 (2026-01-23) which is the latest version,
+    and the version currently used in gnome-shell's main branch.
+    (Closes: #1126514)
+  * d/watch: Convert to v5 format
+  * Update Lintian overrides
+
+ -- Simon McVittie <smcv@debian.org>  Wed, 28 Jan 2026 13:25:18 +0000
+
+gnome-shell (49.3-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream release
+  * d/p/Revert-main-Register-session-with-GDM-on-startup.patch:
+    Revert a change that shouldn't have been backported to 49.x.
+    Upstream suggested this as a possible trigger for regressions in
+    modesetting during first login on some systems (the regression seems to
+    be specific to AMD GPUs, but not all AMD GPUs are affected) and it
+    seems that it was developed for v50, under the assumption that gdm3
+    changes from v50 would be present.
+    For whatever reason (possibly timing-dependent), this was reported
+    in Debian 13 but not in testing/unstable.
+    (Closes: #1125941, #1125273, #1125275, #1126174)
+  * d/control: Reinstate direct Build-Depends on the dbus-daemon package.
+    gnome-shell's test suite explicitly invokes dbus-run-session, which
+    is in the dbus-daemon package. If the dependency had been on dbus, that
+    would have been incompatible with dbus-broker, but a test dependency
+    on dbus-daemon is fine.
+  * d/patches/series: Sort with closest-to-upstream first.
+    No functional change.
+
+ -- Simon McVittie <smcv@debian.org>  Tue, 27 Jan 2026 16:42:32 +0000
+
+gnome-shell (49.2-2) unstable; urgency=medium
+
+  * Add Build-Depends: libxml2-utils for xmllint
+  * Remove direct Build-Depends: dbus
+  * Bump Standards Version to 4.7.3
+
+ -- Jeremy Bícha <jbicha@ubuntu.com>  Thu, 25 Dec 2025 20:49:01 -0500
+
 gnome-shell (49.2-1ubuntu2) resolute; urgency=medium
 
   * d/p/gvc-Don-t-crash-with-newer-pipewire-and-fix-device-select.patch:

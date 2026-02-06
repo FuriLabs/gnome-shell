@@ -34,7 +34,7 @@ default:
   image: $MUTTER_CI_IMAGE
 
 variables:
-  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/43:x86_64-2025-09-13.0
+  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/43:x86_64-2026-01-29.0
   TARBALL_ARTIFACT_PATH: build/meson-dist/$CI_PROJECT_NAME-$CI_COMMIT_TAG.tar.xz
 
 .pipeline-guard:
@@ -49,15 +49,15 @@ variables:
   variables:
     FDO_UPSTREAM_REPO: GNOME/gnome-shell
     FDO_DISTRIBUTION_VERSION: 43
-    FDO_DISTRIBUTION_TAG: '2025-09-10.1'
+    FDO_DISTRIBUTION_TAG: '2025-11-28.0'
     FDO_DISTRIBUTION_PACKAGES:
+      gcc
       gjs
       nodejs
       npm
       meson
       git
       glib-networking
-      'pkgconfig(gobject-introspection-1.0)'
       'pkgconfig(gio-2.0)'
       'pkgconfig(gio-unix-2.0)'
       'pkgconfig(gnome-autoar-0)'
@@ -222,8 +222,8 @@ test-coverity:
     - sudo meson install -C mutter/build
   script:
     - .gitlab-ci/download-coverity-tarball.sh
-    - CC=clang meson coverity-build -Dman=false
-    - ./coverity/cov-analysis-linux64-*/bin/cov-build --fs-capture-search js --dir cov-int meson compile -C coverity-build
+    - CC=clang meson setup coverity-build -Dman=false
+    - ./coverity/cov-analysis-linux64-*/bin/cov-build --dir cov-int meson compile -C coverity-build
     - tar czf cov-int.tar.gz cov-int
     - curl https://scan.coverity.com/builds?project=GNOME+Shell
       --form token=$COVERITY_TOKEN --form email=carlosg@gnome.org

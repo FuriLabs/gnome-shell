@@ -179,10 +179,10 @@ export const InputMethod = GObject.registerClass({
     }
 
     _onForwardKeyEvent(_context, keyval, keycode, state) {
-        let press = (state & IBus.ModifierType.RELEASE_MASK) === 0;
+        const press = (state & IBus.ModifierType.RELEASE_MASK) === 0;
         state &= ~IBus.ModifierType.RELEASE_MASK;
 
-        let curEvent = Clutter.get_current_event();
+        const curEvent = Clutter.get_current_event();
         let time;
         if (curEvent)
             time = curEvent.get_time();
@@ -219,10 +219,9 @@ export const InputMethod = GObject.registerClass({
             this._preeditStr = null;
         }
 
-        this._hidePanelId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, HIDE_PANEL_TIME, () => {
+        this._hidePanelId = GLib.timeout_add_once(GLib.PRIORITY_DEFAULT, HIDE_PANEL_TIME, () => {
             this.set_input_panel_state(Clutter.InputPanelState.OFF);
             this._hidePanelId = 0;
-            return GLib.SOURCE_REMOVE;
         });
     }
 
@@ -267,7 +266,7 @@ export const InputMethod = GObject.registerClass({
         if (!this._context || (!text && text !== ''))
             return;
 
-        let ibusText = IBus.Text.new_from_string(text);
+        const ibusText = IBus.Text.new_from_string(text);
 
         if (updateCapabilities)
             this._updateCapabilities();
@@ -292,6 +291,8 @@ export const InputMethod = GObject.registerClass({
             ibusHints |= IBus.InputHints.UPPERCASE_WORDS;
         if (hints & Clutter.InputContentHintFlags.SENSITIVE_DATA)
             ibusHints |= IBus.InputHints.PRIVATE;
+        if (hints & Clutter.InputContentHintFlags.HIDDEN_TEXT)
+            ibusHints |= IBus.InputHints.HIDDEN_TEXT;
 
         this._hints = ibusHints;
         if (this._context)
@@ -349,7 +350,7 @@ export const InputMethod = GObject.registerClass({
                     return;
 
                 try {
-                    let retval = context.process_key_event_async_finish(res);
+                    const retval = context.process_key_event_async_finish(res);
                     this.notify_key_event(event, retval);
                 } catch (e) {
                     if (!e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))

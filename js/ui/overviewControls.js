@@ -8,7 +8,6 @@ import St from 'gi://St';
 
 import * as AppDisplay from './appDisplay.js';
 import * as Dash from './dash.js';
-import * as Layout from './layout.js';
 import * as Main from './main.js';
 import * as Overview from './overview.js';
 import * as SearchController from './searchController.js';
@@ -16,6 +15,8 @@ import * as Util from '../misc/util.js';
 import * as WindowManager from './windowManager.js';
 import * as WorkspaceThumbnail from './workspaceThumbnail.js';
 import * as WorkspacesView from './workspacesView.js';
+
+import {STARTUP_ANIMATION_TIME} from './layout.js';
 
 export const SMALL_WORKSPACE_RATIO = 0.15;
 const DASH_MAX_HEIGHT_RATIO = 0.16;
@@ -161,7 +162,7 @@ class ControlsManagerLayout extends Clutter.LayoutManager {
         let availableHeight = height;
 
         // Search entry
-        let [searchHeight] = this._searchEntry.get_preferred_height(width);
+        const [searchHeight] = this._searchEntry.get_preferred_height(width);
         childBox.set_origin(0, startY);
         childBox.set_size(width, searchHeight);
         this._searchEntry.allocate(childBox);
@@ -652,7 +653,7 @@ class ControlsManager extends St.Widget {
         this._stateAdjustment.remove_transition('value');
         this._stateAdjustment.ease(value, {
             duration: SIDE_CONTROLS_ANIMATION_TIME,
-            mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+            mode: Clutter.AnimationMode.EASE_OUT_SINE,
         });
     }
 
@@ -723,7 +724,7 @@ class ControlsManager extends St.Widget {
         this._stateAdjustment.value = ControlsState.HIDDEN;
         this._stateAdjustment.ease(state, {
             duration: Overview.ANIMATION_TIME,
-            mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+            mode: Clutter.AnimationMode.EASE_OUT_SINE,
             onStopped: () => {
                 if (callback)
                     callback();
@@ -802,11 +803,14 @@ class ControlsManager extends St.Widget {
 
         this.prepareToEnterOverview();
 
+        const startupPromises = [];
+
         this._stateAdjustment.value = ControlsState.HIDDEN;
-        this._stateAdjustment.ease(ControlsState.WINDOW_PICKER, {
-            duration: Overview.ANIMATION_TIME,
-            mode: Clutter.AnimationMode.EASE_OUT_QUAD,
-        });
+        startupPromises.push(
+            this._stateAdjustment.easeAsync(ControlsState.WINDOW_PICKER, {
+                duration: Overview.ANIMATION_TIME,
+                mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+            }));
 
         this.dash.showAppsButton.checked = false;
         this._ignoreShowAppsButtonToggle = false;
@@ -817,14 +821,13 @@ class ControlsManager extends St.Widget {
         // We can't run the animation before the first allocation happens
         await this.layout_manager.ensureAllocation();
 
-        const {STARTUP_ANIMATION_TIME} = Layout;
-
         // Opacity
-        this.ease({
-            opacity: 255,
-            duration: STARTUP_ANIMATION_TIME,
-            mode: Clutter.AnimationMode.EASE_OUT_QUAD,
-        });
+        startupPromises.push(
+            this.easeAsync({
+                opacity: 255,
+                duration: STARTUP_ANIMATION_TIME,
+                mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+            }));
 
         // Search bar falls from the ceiling
         const {primaryMonitor} = Main.layoutManager;
@@ -832,24 +835,25 @@ class ControlsManager extends St.Widget {
         const yOffset = y - primaryMonitor.y;
 
         this._searchEntryBin.translation_y = -(yOffset + this._searchEntryBin.height);
-        this._searchEntryBin.ease({
-            translation_y: 0,
-            duration: STARTUP_ANIMATION_TIME,
-            mode: Clutter.AnimationMode.EASE_OUT_QUAD,
-        });
+        startupPromises.push(
+            this._searchEntryBin.easeAsync({
+                translation_y: 0,
+                duration: STARTUP_ANIMATION_TIME,
+                mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+            }));
 
         // The Dash rises from the bottom. This is the last animation to finish,
         // so resolve the promise there.
         this.dash.translation_y = this.dash.height + this.dash.margin_bottom;
-        return new Promise(resolve => {
-            this.dash.ease({
+        startupPromises.push(
+            this.dash.easeAsync({
                 translation_y: 0,
                 delay: STARTUP_ANIMATION_TIME,
                 duration: STARTUP_ANIMATION_TIME,
                 mode: Clutter.AnimationMode.EASE_OUT_QUAD,
-                onStopped: () => resolve(),
-            });
-        });
+            }));
+
+        return Promise.allSettled(startupPromises);
     }
 
     get searchController() {

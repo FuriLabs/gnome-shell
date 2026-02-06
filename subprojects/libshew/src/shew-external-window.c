@@ -22,7 +22,6 @@
 #include <string.h>
 
 #include "shew-external-window.h"
-#include "shew-external-window-x11.h"
 #include "shew-external-window-wayland.h"
 
 enum
@@ -42,19 +41,6 @@ G_DEFINE_TYPE_WITH_PRIVATE (ShewExternalWindow, shew_external_window, G_TYPE_OBJ
 ShewExternalWindow *
 shew_external_window_new_from_handle (const char *handle_str)
 {
-#ifdef GDK_WINDOWING_X11
-    {
-      const char x11_prefix[] = "x11:";
-      if (g_str_has_prefix (handle_str, x11_prefix))
-        {
-          ShewExternalWindowX11 *external_window_x11;
-          const char *x11_handle_str = handle_str + strlen (x11_prefix);
-
-          external_window_x11 = shew_external_window_x11_new (x11_handle_str);
-          return SHEW_EXTERNAL_WINDOW (external_window_x11);
-        }
-    }
-#endif
 #ifdef GDK_WINDOWING_WAYLAND
     {
       const char wayland_prefix[] = "wayland:";

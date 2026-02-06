@@ -8,14 +8,13 @@ shew_public_headers = files(
 
 shew_sources = [
   'shew-external-window-wayland.c',
-  'shew-external-window-x11.c',
   'shew-external-window.c',
   'shew-window-exporter.c',
 ]
 
 libshew = library(full_name,
   sources: shew_sources,
-  dependencies: [gtk_dep, x11_dep],
+  dependencies: [gtk_dep],
   install_dir: pkglibdir,
   install: true,
 )

@@ -89,23 +89,6 @@ test_external_window_wayland (void)
   g_test_trap_assert_passed ();
 }
 
-static void
-test_external_window_x11 (void)
-{
-  g_auto (GStrv) envp = NULL;
-
-  if (g_test_subprocess ())
-    {
-      test_external_window ();
-      return;
-    }
-
-  envp = g_get_environ ();
-  envp = g_environ_setenv (g_steal_pointer (&envp), "GDK_BACKEND", "x11", TRUE);
-  g_test_trap_subprocess_with_envp (NULL, (const char * const *)envp, 0, G_TEST_SUBPROCESS_DEFAULT);
-  g_test_trap_assert_passed ();
-}
-
 int
 main (int    argc,
       char **argv)
@@ -114,7 +97,6 @@ main (int    argc,
   gtk_test_init (&argc, &argv, NULL);
 
   g_test_add_func ("/Shew/ExternalWindow/wayland", test_external_window_wayland);
-  g_test_add_func ("/Shew/ExternalWindow/x11", test_external_window_x11);
 
   return g_test_run ();
 }

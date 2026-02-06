@@ -21,9 +21,6 @@
 
 #include "shew-window-exporter.h"
 
-#ifdef GDK_WINDOWING_X11
-#include <gdk/x11/gdkx.h>
-#endif
 #ifdef GDK_WINDOWING_WAYLAND
 #include <gdk/wayland/gdkwayland.h>
 #endif
@@ -87,19 +84,6 @@ shew_window_exporter_export (ShewWindowExporter  *exporter,
   g_task_set_source_tag (task, shew_window_exporter_export);
 
   widget = GTK_WIDGET (exporter->window);
-
-#ifdef GDK_WINDOWING_X11
-  if (GDK_IS_X11_DISPLAY (gtk_widget_get_display (widget)))
-    {
-      GdkSurface *s = gtk_native_get_surface (GTK_NATIVE (widget));
-      G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-      guint32 xid = (guint32) gdk_x11_surface_get_xid (s);
-      G_GNUC_END_IGNORE_DEPRECATIONS
-
-      g_task_return_pointer (task, g_strdup_printf ("x11:%x", xid), g_free);
-      return;
-    }
-#endif
 
 #ifdef GDK_WINDOWING_WAYLAND
   if (GDK_IS_WAYLAND_DISPLAY (gtk_widget_get_display (widget)))

@@ -1,5 +1,5 @@
-debian/Revert-tests-Fail-on-warnings-too.patch
 shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
+debian/Revert-tests-Fail-on-warnings-too.patch
 debian/data-Add-im-config.desktop-to-System-folder.patch
 ubuntu/desktop_detect.patch
 ubuntu/lightdm-user-switching.patch

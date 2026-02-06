@@ -21,7 +21,7 @@ import GObject from 'gi://GObject';
 import Meta from 'gi://Meta';
 import St from 'gi://St';
 
-const SCROLL_ANIMATION_TIME = 500;
+export const SCROLL_ANIMATION_TIME = 500;
 
 const AuthListItem = GObject.registerClass({
     Signals: {'activate': {}},
@@ -102,7 +102,7 @@ export const AuthList = GObject.registerClass({
     }
 
     _moveFocusToItems() {
-        let hasItems = this.numItems > 0;
+        const hasItems = this.numItems > 0;
 
         if (!hasItems)
             return;
@@ -110,7 +110,7 @@ export const AuthList = GObject.registerClass({
         if (global.stage.get_key_focus() !== this)
             return;
 
-        let focusSet = this.navigate_focus(null, St.DirectionType.TAB_FORWARD, false);
+        const focusSet = this.navigate_focus(null, St.DirectionType.TAB_FORWARD, false);
         if (!focusSet) {
             const laters = global.compositor.get_laters();
             laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
@@ -125,11 +125,11 @@ export const AuthList = GObject.registerClass({
     }
 
     scrollToItem(item) {
-        let box = item.get_allocation_box();
+        const box = item.get_allocation_box();
 
         const adjustment = this._scrollView.vadjustment;
 
-        let value = (box.y1 + adjustment.step_increment / 2.0) - (adjustment.page_size / 2.0);
+        const value = (box.y1 + adjustment.step_increment / 2.0) - (adjustment.page_size / 2.0);
         adjustment.ease(value, {
             duration: SCROLL_ANIMATION_TIME,
             mode: Clutter.AnimationMode.EASE_OUT_QUAD,
@@ -139,7 +139,7 @@ export const AuthList = GObject.registerClass({
     addItem(key, text) {
         this.removeItem(key);
 
-        let item = new AuthListItem(key, text);
+        const item = new AuthListItem(key, text);
         this._box.add_child(item);
 
         this._items.set(key, item);
@@ -158,7 +158,7 @@ export const AuthList = GObject.registerClass({
         if (!this._items.has(key))
             return;
 
-        let item = this._items.get(key);
+        const item = this._items.get(key);
 
         item.destroy();
 
