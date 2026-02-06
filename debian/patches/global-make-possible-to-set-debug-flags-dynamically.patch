@@ -21,10 +21,10 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  3 files changed, 103 insertions(+), 14 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index ee86171..d0529b5 100644
+index 6895de1..59d78ea 100644
 --- a/src/main.c
 +++ b/src/main.c
-@@ -360,14 +360,14 @@ shell_a11y_init (void)
+@@ -359,14 +359,14 @@ shell_a11y_init (void)
  }
  
  static void
@@ -92,7 +92,7 @@ index ee86171..d0529b5 100644
    int ecode = EXIT_SUCCESS;
  
    bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
-@@ -636,17 +673,6 @@ main (int argc, char **argv)
+@@ -638,17 +675,6 @@ main (int argc, char **argv)
    if (session_mode == NULL)
      session_mode = is_gdm_mode ? (char *)"gdm" : (char *)"user";
  
@@ -110,7 +110,7 @@ index ee86171..d0529b5 100644
    if (script_path)
      automation_script = g_file_new_for_commandline_arg_and_cwd (script_path, cwd);
  
-@@ -655,10 +681,16 @@ main (int argc, char **argv)
+@@ -657,10 +683,16 @@ main (int argc, char **argv)
     * resolve internal modules.
     */
    _shell_global_init ("session-mode", session_mode,
@@ -127,7 +127,7 @@ index ee86171..d0529b5 100644
    /* Setup Meta _after_ the Shell global to avoid GjsContext
     * iterating on the main loop once Meta starts adding events
     */
-@@ -668,7 +700,8 @@ main (int argc, char **argv)
+@@ -670,7 +702,8 @@ main (int argc, char **argv)
        return EXIT_FAILURE;
      }
  
@@ -135,10 +135,10 @@ index ee86171..d0529b5 100644
 +  debug_flags = g_getenv ("SHELL_DEBUG");
 +  shell_update_debug (debug_flags);
  
-   shell_dbus_init (meta_context_is_replacing (context));
+   shell_dbus_init ();
    shell_a11y_init ();
 diff --git a/src/shell-global.c b/src/shell-global.c
-index 9a6de28..8a3fbce 100644
+index 4291bb9..69e4838 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
 @@ -61,6 +61,7 @@ struct _ShellGlobal {
@@ -191,7 +191,7 @@ index 9a6de28..8a3fbce 100644
    g_object_class_install_properties (gobject_class, N_PROPS, props);
  }
  
-@@ -2008,3 +2023,40 @@ shell_global_set_frame_finish_timestamp (ShellGlobal *global,
+@@ -1767,3 +1782,40 @@ shell_global_set_frame_finish_timestamp (ShellGlobal *global,
        g_object_notify_by_pspec (G_OBJECT (global), props[PROP_FRAME_FINISH_TIMESTAMP]);
      }
  }
@@ -233,10 +233,10 @@ index 9a6de28..8a3fbce 100644
 +    }
 +}
 diff --git a/src/shell-global.h b/src/shell-global.h
-index ef07996..330e0ff 100644
+index 3bbe3e0..e170ce3 100644
 --- a/src/shell-global.h
 +++ b/src/shell-global.h
-@@ -125,4 +125,8 @@ gboolean shell_global_get_frame_finish_timestamp (ShellGlobal *global);
+@@ -120,4 +120,8 @@ gboolean shell_global_get_frame_finish_timestamp (ShellGlobal *global);
  void shell_global_set_frame_finish_timestamp (ShellGlobal *global,
                                                gboolean     enable);
  

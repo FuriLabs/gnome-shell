@@ -12,7 +12,7 @@ https://bugzilla.gnome.org/show_bug.cgi?id=685794
  1 file changed, 40 insertions(+), 7 deletions(-)
 
 diff --git a/js/misc/systemActions.js b/js/misc/systemActions.js
-index d0a934d..cf61cc2 100644
+index 710d42f..28ac023 100644
 --- a/js/misc/systemActions.js
 +++ b/js/misc/systemActions.js
 @@ -238,6 +238,34 @@ const SystemActions = GObject.registerClass({
@@ -52,8 +52,8 @@ index d0a934d..cf61cc2 100644
  
 @@ -339,7 +367,7 @@ const SystemActions = GObject.registerClass({
      _updateLockScreen() {
-         let showLock = !Main.sessionMode.isLocked && !Main.sessionMode.isGreeter;
-         let allowLockScreen = !this._lockdownSettings.get_boolean(DISABLE_LOCK_SCREEN_KEY);
+         const showLock = !Main.sessionMode.isLocked && !Main.sessionMode.isGreeter;
+         const allowLockScreen = !this._lockdownSettings.get_boolean(DISABLE_LOCK_SCREEN_KEY);
 -        this._actions.get(LOCK_SCREEN_ACTION_ID).available = showLock && allowLockScreen && LoginManager.canLock();
 +        this._actions.get(LOCK_SCREEN_ACTION_ID).available = showLock && allowLockScreen;
          this.notify('can-lock-screen');

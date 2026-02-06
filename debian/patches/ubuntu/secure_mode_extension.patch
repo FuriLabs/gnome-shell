@@ -18,7 +18,7 @@ Forwarded: https://bugzilla.gnome.org/show_bug.cgi?id=789852
  2 files changed, 20 insertions(+)
 
 diff --git a/js/ui/extensionDownloader.js b/js/ui/extensionDownloader.js
-index fe687cb..1bb709c 100644
+index 16f765a..4fd457b 100644
 --- a/js/ui/extensionDownloader.js
 +++ b/js/ui/extensionDownloader.js
 @@ -5,6 +5,7 @@ import GObject from 'gi://GObject';
@@ -54,7 +54,7 @@ index fe687cb..1bb709c 100644
              version: extension.metadata.version,
          };
 diff --git a/js/ui/extensionSystem.js b/js/ui/extensionSystem.js
-index 22121c4..bec5baf 100644
+index 8a10c5c..9bb7868 100644
 --- a/js/ui/extensionSystem.js
 +++ b/js/ui/extensionSystem.js
 @@ -6,6 +6,7 @@ import Shell from 'gi://Shell';
@@ -65,7 +65,7 @@ index 22121c4..bec5baf 100644
  import * as ExtensionDownloader from './extensionDownloader.js';
  import {formatError} from '../misc/errorUtils.js';
  import {
-@@ -481,6 +482,10 @@ export class ExtensionManager extends Signals.EventEmitter {
+@@ -480,6 +481,10 @@ export class ExtensionManager extends Signals.EventEmitter {
          await this.loadExtension(newExtension);
      }
  
@@ -76,8 +76,8 @@ index 22121c4..bec5baf 100644
      async _callExtensionInit(uuid) {
          if (!this._extensionSupportsSessionMode(uuid))
              return false;
-@@ -726,6 +731,10 @@ export class ExtensionManager extends Signals.EventEmitter {
-             let type = dir.has_prefix(perUserDir)
+@@ -725,6 +730,10 @@ export class ExtensionManager extends Signals.EventEmitter {
+             const type = dir.has_prefix(perUserDir)
                  ? ExtensionType.PER_USER
                  : ExtensionType.SYSTEM;
 +            if (Desktop.is('ubuntu') && this.isModeExtension(uuid) && type === ExtensionType.PER_USER) {

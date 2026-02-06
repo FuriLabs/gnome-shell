@@ -11,7 +11,7 @@ Last-Update: 2025-06-28
  1 file changed, 137 insertions(+), 1 deletion(-)
 
 diff --git a/src/st/st-spinner-content.c b/src/st/st-spinner-content.c
-index 925667c..ae4ef76 100644
+index 810e654..0c40a82 100644
 --- a/src/st/st-spinner-content.c
 +++ b/src/st/st-spinner-content.c
 @@ -20,7 +20,9 @@
@@ -94,7 +94,7 @@ index 925667c..ae4ef76 100644
  }
  
  static void
-@@ -131,6 +179,12 @@ st_spinner_content_set_actor (StSpinnerContent *spinner,
+@@ -145,6 +193,12 @@ st_spinner_content_set_actor (StSpinnerContent *spinner,
        clutter_timeline_set_repeat_count (spinner->timeline, -1);
        clutter_timeline_set_progress_mode (spinner->timeline, CLUTTER_LINEAR);
  
@@ -107,7 +107,7 @@ index 925667c..ae4ef76 100644
        g_signal_connect_object (spinner->timeline, "new-frame", G_CALLBACK (new_frame_cb), spinner, 0);
  
        if (clutter_actor_is_mapped (actor))
-@@ -315,6 +369,85 @@ st_spinner_content_draw_spinner (StSpinnerContent *spinner,
+@@ -329,6 +383,85 @@ st_spinner_content_draw_spinner (StSpinnerContent *spinner,
    cairo_restore (cr);
  }
  
@@ -193,7 +193,7 @@ index 925667c..ae4ef76 100644
  static void
  st_spinner_content_redraw (StSpinnerContent *spinner)
  {
-@@ -398,7 +531,10 @@ st_spinner_content_redraw (StSpinnerContent *spinner)
+@@ -412,7 +545,10 @@ st_spinner_content_redraw (StSpinnerContent *spinner)
    cairo_paint (cr);
    cairo_restore (cr);
  

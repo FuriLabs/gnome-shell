@@ -94,7 +94,7 @@ index 0000000..ee8b3a2
 +  </schema>
 +</schemalist>
 diff --git a/data/meson.build b/data/meson.build
-index cc7b5e2..fcf1f34 100644
+index bc1c6ab..6db8b56 100644
 --- a/data/meson.build
 +++ b/data/meson.build
 @@ -109,6 +109,12 @@ schema = configure_file(
@@ -110,7 +110,7 @@ index cc7b5e2..fcf1f34 100644
  install_data('00_org.gnome.shell.gschema.override', install_dir: schemadir)
  
  if have_systemd
-@@ -152,7 +158,7 @@ endif
+@@ -129,7 +135,7 @@ endif
  
  # for unit tests - gnome.compile_schemas() only looks in srcdir
  compiled_schemas = custom_target('compile-schemas',
@@ -120,10 +120,10 @@ index cc7b5e2..fcf1f34 100644
    command: [find_program('glib-compile-schemas'), '--strict', data_builddir],
  )
 diff --git a/js/ui/background.js b/js/ui/background.js
-index c320300..0454c64 100644
+index c22dc5f..8efdda0 100644
 --- a/js/ui/background.js
 +++ b/js/ui/background.js
-@@ -542,7 +542,11 @@ export const SystemBackground = GObject.registerClass({
+@@ -535,7 +535,11 @@ export const SystemBackground = GObject.registerClass({
  
              let backgroundColor = DEFAULT_BACKGROUND_COLOR;
              if (Desktop.is('ubuntu')) {
@@ -136,7 +136,7 @@ index c320300..0454c64 100644
                  backgroundColor = dummyBgActor.get_theme_node().get_background_color();
                  dummyBgActor.destroy();
 diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js
-index ac3970c..9727ccf 100644
+index d318b1d..cfee34a 100644
 --- a/js/ui/screenShield.js
 +++ b/js/ui/screenShield.js
 @@ -31,6 +31,12 @@ const DISABLE_LOCK_KEY = 'disable-lock-screen';
@@ -166,11 +166,11 @@ index ac3970c..9727ccf 100644
 +            () => this._refreshBackground()));
 +        this._refreshBackground();
 +
-         this._isModal = false;
+         this._grab = null;
          this._isGreeter = false;
          this._isActive = false;
-@@ -214,6 +230,31 @@ export class ScreenShield extends Signals.EventEmitter {
-         return this._isModal;
+@@ -201,6 +217,31 @@ export class ScreenShield extends Signals.EventEmitter {
+         });
      }
  
 +    _refreshBackground() {
@@ -201,7 +201,7 @@ index ac3970c..9727ccf 100644
      async _syncInhibitor() {
          const lockEnabled = this._settings.get_boolean(LOCK_ENABLED_KEY) ||
                              this._settings.get_boolean(SUSPEND_LOCK_ENABLED_KEY);
-@@ -442,6 +483,7 @@ export class ScreenShield extends Signals.EventEmitter {
+@@ -410,6 +451,7 @@ export class ScreenShield extends Signals.EventEmitter {
              }
  
              this._dialog = new constructor(this._lockDialogGroup);

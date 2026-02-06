@@ -10,15 +10,15 @@ https://bugzilla.gnome.org/show_bug.cgi?id=789377
 Bug-GNOME: https://bugzilla.gnome.org/show_bug.cgi?id=789377
 Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
 ---
- src/main.c         | 76 +++++++++++++++++++++++++++++++++++++++++-------------
+ src/main.c         | 77 +++++++++++++++++++++++++++++++++++++++++-------------
  src/shell-global.c | 10 ++++---
- 2 files changed, 65 insertions(+), 21 deletions(-)
+ 2 files changed, 66 insertions(+), 21 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index d0529b5..9cd5948 100644
+index 59d78ea..06425b7 100644
 --- a/src/main.c
 +++ b/src/main.c
-@@ -42,16 +42,26 @@ static char *session_mode = NULL;
+@@ -42,16 +42,27 @@ static char *session_mode = NULL;
  static int caught_signal = 0;
  static gboolean force_animations = FALSE;
  static char *script_path = NULL;
@@ -46,10 +46,11 @@ index d0529b5..9cd5948 100644
 +static int _default_debug_flags = SHELL_DEBUG_BACKTRACE_ABORTS |
 +                                  SHELL_DEBUG_BACKTRACE_FPE;
 +static int _shell_debug = 0;
++
+ static GThread *main_thread;
  
  static void
- shell_dbus_acquire_name (GDBusProxy  *bus,
-@@ -362,13 +372,23 @@ shell_a11y_init (void)
+@@ -361,13 +372,23 @@ shell_a11y_init (void)
  static void
  shell_update_debug (const char *debug_string)
  {
@@ -79,7 +80,7 @@ index d0529b5..9cd5948 100644
  }
  
  static GLogWriterOutput
-@@ -479,10 +499,23 @@ reset_signal_handler_to_default (int signo)
+@@ -479,10 +500,23 @@ reset_signal_handler_to_default (int signo)
  static void
  setup_debug_signal_listners (void)
  {
@@ -107,7 +108,7 @@ index d0529b5..9cd5948 100644
  
    if ((_shell_debug & SHELL_DEBUG_BACKTRACE_SEGFAULTS))
      {
-@@ -636,8 +669,9 @@ main (int argc, char **argv)
+@@ -636,8 +670,9 @@ main (int argc, char **argv)
    g_autoptr (MetaContext) context = NULL;
    g_autoptr (GFile) automation_script = NULL;
    g_autofree char *cwd = NULL;
@@ -118,7 +119,7 @@ index d0529b5..9cd5948 100644
    int ecode = EXIT_SUCCESS;
  
    bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
-@@ -681,7 +715,7 @@ main (int argc, char **argv)
+@@ -683,7 +718,7 @@ main (int argc, char **argv)
     * resolve internal modules.
     */
    _shell_global_init ("session-mode", session_mode,
@@ -127,7 +128,7 @@ index d0529b5..9cd5948 100644
                        "force-animations", force_animations,
                        "automation-script", automation_script,
                        NULL);
-@@ -700,8 +734,14 @@ main (int argc, char **argv)
+@@ -702,8 +737,14 @@ main (int argc, char **argv)
        return EXIT_FAILURE;
      }
  
@@ -142,13 +143,13 @@ index d0529b5..9cd5948 100644
 +
 +  debug_flags_string = debug_flags_to_string ();
  
-   shell_dbus_init (meta_context_is_replacing (context));
+   shell_dbus_init ();
    shell_a11y_init ();
 diff --git a/src/shell-global.c b/src/shell-global.c
-index 8a3fbce..8e08e56 100644
+index 69e4838..9bc0554 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
-@@ -2041,11 +2041,15 @@ shell_global_get_debug_flags (ShellGlobal *global)
+@@ -1800,11 +1800,15 @@ shell_global_get_debug_flags (ShellGlobal *global)
  /**
   * shell_global_set_debug_flags:
   * @global: a #ShellGlobal

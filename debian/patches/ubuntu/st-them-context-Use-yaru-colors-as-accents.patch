@@ -11,7 +11,7 @@ Colors are computed as the $yaru_accent_bg_color in yaru.
  1 file changed, 108 insertions(+)
 
 diff --git a/src/st/st-theme-context.c b/src/st/st-theme-context.c
-index 8007c38..82286f2 100644
+index 6393181..72c74a2 100644
 --- a/src/st/st-theme-context.c
 +++ b/src/st/st-theme-context.c
 @@ -40,6 +40,32 @@

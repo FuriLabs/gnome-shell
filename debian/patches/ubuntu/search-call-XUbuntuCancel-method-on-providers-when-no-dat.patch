@@ -54,7 +54,7 @@ index 9502340..8141bc0 100644
    </interface>
  </node>
 diff --git a/js/ui/remoteSearch.js b/js/ui/remoteSearch.js
-index b7247ca..f20c876 100644
+index b7289ad..de623cb 100644
 --- a/js/ui/remoteSearch.js
 +++ b/js/ui/remoteSearch.js
 @@ -28,6 +28,7 @@ const SearchProviderIface = `
@@ -73,7 +73,7 @@ index b7247ca..f20c876 100644
  </interface>
  </node>`;
  
-@@ -306,6 +308,16 @@ class RemoteSearchProvider {
+@@ -303,6 +305,16 @@ class RemoteSearchProvider {
          return resultMetas;
      }
  
@@ -91,7 +91,7 @@ index b7247ca..f20c876 100644
          this.proxy.ActivateResultAsync(id).catch(logError);
      }
 diff --git a/js/ui/search.js b/js/ui/search.js
-index 3333e04..2f785be 100644
+index 897bae5..f7f69e8 100644
 --- a/js/ui/search.js
 +++ b/js/ui/search.js
 @@ -227,7 +227,9 @@ const SearchResultsBase = GObject.registerClass({
@@ -147,7 +147,7 @@ index 3333e04..2f785be 100644
          this._defaultResult = null;
          this._startingSearch = false;
  
-@@ -754,6 +780,13 @@ export const SearchResultsView = GObject.registerClass({
+@@ -753,6 +779,13 @@ export const SearchResultsView = GObject.registerClass({
          if (this._terms.length > 0)
              isSubSearch = searchString.indexOf(previousSearchString) === 0;
  

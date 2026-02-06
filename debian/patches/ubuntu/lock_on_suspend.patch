@@ -8,7 +8,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/1063110
  1 file changed, 5 insertions(+), 2 deletions(-)
 
 diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js
-index c4df1c2..ac3970c 100644
+index 515dc82..d318b1d 100644
 --- a/js/ui/screenShield.js
 +++ b/js/ui/screenShield.js
 @@ -24,6 +24,7 @@ import {adjustAnimationTime} from '../misc/animationUtils.js';
@@ -27,7 +27,7 @@ index c4df1c2..ac3970c 100644
  
          this._lockSettings = new Gio.Settings({schema_id: LOCKDOWN_SCHEMA});
          this._lockSettings.connect(`changed::${DISABLE_LOCK_KEY}`, this._syncInhibitor.bind(this));
-@@ -213,7 +215,8 @@ export class ScreenShield extends Signals.EventEmitter {
+@@ -200,7 +202,8 @@ export class ScreenShield extends Signals.EventEmitter {
      }
  
      async _syncInhibitor() {
@@ -37,10 +37,10 @@ index c4df1c2..ac3970c 100644
          const lockLocked = this._lockSettings.get_boolean(DISABLE_LOCK_KEY);
          const inhibit = !!this._loginSession && this._loginSession.Active &&
                           !this._isActive && lockEnabled && !lockLocked &&
-@@ -244,7 +247,7 @@ export class ScreenShield extends Signals.EventEmitter {
- 
+@@ -232,7 +235,7 @@ export class ScreenShield extends Signals.EventEmitter {
      _prepareForSleep(loginManager, aboutToSuspend) {
          if (aboutToSuspend) {
+             this._dialog?.cancel();
 -            if (this._settings.get_boolean(LOCK_ENABLED_KEY))
 +            if (this._settings.get_boolean(SUSPEND_LOCK_ENABLED_KEY))
                  this.lock(true);
