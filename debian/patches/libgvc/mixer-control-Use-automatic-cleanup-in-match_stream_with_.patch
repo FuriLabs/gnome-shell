@@ -11,7 +11,7 @@ Signed-off-by: Guido Günther <agx@sigxcpu.org>
 Origin: https://gitlab.gnome.org/GNOME/libgnome-volume-control/-/merge_requests/31
 Bug: https://gitlab.gnome.org/GNOME/libgnome-volume-control/-/issues/34
 Bug-Debian: https://bugs.debian.org/1126514
-Applied-upstream: gnome-shell 50, commit:798230599950607ec285daecd070f5bcb28580e4
+Applied-upstream: gnome-shell 49.4, commit:3bfe1c78ef96e00a2b5cf8ac420bda634c5d598a
 ---
  subprojects/gvc/gvc-mixer-control.c | 15 +++++----------
  1 file changed, 5 insertions(+), 10 deletions(-)
