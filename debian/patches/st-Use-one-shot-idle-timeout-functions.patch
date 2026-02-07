@@ -1,0 +1,108 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Fri, 31 Oct 2025 18:13:04 +0100
+Subject: st: Use one-shot idle/timeout functions
+
+GLib added one-shot variants of the idle/timeout functions a while ago.
+
+While they don't save a lot of code, they serve as a clear marker that
+the callback is only invoked once.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3947>
+(cherry picked from commit 6f52b3a7b1740ad26eba616d8fa88c82441fabca)
+Origin: upstream, 49.4, commit:f3cec01904e36a3a1b3d74a9eab6d7b3f4b6c43f
+---
+ src/st/st-icon-theme.c    |  6 ++----
+ src/st/st-theme-context.c | 11 ++---------
+ src/st/st-widget.c        |  5 ++---
+ 3 files changed, 6 insertions(+), 16 deletions(-)
+
+diff --git a/src/st/st-icon-theme.c b/src/st/st-icon-theme.c
+index 4563c0d..da84cfa 100644
+--- a/src/st/st-icon-theme.c
++++ b/src/st/st-icon-theme.c
+@@ -493,7 +493,7 @@ free_dir_mtime (IconThemeDirMtime *dir_mtime)
+   g_free (dir_mtime);
+ }
+ 
+-static gboolean
++static void
+ theme_changed_idle (gpointer user_data)
+ {
+   StIconTheme *icon_theme;
+@@ -503,8 +503,6 @@ theme_changed_idle (gpointer user_data)
+   g_signal_emit (icon_theme, signals[CHANGED], 0);
+ 
+   icon_theme->theme_changed_idle = 0;
+-
+-  return FALSE;
+ }
+ 
+ static void
+@@ -512,7 +510,7 @@ queue_theme_changed (StIconTheme *icon_theme)
+ {
+   if (!icon_theme->theme_changed_idle)
+     {
+-      icon_theme->theme_changed_idle = g_idle_add (theme_changed_idle, icon_theme);
++      icon_theme->theme_changed_idle = g_idle_add_once (theme_changed_idle, icon_theme);
+       g_source_set_name_by_id (icon_theme->theme_changed_idle, "theme_changed_idle");
+     }
+ }
+diff --git a/src/st/st-theme-context.c b/src/st/st-theme-context.c
+index 8007c38..6393181 100644
+--- a/src/st/st-theme-context.c
++++ b/src/st/st-theme-context.c
+@@ -346,13 +346,6 @@ on_font_name_changed (StSettings     *settings,
+   pango_font_description_free (font_desc);
+ }
+ 
+-static gboolean
+-changed_idle (gpointer userdata)
+-{
+-  st_theme_context_changed (userdata);
+-  return FALSE;
+-}
+-
+ static void
+ on_icon_theme_changed (StTextureCache *cache,
+                        StThemeContext *context)
+@@ -364,8 +357,8 @@ on_icon_theme_changed (StTextureCache *cache,
+    * icon_name => icon lookup, faking a theme context change is a good way
+    * to force users such as StIcon to look up icons again.
+    */
+-  id = g_idle_add ((GSourceFunc) changed_idle, context);
+-  g_source_set_name_by_id (id, "[gnome-shell] changed_idle");
++  id = g_idle_add_once ((GSourceOnceFunc) st_theme_context_changed, context);
++  g_source_set_name_by_id (id, "[gnome-shell] st_theme_context_changed");
+ }
+ 
+ /**
+diff --git a/src/st/st-widget.c b/src/st/st-widget.c
+index 1299b1c..226141a 100644
+--- a/src/st/st-widget.c
++++ b/src/st/st-widget.c
+@@ -1518,7 +1518,7 @@ find_nearest_visible_forward (ClutterActor *actor)
+   return next;
+ }
+ 
+-static gboolean
++static void
+ st_widget_update_child_styles (StWidget *widget)
+ {
+   StWidgetPrivate *priv = st_widget_get_instance_private (widget);
+@@ -1546,7 +1546,6 @@ st_widget_update_child_styles (StWidget *widget)
+     }
+ 
+   priv->update_child_styles_id = 0;
+-  return G_SOURCE_REMOVE;
+ }
+ 
+ static void
+@@ -1557,7 +1556,7 @@ st_widget_queue_child_styles_update (StWidget *widget)
+   if (priv->update_child_styles_id != 0)
+     return;
+ 
+-  priv->update_child_styles_id = g_idle_add ((GSourceFunc) st_widget_update_child_styles, widget);
++  priv->update_child_styles_id = g_idle_add_once ((GSourceOnceFunc) st_widget_update_child_styles, widget);
+ }
+ 
+ static void

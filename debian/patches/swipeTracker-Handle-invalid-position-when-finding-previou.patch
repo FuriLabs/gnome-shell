@@ -1,0 +1,39 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Wed, 4 Feb 2026 14:12:25 +0100
+Subject: swipeTracker: Handle invalid position when finding previous point
+
+Commit 8e29babca8adc677 switched to `findLastIndex()` to find
+the previous point, which inadvertently changed what value is
+returned for invalid input.
+
+Restore the old fallback value and log a stacktrace, so we can
+hopefully track down what causes the invalid input.
+
+Related: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/8856
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4062>
+(cherry picked from commit eb9caf0028be0d5740fc419e7e865584c0f52cab)
+Origin: upstream, 49.4, commit:ae67cb03f75d485da73e7c2af25da67aa772c807
+---
+ js/ui/swipeTracker.js | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/js/ui/swipeTracker.js b/js/ui/swipeTracker.js
+index 1bf66b0..9abc598 100644
+--- a/js/ui/swipeTracker.js
++++ b/js/ui/swipeTracker.js
+@@ -523,7 +523,14 @@ export const SwipeTracker = GObject.registerClass({
+     }
+ 
+     _findPreviousPoint(pos) {
+-        return this._snapPoints.findLastIndex(p => p <= pos);
++        const index =
++            this._snapPoints.findLastIndex(p => p <= pos);
++        if (index !== -1)
++            return index;
++
++        console.trace(`Invalid position ${pos}`);
++        // also out-of-bounds, but somehow callers fail less hard than with -1
++        return this._snapPoints.length;
+     }
+ 
+     _findPointForProjection(pos, velocity) {

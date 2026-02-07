@@ -1,0 +1,45 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 17 Sep 2025 19:04:46 +0200
+Subject: gdm/util: Clear the request if user verifier connection is closed
+
+Similarly to previous commit, in case the user verifier connection is
+closed we should just clear the user verifier instance, since starting
+from this point is going to be just invalid.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3885>
+(cherry picked from commit 91a736a09ed9f5e2d11c733535b479fbf4f4fddf)
+Origin: upstream, 49.4, commit:704f90b68de8000387a2cc38f25fc83e08b66f4f
+---
+ js/gdm/util.js | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/js/gdm/util.js b/js/gdm/util.js
+index 8cd18f0..f75c581 100644
+--- a/js/gdm/util.js
++++ b/js/gdm/util.js
+@@ -200,6 +200,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     _clearUserVerifier() {
+         if (this._userVerifier) {
+             this._disconnectSignals();
++            this._userVerifier.get_connection().disconnectObject(this);
+             this._userVerifier.run_dispose();
+             this._userVerifier = null;
+             if (this._userVerifierChoiceList) {
+@@ -508,6 +509,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             this._clearUserVerifier();
+             this._userVerifier = await this._client.open_reauthentication_channel(
+                 userName, this._cancellable);
++            this._userVerifier.get_connection().connectObject('closed',
++                () => this.clear(), this);
+         } catch (e) {
+             if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+                 return;
+@@ -540,6 +543,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             this._clearUserVerifier();
+             this._userVerifier =
+                 await this._client.get_user_verifier(this._cancellable);
++            this._userVerifier.get_connection().connectObject('closed',
++                () => this.clear(), this);
+         } catch (e) {
+             if (e.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+                 return;

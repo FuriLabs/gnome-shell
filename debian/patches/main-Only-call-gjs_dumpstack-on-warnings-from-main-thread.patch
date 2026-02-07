@@ -1,0 +1,48 @@
+From: Sebastian Keller <skeller@gnome.org>
+Date: Wed, 21 Jan 2026 22:54:39 +0100
+Subject: main: Only call gjs_dumpstack() on warnings from main thread
+
+The mozjs code called by gjs_dumpstack() does not appear to be thread
+safe and was sometimes resulting in crashes when triggered by error
+messages from threads other than the main thread. And even when not
+crashing, such a backtrace can only be misleading since only the main
+thread is executing JS code.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4046>
+(cherry picked from commit 23e3e7970f1ef316c0a5bce2dea4872cf1ca5750)
+Origin: upstream, 49.4, commit:c481543906d4f843f8aec26029a760ab82e213ef
+---
+ src/main.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/src/main.c b/src/main.c
+index 99eca3e..62a284b 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -52,6 +52,7 @@ enum {
+ };
+ static int _shell_debug;
+ static gboolean _tracked_signals[NSIG] = { 0 };
++static GThread *main_thread;
+ 
+ static void
+ shell_dbus_acquire_name (GDBusProxy  *bus,
+@@ -384,7 +385,8 @@ default_log_writer (GLogLevelFlags   log_level,
+ 
+   if ((_shell_debug & SHELL_DEBUG_BACKTRACE_WARNINGS) &&
+       ((log_level & G_LOG_LEVEL_CRITICAL) ||
+-       (log_level & G_LOG_LEVEL_WARNING)))
++       (log_level & G_LOG_LEVEL_WARNING)) &&
++      g_thread_self () == main_thread)
+     {
+       const char *log_domain = NULL;
+ 
+@@ -611,6 +613,8 @@ main (int argc, char **argv)
+   g_setenv ("GJS_DEBUG_OUTPUT", "stderr", TRUE);
+   g_setenv ("GJS_DEBUG_TOPICS", "JS ERROR;JS LOG", TRUE);
+ 
++  main_thread = g_thread_self ();
++
+   context = meta_create_context (WM_NAME);
+   meta_context_add_option_entries (context, gnome_shell_options,
+                                    GETTEXT_PACKAGE);

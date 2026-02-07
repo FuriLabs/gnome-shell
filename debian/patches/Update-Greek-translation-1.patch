@@ -1,0 +1,22 @@
+From: Efstathios Iosifidis <eiosifidis@gnome.org>
+Date: Fri, 6 Feb 2026 21:45:43 +0000
+Subject: Update Greek translation
+
+Origin: upstream, 49.4, commit:cdd6b186c392cb6b6780e1df7ae9d7f106917a71
+---
+ po/el.po | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/po/el.po b/po/el.po
+index 00fb9ed..7469684 100644
+--- a/po/el.po
++++ b/po/el.po
+@@ -2807,7 +2807,7 @@ msgstr "Μόνο ενσωματωμένο"
+ #. long format
+ #: js/ui/unlockDialog.js:414
+ msgid "%A %B %-d"
+-msgstr "%A %B %-d"
++msgstr "%A %-d %B"
+ 
+ #: js/ui/unlockDialog.js:420
+ msgid "Swipe up to unlock"

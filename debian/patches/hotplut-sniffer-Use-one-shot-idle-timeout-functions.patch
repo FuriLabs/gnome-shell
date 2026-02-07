@@ -1,0 +1,92 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Thu, 29 Jan 2026 14:29:58 +0100
+Subject: hotplut-sniffer: Use one-shot idle/timeout functions
+
+GLib added one-shot variants of the idle/timeout functions a while ago.
+
+While they don't save a lot of code, they serve as a clear marker that
+the callback is only invoked once.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3947>
+(cherry picked from commit 1b1d22b5da2aea45f3125c91b72fc636a736abf1)
+Origin: upstream, 49.4, commit:7d3ec9cc45186cbcd6a7bbe15ac4d98120549657
+---
+ src/hotplug-sniffer/hotplug-sniffer.c    | 12 +++++-------
+ src/hotplug-sniffer/shell-mime-sniffer.c |  8 +++-----
+ 2 files changed, 8 insertions(+), 12 deletions(-)
+
+diff --git a/src/hotplug-sniffer/hotplug-sniffer.c b/src/hotplug-sniffer/hotplug-sniffer.c
+index 4b70ec7..9291fc2 100644
+--- a/src/hotplug-sniffer/hotplug-sniffer.c
++++ b/src/hotplug-sniffer/hotplug-sniffer.c
+@@ -43,15 +43,13 @@ static GDBusNodeInfo *introspection_data = NULL;
+ static GMainLoop     *loop = NULL;
+ static guint          autoquit_id = 0;
+ 
+-static gboolean
++static void
+ autoquit_timeout_cb (gpointer _unused)
+ {
+   print_debug ("Timeout reached, quitting...");
+ 
+   autoquit_id = 0;
+   g_main_loop_quit (loop);
+-
+-  return FALSE;
+ }
+ 
+ static void
+@@ -69,9 +67,9 @@ ensure_autoquit_on (void)
+   if (g_getenv ("HOTPLUG_SNIFFER_PERSIST") != NULL)
+     return;
+ 
+-  autoquit_id = 
+-    g_timeout_add_seconds (AUTOQUIT_TIMEOUT,
+-                           autoquit_timeout_cb, NULL);
++  autoquit_id =
++    g_timeout_add_seconds_once (AUTOQUIT_TIMEOUT,
++                                autoquit_timeout_cb, NULL);
+   g_source_set_name_by_id (autoquit_id, "[gnome-shell] autoquit_timeout_cb");
+ }
+ 
+@@ -139,7 +137,7 @@ handle_sniff_uri (InvocationData *data)
+ 
+   ensure_autoquit_off ();
+ 
+-  g_variant_get (data->parameters, 
++  g_variant_get (data->parameters,
+                  "(&s)", &uri,
+                  NULL);
+   file = g_file_new_for_uri (uri);
+diff --git a/src/hotplug-sniffer/shell-mime-sniffer.c b/src/hotplug-sniffer/shell-mime-sniffer.c
+index 724a204..b4d6d43 100644
+--- a/src/hotplug-sniffer/shell-mime-sniffer.c
++++ b/src/hotplug-sniffer/shell-mime-sniffer.c
+@@ -439,15 +439,13 @@ query_info_async_ready_cb (GObject *source,
+   deep_count_start (self);
+ }
+ 
+-static gboolean
++static void
+ watchdog_timeout_reached_cb (gpointer user_data)
+ {
+   ShellMimeSniffer *self = user_data;
+ 
+   self->watchdog_id = 0;
+   g_cancellable_cancel (self->cancellable);
+-
+-  return FALSE;
+ }
+ 
+ static void
+@@ -565,8 +563,8 @@ shell_mime_sniffer_sniff_async (ShellMimeSniffer *self,
+                            callback, user_data);
+ 
+   self->watchdog_id =
+-    g_timeout_add (WATCHDOG_TIMEOUT,
+-                   watchdog_timeout_reached_cb, self);
++    g_timeout_add_once (WATCHDOG_TIMEOUT,
++                        watchdog_timeout_reached_cb, self);
+   g_source_set_name_by_id (self->watchdog_id, "[gnome-shell] watchdog_timeout_reached_cb");
+ 
+   start_loading_file (self);

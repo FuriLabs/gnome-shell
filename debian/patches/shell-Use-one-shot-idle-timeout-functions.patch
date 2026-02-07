@@ -1,0 +1,205 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Fri, 31 Oct 2025 17:57:20 +0100
+Subject: shell: Use one-shot idle/timeout functions
+
+GLib added one-shot variants of the idle/timeout functions a while ago.
+
+While they don't save a lot of code, they serve as a clear marker that
+the callback is only invoked once.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/3947>
+(cherry picked from commit 3a1d28c866e1efba695f4d9b724f7e1c732d254f)
+Origin: upstream, 49.4, commit:0140ca4f29ba3834fd9a5b5699a131a0857a4ccd
+---
+ src/shell-app-cache.c                   | 10 ++++------
+ src/shell-app-usage.c                   | 10 +++++-----
+ src/shell-edge-drag-gesture.c           |  7 +++----
+ src/shell-perf-helper.c                 |  6 ++----
+ src/shell-polkit-authentication-agent.c |  6 ++----
+ 5 files changed, 16 insertions(+), 23 deletions(-)
+
+diff --git a/src/shell-app-cache.c b/src/shell-app-cache.c
+index 484e024..31c28fc 100644
+--- a/src/shell-app-cache.c
++++ b/src/shell-app-cache.c
+@@ -194,7 +194,7 @@ apply_update_cb (GObject      *object,
+   cache_state_free (state);
+ }
+ 
+-static gboolean
++static void
+ shell_app_cache_do_update (gpointer user_data)
+ {
+   ShellAppCache *cache = user_data;
+@@ -213,8 +213,6 @@ shell_app_cache_do_update (gpointer user_data)
+   task = g_task_new (cache, cache->cancellable, apply_update_cb, NULL);
+   g_task_set_source_tag (task, shell_app_cache_do_update);
+   g_task_run_in_thread (task, shell_app_cache_worker);
+-
+-  return G_SOURCE_REMOVE;
+ }
+ 
+ static void
+@@ -225,9 +223,9 @@ shell_app_cache_queue_update (ShellAppCache *self)
+   if (self->queued_update != 0)
+     g_source_remove (self->queued_update);
+ 
+-  self->queued_update = g_timeout_add_seconds (DEFAULT_TIMEOUT_SECONDS,
+-                                               shell_app_cache_do_update,
+-                                               self);
++  self->queued_update = g_timeout_add_seconds_once (DEFAULT_TIMEOUT_SECONDS,
++                                                    shell_app_cache_do_update,
++                                                    self);
+ }
+ 
+ static void
+diff --git a/src/shell-app-usage.c b/src/shell-app-usage.c
+index 9e57a91..a6edc27 100644
+--- a/src/shell-app-usage.c
++++ b/src/shell-app-usage.c
+@@ -108,7 +108,7 @@ static void on_session_status_changed (GDBusProxy *proxy, guint status, ShellApp
+ static void on_focus_app_changed (ShellWindowTracker *tracker, GParamSpec *spec, ShellAppUsage *self);
+ static void ensure_queued_save (ShellAppUsage *self);
+ 
+-static gboolean idle_save_application_usage (gpointer data);
++static void idle_save_application_usage (gpointer data);
+ 
+ static void restore_from_file (ShellAppUsage *self);
+ 
+@@ -426,7 +426,8 @@ ensure_queued_save (ShellAppUsage *self)
+ {
+   if (self->save_id != 0)
+     return;
+-  self->save_id = g_timeout_add_seconds (SAVE_APPS_TIMEOUT_SECONDS, idle_save_application_usage, self);
++  self->save_id = g_timeout_add_seconds_once (SAVE_APPS_TIMEOUT_SECONDS,
++                                              idle_save_application_usage, self);
+   g_source_set_name_by_id (self->save_id, "[gnome-shell] idle_save_application_usage");
+ }
+ 
+@@ -526,7 +527,7 @@ write_attribute_double (GDataOutputStream *stream,
+ }
+ 
+ /* Save app data lists to file */
+-static gboolean
++static void
+ idle_save_application_usage (gpointer data)
+ {
+   ShellAppUsage *self = SHELL_APP_USAGE (data);
+@@ -546,7 +547,7 @@ idle_save_application_usage (gpointer data)
+     {
+       g_debug ("Could not save applications usage data: %s", error->message);
+       g_error_free (error);
+-      return FALSE;
++      return;
+     }
+   buffered_output = g_buffered_output_stream_new (G_OUTPUT_STREAM (output));
+   g_object_unref (output);
+@@ -594,7 +595,6 @@ out:
+       g_debug ("Could not save applications usage data: %s", error->message);
+       g_error_free (error);
+     }
+-  return FALSE;
+ }
+ 
+ static void
+diff --git a/src/shell-edge-drag-gesture.c b/src/shell-edge-drag-gesture.c
+index f4f9732..f2f4b65 100644
+--- a/src/shell-edge-drag-gesture.c
++++ b/src/shell-edge-drag-gesture.c
+@@ -127,7 +127,7 @@ exceeds_cancel_threshold (ShellEdgeDragGesture *self,
+   clutter_gesture_get_point_coords_abs (CLUTTER_GESTURE (self),
+                                         point,
+                                         &latest_coords);
+-  
++
+   graphene_point_distance (&latest_coords, &begin_coords, &distance_x, &distance_y);
+ 
+   switch (self->side)
+@@ -194,7 +194,7 @@ shell_edge_drag_gesture_should_handle_sequence (ClutterGesture     *gesture,
+   return FALSE;
+ }
+ 
+-static gboolean
++static void
+ on_cancel_timeout (gpointer data)
+ {
+   ShellEdgeDragGesture *self = data;
+@@ -203,7 +203,6 @@ on_cancel_timeout (gpointer data)
+     clutter_gesture_set_state (CLUTTER_GESTURE (self), CLUTTER_GESTURE_STATE_CANCELLED);
+ 
+   self->cancel_timeout_id = 0;
+-  return G_SOURCE_REMOVE;
+ }
+ 
+ static void
+@@ -223,7 +222,7 @@ shell_edge_drag_gesture_point_began (ClutterGesture *gesture,
+   self->cancel_timeout_point = point;
+ 
+   g_assert (self->cancel_timeout_id == 0);
+-  self->cancel_timeout_id = g_timeout_add (CANCEL_TIMEOUT_MS, on_cancel_timeout, self);
++  self->cancel_timeout_id = g_timeout_add_once (CANCEL_TIMEOUT_MS, on_cancel_timeout, self);
+ }
+ 
+ static void
+diff --git a/src/shell-perf-helper.c b/src/shell-perf-helper.c
+index db36e72..613fc1c 100644
+--- a/src/shell-perf-helper.c
++++ b/src/shell-perf-helper.c
+@@ -88,7 +88,7 @@ static void destroy_windows           (PerfHelperApp *app);
+ static void finish_wait_windows       (PerfHelperApp *app);
+ static void check_finish_wait_windows (PerfHelperApp *app);
+ 
+-static gboolean
++static void
+ on_timeout (gpointer data)
+ {
+   PerfHelperApp *app = data;
+@@ -96,8 +96,6 @@ on_timeout (gpointer data)
+ 
+   destroy_windows (app);
+   g_application_quit (G_APPLICATION (app));
+-
+-  return FALSE;
+ }
+ 
+ static void
+@@ -105,7 +103,7 @@ establish_timeout (PerfHelperApp *app)
+ {
+   g_clear_handle_id (&app->timeout_id, g_source_remove);
+ 
+-  app->timeout_id = g_timeout_add (opt_idle_timeout * 1000, on_timeout, app);
++  app->timeout_id = g_timeout_add_once (opt_idle_timeout * 1000, on_timeout, app);
+   g_source_set_name_by_id (app->timeout_id, "[gnome-shell] on_timeout");
+ }
+ 
+diff --git a/src/shell-polkit-authentication-agent.c b/src/shell-polkit-authentication-agent.c
+index 6815f01..62676bd 100644
+--- a/src/shell-polkit-authentication-agent.c
++++ b/src/shell-polkit-authentication-agent.c
+@@ -262,7 +262,7 @@ auth_request_initiate (AuthRequest *request)
+ static void auth_request_complete (AuthRequest *request,
+                                    gboolean     dismissed);
+ 
+-static gboolean
++static void
+ handle_cancelled_in_idle (gpointer user_data)
+ {
+   AuthRequest *request = user_data;
+@@ -278,8 +278,6 @@ handle_cancelled_in_idle (gpointer user_data)
+     {
+       auth_request_complete (request, FALSE);
+     }
+-
+-  return FALSE;
+ }
+ 
+ static void
+@@ -293,7 +291,7 @@ on_request_cancelled (GCancellable *cancellable,
+    *
+    *  https://bugzilla.gnome.org/show_bug.cgi?id=642968
+    */
+-  id = g_idle_add (handle_cancelled_in_idle, request);
++  id = g_idle_add_once (handle_cancelled_in_idle, request);
+   g_source_set_name_by_id (id, "[gnome-shell] handle_cancelled_in_idle");
+ }
+ 

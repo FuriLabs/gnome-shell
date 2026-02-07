@@ -1,0 +1,24 @@
+From: Ramez Medhat <iramezdev@gmail.com>
+Date: Sat, 17 Jan 2026 17:33:54 +0200
+Subject: style: Adjust padding for close button in message list
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4041>
+(cherry picked from commit 10bbebad14d1c38b45cb43c05f066641cd62961c)
+Origin: upstream, 49.4, commit:1a3b4691baae6b5af13ffe994dad4506b98d7464
+---
+ data/theme/gnome-shell-sass/widgets/_message-list.scss | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/data/theme/gnome-shell-sass/widgets/_message-list.scss b/data/theme/gnome-shell-sass/widgets/_message-list.scss
+index 6be1400..55f0b04 100644
+--- a/data/theme/gnome-shell-sass/widgets/_message-list.scss
++++ b/data/theme/gnome-shell-sass/widgets/_message-list.scss
+@@ -152,7 +152,7 @@
+     // add margin to close button to balance it with the expand button
+     .message-close-button {
+       margin: $base_padding * 0.5;
+-      padding: 4px;
++      padding: $base_padding;
+     }
+   }
+ 
