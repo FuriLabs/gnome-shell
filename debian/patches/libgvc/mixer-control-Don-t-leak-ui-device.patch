@@ -1,0 +1,29 @@
+From: =?utf-8?q?Guido_G=C3=BCnther?= <agx@sigxcpu.org>
+Date: Wed, 31 Dec 2025 11:55:41 +0100
+Subject: mixer-control: Don't leak ui device
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+We have a ref when creating the `device` object, use that for inserting
+into the hash table as otherwise we leak that reference.
+
+Signed-off-by: Guido Günther <agx@sigxcpu.org>
+Applied-upstream: gnome-shell 49.4, commit:d0e1664ac6278b70a7e26bf8135f0d1d92ee1e9f
+---
+ subprojects/gvc/gvc-mixer-control.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/subprojects/gvc/gvc-mixer-control.c b/subprojects/gvc/gvc-mixer-control.c
+index 51e389f..c7f9613 100644
+--- a/subprojects/gvc/gvc-mixer-control.c
++++ b/subprojects/gvc/gvc-mixer-control.c
+@@ -1367,7 +1367,7 @@ sync_devices (GvcMixerControl *control,
+ 
+                 g_hash_table_insert (is_output ? control->priv->ui_outputs : control->priv->ui_inputs,
+                                      GUINT_TO_POINTER (gvc_mixer_ui_device_get_id (device)),
+-                                     g_object_ref (device));
++                                     device);
+ 
+                 g_signal_emit (G_OBJECT (control),
+                                signals[is_output ? OUTPUT_ADDED : INPUT_ADDED],

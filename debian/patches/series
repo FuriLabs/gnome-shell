@@ -17,6 +17,9 @@ libgvc/mixer-control-Reset-stream-id-s-on-UI-devices.patch
 libgvc/mixer-control-Clear-stream-ids-from-UI-devices-when-BT-st.patch
 libgvc/mixer-control-Check-for-invalid-input.patch
 libgvc/mixer-control-Simplify-device-lookup.patch
+libgvc/mixer-control-Check-whether-we-are-handling-new-device-in.patch
+libgvc/mixer-control-Don-t-leak-ui-device.patch
+libgvc/mixer-control-Document-that-add_stream-is-transfer-full.patch
 shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
 debian/data-Add-im-config.desktop-to-System-folder.patch
