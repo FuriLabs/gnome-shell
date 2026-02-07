@@ -1,5 +1,6 @@
-gnome-shell (48.7-0+deb13u2) UNRELEASED; urgency=medium
+gnome-shell (48.7-0+deb13u2) trixie; urgency=medium
 
+  * Team upload
   * d/p/Revert-main-Register-session-with-GDM-on-startup.patch:
     Revert an upstream change that was not intended to be backported
     to 48.x. A corresponding revert has been queued for inclusion in
@@ -12,7 +13,7 @@ gnome-shell (48.7-0+deb13u2) UNRELEASED; urgency=medium
     the Shell UI never appearing.
     (Closes: #1125941, #1125273, #1125275, #1126174)
 
- -- Simon McVittie <smcv@debian.org>  Tue, 27 Jan 2026 20:06:22 +0000
+ -- Simon McVittie <smcv@debian.org>  Sat, 07 Feb 2026 11:16:25 +0000
 
 gnome-shell (48.7-0+deb13u1) trixie; urgency=medium
 
