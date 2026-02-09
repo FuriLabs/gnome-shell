@@ -40,6 +40,7 @@ libgvc/mixer-control-Don-t-leak-ui-device.patch
 libgvc/mixer-control-Document-that-add_stream-is-transfer-full.patch
 Update-Greek-translation.patch
 Update-Greek-translation-1.patch
+Update-Kazakh-translation.patch
 shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
 debian/data-Add-im-config.desktop-to-System-folder.patch
