@@ -1,5 +1,6 @@
 gnome-shell (50~beta-1) UNRELEASED; urgency=medium
 
+  [ Daniel van Vugt ]
   * New upstream release: 50.beta
   * Refresh patches and fix conflicts:
     - Revert-main-Register-session-with-GDM-on-startup.patch
@@ -11,6 +12,11 @@ gnome-shell (50~beta-1) UNRELEASED; urgency=medium
     - Revert-main-Register-session-with-GDM-on-startup.patch
   * Declare gnome-shell-common breaks old versions of gnome-session-common,
     since the systemd services changed: gnome-shell!3960, gnome-session!167
+
+  [ Simon McVittie ]
+  * Revert "d/control, d/gbp.conf: Branch for 49.x"
+  * Revert "d/patches: Update to commit 49.3-27-g7e2619acb": these changes
+    were included in 50~beta
 
  -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 04 Feb 2026 16:21:27 +0800
 
