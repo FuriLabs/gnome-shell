@@ -1,0 +1,21 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Mon, 9 Feb 2026 21:57:39 +0100
+Subject: js/ui/shellDBus: Allow Initial Setup to trigger transitions
+
+It's a safe component that should be able to access to shell bus
+---
+ js/ui/shellDBus.js | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/js/ui/shellDBus.js b/js/ui/shellDBus.js
+index 9b91c7f..917e95c 100644
+--- a/js/ui/shellDBus.js
++++ b/js/ui/shellDBus.js
+@@ -25,6 +25,7 @@ export class GnomeShell {
+         this._dbusImpl.export(Gio.DBus.session, '/org/gnome/Shell');
+ 
+         this._senderChecker = new DBusSenderChecker([
++            'org.gnome.InitialSetup',
+             'org.gnome.Settings',
+             'org.gnome.SettingsDaemon.MediaKeys',
+             'org.freedesktop.impl.portal.desktop.gnome',

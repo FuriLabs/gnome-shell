@@ -57,3 +57,4 @@ ubuntu/layout-Make-starting-in-the-overview-configurable-not-imp.patch
 # ubuntu-authd/js-Minify-the-authd-protocol-during-build.patch
 # ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch
 ubuntu/extensions-Include-snapd-prompting-extension.patch
+ubuntu/js-ui-shellDBus-Allow-Initial-Setup-to-trigger-transition.patch
