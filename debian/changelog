@@ -4,7 +4,7 @@ gnome-shell (49.3-3) UNRELEASED; urgency=medium
     The debian/latest branch is now being used to package v50 for
     experimental.
   * d/patches: Mark libgvc update as included in 49.4
-  * d/patches: Update to commit 49.3-26-gcdd6b186c.
+  * d/patches: Update to commit 49.3-27-g7e2619acb.
     This incorporates most of the bug fixes backported from 50.beta or
     earlier that will be in 49.4. I've excluded changes from
     upstream gnome-shell!4058 for now, since those want a newer version of
@@ -25,7 +25,7 @@ gnome-shell (49.3-3) UNRELEASED; urgency=medium
       fails but then succeeds
     - In gdm, reset correctly if the user verifier connection is closed
     - Consistently use one-shot idle and timeout functions where appropriate
-    - Translation updates: cs, el, th
+    - Translation updates: cs, el, kk, th
 
  -- Simon McVittie <smcv@debian.org>  Sat, 07 Feb 2026 14:40:58 +0000
 
