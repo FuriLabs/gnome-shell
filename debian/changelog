@@ -1,4 +1,4 @@
-gnome-shell (49.3-3) UNRELEASED; urgency=medium
+gnome-shell (49.3-3) unstable; urgency=medium
 
   * d/control, d/gbp.conf: Branch for 49.x.
     The debian/latest branch is now being used to package v50 for
@@ -27,7 +27,7 @@ gnome-shell (49.3-3) UNRELEASED; urgency=medium
     - Consistently use one-shot idle and timeout functions where appropriate
     - Translation updates: cs, el, kk, th
 
- -- Simon McVittie <smcv@debian.org>  Sat, 07 Feb 2026 14:40:58 +0000
+ -- Simon McVittie <smcv@debian.org>  Mon, 09 Feb 2026 10:10:03 +0000
 
 gnome-shell (49.3-2) unstable; urgency=medium
 
