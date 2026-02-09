@@ -14,6 +14,37 @@ gnome-shell (50~beta-1) UNRELEASED; urgency=medium
 
  -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 04 Feb 2026 16:21:27 +0800
 
+gnome-shell (49.3-3) unstable; urgency=medium
+
+  * d/control, d/gbp.conf: Branch for 49.x.
+    The debian/latest branch is now being used to package v50 for
+    experimental.
+  * d/patches: Mark libgvc update as included in 49.4
+  * d/patches: Update to commit 49.3-27-g7e2619acb.
+    This incorporates most of the bug fixes backported from 50.beta or
+    earlier that will be in 49.4. I've excluded changes from
+    upstream gnome-shell!4058 for now, since those want a newer version of
+    mutter and will log warnings until we have one.
+    - Update libgvc again, fixing duplicate audio devices and a memory leak
+    - Fix a memory leak when progress spinners are destroyed
+    - In the app grid, only create default folders on first startup
+    - Allow tab-to-focus in the quick settings menu
+    - Fix inconsistent padding in the message list
+    - When prompting for a password, tell ibus whether the text is hidden
+      or visible, so it can hide preedit text when appropriate
+    - Avoid misleading stack traces and possible crashes when a warning is
+      emitted from a background thread
+    - Improve handling of invalid positions in touchscreen swipe tracking
+    - In gdm, show authentication messages for at least 2 seconds,
+      even if they are a very short string like "PIN locked"
+    - In gdm, ensure that we proceed to the session when authentication
+      fails but then succeeds
+    - In gdm, reset correctly if the user verifier connection is closed
+    - Consistently use one-shot idle and timeout functions where appropriate
+    - Translation updates: cs, el, kk, th
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 09 Feb 2026 10:10:03 +0000
+
 gnome-shell (49.3-2) unstable; urgency=medium
 
   * Team upload
