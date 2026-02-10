@@ -1317,6 +1317,119 @@ apply_discrete_gpu_env (GAppLaunchContext *context,
   g_debug ("Could not find discrete GPU in switcheroo-control, not applying environment");
 }
 
+static char *
+strip_desktop_exec_field_codes (const char *arg)
+{
+  GString *out = g_string_sized_new (strlen (arg));
+  const char *p = arg;
+
+  while (*p) {
+    if (*p == '%') {
+      p++;
+      if (*p == '\0')
+        break;
+
+      if (*p == '%') {
+        g_string_append_c (out, '%');
+        p++;
+        continue;
+      }
+
+      if (strchr ("fFuUdDnNickvm", *p) != NULL) {
+        p++;
+        continue;
+      }
+
+      g_string_append_c (out, *p);
+      p++;
+      continue;
+    }
+
+    g_string_append_c (out, *p);
+    p++;
+  }
+
+  return g_string_free (out, FALSE);
+}
+
+static gboolean
+desktop_exec_to_argv_no_uris (GDesktopAppInfo  *info,
+                              char           ***argv_out,
+                              GError          **error)
+{
+  const char *exec_line;
+  g_autofree char **argv = NULL;
+  int argc = 0;
+  g_autoptr (GPtrArray) filtered = NULL;
+
+  exec_line = g_desktop_app_info_get_string (info, "Exec");
+  if (exec_line == NULL || *exec_line == '\0') {
+    g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                 "Desktop file has no Exec line");
+    return FALSE;
+  }
+
+  if (!g_shell_parse_argv (exec_line, &argc, &argv, error))
+    return FALSE;
+
+  filtered = g_ptr_array_new_with_free_func (g_free);
+
+  for (int i = 0; i < argc; i++) {
+    g_autofree char *stripped = strip_desktop_exec_field_codes (argv[i]);
+
+    if (stripped == NULL || *stripped == '\0')
+      continue;
+
+    g_ptr_array_add (filtered, g_strdup (stripped));
+  }
+
+  g_ptr_array_add (filtered, NULL);
+
+  if (filtered->len <= 1 || g_ptr_array_index (filtered, 0) == NULL) {
+    g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+                 "Exec line produced empty argv after stripping field codes");
+    return FALSE;
+  }
+
+  *argv_out = (char **) g_ptr_array_free (g_steal_pointer (&filtered), FALSE);
+  return TRUE;
+}
+
+static gboolean
+spawn_desktop_exec_for_nested_wayland (ShellApp          *app,
+                                       GSpawnFlags        flags,
+                                       GError           **error)
+{
+  const char *socket = g_getenv ("GNOME_SHELL_WAYLAND_SOCKET");
+  g_autofree char **argv = NULL;
+  g_auto(GStrv) envp = NULL;
+  GPid pid = 0;
+
+  if (socket == NULL || *socket == '\0')
+    return FALSE;
+
+  if (!desktop_exec_to_argv_no_uris (app->info, &argv, error))
+    return FALSE;
+
+  envp = g_get_environ ();
+  envp = g_environ_setenv (envp, "WAYLAND_DISPLAY", socket, TRUE);
+
+  /* Spawn directly and bypasses D-Bus activation */
+  if (!g_spawn_async (NULL,
+                      argv,
+                      envp,
+                      flags,
+                      child_context_setup,
+                      shell_global_get (),
+                      &pid,
+                      error))
+    return FALSE;
+
+  wait_pid (app->info, pid, NULL);
+
+  return TRUE;
+}
+
 /**
  * shell_app_launch:
  * @timestamp: Event timestamp, or 0 for current event timestamp
@@ -1353,6 +1466,20 @@ shell_app_launch (ShellApp           *app,
 
   global = shell_global_get ();
   context = shell_global_create_app_launch_context (global, timestamp, workspace);
+
+  if (g_desktop_app_info_get_boolean (app->info, "DBusActivatable") &&
+      g_getenv ("GNOME_SHELL_WAYLAND_SOCKET") != NULL &&
+      *g_getenv ("GNOME_SHELL_WAYLAND_SOCKET") != '\0') {
+    gboolean ok;
+
+    flags = G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD |
+            G_SPAWN_LEAVE_DESCRIPTORS_OPEN;
+
+    ok = spawn_desktop_exec_for_nested_wayland (app, flags, error);
+    g_object_unref (context);
+    return ok;
+  }
+
   if (gpu_pref == SHELL_APP_LAUNCH_GPU_APP_PREF)
     discrete_gpu = g_desktop_app_info_get_boolean (app->info, "PrefersNonDefaultGPU");
   else
@@ -1413,6 +1540,23 @@ shell_app_launch_action (ShellApp        *app,
 
   global = shell_global_get ();
   context = shell_global_create_app_launch_context (global, timestamp, workspace);
+
+  GSpawnFlags flags;
+  g_autoptr (GError) error = NULL;
+  if (g_desktop_app_info_get_boolean (app->info, "DBusActivatable") &&
+      g_getenv ("GNOME_SHELL_WAYLAND_SOCKET") != NULL &&
+      *g_getenv ("GNOME_SHELL_WAYLAND_SOCKET") != '\0') {
+    flags = G_SPAWN_SEARCH_PATH | G_SPAWN_DO_NOT_REAP_CHILD |
+            G_SPAWN_LEAVE_DESCRIPTORS_OPEN;
+
+    if (!spawn_desktop_exec_for_nested_wayland (app, flags, &error))
+      g_warning ("Failed to spawn nested Exec= for action '%s': %s",
+                 action_name,
+                 error ? error->message : "unknown error");
+
+    g_object_unref (context);
+    return;
+  }
 
   g_desktop_app_info_launch_action (G_DESKTOP_APP_INFO (app->info),
                                     action_name, context);
