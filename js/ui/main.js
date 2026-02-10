@@ -209,7 +209,8 @@ async function _initializeUI() {
 
     reloadThemeResource();
     _loadIcons();
-    _loadOskLayouts();
+    if (GLib.getenv('GNOME_SHELL_DISABLE_OSK') !== '1')
+        _loadOskLayouts();
     _loadDefaultStylesheet();
     _loadWorkspacesAdjustment();
 
@@ -246,7 +247,10 @@ async function _initializeUI() {
 
     messageTray = new MessageTray.MessageTray();
     panel = new Panel.Panel();
-    keyboard = new Keyboard.KeyboardManager();
+    if (GLib.getenv('GNOME_SHELL_DISABLE_OSK') === '1')
+        keyboard = null;
+    else
+        keyboard = new Keyboard.KeyboardManager();
     notificationDaemon = new NotificationDaemon.NotificationDaemon();
     windowAttentionHandler = new WindowAttentionHandler.WindowAttentionHandler();
     componentManager = new Components.ComponentManager();
