@@ -1,0 +1,25 @@
+From: Carlos Garnacho <carlosg@gnome.org>
+Date: Thu, 5 Feb 2026 22:56:47 +0100
+Subject: environment: Drop Meta.Backend.set_keymap_layout_group_async
+ promisify
+
+This method was removed in mutter, its async promisification is not
+necessary anymore.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4068>
+---
+ js/ui/environment.js | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/js/ui/environment.js b/js/ui/environment.js
+index 83743ee..f4ff303 100644
+--- a/js/ui/environment.js
++++ b/js/ui/environment.js
+@@ -34,7 +34,6 @@ Gio._promisify(Gio.File.prototype, 'query_info_async');
+ Gio._promisify(Polkit.Permission, 'new');
+ Gio._promisify(Shell.App.prototype, 'activate_action');
+ Gio._promisify(Meta.Backend.prototype, 'set_keymap_async');
+-Gio._promisify(Meta.Backend.prototype, 'set_keymap_layout_group_async');
+ 
+ // We can't import shell JS modules yet, because they may have
+ // variable initializations, etc, that depend on this file's
