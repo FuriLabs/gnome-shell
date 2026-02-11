@@ -21,7 +21,7 @@ https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/web-lo
  create mode 100644 js/gdm/webLogin.js
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index 505cc34..097d10e 100644
+index b7dcd86..d6ab984 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 @@ -38,7 +38,8 @@ $_gdm_dialog_width: 25em;
@@ -116,18 +116,18 @@ index 505cc34..097d10e 100644
    background-color: transparent;
  
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index e1ff169..3ce046a 100644
+index 426e27a..6605ba7 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -14,6 +14,7 @@ import * as MessageTray from '../ui/messageTray.js';
+@@ -15,6 +15,7 @@ import * as MessageTray from '../ui/messageTray.js';
  import * as Params from '../misc/params.js';
  import * as ShellEntry from '../ui/shellEntry.js';
  import * as UserWidget from '../ui/userWidget.js';
 +import * as WebLogin from './webLogin.js';
  import {wiggle} from '../misc/animationUtils.js';
  
- const DEFAULT_BUTTON_WELL_ICON_SIZE = 16;
-@@ -84,6 +85,8 @@ export const AuthPrompt = GObject.registerClass({
+ import {loadInterfaceXML} from '../misc/fileUtils.js';
+@@ -174,6 +175,8 @@ export const AuthPrompt = GObject.registerClass({
          this._userVerifier.connect('show-choice-list', this._onShowChoiceList.bind(this));
          this._userVerifier.connect('mechanisms-list-changed', this._onAuthMechanismsListChanged.bind(this));
          this._userVerifier.connect('foreground-mechanism-changed', this._onForegroundMechanismChanged.bind(this));
@@ -136,7 +136,7 @@ index e1ff169..3ce046a 100644
          this._userVerifier.connect('verification-failed', this._onVerificationFailed.bind(this));
          this._userVerifier.connect('verification-complete', this._onVerificationComplete.bind(this));
          this._userVerifier.connect('reset', this._onReset.bind(this));
-@@ -173,6 +176,13 @@ export const AuthPrompt = GObject.registerClass({
+@@ -272,6 +275,13 @@ export const AuthPrompt = GObject.registerClass({
              this.cancelButton.opacity = 0;
          this._mainBox.add_child(this.cancelButton);
  
@@ -150,7 +150,7 @@ index e1ff169..3ce046a 100644
          this._authList = new AuthList.AuthList();
          this._authList.set({
              visible: false,
-@@ -318,6 +328,9 @@ export const AuthPrompt = GObject.registerClass({
+@@ -417,6 +427,9 @@ export const AuthPrompt = GObject.registerClass({
          }
  
          this._capsLockWarningLabel.visible = secret;
@@ -160,7 +160,7 @@ index e1ff169..3ce046a 100644
      }
  
      _onAskQuestion(verifier, serviceName, question, secret) {
-@@ -364,6 +377,110 @@ export const AuthPrompt = GObject.registerClass({
+@@ -463,6 +476,110 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('mechanisms-changed', serviceName);
      }
  
@@ -271,7 +271,7 @@ index e1ff169..3ce046a 100644
      _onCredentialManagerAuthenticated() {
          if (this.verificationStatus !== AuthPromptStatus.VERIFICATION_SUCCEEDED)
              this.reset();
-@@ -521,12 +638,16 @@ export const AuthPrompt = GObject.registerClass({
+@@ -620,12 +737,16 @@ export const AuthPrompt = GObject.registerClass({
          this.stopSpinning();
          this._authList.clear();
          this._authList.hide();
@@ -288,7 +288,7 @@ index e1ff169..3ce046a 100644
          this._entry.show();
          this._entry.grab_key_focus();
      }
-@@ -608,6 +729,9 @@ export const AuthPrompt = GObject.registerClass({
+@@ -707,6 +828,9 @@ export const AuthPrompt = GObject.registerClass({
      }
  
      updateSensitivity(sensitive) {
@@ -298,7 +298,7 @@ index e1ff169..3ce046a 100644
          let authWidget;
  
          if (this._authList.visible)
-@@ -744,6 +868,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -865,6 +989,7 @@ export const AuthPrompt = GObject.registerClass({
              hold: null,
          });
  
@@ -307,7 +307,7 @@ index e1ff169..3ce046a 100644
  
          let hold = params.hold;
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index eb7919b..dd888fd 100644
+index dce1855..4402585 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -40,6 +40,7 @@ export const AUTH_MECHANISM_PROTOCOL = 'auth-mechanisms';
@@ -318,7 +318,7 @@ index eb7919b..dd888fd 100644
  export const FINGERPRINT_AUTHENTICATION_KEY = 'enable-fingerprint-authentication';
  export const SMARTCARD_AUTHENTICATION_KEY = 'enable-smartcard-authentication';
  export const BANNER_MESSAGE_KEY = 'banner-message-enable';
-@@ -267,6 +268,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -264,6 +265,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              this._cancellable = null;
          }
  
@@ -326,7 +326,7 @@ index eb7919b..dd888fd 100644
          this._clearUserVerifier();
          this._clearMessageQueue();
          this._activeServices.clear();
-@@ -847,6 +849,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -846,6 +848,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      _startMechanismFromUnifiedService(mechanism) {
          const roleHandlers = {
@@ -334,7 +334,7 @@ index eb7919b..dd888fd 100644
              [PASSWORD_ROLE_NAME]: this._startPasswordLogin.bind(this),
          };
  
-@@ -950,6 +953,45 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -949,6 +952,45 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          await this.replyWithJSON(serviceName, JSON.stringify(reply));
      }
  
@@ -380,7 +380,7 @@ index eb7919b..dd888fd 100644
      _filterAuthMechanisms(mechanismsList, filterFunc) {
          return mechanismsList.filter(mechanism => {
              const mapping = DiscreteServiceMechanismDefinitions.find(m =>
-@@ -1211,6 +1253,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1209,6 +1251,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const doneTrying = !shouldRetry || !this._canRetry();
  
          this.emit('verification-failed', serviceName, !doneTrying);

@@ -8,10 +8,10 @@ Subject: gdm: Support more authentication mechanism UIs
  2 files changed, 79 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 03ce0e4..fa5a999 100644
+index 1be34fa..818f5c0 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -88,9 +88,11 @@ export const AuthPrompt = GObject.registerClass({
+@@ -178,9 +178,11 @@ export const AuthPrompt = GObject.registerClass({
  
          this._userVerifier.connect('ask-question', this._onAskQuestion.bind(this));
          this._userVerifier.connect('show-message', this._onShowMessage.bind(this));
@@ -23,7 +23,7 @@ index 03ce0e4..fa5a999 100644
          this._userVerifier.connect('web-login', this._onWebLogin.bind(this));
          this._userVerifier.connect('web-login-time-out', this._onWebLoginTimeOut.bind(this));
          this._userVerifier.connect('verification-failed', this._onVerificationFailed.bind(this));
-@@ -371,6 +373,20 @@ export const AuthPrompt = GObject.registerClass({
+@@ -470,6 +472,20 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('prompted');
      }
  
@@ -44,7 +44,7 @@ index 03ce0e4..fa5a999 100644
      _onShowChoiceList(userVerifier, serviceName, promptMessage, choiceList) {
          if (this._queryingService)
              this.clear();
-@@ -390,6 +406,11 @@ export const AuthPrompt = GObject.registerClass({
+@@ -489,6 +505,11 @@ export const AuthPrompt = GObject.registerClass({
          this.emit('mechanisms-changed', serviceName);
      }
  
@@ -57,10 +57,10 @@ index 03ce0e4..fa5a999 100644
          const introAlreadyUp = this._queryingService === serviceName;
  
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index b1ded97..d6e49bd 100644
+index 50eab43..17d9d77 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -366,6 +366,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -363,6 +363,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      selectChoice(serviceName, key) {
@@ -73,7 +73,7 @@ index b1ded97..d6e49bd 100644
          this._userVerifierChoiceList.call_select_choice(serviceName, key, this._cancellable, null);
      }
  
-@@ -374,6 +380,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -371,6 +377,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              await this._handlePendingMessages();
              if (this._pendingMechanisms.has(PASSWORD_ROLE_NAME))
                  this._replyWithAuthSelectionResponse(serviceName, PASSWORD_ROLE_NAME, {password: answer});
@@ -82,7 +82,7 @@ index b1ded97..d6e49bd 100644
              else
                  this._userVerifier.call_answer_query(serviceName, answer, this._cancellable, null);
          } catch (e) {
-@@ -976,6 +984,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -975,6 +983,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const roleHandlers = {
              [WEB_LOGIN_ROLE_NAME]: this._startWebLogin,
              [PASSWORD_ROLE_NAME]: this._startQuestionLogin,
@@ -92,7 +92,7 @@ index b1ded97..d6e49bd 100644
          };
  
          const handler = roleHandlers[mechanism.role];
-@@ -1050,7 +1061,27 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1049,7 +1060,27 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this.emit('show-choice-list', serviceName, promptMessage, list.deepUnpack());
      }
  
@@ -121,7 +121,7 @@ index b1ded97..d6e49bd 100644
          const mechanisms = this._publishedMechanisms.get(serviceName);
  
          if (!mechanisms)
-@@ -1060,9 +1091,25 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1059,9 +1090,25 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              return;
  
          const {prompt, role} = mechanisms[mechanismId];
@@ -148,7 +148,7 @@ index b1ded97..d6e49bd 100644
      }
  
      _replyWithAuthSelectionResponse(serviceName, role, response) {
-@@ -1140,6 +1187,15 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1139,6 +1186,15 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._replyWithAuthSelectionResponse(serviceName, WEB_LOGIN_ROLE_NAME, {});
      }
  

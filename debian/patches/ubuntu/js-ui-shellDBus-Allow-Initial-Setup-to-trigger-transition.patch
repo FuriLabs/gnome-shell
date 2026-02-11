@@ -8,7 +8,7 @@ It's a safe component that should be able to access to shell bus
  1 file changed, 1 insertion(+)
 
 diff --git a/js/ui/shellDBus.js b/js/ui/shellDBus.js
-index 9b91c7f..917e95c 100644
+index 1e5a6a3..cfc7e79 100644
 --- a/js/ui/shellDBus.js
 +++ b/js/ui/shellDBus.js
 @@ -25,6 +25,7 @@ export class GnomeShell {

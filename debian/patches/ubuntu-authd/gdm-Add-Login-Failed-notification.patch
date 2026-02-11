@@ -18,10 +18,10 @@ It will be used later when Web Login support is added.
  2 files changed, 36 insertions(+)
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index de7b6f2..505cc34 100644
+index 36a2545..b7dcd86 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-@@ -397,6 +397,19 @@ $_gdm_dialog_width: 25em;
+@@ -422,6 +422,19 @@ $_gdm_dialog_width: 25em;
    }
  }
  
@@ -42,10 +42,10 @@ index de7b6f2..505cc34 100644
  .qr-code {
    background: black;
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 64b5837..e1ff169 100644
+index f0f5ff5..426e27a 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -10,6 +10,7 @@ import * as Animation from '../ui/animation.js';
+@@ -11,6 +11,7 @@ import * as Animation from '../ui/animation.js';
  import * as AuthList from './authList.js';
  import * as Batch from './batch.js';
  import * as GdmUtil from './util.js';
@@ -53,7 +53,7 @@ index 64b5837..e1ff169 100644
  import * as Params from '../misc/params.js';
  import * as ShellEntry from '../ui/shellEntry.js';
  import * as UserWidget from '../ui/userWidget.js';
-@@ -657,6 +658,28 @@ export const AuthPrompt = GObject.registerClass({
+@@ -756,6 +757,28 @@ export const AuthPrompt = GObject.registerClass({
          this._userVerifier.setForegroundMechanism(mechanism);
      }
  

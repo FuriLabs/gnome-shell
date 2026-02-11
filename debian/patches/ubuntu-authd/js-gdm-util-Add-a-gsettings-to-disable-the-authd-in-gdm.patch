@@ -28,7 +28,7 @@ index ee8b3a2..136d67a 100644
    </schema>
  </schemalist>
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 0a29cf3..66a7bdb 100644
+index e2b26e8..9dbeaf1 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -50,6 +50,9 @@ export const BANNER_MESSAGE_TEXT_KEY = 'banner-message-text';
@@ -41,7 +41,7 @@ index 0a29cf3..66a7bdb 100644
  export const LOGO_KEY = 'logo';
  export const DISABLE_USER_LIST_KEY = 'disable-user-list';
  
-@@ -178,6 +181,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -181,6 +184,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
          this._settings = new Gio.Settings({schema_id: LOGIN_SCREEN_SCHEMA});
          this._settings.connect('changed', () => this._onSettingsChanged());
@@ -50,7 +50,7 @@ index 0a29cf3..66a7bdb 100644
          this._updateEnabledServices();
          this._updateDefaultService();
  
-@@ -899,6 +904,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -898,6 +903,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
               this._serviceIsAvailable(UNIFIED_AUTH_SERVICE_NAME))
              return UNIFIED_AUTH_SERVICE_NAME;
  

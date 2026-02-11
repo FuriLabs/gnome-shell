@@ -14,10 +14,10 @@ long if/else if code that was there before
  1 file changed, 18 insertions(+), 7 deletions(-)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 3b5b459..cb1b65c 100644
+index f28273f..e682a29 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -63,6 +63,7 @@ const USER_READ_TIME = 48;
+@@ -66,6 +66,7 @@ const USER_READ_TIME_MIN = 2000;
  const FINGERPRINT_SERVICE_PROXY_TIMEOUT = 5000;
  const FINGERPRINT_ERROR_TIMEOUT_WAIT = 15;
  
@@ -25,7 +25,7 @@ index 3b5b459..cb1b65c 100644
  const DiscreteServiceMechanismDefinitions = [
      {
          serviceName: PASSWORD_SERVICE_NAME,
-@@ -764,16 +765,26 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -763,16 +764,26 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              this._cancelAndReset();
      }
  

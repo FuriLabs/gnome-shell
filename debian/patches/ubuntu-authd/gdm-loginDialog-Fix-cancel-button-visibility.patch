@@ -8,10 +8,10 @@ Subject: gdm/loginDialog: Fix cancel button visibility
  2 files changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 7578a01..03ce0e4 100644
+index 749e2ba..1be34fa 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -55,6 +55,12 @@ export const AuthPrompt = GObject.registerClass({
+@@ -145,6 +145,12 @@ export const AuthPrompt = GObject.registerClass({
          'mechanisms-changed': {param_types: [GObject.TYPE_STRING]},
          'reset': {param_types: [GObject.TYPE_UINT]},
      },
@@ -24,7 +24,7 @@ index 7578a01..03ce0e4 100644
  }, class AuthPrompt extends St.BoxLayout {
      _init(gdmClient, mode) {
          super._init({
-@@ -827,6 +833,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -926,6 +932,7 @@ export const AuthPrompt = GObject.registerClass({
          this.cancelButton.reactive = this._hasCancelButton;
          this.cancelButton.can_focus = this._hasCancelButton;
          this._preemptiveAnswer = null;
@@ -33,7 +33,7 @@ index 7578a01..03ce0e4 100644
          if (this._userVerifier)
              this._userVerifier.cancel();
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index c6fa9d7..80d28e5 100644
+index 77982d8..28a3d8d 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -595,6 +595,8 @@ export const LoginDialog = GObject.registerClass({
@@ -45,7 +45,7 @@ index c6fa9d7..80d28e5 100644
          this._authPrompt.hide();
          this.add_child(this._authPrompt);
  
-@@ -1218,9 +1220,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1225,9 +1227,7 @@ export const LoginDialog = GObject.registerClass({
                  this._user = this._userManager.get_user(answer);
                  this._authPrompt.clear();
                  this._beginVerification({userName: answer});

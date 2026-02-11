@@ -9,10 +9,10 @@ should appear in the footer.
  1 file changed, 1 insertion(+)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index dd888fd..2f024c5 100644
+index 4402585..078e908 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -104,6 +104,7 @@ export const MessageType = {
+@@ -107,6 +107,7 @@ export const MessageType = {
      HINT: 1,
      INFO: 2,
      ERROR: 3,

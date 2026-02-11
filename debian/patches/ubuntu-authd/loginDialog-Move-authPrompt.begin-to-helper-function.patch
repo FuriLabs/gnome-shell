@@ -12,7 +12,7 @@ _beginVerification, that can be easily augmented later.
  1 file changed, 15 insertions(+), 4 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index e8bf2db..4442365 100644
+index 7da9f49..52a8e33 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -37,6 +37,7 @@ import * as LoginManager from '../misc/loginManager.js';
@@ -23,7 +23,7 @@ index e8bf2db..4442365 100644
  import * as PopupMenu from '../ui/popupMenu.js';
  import * as Realmd from './realmd.js';
  import * as UserWidget from '../ui/userWidget.js';
-@@ -1073,7 +1074,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1080,7 +1081,7 @@ export const LoginDialog = GObject.registerClass({
          if (previousUser && beginRequest === AuthPrompt.BeginRequestType.REUSE_USERNAME) {
              this._user = previousUser;
              this._authPrompt.setUser(this._user);
@@ -32,8 +32,8 @@ index e8bf2db..4442365 100644
          } else if (beginRequest === AuthPrompt.BeginRequestType.PROVIDE_USERNAME) {
              if (!this._disableUserList)
                  this._showUserList();
-@@ -1145,7 +1146,7 @@ export const LoginDialog = GObject.registerClass({
-                 let answer = this._authPrompt.getAnswer();
+@@ -1152,7 +1153,7 @@ export const LoginDialog = GObject.registerClass({
+                 const answer = this._authPrompt.getAnswer();
                  this._user = this._userManager.get_user(answer);
                  this._authPrompt.clear();
 -                this._authPrompt.begin({userName: answer});
@@ -41,7 +41,7 @@ index e8bf2db..4442365 100644
                  this._updateCancelButton();
              });
          this._updateCancelButton();
-@@ -1439,6 +1440,15 @@ export const LoginDialog = GObject.registerClass({
+@@ -1444,6 +1445,15 @@ export const LoginDialog = GObject.registerClass({
          });
      }
  
@@ -57,7 +57,7 @@ index e8bf2db..4442365 100644
      _setUserListExpanded(expanded) {
          this._userList.updateStyle(expanded);
          this._userSelectionBox.visible = expanded;
-@@ -1457,7 +1467,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1462,7 +1472,7 @@ export const LoginDialog = GObject.registerClass({
  
      _hideUserListAndBeginVerification() {
          this._hideUserList();
@@ -66,9 +66,9 @@ index e8bf2db..4442365 100644
      }
  
      _showUserList() {
-@@ -1477,7 +1487,8 @@ export const LoginDialog = GObject.registerClass({
-         let userName = item.user.get_user_name();
-         let hold = new Batch.Hold();
+@@ -1482,7 +1492,8 @@ export const LoginDialog = GObject.registerClass({
+         const userName = item.user.get_user_name();
+         const hold = new Batch.Hold();
  
 -        this._authPrompt.begin({userName, hold});
 +        this._beginVerification({userName, hold});

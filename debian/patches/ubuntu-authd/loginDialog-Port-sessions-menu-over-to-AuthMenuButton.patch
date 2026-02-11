@@ -12,7 +12,7 @@ control.
  2 files changed, 60 insertions(+), 12 deletions(-)
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index b661e93..3c7edaa 100644
+index 5929ccc..a3b10c3 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 @@ -37,6 +37,7 @@ $_gdm_dialog_width: 25em;
@@ -64,7 +64,7 @@ index b661e93..3c7edaa 100644
    margin: 3em 0;
  }
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 4442365..1c37a67 100644
+index 52a8e33..5757640 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -27,9 +27,9 @@ import Pango from 'gi://Pango';
@@ -128,9 +128,9 @@ index 4442365..1c37a67 100644
 +    }
 +
      _getBannerAllocation(dialogBox) {
-         let actorBox = new Clutter.ActorBox();
+         const actorBox = new Clutter.ActorBox();
  
-@@ -1086,7 +1108,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1093,7 +1115,7 @@ export const LoginDialog = GObject.registerClass({
      }
  
      _onDefaultSessionChanged(client, sessionId) {
@@ -139,7 +139,7 @@ index 4442365..1c37a67 100644
      }
  
      _shouldShowSessionMenuButton() {
-@@ -1474,8 +1496,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1479,8 +1501,7 @@ export const LoginDialog = GObject.registerClass({
          this._ensureUserListLoaded();
          this._authPrompt.hide();
          this._hideBannerView();

@@ -7,10 +7,10 @@ Subject: gdm/util: Catch errors on re-authentication
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 2f024c5..5837027 100644
+index 078e908..e7782c4 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -231,7 +231,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -234,7 +234,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          // If possible, reauthenticate an already running session,
          // so any session specific credentials get updated appropriately
          if (userName)
