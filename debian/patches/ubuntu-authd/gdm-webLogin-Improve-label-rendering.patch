@@ -7,18 +7,18 @@ Subject: gdm/webLogin: Improve label rendering
  1 file changed, 8 insertions(+)
 
 diff --git a/js/gdm/webLogin.js b/js/gdm/webLogin.js
-index 65b10e6..19f3ac2 100644
+index 55e437f..244cab0 100644
 --- a/js/gdm/webLogin.js
 +++ b/js/gdm/webLogin.js
-@@ -7,6 +7,7 @@ import Clutter from 'gi://Clutter';
+@@ -5,6 +5,7 @@
+ 
+ import Clutter from 'gi://Clutter';
  import GObject from 'gi://GObject';
- import Gio from 'gi://Gio';
- import Shell from 'gi://Shell';
 +import Pango from 'gi://Pango';
  import St from 'gi://St';
+ import {QrCode} from '../ui/qrCode.js';
  import {Spinner} from '../ui/animation.js';
- import * as ModalDialog from '../ui/modalDialog.js';
-@@ -120,6 +121,10 @@ class WebLoginPrompt extends St.BoxLayout {
+@@ -33,6 +34,10 @@ class WebLoginPrompt extends St.BoxLayout {
              text: message,
              style_class: 'web-login-title-label',
          });
@@ -28,8 +28,8 @@ index 65b10e6..19f3ac2 100644
 +        });
          this.add_child(this._urlTitleLabel);
  
-         this._qrCode = new QrCode({iconSize, url});
-@@ -157,6 +162,9 @@ class WebLoginPrompt extends St.BoxLayout {
+         const qrCode = new QrCode({
+@@ -75,6 +80,9 @@ class WebLoginPrompt extends St.BoxLayout {
          const http = 'http://';
          const https = 'https://';
  

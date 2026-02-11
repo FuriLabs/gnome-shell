@@ -140,10 +140,10 @@ index 17d9d77..8091832 100644
          if (!authService)
              return;
 diff --git a/js/gdm/webLogin.js b/js/gdm/webLogin.js
-index 2795c3d..65b10e6 100644
+index efe9ae8..55e437f 100644
 --- a/js/gdm/webLogin.js
 +++ b/js/gdm/webLogin.js
-@@ -174,10 +174,12 @@ export const WebLoginDialog = GObject.registerClass({
+@@ -92,10 +92,12 @@ export const WebLoginDialog = GObject.registerClass({
      },
  }, class WebLoginDialog extends ModalDialog.ModalDialog {
      _init(params) {
@@ -157,7 +157,7 @@ index 2795c3d..65b10e6 100644
          });
  
          super._init({
-@@ -193,7 +195,7 @@ export const WebLoginDialog = GObject.registerClass({
+@@ -111,7 +113,7 @@ export const WebLoginDialog = GObject.registerClass({
          this.contentLayout.reactive = false;
          this.contentLayout.can_focus = false;
          this.contentLayout.add_child(this._webLoginPrompt);
@@ -166,7 +166,7 @@ index 2795c3d..65b10e6 100644
  
          this._contentOverlay = new St.Widget({
              layout_manager: new Clutter.BinLayout(),
-@@ -233,18 +235,25 @@ export const WebLoginDialog = GObject.registerClass({
+@@ -151,18 +153,25 @@ export const WebLoginDialog = GObject.registerClass({
          this.emit('done');
      }
  

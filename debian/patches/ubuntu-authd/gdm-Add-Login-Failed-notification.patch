@@ -18,13 +18,14 @@ It will be used later when Web Login support is added.
  2 files changed, 36 insertions(+)
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index 36a2545..b7dcd86 100644
+index a3b10c3..7d23ebc 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-@@ -422,6 +422,19 @@ $_gdm_dialog_width: 25em;
+@@ -421,3 +421,16 @@ $_gdm_dialog_width: 25em;
+     }
    }
  }
- 
++
 +// Login Failed banner
 +.auth-notification-banner {
 +  .message-header {
@@ -37,10 +38,6 @@ index 36a2545..b7dcd86 100644
 +    }
 +  }
 +}
-+
- // QR Code
- .qr-code {
-   background: black;
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
 index f0f5ff5..426e27a 100644
 --- a/js/gdm/authPrompt.js

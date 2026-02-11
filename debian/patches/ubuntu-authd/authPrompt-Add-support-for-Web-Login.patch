@@ -11,17 +11,17 @@ QR code as proposed in the design here:
 
 https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/web-login.png.
 ---
- .../gnome-shell-sass/widgets/_login-lock.scss      |  75 +++++-
- js/gdm/authPrompt.js                               | 125 ++++++++++
- js/gdm/util.js                                     |  46 ++++
- js/gdm/webLogin.js                                 | 259 +++++++++++++++++++++
+ .../gnome-shell-sass/widgets/_login-lock.scss      |  75 +++++++-
+ js/gdm/authPrompt.js                               | 125 +++++++++++++
+ js/gdm/util.js                                     |  46 +++++
+ js/gdm/webLogin.js                                 | 205 +++++++++++++++++++++
  js/js-resources.gresource.xml                      |   1 +
  po/POTFILES.in                                     |   1 +
- 6 files changed, 506 insertions(+), 1 deletion(-)
+ 6 files changed, 452 insertions(+), 1 deletion(-)
  create mode 100644 js/gdm/webLogin.js
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index b7dcd86..d6ab984 100644
+index 7d23ebc..4b84b29 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 @@ -38,7 +38,8 @@ $_gdm_dialog_width: 25em;
@@ -393,10 +393,10 @@ index dce1855..4402585 100644
                  this._disconnectSignals();
 diff --git a/js/gdm/webLogin.js b/js/gdm/webLogin.js
 new file mode 100644
-index 0000000..30697ae
+index 0000000..efe9ae8
 --- /dev/null
 +++ b/js/gdm/webLogin.js
-@@ -0,0 +1,259 @@
+@@ -0,0 +1,205 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +//
 +// A widget showing a URL for web login
@@ -404,9 +404,8 @@ index 0000000..30697ae
 +
 +import Clutter from 'gi://Clutter';
 +import GObject from 'gi://GObject';
-+import Gio from 'gi://Gio';
-+import Shell from 'gi://Shell';
 +import St from 'gi://St';
++import {QrCode} from '../ui/qrCode.js';
 +import {Spinner} from '../ui/animation.js';
 +import * as ModalDialog from '../ui/modalDialog.js';
 +import * as Params from '../misc/params.js';
@@ -414,69 +413,11 @@ index 0000000..30697ae
 +const QR_CODE_SIZE = 150;
 +const WEB_LOGIN_SPINNER_SIZE = 35;
 +
-+Gio._promisify(Shell.QrCodeGenerator.prototype, 'generate_qr_code');
-+
-+export const QrCode = GObject.registerClass(
-+class QrCode extends St.Bin {
-+    _init(params) {
-+        const themeContext = St.ThemeContext.get_for_stage(global.stage);
-+        const {iconSize, url} = Params.parse(params, {
-+            iconSize: QR_CODE_SIZE,
-+            url: null,
-+        });
-+
-+        super._init({
-+            width: QR_CODE_SIZE,
-+            height: QR_CODE_SIZE,
-+            x_align: Clutter.ActorAlign.CENTER,
-+        });
-+
-+        this._qrCodeGenerator = new Shell.QrCodeGenerator();
-+        this._iconSize = iconSize;
-+        this._url = url;
-+        this.child = new St.Icon({
-+            icon_size: this._iconSize,
-+            style_class: 'qr-code',
-+        });
-+
-+        themeContext.connectObject('notify::scale-factor', this.update.bind(this), this);
-+
-+        this.update();
-+    }
-+
-+    vfunc_style_changed() {
-+        super.vfunc_style_changed();
-+
-+        let node = this.get_theme_node();
-+        let [found, iconSize] = node.lookup_length('icon-size', false);
-+
-+        if (!found)
-+            return;
-+
-+        let themeContext = St.ThemeContext.get_for_stage(global.stage);
-+
-+        this._iconSize = iconSize / themeContext.scaleFactor;
-+        this.update().catch(logError);
-+    }
-+
-+    async update() {
-+        let {scaleFactor} = St.ThemeContext.get_for_stage(global.stage);
-+        this.set_size(
-+            this._iconSize * scaleFactor,
-+            this._iconSize * scaleFactor);
-+
-+        this.child.gicon = await this._qrCodeGenerator.generate_qr_code(
-+            this._url, this._iconSize, this._iconSize);
-+
-+        this.style = null;
-+    }
-+});
-+
 +export const WebLoginPrompt = GObject.registerClass(
 +class WebLoginPrompt extends St.BoxLayout {
 +    _init(params) {
-+        const {iconSize, message, url, code} = Params.parse(params, {
-+            iconSize: QR_CODE_SIZE,
++        const {qrCodeSize, message, url, code} = Params.parse(params, {
++            qrCodeSize: QR_CODE_SIZE,
 +            message: null,
 +            url: null,
 +            code: null,
@@ -493,8 +434,13 @@ index 0000000..30697ae
 +        });
 +        this.add_child(this._urlTitleLabel);
 +
-+        this._qrCode = new QrCode({iconSize, url});
-+        this.add_child(this._qrCode);
++        const qrCode = new QrCode({
++            width: qrCodeSize,
++            height: qrCodeSize,
++            x_align: Clutter.ActorAlign.CENTER,
++            url,
++        });
++        this.add_child(qrCode);
 +
 +        this._urlLabel = new St.Label({
 +            style_class: 'web-login-url-label',
@@ -657,7 +603,7 @@ index 0000000..30697ae
 +    }
 +});
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index b1c59f3..26d5f35 100644
+index b8b20a6..6200c7f 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
 @@ -11,6 +11,7 @@

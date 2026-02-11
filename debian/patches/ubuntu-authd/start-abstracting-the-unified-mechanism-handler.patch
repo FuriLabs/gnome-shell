@@ -703,7 +703,7 @@ index e7782c4..657916e 100644
              this.disconnect(this._mechanismsListChangedSignalId);
              this._mechanismsListChangedSignalId = 0;
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 26d5f35..684af12 100644
+index 6200c7f..1aaa8e8 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
 @@ -5,12 +5,14 @@

@@ -42,13 +42,12 @@ ubuntu-authd/unlockDialog-Add-Login-Options-menu-button.patch
 ubuntu-authd/gdm-Add-support-unified-authentication.patch
 ubuntu-authd/gdm-util-Figure-out-default-service-from-service-definiti.patch
 ubuntu-authd/gdm-util-Emit-service-request-signal-on-every-request.patch
-ubuntu-authd/src-Add-function-for-generating-QR-codes.patch
 ubuntu-authd/gdm-Add-Login-Failed-notification.patch
+ubuntu-authd/ui-qrCode-Add-a-QR-Code-widget.patch
 ubuntu-authd/authPrompt-Add-support-for-Web-Login.patch
 ubuntu-authd/authPrompt-Fade-out-cancel-button-after-verification.patch
 ubuntu-authd/gdm-util-Add-new-background-message-type.patch
 ubuntu-authd/gdm-util-Catch-errors-on-re-authentication.patch
-ubuntu-authd/shell-qr-code-generator-Use-g-c-c-embedded-library-simpli.patch
 ubuntu-authd/start-abstracting-the-unified-mechanism-handler.patch
 ubuntu-authd/gdm-loginDialog-Bind-login-option-button-visibility-to-me.patch
 ubuntu-authd/gdm-loginDialog-Fix-cancel-button-visibility.patch
