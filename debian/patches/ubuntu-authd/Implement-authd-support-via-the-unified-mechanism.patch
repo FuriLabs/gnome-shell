@@ -15,7 +15,7 @@ Subject: Implement authd support via the unified mechanism
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..3395bb3
+index 0000000..4df2779
 --- /dev/null
 +++ b/js/gdm/authd.js
 @@ -0,0 +1,815 @@
@@ -116,12 +116,12 @@ index 0000000..3395bb3
 +    }
 +
 +    handleProblem(problem) {
-+        console.log(`authd: Got a problem: ${problem}`)
++        console.log(`authd: Got a problem: ${problem}`);
 +
 +        this.emit('queue-priority-message', problem, MessageType.ERROR);
 +        this.reset();
 +
-+        return true
++        return true;
 +    }
 +
 +    getProtocolResponse(_mechanism, _role, _response) {
@@ -214,19 +214,19 @@ index 0000000..3395bb3
 +
 +        const maybeSwitchMechanism = () => {
 +            if (this._stage !== AuthdPam.Stage.challenge)
-+                return
++                return;
 +
 +            this._pendingStage = AuthdGdm.EventType.challenge;
 +            this._selectAuthMode(mechanism.id);
-+        }
++        };
 +
 +        if (this._authenticationStarted && this._isWaitingLayout()) {
 +            this._authCancelledAction = maybeSwitchMechanism;
 +            this._pendingEvents.push(
 +                new AuthdGdm.EventData({
-+                type: AuthdGdm.EventType.isAuthenticatedCancelled,
-+                isAuthenticatedCancelled: new AuthdGdm.Events.IsAuthenticatedCancelled(),
-+            }));
++                    type: AuthdGdm.EventType.isAuthenticatedCancelled,
++                    isAuthenticatedCancelled: new AuthdGdm.Events.IsAuthenticatedCancelled(),
++                }));
 +
 +            return true;
 +        }
@@ -354,12 +354,12 @@ index 0000000..3395bb3
 +
 +        const brokerIDs = Object.keys(this._brokers);
 +        switch (brokerIDs.length) {
-+            case 0:
-+                return;
-+            case 1:
-+                if (this._selectedBroker !== brokerIDs[0])
-+                    this._selectBroker(brokerIDs[0]);
-+                return;
++        case 0:
++            return;
++        case 1:
++            if (this._selectedBroker !== brokerIDs[0])
++                this._selectBroker(brokerIDs[0]);
++            return;
 +        }
 +
 +        this._maybeShowChoiceList(AuthMechanismIDs.BrokerSelection,
@@ -372,7 +372,7 @@ index 0000000..3395bb3
 +            brokerSelected: new AuthdGdm.Events.BrokerSelected({
 +                brokerId,
 +            }),
-+        }))
++        }));
 +    }
 +
 +    _maybeStartAuthModeSelection() {
@@ -389,12 +389,12 @@ index 0000000..3395bb3
 +
 +        const authModesIDs = Object.keys(this._authModes);
 +        switch (authModesIDs.length) {
-+            case 0:
-+                return;
-+            case 1:
-+                if (this._selectedAuthMode !== authModesIDs[0])
-+                    this._selectAuthMode(authModesIDs[0]);
-+                return;
++        case 0:
++            return;
++        case 1:
++            if (this._selectedAuthMode !== authModesIDs[0])
++                this._selectAuthMode(authModesIDs[0]);
++            return;
 +        }
 +
 +        this._maybeShowChoiceList(AuthMechanismIDs.AuthModeSelection,
@@ -470,29 +470,29 @@ index 0000000..3395bb3
 +        let prevStage = this._stage - 1;
 +
 +        switch (this._stage) {
-+            case AuthdPam.Stage.challenge:
-+                if (Object.keys(this._authModes).length > 1) {
-+                    this._skipNextAutoSelection = true;
-+                    break;
-+                }
++        case AuthdPam.Stage.challenge:
++            if (Object.keys(this._authModes).length > 1) {
++                this._skipNextAutoSelection = true;
++                break;
++            }
 +
-+                prevStage--;
-+                // fallthrough
++            prevStage--;
++            // fallthrough
 +
-+            case AuthdPam.Stage.authModeSelection:
-+                if (Object.keys(this._brokers).length > 1) {
-+                    this._skipNextAutoSelection = true;
-+                    break;
-+                }
++        case AuthdPam.Stage.authModeSelection:
++            if (Object.keys(this._brokers).length > 1) {
++                this._skipNextAutoSelection = true;
++                break;
++            }
 +
-+                prevStage--;
-+                // fallthrough
++            prevStage--;
++            // fallthrough
 +
-+            default:
-+                // Mark the verification as failed, as we do not to want
-+                // to rely on the default allowedFailures value.
-+                this.emit('verification-failed', /* should retry */ false);
-+                return false;
++        default:
++            // Mark the verification as failed, as we do not to want
++            // to rely on the default allowedFailures value.
++            this.emit('verification-failed', /* should retry */ false);
++            return false;
 +        }
 +
 +        this._requestStageChange(prevStage);
@@ -621,7 +621,7 @@ index 0000000..3395bb3
 +
 +    cancel() {
 +        if (this._stage !== undefined)
-+            console.log("authd: Cancelling authentication")
++            console.log('authd: Cancelling authentication');
 +
 +        this._maybeCancelPendingAutoSelection();
 +
@@ -666,7 +666,7 @@ index 0000000..3395bb3
 +    }
 +
 +    _isWaitingLayout() {
-+        return this._uiLayout?.wait === 'true'
++        return this._uiLayout?.wait === 'true';
 +    }
 +
 +    _showChallenge() {
@@ -764,7 +764,7 @@ index 0000000..3395bb3
 +                            new AuthdGdm.EventData({
 +                                type: AuthdGdm.EventType.reselectAuthMode,
 +                                reselectAuthMode: new AuthdGdm.Events.ReselectAuthMode(),
-+                            }))
++                            }));
 +                    },
 +                };
 +            }
@@ -779,7 +779,7 @@ index 0000000..3395bb3
 +    }
 +
 +    _handleAuthResponse(response) {
-+        console.log("authd: Access response:", response.access)
++        console.log('authd: Access response:', response.access);
 +
 +        this._pendingNewChallenge = null;
 +        const authCancelledAction = this._authCancelledAction;
@@ -799,11 +799,11 @@ index 0000000..3395bb3
 +            if (response?.msg)
 +                this.emit('queue-priority-message', response.msg, MessageType.ERROR);
 +
-+            if (response.access === AuthResult.Denied) {
++            if (response.access === AuthResult.Denied)
 +                this._failVerification();
-+            } else if (response.access === AuthResult.Retry) {
++            else if (response.access === AuthResult.Retry)
 +                this._maybeStartAuthModeSelection();
-+            }
++
 +            break;
 +        }
 +
