@@ -1,4 +1,4 @@
-gnome-shell (50~beta-0ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (50~beta-0ubuntu1) resolute; urgency=medium
 
   [ Daniel van Vugt ]
   * New upstream release: 50.beta
@@ -49,7 +49,7 @@ gnome-shell (50~beta-0ubuntu1) UNRELEASED; urgency=medium
   * d/control: Add gnome-qr runtime dependency
   * d/p: Remove snapd prompting extension
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 12 Feb 2026 06:24:01 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 12 Feb 2026 06:38:58 +0100
 
 gnome-shell (49.3-2) unstable; urgency=medium
 
