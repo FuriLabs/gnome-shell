@@ -29,7 +29,6 @@ ubuntu/shell-global-util-Do-not-move-snap-apps-to-gnome-apps-sco.patch
 ubuntu/appMenu-Show-details-menu-item-for-snap-applications.patch
 ubuntu/main-Add-support-for-playing-a-startup-sound-if-enabled-i.patch
 ubuntu/layout-Make-starting-in-the-overview-configurable-not-imp.patch
-ubuntu/extensions-Include-snapd-prompting-extension.patch
 ubuntu/js-ui-shellDBus-Allow-Initial-Setup-to-trigger-transition.patch
 ubuntu-authd/authPrompt-Right-align-cancel-button.patch
 ubuntu-authd/unlockDialog-Support-request-type-of-REUSE_USERNAME.patch
