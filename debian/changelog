@@ -1,5 +1,6 @@
 gnome-shell (50~beta-0ubuntu1) UNRELEASED; urgency=medium
 
+  [ Daniel van Vugt ]
   * New upstream release: 50.beta
   * Refresh patches and fix conflicts:
     - Revert-main-Register-session-with-GDM-on-startup.patch
@@ -39,7 +40,16 @@ gnome-shell (50~beta-0ubuntu1) UNRELEASED; urgency=medium
   * Declare gnome-shell-common breaks old versions of gnome-session-common,
     since the systemd services changed: gnome-shell!3960, gnome-session!167
 
- -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 04 Feb 2026 16:21:27 +0800
+  [ Marco Trevisan (Treviño) ]
+  * d/p: Allow Initial setup to trigger the transitions
+  * d/p: Remove async promosification that breaks startup on latest mutter
+  * d/p: Update ubuntu-authd patches to GNOME 50
+  * d/p/ubuntu-authd: Address linting issues in authd implementation
+  * d/p/ubuntu-authd: Use gnome-qr to draw the QR code
+  * d/control: Add gnome-qr runtime dependency
+  * d/p: Remove snapd prompting extension
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 12 Feb 2026 06:24:01 +0100
 
 gnome-shell (49.3-2) unstable; urgency=medium
 
