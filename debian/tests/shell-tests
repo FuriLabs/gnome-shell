@@ -34,7 +34,7 @@ patch -d "${GNOME_SHELL_BUILDDIR}" -p1 --merge <<"EOF"
          args += wrap.split(' ')
 -    args.append(os.path.join(self_dir, 'gnome-shell'))
 +    args.append('/usr/bin/gnome-shell')
- 
+
      args.append('--automation-script')
      args.append(options.script)
 EOF
@@ -52,9 +52,8 @@ tests[fittsy]=""
 for i in "${!tests[@]}"; do
     echo "##### Running test $i"
     dbus-run-session -- \
-        xvfb-run -a -e /proc/self/fd/2 -s '-noreset -screen 0 1280x1024x24' \
-            "${GNOME_SHELL_BUILDDIR}/gnome-shell-test-tool" \
-                --headless \
-                "$PWD/tests/shell/$i.js" \
-                ${tests[$i]}
+        "${GNOME_SHELL_BUILDDIR}/gnome-shell-test-tool" \
+            --headless \
+            "$PWD/tests/shell/$i.js" \
+            ${tests[$i]}
 done
