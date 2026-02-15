@@ -1,8 +1,9 @@
 gnome-shell (49.4-1) UNRELEASED; urgency=medium
 
   * New upstream release
+  * Drop patches that were included in the new release
 
- -- Simon McVittie <smcv@debian.org>  Sun, 15 Feb 2026 17:12:15 +0000
+ -- Simon McVittie <smcv@debian.org>  Sun, 15 Feb 2026 17:22:35 +0000
 
 gnome-shell (49.3-3) unstable; urgency=medium
 
