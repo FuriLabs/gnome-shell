@@ -12,6 +12,7 @@ Fixes: 8bf60ee ("mixer-control: Reset `stream-id`s on UI devices")
 
 Bug: https://gitlab.gnome.org/GNOME/libgnome-volume-control/-/issues/40
 Signed-off-by: Guido Günther <agx@sigxcpu.org>
+Applied-upstream: 50.rc, commit:7cfa577a9cdbb018411a97681ab746b55f93fe0a
 ---
  subprojects/gvc/gvc-mixer-control.c | 7 ++++---
  1 file changed, 4 insertions(+), 3 deletions(-)
@@ -42,9 +43,9 @@ index 4576484..57dc2d4 100644
 @@ -1390,7 +1391,7 @@ sync_devices (GvcMixerControl *control,
                  GvcMixerStreamPort *stream_port;
                  stream_port = n->data;
- 
+
 -                if (match_stream_with_devices (control, stream_port, stream))
 +                if (match_stream_with_devices (control, stream_port, stream, is_bluetooth))
                          continue;
- 
+
                  g_warning ("Sync_devices: Failed to match stream id: %u, description: '%s', origin: '%s'",
