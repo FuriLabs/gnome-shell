@@ -20,6 +20,16 @@ gnome-shell (50~beta-1) UNRELEASED; urgency=medium
 
  -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 04 Feb 2026 16:21:27 +0800
 
+gnome-shell (49.4-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream release
+  * Drop patches that were included in the new release
+  * d/p/mixer-control-Only-stream-id-for-bluetooth-devices-only.patch:
+    Add patch from libgvc to fix a regression for non-Bluetooth devices
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 16 Feb 2026 19:59:30 +0000
+
 gnome-shell (49.3-3) unstable; urgency=medium
 
   * d/control, d/gbp.conf: Branch for 49.x.
