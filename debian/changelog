@@ -17,8 +17,11 @@ gnome-shell (50~beta-1) UNRELEASED; urgency=medium
   * Revert "d/control, d/gbp.conf: Branch for 49.x"
   * Revert "d/patches: Update to commit 49.3-27-g7e2619acb": these changes
     were included in 50~beta
+  * d/p/mixer-control-Only-stream-id-for-bluetooth-devices-only.patch:
+    Mark patch to libgvc subproject as applied upstream.
+    This wasn't in 50.beta but will be in 50.rc.
 
- -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 04 Feb 2026 16:21:27 +0800
+ -- Simon McVittie <smcv@debian.org>  Mon, 16 Feb 2026 22:00:42 +0000
 
 gnome-shell (49.4-1) unstable; urgency=medium
 
