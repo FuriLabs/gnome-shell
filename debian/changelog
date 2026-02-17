@@ -1,8 +1,8 @@
-gnome-shell (50~beta-0ubuntu3) UNRELEASED; urgency=medium
+gnome-shell (50~beta-0ubuntu3) resolute; urgency=medium
 
   * debian/ubuntu-session: Enable the search provider extensions by default
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 17 Feb 2026 05:09:00 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 17 Feb 2026 05:09:13 +0100
 
 gnome-shell (50~beta-0ubuntu2) resolute; urgency=medium
 
