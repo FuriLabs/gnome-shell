@@ -10,6 +10,8 @@
         "ubuntu-appindicators@ubuntu.com",
         "ding@rastersoft.com",
         "tiling-assistant@ubuntu.com",
-        "snapd-prompting@canonical.com"
+        "snapd-prompting@canonical.com",
+        "snapd-search-provider@canonical.com",
+        "web-search-provider@ubuntu.com"
     ]
 }
