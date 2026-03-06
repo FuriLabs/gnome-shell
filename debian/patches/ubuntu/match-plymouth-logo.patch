@@ -1,0 +1,84 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Fri, 6 Mar 2026 16:27:39 +0800
+Subject: Match the Plymouth boot logo size and position on the login screen
+
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1872594
+---
+ js/gdm/loginDialog.js | 40 ++++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 38 insertions(+), 2 deletions(-)
+
+diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
+index 28a3d8d..3fd7bcf 100644
+--- a/js/gdm/loginDialog.js
++++ b/js/gdm/loginDialog.js
+@@ -22,6 +22,7 @@ import Gdm from 'gi://Gdm';
+ import Gio from 'gi://Gio';
+ import GLib from 'gi://GLib';
+ import GObject from 'gi://GObject';
++import Graphene from 'gi://Graphene';
+ import Meta from 'gi://Meta';
+ import Pango from 'gi://Pango';
+ import Shell from 'gi://Shell';
+@@ -656,10 +657,20 @@ export const LoginDialog = GObject.registerClass({
+         this._a11yMenuButton = new A11yMenuButton();
+         this._bottomButtonGroup.add_child(this._a11yMenuButton);
+ 
++        const plymouthWatermarkVerticalAlignment = 0.96;
++        this._logoBinNormalizedY = plymouthWatermarkVerticalAlignment;
++
++        const monitor = Main.layoutManager.currentMonitor;
++        const mutterScale = monitor ? monitor.geometry_scale : 1.0;
++        const plymouthScale = this._getPlymouthScale(monitor);
++        const logoRescale = plymouthScale / mutterScale;
++
+         this._logoBin = new St.Widget({
+-            style_class: 'login-dialog-logo-bin',
+             x_align: Clutter.ActorAlign.CENTER,
+             y_align: Clutter.ActorAlign.END,
++            scale_x: logoRescale,
++            scale_y: logoRescale,
++            pivot_point: new Graphene.Point({x: 0.5, y: 1.0}),
+         });
+         this._logoBin.connect('resource-scale-changed', () => {
+             this._updateLogoTexture(this._textureCache, this._logoFile);
+@@ -752,7 +763,8 @@ export const LoginDialog = GObject.registerClass({
+         const centerX = dialogBox.x1 + (dialogBox.x2 - dialogBox.x1) / 2;
+ 
+         actorBox.x1 = Math.floor(centerX - natWidth / 2);
+-        actorBox.y1 = dialogBox.y2 - natHeight;
++        actorBox.y1 = Math.floor((dialogBox.y2 - natHeight) *
++                                 this._logoBinNormalizedY);
+         actorBox.x2 = actorBox.x1 + natWidth;
+         actorBox.y2 = actorBox.y1 + natHeight;
+ 
+@@ -1081,6 +1093,30 @@ export const LoginDialog = GObject.registerClass({
+         this._updateLogoTexture(this._textureCache, this._logoFile);
+     }
+ 
++    _getPlymouthScale(monitor) {
++        if (!monitor)
++            return 1;
++
++        // Convert logical dimensions back to physical so we get the same
++        // reasoning as Plymouth
++        let width = monitor.width * monitor.geometry_scale;
++        let height = monitor.height * monitor.geometry_scale;
++
++        // This should match Plymouth's algorithm in ply-utils.c
++        if (height > width) {
++           const tmp = width;
++           width = height;
++           height = tmp;
++        }
++
++        const aspect = width / height;
++        if (aspect == 1.5) {
++            return (width >= 1800 && height >= 1200) ? 2 : 1;
++        }
++
++        return (width >= 2880 && height >= 1620) ? 2 : 1;
++    }
++
+     _onPrompted() {
+         const showSessionMenu = this._shouldShowSessionMenuButton();
+ 
