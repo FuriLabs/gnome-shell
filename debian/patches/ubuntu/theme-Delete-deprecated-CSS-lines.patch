@@ -1,0 +1,63 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Fri, 13 Mar 2026 22:47:46 +0800
+Subject: theme: Delete deprecated CSS lines
+
+Which should happen automatically at build time since the previous commit
+touches the source (_app-grid.scss).
+
+This is required by:
+Standardize-icon-sizes-and-fit-the-grid-to-the-screen.patch
+
+But only when building from release tarballs because these files
+don't exist on the main branch.
+---
+ data/theme/gnome-shell-dark.css          | 4 ----
+ data/theme/gnome-shell-high-contrast.css | 4 ----
+ data/theme/gnome-shell-light.css         | 4 ----
+ 3 files changed, 12 deletions(-)
+
+diff --git a/data/theme/gnome-shell-dark.css b/data/theme/gnome-shell-dark.css
+index c854b32..f1fea9c 100644
+--- a/data/theme/gnome-shell-dark.css
++++ b/data/theme/gnome-shell-dark.css
+@@ -2456,10 +2456,6 @@ StScrollBar {
+ 
+ /* App Grid */
+ .icon-grid {
+-  row-spacing: 12px;
+-  column-spacing: 12px;
+-  max-row-spacing: 36px;
+-  max-column-spacing: 36px;
+   page-padding-top: 24px;
+   page-padding-bottom: 24px;
+   page-padding-left: 18px;
+diff --git a/data/theme/gnome-shell-high-contrast.css b/data/theme/gnome-shell-high-contrast.css
+index 4754640..41bf606 100644
+--- a/data/theme/gnome-shell-high-contrast.css
++++ b/data/theme/gnome-shell-high-contrast.css
+@@ -2714,10 +2714,6 @@ StScrollBar {
+ 
+ /* App Grid */
+ .icon-grid {
+-  row-spacing: 12px;
+-  column-spacing: 12px;
+-  max-row-spacing: 36px;
+-  max-column-spacing: 36px;
+   page-padding-top: 24px;
+   page-padding-bottom: 24px;
+   page-padding-left: 18px;
+diff --git a/data/theme/gnome-shell-light.css b/data/theme/gnome-shell-light.css
+index a1097a4..5defe27 100644
+--- a/data/theme/gnome-shell-light.css
++++ b/data/theme/gnome-shell-light.css
+@@ -2457,10 +2457,6 @@ StScrollBar {
+ 
+ /* App Grid */
+ .icon-grid {
+-  row-spacing: 12px;
+-  column-spacing: 12px;
+-  max-row-spacing: 36px;
+-  max-column-spacing: 36px;
+   page-padding-top: 24px;
+   page-padding-bottom: 24px;
+   page-padding-left: 18px;

@@ -1,0 +1,779 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Wed, 11 Mar 2026 19:53:53 +0800
+Subject: Standardize icon sizes and fit the grid to the screen
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4122
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/2173
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/2713
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/3099
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/3450
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/3718
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/4768
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/5416
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6186
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7020
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7414
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/8029
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1987734
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/1969577
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2067433
+---
+ data/theme/gnome-shell-sass/widgets/_app-grid.scss |  11 +-
+ js/gdm/authPrompt.js                               |   4 +-
+ js/ui/altTab.js                                    |  16 +-
+ js/ui/appDisplay.js                                |   7 -
+ js/ui/components/polkitAgent.js                    |   4 +-
+ js/ui/ctrlAltTab.js                                |   6 +-
+ js/ui/dash.js                                      |  16 +-
+ js/ui/endSessionDialog.js                          |   7 +-
+ js/ui/iconGrid.js                                  | 208 ++++++++-------------
+ js/ui/main.js                                      |   6 +
+ js/ui/shellMountOperation.js                       |   8 +-
+ js/ui/switchMonitor.js                             |   5 +-
+ js/ui/userWidget.js                                |   5 +-
+ js/ui/windowPreview.js                             |   7 +-
+ 14 files changed, 123 insertions(+), 187 deletions(-)
+
+diff --git a/data/theme/gnome-shell-sass/widgets/_app-grid.scss b/data/theme/gnome-shell-sass/widgets/_app-grid.scss
+index 2fe110f..f282aeb 100644
+--- a/data/theme/gnome-shell-sass/widgets/_app-grid.scss
++++ b/data/theme/gnome-shell-sass/widgets/_app-grid.scss
+@@ -5,10 +5,13 @@ $app_folder_size: 720px;
+ 
+ // app icons
+ .icon-grid {
+-  row-spacing: $base_padding * 2;
+-  column-spacing: $base_padding * 2;
+-  max-row-spacing: $base_padding * 6;
+-  max-column-spacing: $base_padding * 6;
++  // You can define these but probably shouldn't. The default is relative to
++  // the current icon size, which is not known until runtime.
++  //
++  // row-spacing:
++  // column-spacing:
++  // max-row-spacing:
++  // max-column-spacing:
+   page-padding-top: $base_padding * 4;
+   page-padding-bottom: $base_padding * 4;
+   page-padding-left: $base_padding * 3;
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 8d6b6ff..d7f4058 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -11,6 +11,7 @@ import * as Animation from '../ui/animation.js';
+ import * as AuthList from './authList.js';
+ import * as Batch from './batch.js';
+ import * as GdmUtil from './util.js';
++import * as Main from '../ui/main.js';
+ import * as MessageTray from '../ui/messageTray.js';
+ import * as Params from '../misc/params.js';
+ import * as ShellEntry from '../ui/shellEntry.js';
+@@ -23,7 +24,6 @@ import {loadInterfaceXML} from '../misc/fileUtils.js';
+ const TimerChildIface = loadInterfaceXML('org.freedesktop.MalcontentTimer1.Child');
+ const TimerChildProxy = Gio.DBusProxy.makeProxyWrapper(TimerChildIface);
+ 
+-const DEFAULT_BUTTON_WELL_ICON_SIZE = 16;
+ const DEFAULT_BUTTON_WELL_ANIMATION_DELAY = 1000;
+ 
+ // A widget displayed instead of the unlock prompt
+@@ -368,7 +368,7 @@ export const AuthPrompt = GObject.registerClass({
+         }));
+         this._mainBox.add_child(this._defaultButtonWell);
+ 
+-        this._spinner = new Animation.Spinner(DEFAULT_BUTTON_WELL_ICON_SIZE);
++        this._spinner = new Animation.Spinner(Main.smallestIconSize);
+         this._defaultButtonWell.add_child(this._spinner);
+     }
+ 
+diff --git a/js/ui/altTab.js b/js/ui/altTab.js
+index 1a6c705..c5852d2 100644
+--- a/js/ui/altTab.js
++++ b/js/ui/altTab.js
+@@ -17,10 +17,6 @@ const THUMBNAIL_POPUP_TIME = 500; // milliseconds
+ const THUMBNAIL_FADE_TIME = 100; // milliseconds
+ 
+ const WINDOW_PREVIEW_SIZE = 128;
+-const APP_ICON_SIZE = 96;
+-const APP_ICON_SIZE_SMALL = 48;
+-
+-const baseIconSizes = [96, 64, 48, 32, 22];
+ 
+ /** @enum {number} */
+ const AppIconMode = {
+@@ -758,12 +754,12 @@ class AppSwitcher extends SwitcherPopup.SwitcherList {
+         const availWidth = primary.width - parentPadding - this.get_theme_node().get_horizontal_padding();
+ 
+         const scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+-        const iconSizes = baseIconSizes.map(s => s * scaleFactor);
+-        let iconSize = baseIconSizes[0];
++        const iconSizes = Main.iconSizes.map(s => s * scaleFactor);
++        let iconSize = Main.defaultIconSize;
+ 
+         if (this._items.length > 1) {
+-            for (let i =  0; i < baseIconSizes.length; i++) {
+-                iconSize = baseIconSizes[i];
++            for (let i = Main.defaultIconSizeIndex; i < Main.iconSizes.length; i++) {
++                iconSize = Main.iconSizes[i];
+                 const height = iconSizes[i] + iconSpacing;
+                 const w = height * this._items.length + totalSpacing;
+                 if (w <= availWidth)
+@@ -1035,12 +1031,12 @@ class WindowIcon extends St.BoxLayout {
+ 
+             if (this.app) {
+                 this._icon.add_child(
+-                    this._createAppIcon(this.app, APP_ICON_SIZE_SMALL));
++                    this._createAppIcon(this.app, Main.smallIconSize));
+             }
+             break;
+ 
+         case AppIconMode.APP_ICON_ONLY:
+-            size = APP_ICON_SIZE;
++            size = Main.defaultIconSize;
+             this._icon.add_child(this._createAppIcon(this.app, size));
+         }
+ 
+diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
+index a1de2a8..83a6a8a 100644
+--- a/js/ui/appDisplay.js
++++ b/js/ui/appDisplay.js
+@@ -2062,13 +2062,6 @@ class FolderGrid extends AppGrid {
+             page_halign: Clutter.ActorAlign.CENTER,
+             page_valign: Clutter.ActorAlign.CENTER,
+         });
+-
+-        this.setGridModes([
+-            {
+-                rows: 3,
+-                columns: 3,
+-            },
+-        ]);
+     }
+ });
+ 
+diff --git a/js/ui/components/polkitAgent.js b/js/ui/components/polkitAgent.js
+index 68ee8db..d5258b6 100644
+--- a/js/ui/components/polkitAgent.js
++++ b/js/ui/components/polkitAgent.js
+@@ -21,8 +21,6 @@ const DialogMode = {
+     CONFIRM: 1,
+ };
+ 
+-const DIALOG_ICON_SIZE = 96;
+-
+ const DELAYED_RESET_TIMEOUT = 200;
+ 
+ const AuthenticationDialog = GObject.registerClass({
+@@ -69,7 +67,7 @@ const AuthenticationDialog = GObject.registerClass({
+         bodyContent.add_child(userBox);
+ 
+         this._userAvatar = new UserWidget.Avatar(this._user, {
+-            iconSize: DIALOG_ICON_SIZE,
++            iconSize: Main.defaultIconSize,
+         });
+         this._userAvatar.x_align = Clutter.ActorAlign.CENTER;
+         userBox.add_child(this._userAvatar);
+diff --git a/js/ui/ctrlAltTab.js b/js/ui/ctrlAltTab.js
+index 1d8163f..028bafb 100644
+--- a/js/ui/ctrlAltTab.js
++++ b/js/ui/ctrlAltTab.js
+@@ -8,8 +8,6 @@ import * as Main from './main.js';
+ import * as SwitcherPopup from './switcherPopup.js';
+ import * as Params from '../misc/params.js';
+ 
+-const POPUP_APPICON_SIZE = 96;
+-
+ export const SortGroup = {
+     TOP:    0,
+     MIDDLE: 1,
+@@ -95,7 +93,7 @@ export class CtrlAltTabManager {
+                     iconName = 'shell-focus-desktop-symbolic';
+                 } else {
+                     const app = windowTracker.get_window_app(windows[i]);
+-                    icon = app.create_icon_texture(POPUP_APPICON_SIZE);
++                    icon = app.create_icon_texture(Main.defaultIconSize);
+                 }
+ 
+                 items.push({
+@@ -179,7 +177,7 @@ class CtrlAltTabSwitcher extends SwitcherPopup.SwitcherList {
+         if (!icon) {
+             icon = new St.Icon({
+                 icon_name: item.iconName,
+-                icon_size: POPUP_APPICON_SIZE,
++                icon_size: Main.defaultIconSize,
+             });
+         }
+         box.add_child(icon);
+diff --git a/js/ui/dash.js b/js/ui/dash.js
+index 1df9414..d141040 100644
+--- a/js/ui/dash.js
++++ b/js/ui/dash.js
+@@ -301,8 +301,6 @@ class DashIconsLayout extends Clutter.BoxLayout {
+     }
+ });
+ 
+-const baseIconSizes = [16, 22, 24, 32, 48, 64];
+-
+ export const Dash = GObject.registerClass({
+     Signals: {'icon-size-changed': {}},
+ }, class Dash extends St.Widget {
+@@ -319,7 +317,7 @@ export const Dash = GObject.registerClass({
+     _init() {
+         this._maxWidth = -1;
+         this._maxHeight = -1;
+-        this.iconSize = 64;
++        this.iconSize = Main.defaultIconSize;
+         this._shownInitially = false;
+ 
+         this._separator = null;
+@@ -623,12 +621,14 @@ export const Dash = GObject.registerClass({
+         const maxIconSize = Math.min(availWidth / iconChildren.length, availHeight);
+ 
+         const scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+-        const iconSizes = baseIconSizes.map(s => s * scaleFactor);
++        const iconSizes = Main.iconSizes.map(s => s * scaleFactor);
+ 
+-        let newIconSize = baseIconSizes[0];
+-        for (let i = 0; i < iconSizes.length; i++) {
+-            if (iconSizes[i] <= maxIconSize)
+-                newIconSize = baseIconSizes[i];
++        let newIconSize = Main.defaultIconSize;
++        for (let i = Main.defaultIconSizeIndex; i < iconSizes.length; i++) {
++            if (iconSizes[i] <= maxIconSize) {
++                newIconSize = Main.iconSizes[i];
++                break;
++            }
+         }
+ 
+         if (newIconSize === this.iconSize)
+diff --git a/js/ui/endSessionDialog.js b/js/ui/endSessionDialog.js
+index 6178320..6aebcab 100644
+--- a/js/ui/endSessionDialog.js
++++ b/js/ui/endSessionDialog.js
+@@ -29,6 +29,7 @@ import * as CheckBox from './checkBox.js';
+ import * as Dialog from './dialog.js';
+ import * as GnomeSession from '../misc/gnomeSession.js';
+ import * as LoginManager from '../misc/loginManager.js';
++import * as Main from './main.js';
+ import * as ModalDialog from './modalDialog.js';
+ import * as UserWidget from './userWidget.js';
+ 
+@@ -36,8 +37,6 @@ import {ModalDialogErrors, ModalDialogError} from '../misc/dbusErrors.js';
+ 
+ import {loadInterfaceXML} from '../misc/fileUtils.js';
+ 
+-const _ITEM_ICON_SIZE = 64;
+-
+ const LOW_BATTERY_THRESHOLD = 30;
+ 
+ const EndSessionDialogIface = loadInterfaceXML('org.gnome.SessionManager.EndSessionDialog');
+@@ -578,7 +577,7 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
+         if (app && flags & GnomeSession.InhibitFlags.LOGOUT) {
+             const [description] = inhibitor.GetReasonSync();
+             const listItem = new Dialog.ListSectionItem({
+-                icon_actor: app.create_icon_texture(_ITEM_ICON_SIZE),
++                icon_actor: app.create_icon_texture(Main.defaultIconSize),
+                 title: app.get_name(),
+                 description,
+             });
+@@ -622,7 +621,7 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
+             const nSessions = this._sessions.push(session);
+ 
+             const userAvatar = new UserWidget.Avatar(session.user, {
+-                iconSize: _ITEM_ICON_SIZE,
++                iconSize: Main.defaultIconSize,
+             });
+             userAvatar.update();
+ 
+diff --git a/js/ui/iconGrid.js b/js/ui/iconGrid.js
+index a67a1ee..3093b8d 100644
+--- a/js/ui/iconGrid.js
++++ b/js/ui/iconGrid.js
+@@ -8,47 +8,18 @@ import St from 'gi://St';
+ import * as Params from '../misc/params.js';
+ import * as Main from './main.js';
+ 
+-const ICON_SIZE = 96;
+-
+ const PAGE_SWITCH_TIME = 300;
+ 
+-/** @enum {number} */
+-const IconSize = {
+-    LARGE: 96,
+-    MEDIUM: 64,
+-    MEDIUM_SMALL: 48,
+-    SMALL: 32,
+-    SMALLER: 24,
+-    TINY: 16,
+-};
+-
+ const APPICON_ANIMATION_OUT_SCALE = 3;
+ const APPICON_ANIMATION_OUT_TIME = 250;
+ 
+ const ICON_POSITION_DELAY = 10;
+ 
+-const defaultGridModes = [
+-    {
+-        rows: 8,
+-        columns: 3,
+-    },
+-    {
+-        rows: 6,
+-        columns: 4,
+-    },
+-    {
+-        rows: 4,
+-        columns: 6,
+-    },
+-    {
+-        rows: 3,
+-        columns: 8,
+-    },
+-];
+-
+ const LEFT_DIVIDER_LEEWAY = 20;
+ const RIGHT_DIVIDER_LEEWAY = 20;
+ 
++const MAX_GRID_DIMENSION = GLib.MAXINT32;
++
+ /** @enum {number} */
+ export const DragLocation = {
+     INVALID: 0,
+@@ -80,7 +51,7 @@ class BaseIcon extends Shell.SquareBin {
+         });
+         this.set_child(this._box);
+ 
+-        this.iconSize = ICON_SIZE;
++        this.iconSize = Main.defaultIconSize;
+         this._iconBin = new St.Bin({x_align: Clutter.ActorAlign.CENTER});
+ 
+         this._box.add_child(this._iconBin);
+@@ -144,7 +115,7 @@ class BaseIcon extends Shell.SquareBin {
+                 St.ThemeContext.get_for_stage(global.stage);
+ 
+             const [found, len] = node.lookup_length('icon-size', false);
+-            size = found ? len / scaleFactor : ICON_SIZE;
++            size = found ? len / scaleFactor : Main.defaultIconSize;
+         }
+ 
+         if (this.iconSize === size && this._iconBin.child)
+@@ -255,7 +226,7 @@ export const IconGridLayout = GObject.registerClass({
+         'columns-per-page': GObject.ParamSpec.int('columns-per-page',
+             null, null,
+             GObject.ParamFlags.READWRITE,
+-            1, GLib.MAXINT32, 6),
++            1, MAX_GRID_DIMENSION, MAX_GRID_DIMENSION),
+         'fixed-icon-size': GObject.ParamSpec.int('fixed-icon-size',
+             null, null,
+             GObject.ParamFlags.READWRITE,
+@@ -303,7 +274,7 @@ export const IconGridLayout = GObject.registerClass({
+         'rows-per-page': GObject.ParamSpec.int('rows-per-page',
+             null, null,
+             GObject.ParamFlags.READWRITE,
+-            1, GLib.MAXINT32, 4),
++            1, MAX_GRID_DIMENSION, MAX_GRID_DIMENSION),
+     },
+     Signals: {
+         'pages-changed': {},
+@@ -319,7 +290,13 @@ export const IconGridLayout = GObject.registerClass({
+ 
+         this._iconSize = this.fixedIconSize !== -1
+             ? this.fixedIconSize
+-            : IconSize.LARGE;
++            : Main.defaultIconSize;
++
++        if (this.columns_per_page < MAX_GRID_DIMENSION)
++            this._fixedCols = this.columns_per_page;
++
++        if (this.rows_per_page < MAX_GRID_DIMENSION)
++            this._fixedRows = this.rows_per_page;
+ 
+         this._pageSizeChanged = false;
+         this._pageHeight = 0;
+@@ -357,48 +334,6 @@ export const IconGridLayout = GObject.registerClass({
+         this._childrenMaxSize = -1;
+     }
+ 
+-    _findBestIconSize() {
+-        const nColumns = this.columnsPerPage;
+-        const nRows = this.rowsPerPage;
+-        const columnSpacingPerPage = this.columnSpacing * (nColumns - 1);
+-        const rowSpacingPerPage = this.rowSpacing * (nRows - 1);
+-        const [firstItem] = this._container;
+-
+-        if (this.fixedIconSize !== -1)
+-            return this.fixedIconSize;
+-
+-        const iconSizes = Object.values(IconSize).sort((a, b) => b - a);
+-        for (const size of iconSizes) {
+-            let usedWidth, usedHeight;
+-
+-            if (firstItem) {
+-                firstItem.icon.setIconSize(size);
+-                const [firstItemWidth, firstItemHeight] =
+-                    firstItem.get_preferred_size();
+-
+-                const itemSize = Math.max(firstItemWidth, firstItemHeight);
+-
+-                usedWidth = itemSize * nColumns;
+-                usedHeight = itemSize * nRows;
+-            } else {
+-                usedWidth = size * nColumns;
+-                usedHeight = size * nRows;
+-            }
+-
+-            const emptyHSpace =
+-                this._pageWidth - usedWidth - columnSpacingPerPage -
+-                this.pagePadding.left - this.pagePadding.right;
+-            const emptyVSpace =
+-                this._pageHeight - usedHeight -  rowSpacingPerPage -
+-                this.pagePadding.top - this.pagePadding.bottom;
+-
+-            if (emptyHSpace >= 0 && emptyVSpace > 0)
+-                return size;
+-        }
+-
+-        return IconSize.TINY;
+-    }
+-
+     _getChildrenMaxSize() {
+         if (this._childrenMaxSize === -1) {
+             let minWidth = 0;
+@@ -705,7 +640,7 @@ export const IconGridLayout = GObject.registerClass({
+ 
+         switch (this._orientation) {
+         case Clutter.Orientation.VERTICAL:
+-            minWidth = IconSize.TINY;
++            minWidth = Main.smallestIconSize;
+             natWidth = this._pageWidth;
+             break;
+ 
+@@ -729,7 +664,7 @@ export const IconGridLayout = GObject.registerClass({
+             break;
+ 
+         case Clutter.Orientation.HORIZONTAL:
+-            minHeight = IconSize.TINY;
++            minHeight = Main.smallestIconSize;
+             natHeight = this._pageHeight;
+             break;
+         }
+@@ -996,12 +931,58 @@ export const IconGridLayout = GObject.registerClass({
+         this._pageHeight = pageHeight;
+         this._pageSizeChanged = true;
+ 
++        const iconSizes = this.fixedIconSize > 0
++            ? [this.fixedIconSize]
++            : Main.iconSizes.slice(Main.defaultIconSizeIndex);
++        let iconSize = iconSizes[0];
++        let cols, rows;
++
++        const hPadding = this.pagePadding.left + this.pagePadding.right;
++        const vPadding = this.pagePadding.top + this.pagePadding.bottom;
++        const iconsWidth = pageWidth - hPadding;
++        const iconsHeight = pageHeight - vPadding;
++
++        if (this._fixedCols && this._fixedRows) {
++            cols = this._fixedCols;
++            rows = this._fixedRows;
++            const maxIconWidth =
++                (iconsWidth - this.columnSpacing * (cols - 1)) / cols;
++            const maxIconHeight =
++                (iconsHeight - this.rowSpacing * (rows - 1)) / rows;
++            const maxIconSize = Math.min(maxIconWidth, maxIconHeight);
++            for (const s of iconSizes) {
++                if (s <= maxIconSize) {
++                    iconSize = s;
++                    break;
++                }
++            }
++        } else {
++            for (iconSize of iconSizes) {
++                const colStride = iconSize + this.columnSpacing;
++                const rowStride = iconSize + this.rowSpacing;
++                const colsMinusOne =
++                    Math.floor((iconsWidth - iconSize) / colStride);
++                const rowsMinusOne =
++                    Math.floor((iconsHeight - iconSize) / rowStride);
++                cols = colsMinusOne + 1;
++                rows = rowsMinusOne + 1;
++                if (cols >= 2 && rows >= 2)
++                    break;
++            }
++        }
++
++        if (cols === this.columns_per_page &&
++            rows === this.rows_per_page &&
++            iconSize === this._iconSize)
++            return;
++
++        this.columns_per_page = cols;
++        this.rows_per_page = rows;
++
+         if (this._updateIconSizesLaterId === 0) {
+             const laters = global.compositor.get_laters();
+             this._updateIconSizesLaterId =
+                 laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
+-                    const iconSize = this._findBestIconSize();
+-
+                     if (this._iconSize !== iconSize) {
+                         this._iconSize = iconSize;
+ 
+@@ -1011,6 +992,8 @@ export const IconGridLayout = GObject.registerClass({
+                         this.notify('icon-size');
+                     }
+ 
++                    this._updatePages();
++
+                     this._updateIconSizesLaterId = 0;
+                     return GLib.SOURCE_REMOVE;
+                 });
+@@ -1166,8 +1149,8 @@ export const IconGrid = GObject.registerClass({
+         layoutParams = Params.parse(layoutParams, {
+             allow_incomplete_pages: false,
+             orientation: Clutter.Orientation.HORIZONTAL,
+-            columns_per_page: 6,
+-            rows_per_page: 4,
++            columns_per_page: MAX_GRID_DIMENSION,
++            rows_per_page: MAX_GRID_DIMENSION,
+             page_halign: Clutter.ActorAlign.FILL,
+             page_padding: new Clutter.Margin(),
+             page_valign: Clutter.ActorAlign.FILL,
+@@ -1186,9 +1169,7 @@ export const IconGrid = GObject.registerClass({
+             y_expand: true,
+         });
+ 
+-        this._gridModes = defaultGridModes;
+         this._currentPage = 0;
+-        this._currentMode = -1;
+ 
+         this.connect('destroy', () => layoutManager.disconnect(pagesChangedId));
+     }
+@@ -1207,42 +1188,6 @@ export const IconGrid = GObject.registerClass({
+         this.goToPage(itemPage);
+     }
+ 
+-    _setGridMode(modeIndex) {
+-        if (this._currentMode === modeIndex)
+-            return;
+-
+-        this._currentMode = modeIndex;
+-
+-        if (modeIndex !== -1) {
+-            const newMode = this._gridModes[modeIndex];
+-
+-            this.layout_manager.rows_per_page = newMode.rows;
+-            this.layout_manager.columns_per_page = newMode.columns;
+-        }
+-    }
+-
+-    _findBestModeForSize(width, height) {
+-        const {pagePadding} = this.layout_manager;
+-        width -= pagePadding.left + pagePadding.right;
+-        height -= pagePadding.top + pagePadding.bottom;
+-
+-        const sizeRatio = width / height;
+-        let closestRatio = Infinity;
+-        let bestMode = -1;
+-
+-        for (const modeIndex in this._gridModes) {
+-            const mode = this._gridModes[modeIndex];
+-            const modeRatio = mode.columns / mode.rows;
+-
+-            if (Math.abs(sizeRatio - modeRatio) < Math.abs(sizeRatio - closestRatio)) {
+-                closestRatio = modeRatio;
+-                bestMode = modeIndex;
+-            }
+-        }
+-
+-        this._setGridMode(bestMode);
+-    }
+-
+     vfunc_child_removed(child) {
+         child.disconnect(child._iconGridKeyFocusInId);
+         delete child._iconGridKeyFocusInId;
+@@ -1250,7 +1195,6 @@ export const IconGrid = GObject.registerClass({
+ 
+     vfunc_allocate(box) {
+         const [width, height] = box.get_size();
+-        this._findBestModeForSize(width, height);
+         this.layout_manager.adaptToSize(width, height);
+         super.vfunc_allocate(box);
+     }
+@@ -1259,10 +1203,17 @@ export const IconGrid = GObject.registerClass({
+         super.vfunc_style_changed();
+ 
+         const node = this.get_theme_node();
+-        this.layout_manager.column_spacing = node.get_length('column-spacing');
+-        this.layout_manager.row_spacing = node.get_length('row-spacing');
+ 
+-        let [found, value] = node.lookup_length('max-column-spacing', false);
++        const defaultSpacing = this.layout_manager._iconSize * 1.25;
++        let found, value;
++
++        [found, value] = node.lookup_length('column-spacing', false);
++        this.layout_manager.column_spacing = found ? value : defaultSpacing;
++
++        [found, value] = node.lookup_length('row-spacing', false);
++        this.layout_manager.row_spacing = found ? value : defaultSpacing;
++
++        [found, value] = node.lookup_length('max-column-spacing', false);
+         this.layout_manager.max_column_spacing = found ? value : -1;
+ 
+         [found, value] = node.lookup_length('max-row-spacing', false);
+@@ -1452,11 +1403,6 @@ export const IconGrid = GObject.registerClass({
+         return this.layout_manager.nPages;
+     }
+ 
+-    setGridModes(modes) {
+-        this._gridModes = modes ? modes : defaultGridModes;
+-        this.queue_relayout();
+-    }
+-
+     getDropTarget(x, y) {
+         const layoutManager = this.layout_manager;
+         return layoutManager.getDropTarget(x, y, this._currentPage);
+diff --git a/js/ui/main.js b/js/ui/main.js
+index a027cda..b80017e 100644
+--- a/js/ui/main.js
++++ b/js/ui/main.js
+@@ -100,6 +100,12 @@ export let timeLimitsDispatcher = null;
+ export let brightnessManager = null;
+ export let brightnessDBus = null;
+ 
++export const iconSizes = [96, 64, 48, 32, 22, 16];
++export const defaultIconSizeIndex = 1;
++export const defaultIconSize = iconSizes[defaultIconSizeIndex];
++export const smallIconSize = 48;
++export const smallestIconSize = iconSizes.at(-1);
++
+ let _startDate;
+ let _defaultCssStylesheet = null;
+ let _cssStylesheet = null;
+diff --git a/js/ui/shellMountOperation.js b/js/ui/shellMountOperation.js
+index aa180ba..25420fa 100644
+--- a/js/ui/shellMountOperation.js
++++ b/js/ui/shellMountOperation.js
+@@ -9,6 +9,7 @@ import St from 'gi://St';
+ import * as Animation from './animation.js';
+ import * as CheckBox from './checkBox.js';
+ import * as Dialog from './dialog.js';
++import * as Main from './main.js';
+ import * as MessageTray from './messageTray.js';
+ import * as ModalDialog from './modalDialog.js';
+ import * as Params from '../misc/params.js';
+@@ -17,9 +18,6 @@ import * as ShellEntry from './shellEntry.js';
+ import {loadInterfaceXML} from '../misc/fileUtils.js';
+ import {wiggle} from '../misc/animationUtils.js';
+ 
+-const LIST_ITEM_ICON_SIZE = 48;
+-const WORK_SPINNER_ICON_SIZE = 16;
+-
+ const REMEMBER_MOUNT_PASSWORD_KEY = 'remember-mount-password';
+ 
+ /* ------ Common Utils ------- */
+@@ -337,7 +335,7 @@ const ShellMountPasswordDialog = GObject.registerClass({
+         this.setInitialKeyFocus(this._passwordEntry);
+         ShellEntry.addContextMenu(this._passwordEntry);
+ 
+-        this._workSpinner = new Animation.Spinner(WORK_SPINNER_ICON_SIZE, {
++        this._workSpinner = new Animation.Spinner(Main.smallestIconSize, {
+             animate: true,
+         });
+ 
+@@ -506,7 +504,7 @@ const ShellProcessesDialog = GObject.registerClass({
+                 return;
+ 
+             const listItem = new Dialog.ListSectionItem({
+-                icon_actor: app.create_icon_texture(LIST_ITEM_ICON_SIZE),
++                icon_actor: app.create_icon_texture(Main.smallIconSize),
+                 title: app.get_name(),
+             });
+             this._applicationSection.list.add_child(listItem);
+diff --git a/js/ui/switchMonitor.js b/js/ui/switchMonitor.js
+index cb0f711..77a6e16 100644
+--- a/js/ui/switchMonitor.js
++++ b/js/ui/switchMonitor.js
+@@ -3,10 +3,9 @@ import GObject from 'gi://GObject';
+ import Meta from 'gi://Meta';
+ import St from 'gi://St';
+ 
++import * as Main from './main.js';
+ import * as SwitcherPopup from './switcherPopup.js';
+ 
+-const APP_ICON_SIZE = 96;
+-
+ export const SwitchMonitorPopup = GObject.registerClass(
+ class SwitchMonitorPopup extends SwitcherPopup.SwitcherPopup {
+     _init() {
+@@ -107,7 +106,7 @@ class SwitchMonitorSwitcher extends SwitcherPopup.SwitcherList {
+ 
+         const icon = new St.Icon({
+             icon_name: item.icon,
+-            icon_size: APP_ICON_SIZE,
++            icon_size: Main.defaultIconSize,
+         });
+         box.add_child(icon);
+ 
+diff --git a/js/ui/userWidget.js b/js/ui/userWidget.js
+index 9447308..dd88684 100644
+--- a/js/ui/userWidget.js
++++ b/js/ui/userWidget.js
+@@ -6,10 +6,9 @@ import GLib from 'gi://GLib';
+ import GObject from 'gi://GObject';
+ import St from 'gi://St';
+ 
++import * as Main from './main.js';
+ import * as Params from '../misc/params.js';
+ 
+-const AVATAR_ICON_SIZE = 64;
+-
+ // Adapted from gdm/gui/user-switch-applet/applet.c
+ //
+ // Copyright (C) 2004-2005 James M. Cape <jcape@ignore-your.tv>.
+@@ -22,7 +21,7 @@ class Avatar extends St.Bin {
+         params = Params.parse(params, {
+             styleClass: 'user-icon',
+             reactive: false,
+-            iconSize: AVATAR_ICON_SIZE,
++            iconSize: Main.defaultIconSize,
+         });
+ 
+         super._init({
+diff --git a/js/ui/windowPreview.js b/js/ui/windowPreview.js
+index 8d0c002..d77c0e4 100644
+--- a/js/ui/windowPreview.js
++++ b/js/ui/windowPreview.js
+@@ -9,6 +9,7 @@ import Shell from 'gi://Shell';
+ import St from 'gi://St';
+ 
+ import * as DND from './dnd.js';
++import * as Main from './main.js';
+ import * as OverviewControls from './overviewControls.js';
+ 
+ const WINDOW_DND_SIZE = 256;
+@@ -21,7 +22,6 @@ const WINDOW_ACTIVE_SIZE_INC = 5; // in each direction
+ 
+ const DRAGGING_WINDOW_OPACITY = 100;
+ 
+-const ICON_SIZE = 64;
+ const ICON_OVERLAP = 0.7;
+ 
+ const ICON_TITLE_SPACING = 6;
+@@ -132,7 +132,8 @@ export const WindowPreview = GObject.registerClass({
+ 
+         const tracker = Shell.WindowTracker.get_default();
+         const app = tracker.get_window_app(this.metaWindow);
+-        this._icon = app.create_icon_texture(ICON_SIZE);
++        const iconSize = Main.defaultIconSize;
++        this._icon = app.create_icon_texture(iconSize);
+         this._icon.add_style_class_name('window-icon');
+         this._icon.add_style_class_name('icon-dropshadow');
+         this._icon.set({
+@@ -167,7 +168,7 @@ export const WindowPreview = GObject.registerClass({
+             source: windowContainer,
+             coordinate: Clutter.BindCoordinate.X,
+         }));
+-        const iconBottomOverlap = ICON_SIZE * (1 - ICON_OVERLAP);
++        const iconBottomOverlap = iconSize * (1 - ICON_OVERLAP);
+         this._title.add_constraint(new Clutter.BindConstraint({
+             source: windowContainer,
+             coordinate: Clutter.BindCoordinate.Y,
