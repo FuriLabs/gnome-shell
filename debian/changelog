@@ -1,10 +1,11 @@
-gnome-shell (49.5-1) UNRELEASED; urgency=medium
+gnome-shell (49.5-1) unstable; urgency=medium
 
+  * Team upload
   * New upstream release (Closes: #1128816)
   * d/p/mixer-control-Only-stream-id-for-bluetooth-devices-only.patch:
     Drop patch, applied upstream
 
- -- Simon McVittie <smcv@debian.org>  Tue, 17 Mar 2026 10:55:30 +0000
+ -- Simon McVittie <smcv@debian.org>  Tue, 17 Mar 2026 11:56:24 +0000
 
 gnome-shell (49.4-1) unstable; urgency=medium
 
