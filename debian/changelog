@@ -1,4 +1,4 @@
-gnome-shell (50.0-0ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (50.0-0ubuntu1) resolute; urgency=medium
 
   [ Daniel van Vugt ]
   * New upstream release: 50.0 (LP: #2143949, LP: #2144560, LP: #2144568)
@@ -50,7 +50,7 @@ gnome-shell (50.0-0ubuntu1) UNRELEASED; urgency=medium
     since the systemd services changed: gnome-shell!3960, gnome-session!167
   * Bump dependencies: gjs >= 1.87.1, mutter >= 50.0
 
- -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Thu, 19 Mar 2026 16:18:04 +0800
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Thu, 19 Mar 2026 17:20:54 +0800
 
 gnome-shell (50~beta-0ubuntu3) resolute; urgency=medium
 
