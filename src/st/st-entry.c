@@ -1292,7 +1292,7 @@ _st_entry_set_icon (StEntry       *entry,
 {
   if (*icon)
     {
-      clutter_actor_remove_action_by_name (*icon, "entry-icon-action");
+      clutter_actor_remove_action_by_name (*icon, "entry-icon-click-gesture");
       clutter_actor_remove_child (CLUTTER_ACTOR (entry), *icon);
       *icon = NULL;
     }
@@ -1301,10 +1301,11 @@ _st_entry_set_icon (StEntry       *entry,
     {
       ClutterAction *click_gesture;
 
-      *icon = g_object_ref (new_icon);
+      *icon = new_icon;
 
       clutter_actor_set_reactive (*icon, TRUE);
       clutter_actor_add_child (CLUTTER_ACTOR (entry), *icon);
+      clutter_actor_set_cursor_type (*icon, CLUTTER_CURSOR_DEFAULT);
 
       click_gesture = clutter_click_gesture_new ();
       clutter_actor_add_action_with_name (*icon, "entry-icon-click-gesture", click_gesture);
