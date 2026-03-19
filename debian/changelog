@@ -10,6 +10,7 @@ gnome-shell (50.0-1) UNRELEASED; urgency=medium
     - libgvc/* because 50.beta includes a new snapshot of the subproject
       which includes all those changes.
     - Revert-main-Register-session-with-GDM-on-startup.patch
+    - mixer-control-Only-stream-id-for-bluetooth-devices-only.patch
   * Declare gnome-shell-common breaks old versions of gnome-session-common,
     since the systemd services changed: gnome-shell!3960, gnome-session!167
   * Bump dependencies: gjs >= 1.87.1, mutter >= 50.0
