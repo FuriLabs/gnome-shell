@@ -8,8 +8,8 @@ however there's very likely no interest from upstream for this.
 Forwarded: not-needed
 ---
  js/ui/main.js        | 2 +-
- js/ui/sessionMode.js | 1 +
- 2 files changed, 2 insertions(+), 1 deletion(-)
+ js/ui/sessionMode.js | 2 ++
+ 2 files changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
 index 1276066..b3c5afe 100644
@@ -25,7 +25,7 @@ index 1276066..b3c5afe 100644
  }
  
 diff --git a/js/ui/sessionMode.js b/js/ui/sessionMode.js
-index fb03cd6..edda6d1 100644
+index fb03cd6..925c6e0 100644
 --- a/js/ui/sessionMode.js
 +++ b/js/ui/sessionMode.js
 @@ -24,6 +24,7 @@ const _modes = {
@@ -36,3 +36,11 @@ index fb03cd6..edda6d1 100644
          hasOverview: false,
          showCalendarEvents: false,
          showWelcomeDialog: false,
+@@ -53,6 +54,7 @@ const _modes = {
+         hasNotifications: true,
+         stylesheetName: 'gdm.css',
+         themeResourceName: 'gdm-theme.gresource',
++        iconsResourceName: 'gdm-icons.gresource',
+         isGreeter: true,
+         isPrimary: true,
+         unlockDialog: LoginDialog,
