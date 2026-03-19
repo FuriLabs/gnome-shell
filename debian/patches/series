@@ -32,6 +32,7 @@ ubuntu/js-ui-shellDBus-Allow-Initial-Setup-to-trigger-transition.patch
 ubuntu/match-plymouth-logo.patch
 ubuntu/Standardize-icon-sizes-and-fit-the-grid-to-the-screen.patch
 ubuntu/theme-Delete-deprecated-CSS-lines.patch
+ubuntu/iconGrid-Force-automatic-default-spacing.patch
 ubuntu-authd/authPrompt-Right-align-cancel-button.patch
 ubuntu-authd/unlockDialog-Support-request-type-of-REUSE_USERNAME.patch
 ubuntu-authd/authPrompt-Parameterize-reset-function.patch

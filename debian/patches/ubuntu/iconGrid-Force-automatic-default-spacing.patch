@@ -1,0 +1,29 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Thu, 19 Mar 2026 17:00:01 +0800
+Subject: iconGrid: Force automatic default spacing
+
+At least while themes like Yaru are still shipping unusable values.
+This issue with themes wasn't noticed in previous releases because
+the spacing specified in the CSS was largely ignored before now.
+---
+ js/ui/iconGrid.js | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/js/ui/iconGrid.js b/js/ui/iconGrid.js
+index 3093b8d..b2322a9 100644
+--- a/js/ui/iconGrid.js
++++ b/js/ui/iconGrid.js
+@@ -1207,11 +1207,9 @@ export const IconGrid = GObject.registerClass({
+         const defaultSpacing = this.layout_manager._iconSize * 1.25;
+         let found, value;
+ 
+-        [found, value] = node.lookup_length('column-spacing', false);
+-        this.layout_manager.column_spacing = found ? value : defaultSpacing;
++        this.layout_manager.column_spacing = defaultSpacing;
+ 
+-        [found, value] = node.lookup_length('row-spacing', false);
+-        this.layout_manager.row_spacing = found ? value : defaultSpacing;
++        this.layout_manager.row_spacing = defaultSpacing;
+ 
+         [found, value] = node.lookup_length('max-column-spacing', false);
+         this.layout_manager.max_column_spacing = found ? value : -1;
