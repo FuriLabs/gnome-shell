@@ -1,3 +1,22 @@
+gnome-shell (50.0-0ubuntu1) UNRELEASED; urgency=medium
+
+  [ Daniel van Vugt ]
+  * New upstream release: 50.0
+  * Refresh patches and fix conflicts:
+    - Revert-main-Register-session-with-GDM-on-startup.patch
+    - Revert-tests-Fail-on-warnings-too.patch
+    - shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
+  * Drop upstreamed patches:
+    - libgvc/* because 50.beta includes a new snapshot of the subproject
+      which includes all those changes.
+    - Revert-main-Register-session-with-GDM-on-startup.patch
+    - mixer-control-Only-stream-id-for-bluetooth-devices-only.patch
+  * Declare gnome-shell-common breaks old versions of gnome-session-common,
+    since the systemd services changed: gnome-shell!3960, gnome-session!167
+  * Bump dependencies: gjs >= 1.87.1, mutter >= 50.0
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Thu, 19 Mar 2026 16:18:04 +0800
+
 gnome-shell (50~beta-0ubuntu3) resolute; urgency=medium
 
   * debian/ubuntu-session: Enable the search provider extensions by default
