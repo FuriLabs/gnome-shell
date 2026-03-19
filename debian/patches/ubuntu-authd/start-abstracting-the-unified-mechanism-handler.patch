@@ -16,7 +16,7 @@ As we may have different protocols under the hood.
  create mode 100644 js/gdm/unifiedMechanism.js
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index f827c1d..749e2ba 100644
+index 592a41c..831a0e5 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -246,12 +246,19 @@ export const AuthPrompt = GObject.registerClass({
@@ -62,10 +62,10 @@ index 0000000..ad854ca
 +export const SMARTCARD_ROLE_NAME = 'smartcard';
 +export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index edcc79f..38d027f 100644
+index 41339d3..dca5d53 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -1147,11 +1147,11 @@ export const LoginDialog = GObject.registerClass({
+@@ -1183,11 +1183,11 @@ export const LoginDialog = GObject.registerClass({
  
          mechanisms.sort((a, b) => a.name.localeCompare(b.name));
  

@@ -39,13 +39,13 @@ index a3b10c3..7d23ebc 100644
 +  }
 +}
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index f0f5ff5..426e27a 100644
+index 12f7ec1..a7390a5 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -11,6 +11,7 @@ import * as Animation from '../ui/animation.js';
- import * as AuthList from './authList.js';
+@@ -12,6 +12,7 @@ import * as AuthList from './authList.js';
  import * as Batch from './batch.js';
  import * as GdmUtil from './util.js';
+ import * as Main from '../ui/main.js';
 +import * as MessageTray from '../ui/messageTray.js';
  import * as Params from '../misc/params.js';
  import * as ShellEntry from '../ui/shellEntry.js';

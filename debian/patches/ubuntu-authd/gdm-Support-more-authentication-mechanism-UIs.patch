@@ -8,7 +8,7 @@ Subject: gdm: Support more authentication mechanism UIs
  2 files changed, 79 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 1be34fa..818f5c0 100644
+index 842bc29..2387ff6 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -178,9 +178,11 @@ export const AuthPrompt = GObject.registerClass({

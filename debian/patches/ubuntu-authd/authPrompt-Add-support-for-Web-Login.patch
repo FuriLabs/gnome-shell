@@ -116,10 +116,10 @@ index 7d23ebc..4b84b29 100644
    background-color: transparent;
  
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 426e27a..6605ba7 100644
+index a7390a5..c50ccc6 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -15,6 +15,7 @@ import * as MessageTray from '../ui/messageTray.js';
+@@ -16,6 +16,7 @@ import * as MessageTray from '../ui/messageTray.js';
  import * as Params from '../misc/params.js';
  import * as ShellEntry from '../ui/shellEntry.js';
  import * as UserWidget from '../ui/userWidget.js';
