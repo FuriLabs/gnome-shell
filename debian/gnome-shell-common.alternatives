@@ -2,3 +2,8 @@ Name: gdm-theme.gresource
 Link: /usr/share/gnome-shell/gdm-theme.gresource
 Alternative: /usr/share/gnome-shell/gnome-shell-theme.gresource
 Priority: 10
+
+Name: gdm-icons.gresource
+Link: /usr/share/gnome-shell/gdm-icons.gresource
+Alternative: /usr/share/gnome-shell/gnome-shell-icons.gresource
+Priority: 10
