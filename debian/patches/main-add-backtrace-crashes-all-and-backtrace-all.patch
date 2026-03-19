@@ -33,10 +33,10 @@ index 06425b7..7bc878a 100644
  static int _default_debug_flags = SHELL_DEBUG_BACKTRACE_ABORTS |
                                    SHELL_DEBUG_BACKTRACE_FPE;
 diff --git a/src/shell-global.c b/src/shell-global.c
-index 9bc0554..c0780e2 100644
+index 1e1ca0c..b3dfa36 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
-@@ -1808,6 +1808,8 @@ shell_global_get_debug_flags (ShellGlobal *global)
+@@ -1818,6 +1818,8 @@ shell_global_get_debug_flags (ShellGlobal *global)
   *  - 'backtrace-segfaults'
   *  - 'backtrace-aborts'
   *  - 'backtrace-math-errors'

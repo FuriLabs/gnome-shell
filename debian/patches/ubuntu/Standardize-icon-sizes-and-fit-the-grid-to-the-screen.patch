@@ -57,7 +57,7 @@ index 2fe110f..f282aeb 100644
    page-padding-bottom: $base_padding * 4;
    page-padding-left: $base_padding * 3;
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 8d6b6ff..d7f4058 100644
+index 1d5a5f2..f4d999e 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -11,6 +11,7 @@ import * as Animation from '../ui/animation.js';
@@ -65,10 +65,10 @@ index 8d6b6ff..d7f4058 100644
  import * as Batch from './batch.js';
  import * as GdmUtil from './util.js';
 +import * as Main from '../ui/main.js';
- import * as MessageTray from '../ui/messageTray.js';
  import * as Params from '../misc/params.js';
  import * as ShellEntry from '../ui/shellEntry.js';
-@@ -23,7 +24,6 @@ import {loadInterfaceXML} from '../misc/fileUtils.js';
+ import * as UserWidget from '../ui/userWidget.js';
+@@ -21,7 +22,6 @@ import {loadInterfaceXML} from '../misc/fileUtils.js';
  const TimerChildIface = loadInterfaceXML('org.freedesktop.MalcontentTimer1.Child');
  const TimerChildProxy = Gio.DBusProxy.makeProxyWrapper(TimerChildIface);
  
@@ -76,7 +76,7 @@ index 8d6b6ff..d7f4058 100644
  const DEFAULT_BUTTON_WELL_ANIMATION_DELAY = 1000;
  
  // A widget displayed instead of the unlock prompt
-@@ -368,7 +368,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -338,7 +338,7 @@ export const AuthPrompt = GObject.registerClass({
          }));
          this._mainBox.add_child(this._defaultButtonWell);
  
@@ -133,10 +133,10 @@ index 1a6c705..c5852d2 100644
          }
  
 diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
-index a1de2a8..83a6a8a 100644
+index 0769ef6..53f19bb 100644
 --- a/js/ui/appDisplay.js
 +++ b/js/ui/appDisplay.js
-@@ -2062,13 +2062,6 @@ class FolderGrid extends AppGrid {
+@@ -2064,13 +2064,6 @@ class FolderGrid extends AppGrid {
              page_halign: Clutter.ActorAlign.CENTER,
              page_valign: Clutter.ActorAlign.CENTER,
          });
@@ -246,7 +246,7 @@ index 1df9414..d141040 100644
  
          if (newIconSize === this.iconSize)
 diff --git a/js/ui/endSessionDialog.js b/js/ui/endSessionDialog.js
-index 6178320..6aebcab 100644
+index 7b666f0..291f5e9 100644
 --- a/js/ui/endSessionDialog.js
 +++ b/js/ui/endSessionDialog.js
 @@ -29,6 +29,7 @@ import * as CheckBox from './checkBox.js';
@@ -632,7 +632,7 @@ index a67a1ee..3093b8d 100644
          const layoutManager = this.layout_manager;
          return layoutManager.getDropTarget(x, y, this._currentPage);
 diff --git a/js/ui/main.js b/js/ui/main.js
-index a027cda..b80017e 100644
+index 3543d41..37d42fd 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -100,6 +100,12 @@ export let timeLimitsDispatcher = null;

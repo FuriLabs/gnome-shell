@@ -138,7 +138,7 @@ index 6895de1..59d78ea 100644
    shell_dbus_init ();
    shell_a11y_init ();
 diff --git a/src/shell-global.c b/src/shell-global.c
-index 4291bb9..69e4838 100644
+index 1fbc0dd..c6a0e27 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
 @@ -61,6 +61,7 @@ struct _ShellGlobal {
@@ -149,7 +149,7 @@ index 4291bb9..69e4838 100644
  
    GjsContext *js_context;
    MetaPlugin *plugin;
-@@ -119,6 +120,7 @@ enum {
+@@ -122,6 +123,7 @@ enum {
    PROP_SWITCHEROO_CONTROL,
    PROP_FORCE_ANIMATIONS,
    PROP_AUTOMATION_SCRIPT,
@@ -157,7 +157,7 @@ index 4291bb9..69e4838 100644
  
    N_PROPS
  };
-@@ -235,6 +237,9 @@ shell_global_set_property(GObject         *object,
+@@ -238,6 +240,9 @@ shell_global_set_property(GObject         *object,
      case PROP_AUTOMATION_SCRIPT:
        g_set_object (&global->automation_script, g_value_get_object (value));
        break;
@@ -167,7 +167,7 @@ index 4291bb9..69e4838 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -315,6 +320,9 @@ shell_global_get_property(GObject         *object,
+@@ -318,6 +323,9 @@ shell_global_get_property(GObject         *object,
      case PROP_AUTOMATION_SCRIPT:
        g_value_set_object (value, global->automation_script);
        break;
@@ -177,7 +177,7 @@ index 4291bb9..69e4838 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -623,6 +631,13 @@ shell_global_class_init (ShellGlobalClass *klass)
+@@ -631,6 +639,13 @@ shell_global_class_init (ShellGlobalClass *klass)
                           G_TYPE_FILE,
                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
  
@@ -191,7 +191,7 @@ index 4291bb9..69e4838 100644
    g_object_class_install_properties (gobject_class, N_PROPS, props);
  }
  
-@@ -1767,3 +1782,40 @@ shell_global_set_frame_finish_timestamp (ShellGlobal *global,
+@@ -1777,3 +1792,40 @@ shell_global_set_frame_finish_timestamp (ShellGlobal *global,
        g_object_notify_by_pspec (G_OBJECT (global), props[PROP_FRAME_FINISH_TIMESTAMP]);
      }
  }

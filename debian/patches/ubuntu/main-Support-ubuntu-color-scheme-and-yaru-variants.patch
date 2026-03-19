@@ -67,7 +67,7 @@ index 0000000..6f9cc62
 +  </schema>
 +</schemalist>
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 91c549f..c134d14 100644
+index b3c5afe..86d101b 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -182,6 +182,7 @@ export async function start() {

@@ -9,7 +9,7 @@ Subject: st: Add support for brown accent color
  3 files changed, 16 insertions(+)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
-index c134d14..1e84089 100644
+index 86d101b..37281e8 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -502,6 +502,8 @@ export function getYaruVariantFromAccent() {

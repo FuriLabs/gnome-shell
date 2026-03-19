@@ -146,10 +146,10 @@ index 59d78ea..06425b7 100644
    shell_dbus_init ();
    shell_a11y_init ();
 diff --git a/src/shell-global.c b/src/shell-global.c
-index 69e4838..9bc0554 100644
+index c6a0e27..1e1ca0c 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
-@@ -1800,11 +1800,15 @@ shell_global_get_debug_flags (ShellGlobal *global)
+@@ -1810,11 +1810,15 @@ shell_global_get_debug_flags (ShellGlobal *global)
  /**
   * shell_global_set_debug_flags:
   * @global: a #ShellGlobal
