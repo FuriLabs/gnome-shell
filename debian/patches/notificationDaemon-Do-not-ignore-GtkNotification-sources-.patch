@@ -1,0 +1,92 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 19 Mar 2026 16:14:37 +0100
+Subject: notificationDaemon: Do not ignore GtkNotification sources with
+ invalid app-id
+
+Since the GNOME desktop portal was introduced, all portal notifications
+are wrapped as  GtkNotifications, regardless of whether the source
+application is actually a GTK one.
+To activate their actions, two different strategies are used: one when
+the action originates from the app itself, and another when it's a
+portal-defined action; in the latter case, the portal is responsible for
+emitting the ActionInvoked and Activate signals on the app.
+
+Now, the GtkNotificationDaemonAppSource assumed that all the app IDs it
+handles are valid FDO application IDs, since it's a requirement for the
+direct-action activation, but for this is not true anymore for all the
+portal-provided application sources.
+
+In fact, snap applications may have an AppID that is just `foo_bar` but
+they should still be able to send notifications, given that it's still
+possible to activate the related action using the fallback path.
+
+So, in case the application we're creating the app source for is using
+an invalid FDO application ID, then we accept it only if it's a
+sandboxed app (we can assume that is provided by the portal without
+checking the sender at every invocation).
+
+And then ensure that the action invocation always happens using the
+right signal emission
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4145
+---
+ js/ui/notificationDaemon.js | 22 ++++++++++++++++++----
+ 1 file changed, 18 insertions(+), 4 deletions(-)
+
+diff --git a/js/ui/notificationDaemon.js b/js/ui/notificationDaemon.js
+index f33ec49..ad71416 100644
+--- a/js/ui/notificationDaemon.js
++++ b/js/ui/notificationDaemon.js
+@@ -458,7 +458,7 @@ class GtkNotificationDaemonNotification extends MessageTray.Notification {
+     }
+ 
+     _activateAction(actionId, target) {
+-        if (actionId.startsWith('app.'))
++        if (this.source.isFdoApp && actionId.startsWith('app.'))
+             this.source.activateAction(actionId.slice('app.'.length), target);
+         else
+             this.source.emitActionInvoked(this.id, actionId, target);
+@@ -488,13 +488,21 @@ function InvalidAppError() {}
+ export const GtkNotificationDaemonAppSource = GObject.registerClass(
+ class GtkNotificationDaemonAppSource extends MessageTray.Source {
+     constructor(appId, dbusImpl) {
+-        if (!Gio.Application.id_is_valid(appId))
+-            throw new InvalidAppError();
+-
+         const app = Shell.AppSystem.get_default().lookup_app(`${appId}.desktop`);
+         if (!app)
+             throw new InvalidAppError();
+ 
++        const isFdoApp = Gio.Application.id_is_valid(appId);
++        if (!isFdoApp) {
++            /* Sanboxed apps use the GtkNotification through the portal, but
++             * it's not a requirement for them to use the FDO standard ID as
++             * they may not be exported on the session bus, so let's simplify
++             * the logic, but not break their notifications.
++             */
++            if (!app.get_windows().some(w => w.get_sandboxed_app_id() === appId))
++                throw new InvalidAppError();
++        }
++
+         super({
+             title: app.get_name(),
+             icon: app.get_icon(),
+@@ -504,12 +512,18 @@ class GtkNotificationDaemonAppSource extends MessageTray.Source {
+         this._appId = appId;
+         this._app = app;
+         this._dbusImpl = dbusImpl;
++        this.isFdoApp = isFdoApp;
+ 
+         this._notifications = {};
+         this._notificationPending = false;
+     }
+ 
+     activateAction(actionId, target) {
++        if (!this.isFdoApp) {
++            logError(new Error(`${actionId} cannot be activated for ${this._appId}: Not a valid bus name`));
++            return;
++        }
++
+         const params = target ? GLib.Variant.new('av', [target]) : null;
+         this._app.activate_action(actionId, params, 0, -1, null).catch(error => {
+             logError(error, `Failed to activate action for ${this._appId}`);
