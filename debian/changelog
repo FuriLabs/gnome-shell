@@ -1,11 +1,11 @@
-gnome-shell (50.0-0ubuntu2) UNRELEASED; urgency=medium
+gnome-shell (50.0-0ubuntu2) resolute; urgency=medium
 
   * debian/gnome-shell-common.alternatives: Add gdm-icons.gresource
   * d/p/ubuntu-session-mode: Use gdm-icons.gresource in GDM mode
   * d/p: Do not deny notifications from portal for snap applications
   * d/p: Cherry-pick upstream fixes
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sat, 21 Mar 2026 01:33:12 +0100
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sat, 21 Mar 2026 01:39:45 +0100
 
 gnome-shell (50.0-0ubuntu1) resolute; urgency=medium
 
