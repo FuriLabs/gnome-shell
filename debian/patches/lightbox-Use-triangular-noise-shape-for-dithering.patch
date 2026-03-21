@@ -1,0 +1,38 @@
+From: =?utf-8?q?Michel_D=C3=A4nzer?= <mdaenzer@redhat.com>
+Date: Tue, 17 Mar 2026 18:01:20 +0100
+Subject: lightbox: Use triangular noise shape for dithering
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Highest density at 0.0, dropping off towards ±1.0.
+
+This makes the dithering noise slightly less noticeable in the dark
+corners of the vignette effect.
+
+The algorithm is taken from listing 1 of the Dithering section on
+https://momentsingraphics.de/BlueNoise.html .
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4137>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/1699004
+---
+ js/ui/lightbox.js | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/js/ui/lightbox.js b/js/ui/lightbox.js
+index e942676..fdba082 100644
+--- a/js/ui/lightbox.js
++++ b/js/ui/lightbox.js
+@@ -24,8 +24,9 @@ vec2 position = cogl_tex_coord_in[0].xy - 0.5;                             \n\
+ float t = clamp(length(1.41421 * position), 0.0, 1.0);                     \n\
+ float pixel_brightness = mix(1.0, 1.0 - vignette_sharpness, t);            \n\
+ cogl_color_out.a *= 1.0 - pixel_brightness * brightness;                   \n\
+-float noise_magnitude = (2.0 / ((1.0 - cogl_color_out.a) * 255.0));        \n\
+-cogl_color_out.a += (rand(position) - 0.5) * noise_magnitude;              \n';
++float noise = 2.0 * rand(position + 0.5) - 1.0;                            \n\
++noise = sign(noise) * (1.0 - sqrt(1.0 - abs(noise)));                      \n\
++cogl_color_out.a += noise / ((1.0 - cogl_color_out.a) * 255.0);            \n';
+ 
+ 
+ const RadialShaderEffect = GObject.registerClass({

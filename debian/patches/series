@@ -1,3 +1,10 @@
+Update-Serbian-translation.patch
+Update-Cornish-translation.patch
+Constify-results-from-stdlib-functions.patch
+lightbox-Use-triangular-noise-shape-for-dithering.patch
+croco-Remove-set-but-unused-variables.patch
+shell-Remove-set-but-unused-variable.patch
+shell-Fix-overcounting-of-misc.-symbols-for-password-stre.patch
 shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
 notificationDaemon-Do-not-ignore-GtkNotification-sources-.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
