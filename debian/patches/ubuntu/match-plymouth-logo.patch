@@ -8,7 +8,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/1872594
  1 file changed, 38 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 7da9f49..09364d6 100644
+index 7da9f49..5120958 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -22,6 +22,7 @@ import Gdm from 'gi://Gdm';
@@ -61,8 +61,8 @@ index 7da9f49..09364d6 100644
 +
 +        // Convert logical dimensions back to physical so we get the same
 +        // reasoning as Plymouth
-+        let width = monitor.width * monitor.geometry_scale;
-+        let height = monitor.height * monitor.geometry_scale;
++        let width = Math.round(monitor.width * monitor.geometry_scale);
++        let height = Math.round(monitor.height * monitor.geometry_scale);
 +
 +        // This should match Plymouth's algorithm in ply-utils.c
 +        if (height > width) {
