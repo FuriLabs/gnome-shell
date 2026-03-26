@@ -34,7 +34,7 @@ patch -d "${GNOME_SHELL_BUILDDIR}" -p1 --merge <<"EOF"
          args += wrap.split(' ')
 -    args.append(os.path.join(self_dir, 'gnome-shell'))
 +    args.append('/usr/bin/gnome-shell')
- 
+
      args.append('--automation-script')
      args.append(options.script)
 EOF
