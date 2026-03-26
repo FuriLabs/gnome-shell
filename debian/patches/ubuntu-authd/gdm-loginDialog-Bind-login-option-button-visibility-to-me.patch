@@ -8,7 +8,7 @@ Subject: gdm/loginDialog: Bind login option button visibility to mechanisms
  2 files changed, 2 insertions(+)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index dca5d53..fb898a4 100644
+index 365355c..ffdac36 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -1176,6 +1176,7 @@ export const LoginDialog = GObject.registerClass({

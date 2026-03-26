@@ -64,7 +64,7 @@ index 5929ccc..a3b10c3 100644
    margin: 3em 0;
  }
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index f63a6ff..6e23f14 100644
+index 443624c..1435e98 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -28,9 +28,9 @@ import Pango from 'gi://Pango';

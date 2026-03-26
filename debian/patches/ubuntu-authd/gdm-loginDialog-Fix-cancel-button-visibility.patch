@@ -33,7 +33,7 @@ index 831a0e5..842bc29 100644
          if (this._userVerifier)
              this._userVerifier.cancel();
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index fb898a4..3fd7bcf 100644
+index ffdac36..728ff4e 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -596,6 +596,8 @@ export const LoginDialog = GObject.registerClass({

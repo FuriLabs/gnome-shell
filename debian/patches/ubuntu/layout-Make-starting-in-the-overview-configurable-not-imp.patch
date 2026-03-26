@@ -13,7 +13,7 @@ Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/8917
  2 files changed, 13 insertions(+), 2 deletions(-)
 
 diff --git a/data/org.gnome.shell.gschema.xml.in b/data/org.gnome.shell.gschema.xml.in
-index 9a55ee71..650d9fa 100644
+index 9a55ee7..650d9fa 100644
 --- a/data/org.gnome.shell.gschema.xml.in
 +++ b/data/org.gnome.shell.gschema.xml.in
 @@ -131,6 +131,14 @@
