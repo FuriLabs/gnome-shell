@@ -14,6 +14,7 @@ gnome-shell (50.0-1) UNRELEASED; urgency=medium
   * Declare gnome-shell-common breaks old versions of gnome-session-common,
     since the systemd services changed: gnome-shell!3960, gnome-session!167
   * Bump dependencies: gjs >= 1.87.1, mutter >= 50.0
+  * d/control, d/rules: Don't use xvfb to run the tests
 
   [ Simon McVittie ]
   * Revert "d/control, d/gbp.conf: Branch for 49.x"
