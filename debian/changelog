@@ -1,3 +1,18 @@
+gnome-shell (50.0-0ubuntu3) UNRELEASED; urgency=medium
+
+  * Fix 2880-wide screens in match-plymouth-logo.patch (LP: #1872594)
+  * Refresh patches:
+    - debian/patches/ubuntu-authd/gdm-Add-support-unified-authentication.patch
+    - ubuntu-authd/gdm-loginDialog-Bind-login-option-button-visibility-to-me.patch
+    - ubuntu-authd/gdm-loginDialog-Fix-cancel-button-visibility.patch
+    - ubuntu-authd/loginDialog-Add-Login-Options-button.patch
+    - ubuntu-authd/loginDialog-Move-authPrompt.begin-to-helper-function.patch
+    - ubuntu-authd/loginDialog-Port-sessions-menu-over-to-AuthMenuButton.patch
+    - ubuntu-authd/start-abstracting-the-unified-mechanism-handler.patch
+    - ubuntu/layout-Make-starting-in-the-overview-configurable-not-imp.patch
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Fri, 27 Mar 2026 12:33:50 +0800
+
 gnome-shell (50.0-0ubuntu2) resolute; urgency=medium
 
   * debian/gnome-shell-common.alternatives: Add gdm-icons.gresource
