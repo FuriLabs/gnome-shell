@@ -1,4 +1,6 @@
-gnome-shell (50.0-1) UNRELEASED; urgency=medium
+gnome-shell (50.0-1) experimental; urgency=medium
+
+  * Team upload
 
   [ Daniel van Vugt ]
   * New upstream release: 50.0
@@ -37,7 +39,7 @@ gnome-shell (50.0-1) UNRELEASED; urgency=medium
   * d/control: Bump gsettings-desktop-schemas dependency as per meson.build
   * d/tests/shell-tests: Don't wrap the tests in xvfb-run any more
 
- -- Simon McVittie <smcv@debian.org>  Sat, 28 Mar 2026 18:41:45 +0000
+ -- Simon McVittie <smcv@debian.org>  Sat, 28 Mar 2026 20:51:23 +0000
 
 gnome-shell (49.5-1) unstable; urgency=medium
 
