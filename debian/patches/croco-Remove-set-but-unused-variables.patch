@@ -1,0 +1,69 @@
+From: =?utf-8?q?Florian_M=C3=BCllner?= <fmuellner@gnome.org>
+Date: Thu, 19 Mar 2026 22:41:13 +0100
+Subject: croco: Remove set-but-unused variables
+
+Theses variables are set, but never read. That's not very useful,
+and gcc now warns about them by default (-Wunused-but-set-variable).
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4141>
+Origin: upstream, 50.1, commit:1fd541ddc7fd0604d97ae7eea11840e130afc776
+---
+ src/st/croco/cr-input.c  | 4 +---
+ src/st/croco/cr-parser.c | 8 --------
+ 2 files changed, 1 insertion(+), 11 deletions(-)
+
+diff --git a/src/st/croco/cr-input.c b/src/st/croco/cr-input.c
+index 430e75e..170d8d9 100644
+--- a/src/st/croco/cr-input.c
++++ b/src/st/croco/cr-input.c
+@@ -200,8 +200,7 @@ cr_input_new_from_uri (const gchar * a_file_uri, enum CREncoding a_enc)
+         FILE *file_ptr = NULL;
+         guchar tmp_buf[CR_INPUT_MEM_CHUNK_SIZE] = { 0 };
+         gulong nb_read = 0,
+-                len = 0,
+-                buf_size = 0;
++                len = 0;
+         gboolean loop = TRUE;
+         guchar *buf = NULL;
+ 
+@@ -243,7 +242,6 @@ cr_input_new_from_uri (const gchar * a_file_uri, enum CREncoding a_enc)
+                         buf = g_realloc (buf, len + CR_INPUT_MEM_CHUNK_SIZE);
+                         memcpy (buf + len, tmp_buf, nb_read);
+                         len += nb_read;
+-                        buf_size += CR_INPUT_MEM_CHUNK_SIZE;
+                 }
+         }
+ 
+diff --git a/src/st/croco/cr-parser.c b/src/st/croco/cr-parser.c
+index d4f40cf..3f1b36c 100644
+--- a/src/st/croco/cr-parser.c
++++ b/src/st/croco/cr-parser.c
+@@ -3028,7 +3028,6 @@ cr_parser_parse_expr (CRParser * a_this, CRTerm ** a_expr)
+         CRTerm *expr = NULL,
+                 *expr2 = NULL;
+         guchar next_byte = 0;
+-        gulong nb_terms = 0;
+ 
+         g_return_val_if_fail (a_this && PRIVATE (a_this)
+                               && a_expr, CR_BAD_PARAM_ERROR);
+@@ -3046,12 +3045,6 @@ cr_parser_parse_expr (CRParser * a_this, CRTerm ** a_expr)
+                                              1, &next_byte);
+                 if (status != CR_OK) {
+                         if (status == CR_END_OF_INPUT_ERROR) {
+-                                /*
+-                                   if (!nb_terms)
+-                                   {
+-                                   goto error ;
+-                                   }
+-                                 */
+                                 status = CR_OK;
+                                 break;
+                         } else {
+@@ -3086,7 +3079,6 @@ cr_parser_parse_expr (CRParser * a_this, CRTerm ** a_expr)
+                 expr = cr_term_append_term (expr, expr2);
+                 expr2 = NULL;
+                 operator = 0;
+-                nb_terms++;
+         }
+ 
+         if (status == CR_OK) {

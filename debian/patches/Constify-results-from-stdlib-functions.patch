@@ -1,0 +1,58 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Thu, 19 Mar 2026 15:33:54 +0800
+Subject: Constify results from stdlib functions
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+This fixes recent warnings:
+
+../src/st/croco/cr-rgb.c: In function ‘cr_rgb_set_from_name’:
+../src/st/croco/cr-rgb.c:405:16: warning: assignment discards ‘const’
+qualifier from pointer target type [-Wdiscarded-qualifiers]
+  405 |         result = bsearch (a_color_name,
+      |                ^
+[150/294] Compiling C object src/libshell-18.so.p/shell-util.c.o
+../src/shell-util.c: In function ‘shell_util_translate_time_string’:
+../src/shell-util.c:165:7: warning: assignment discards ‘const’
+qualifier from pointer target type [-Wdiscarded-qualifiers]
+  165 |   sep = strchr (str, '\004');
+      |       ^
+
+which seem to originate from:
+
+https://sourceware.org/git/?p=glibc.git;a=commitdiff;h=cd748a63ab1a7ae846175c532a3daab341c62690;hp=64b6813338d836ad1b61969a153192fb739f8722
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4139>
+Origin: upstream, 50.1, commit:38553e497fca7b3fb02c3d7a79b7a5716fa2c027
+---
+ src/shell-util.c      | 2 +-
+ src/st/croco/cr-rgb.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/shell-util.c b/src/shell-util.c
+index da056a0..382fa2b 100644
+--- a/src/shell-util.c
++++ b/src/shell-util.c
+@@ -153,7 +153,7 @@ shell_util_translate_time_string (const char *str)
+ {
+   const char *locale = g_getenv ("LC_TIME");
+   const char *res;
+-  char *sep;
++  const char *sep;
+   locale_t old_loc;
+   locale_t loc = (locale_t) 0;
+ 
+diff --git a/src/st/croco/cr-rgb.c b/src/st/croco/cr-rgb.c
+index a2b478f..4691e96 100644
+--- a/src/st/croco/cr-rgb.c
++++ b/src/st/croco/cr-rgb.c
+@@ -398,7 +398,7 @@ enum CRStatus
+ cr_rgb_set_from_name (CRRgb * a_this, const guchar * a_color_name)
+ {
+         enum CRStatus status = CR_OK;
+-        CRRgb *result;
++        const CRRgb *result;
+ 
+         g_return_val_if_fail (a_this && a_color_name, CR_BAD_PARAM_ERROR);
+ 
