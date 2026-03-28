@@ -17,12 +17,27 @@ gnome-shell (50.0-1) UNRELEASED; urgency=medium
   * d/control, d/rules: Don't use xvfb to run the tests
 
   [ Simon McVittie ]
+  * d/p/Update-Serbian-translation.patch,
+    d/p/Update-Cornish-translation.patch,
+    d/p/Constify-results-from-stdlib-functions.patch,
+    d/p/lightbox-Use-triangular-noise-shape-for-dithering.patch,
+    d/p/croco-Remove-set-but-unused-variables.patch,
+    d/p/shell-Remove-set-but-unused-variable.patch,
+    d/p/shell-Fix-overcounting-of-misc.-symbols-for-password-stre.patch,
+    d/p/shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch:
+    Update to upstream commit 50.0-7-gb8dbf86a4, matching what's packaged
+    in Ubuntu
+  * d/rules: Regenerate theme CSS with sassc during build.
+    Changes taken from Ubuntu, thanks to Marco Trevisan
+  * d/source/options: Ignore regeneration of CSS when building
+    source package
   * Revert "d/control, d/gbp.conf: Branch for 49.x"
   * Revert "d/patches: Update to commit 49.3-27-g7e2619acb": these changes
     were included in 50~beta
   * d/control: Bump gsettings-desktop-schemas dependency as per meson.build
+  * d/tests/shell-tests: Don't wrap the tests in xvfb-run any more
 
- -- Simon McVittie <smcv@debian.org>  Thu, 26 Mar 2026 11:40:47 +0000
+ -- Simon McVittie <smcv@debian.org>  Sat, 28 Mar 2026 18:41:45 +0000
 
 gnome-shell (49.5-1) unstable; urgency=medium
 
