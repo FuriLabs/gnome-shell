@@ -19,6 +19,8 @@ import St from 'gi://St';
 import * as SignalTracker from '../misc/signalTracker.js';
 import {adjustAnimationTime} from '../misc/animationUtils.js';
 
+const sessionSignalHolder = new SignalTracker.TransientSignalHolder();
+
 setConsoleLogDomain('GNOME Shell');
 
 Gio._promisify(Gio.DataInputStream.prototype, 'fill_async');
@@ -59,13 +61,29 @@ function _makeEaseCallback(params, cleanup) {
     delete params.onStopped;
 
     return isFinished => {
-        cleanup();
+        cleanup?.();
 
         if (onStopped)
             onStopped(isFinished);
         if (onComplete && isFinished)
             onComplete();
     };
+}
+
+function _makeEasePrepareAndCleanup(duration) {
+    if (!duration)
+        return {prepare: null, cleanup: null};
+
+    const prepare = () => {
+        global.compositor.disable_unredirect();
+        global.begin_work();
+    };
+    const cleanup = () => {
+        global.compositor.enable_unredirect();
+        global.end_work();
+    };
+
+    return {prepare, cleanup};
 }
 
 function _getPropertyTarget(actor, propName) {
@@ -102,8 +120,8 @@ function _easeActor(actor, params) {
     const animationRequired = params.animationRequired;
     delete params.animationRequired;
 
-    if (params.duration !== undefined)
-        actor.set_easing_duration(params.duration, {animationRequired});
+    const duration = params.duration ?? actor.get_easing_duration();
+    actor.set_easing_duration(duration, {animationRequired});
     delete params.duration;
 
     if (params.delay !== undefined)
@@ -125,21 +143,15 @@ function _easeActor(actor, params) {
         actor.set_easing_mode(params.mode);
     delete params.mode;
 
-    const prepare = () => {
-        global.compositor.disable_unredirect();
-        global.begin_work();
-    };
-    const cleanup = () => {
-        global.compositor.enable_unredirect();
-        global.end_work();
-    };
-    let callback = _makeEaseCallback(params, cleanup);
+    const easingDuration = actor.get_easing_duration();
+    const {prepare, cleanup} = _makeEasePrepareAndCleanup(easingDuration);
+    const callback = _makeEaseCallback(params, cleanup);
 
     // cancel overwritten transitions
-    let animatedProps = Object.keys(params).map(p => p.replace('_', '-', 'g'));
+    let animatedProps = Object.keys(params).map(p => p.replaceAll('_', '-'));
     animatedProps.forEach(p => actor.remove_transition(p));
 
-    if (actor.get_easing_duration() > 0 || !isReversed)
+    if (easingDuration > 0 || !isReversed)
         actor.set(params);
     actor.restore_easing_state();
 
@@ -151,18 +163,22 @@ function _easeActor(actor, params) {
 
     const [transition] = transitions;
 
-    if (transition && transition.delay)
-        transition.connect('started', () => prepare());
-    else
-        prepare();
+    if (prepare) {
+        if (transition?.delay)
+            transition.connectObject('started', () => prepare(), sessionSignalHolder);
+        else
+            prepare();
+    }
 
-    if (transition)
-        transition.connect('stopped', (t, finished) => callback(finished));
-    else
+    if (transition) {
+        transition.connectObject('stopped', (t, finished) => callback(finished),
+            sessionSignalHolder);
+    } else {
         callback(true);
+    }
 }
 
-function _easeActorProperty(actor, propName, target, params) {
+function _easeAnimatableProperty(animatable, propName, target, params) {
     params = {
         repeatCount: 0,
         autoReverse: false,
@@ -196,38 +212,34 @@ function _easeActorProperty(actor, propName, target, params) {
     // whether the transition should finish where it started
     const isReversed = autoReverse && numIterations % 2 === 0;
 
+    // The object is a Clutter.Animatable.
+    const actor = animatable.get_actor();
+
     // Copy Clutter's behavior for implicit animations, see
     // should_skip_implicit_transition()
-    if (actor instanceof Clutter.Actor && !actor.mapped)
+    if (!actor?.mapped)
         duration = 0;
 
-    const prepare = () => {
-        global.compositor.disable_unredirect();
-        global.begin_work();
-    };
-    const cleanup = () => {
-        global.compositor.enable_unredirect();
-        global.end_work();
-    };
-    let callback = _makeEaseCallback(params, cleanup);
+    const {prepare, cleanup} = _makeEasePrepareAndCleanup(duration);
+    const callback = _makeEaseCallback(params, cleanup);
 
     // cancel overwritten transition
-    actor.remove_transition(propName);
+    animatable.remove_transition(propName);
 
     if (duration === 0) {
-        let [obj, prop] = _getPropertyTarget(actor, propName);
+        const [obj, prop] = _getPropertyTarget(animatable, propName);
 
         if (!isReversed)
             obj[prop] = target;
 
-        prepare();
+        prepare?.();
         callback(true);
 
         return;
     }
 
-    let pspec = actor.find_property(propName);
-    let transition = new Clutter.PropertyTransition({
+    const pspec = animatable.find_property(propName);
+    const transition = new Clutter.PropertyTransition({
         property_name: propName,
         interval: new Clutter.Interval({value_type: pspec.value_type}),
         remove_on_complete: true,
@@ -235,16 +247,19 @@ function _easeActorProperty(actor, propName, target, params) {
         auto_reverse: autoReverse,
         ...params,
     });
-    actor.add_transition(propName, transition);
+    animatable.add_transition(propName, transition);
 
     transition.set_to(target);
 
-    if (transition.delay)
-        transition.connect('started', () => prepare());
-    else
-        prepare();
+    if (prepare) {
+        if (transition.delay)
+            transition.connectObject('started', () => prepare(), sessionSignalHolder);
+        else
+            prepare();
+    }
 
-    transition.connect('stopped', (t, finished) => callback(finished));
+    transition.connectObject('stopped',
+        (t, finished) => callback(finished), sessionSignalHolder);
 }
 
 // Add some bindings to the global JS namespace
@@ -271,6 +286,9 @@ GObject.Object.prototype.disconnect_object = function (...args) {
 };
 
 SignalTracker.registerDestroyableType(Clutter.Actor);
+
+global.connectObject('shutdown', () => sessionSignalHolder.destroy(),
+    sessionSignalHolder);
 
 Cairo.Context.prototype.setSourceColor = function (color) {
     const {red, green, blue, alpha} = color;
@@ -302,12 +320,12 @@ Clutter.Actor.prototype.ease = function (props) {
     _easeActor(this, props);
 };
 Clutter.Actor.prototype.ease_property = function (propName, target, params) {
-    _easeActorProperty(this, propName, target, params);
+    _easeAnimatableProperty(this, propName, target, params);
 };
 St.Adjustment.prototype.ease = function (target, params) {
     // we're not an actor of course, but we implement the same
     // transition API as Clutter.Actor, so this works anyway
-    _easeActorProperty(this, 'value', target, params);
+    _easeAnimatableProperty(this, 'value', target, params);
 };
 
 Clutter.Actor.prototype[Symbol.iterator] = function* () {
@@ -332,6 +350,20 @@ Meta.Rectangle = function (params = {}) {
     console.warn('Meta.Rectangle is deprecated, use Mtk.Rectangle instead');
     return new Mtk.Rectangle(params);
 };
+
+if (!Meta.IdleMonitor.prototype.add_idle_watch_full) {
+    Meta.IdleMonitorWatchFlags = {
+        NONE: 0,
+        UNINHIBITABLE: 1,
+        START_NOW: 2,
+    };
+
+    Meta.IdleMonitor.prototype.add_idle_watch_full = function (interval, callback, flags = 0) {
+        if (flags !== 0)
+            console.warn('IdleMonitor does not support flags, the watch will not work as expected');
+        this.add_idle_watch(interval, callback);
+    };
+}
 
 Gio.File.prototype.touch_async = function (callback) {
     Shell.util_touch_file_async(this, callback);

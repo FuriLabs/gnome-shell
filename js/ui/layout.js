@@ -16,7 +16,7 @@ import * as Main from './main.js';
 import * as Params from '../misc/params.js';
 import * as Ripples from './ripples.js';
 
-const STARTUP_ANIMATION_TIME = 500;
+export const STARTUP_ANIMATION_TIME = 500;
 const BACKGROUND_FADE_ANIMATION_TIME = 1000;
 
 const HOT_CORNER_PRESSURE_THRESHOLD = 100; // pixels
@@ -603,7 +603,7 @@ export const LayoutManager = GObject.registerClass({
         this._updateMonitors();
         this._updateBoxes();
         this._updateHotCorners();
-        this._updateBackgrounds();
+        this._updateBackgrounds().catch(logError);
         this._updateFullscreen();
         this._updateVisibility();
         this._queueUpdateRegions();

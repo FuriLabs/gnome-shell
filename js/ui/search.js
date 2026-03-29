@@ -223,11 +223,12 @@ const SearchResultsBase = GObject.registerClass({
             return;
 
         this._cancellable.cancel();
-        this._cancellable.reset();
+        const cancellable = new Gio.Cancellable();
+        this._cancellable = cancellable;
 
-        const metas = await this.provider.getResultMetas(metasNeeded, this._cancellable);
+        const metas = await this.provider.getResultMetas(metasNeeded, cancellable);
 
-        if (this._cancellable.is_cancelled()) {
+        if (cancellable.is_cancelled()) {
             if (metas.length > 0)
                 throw new Error(`Search provider ${this.provider.id} returned results after the request was canceled`);
         }
@@ -683,20 +684,22 @@ export const SearchResultsView = GObject.registerClass({
     async _doProviderSearch(provider, previousResults) {
         provider.searchInProgress = true;
 
-        let results;
-        if (this._isSubSearch && previousResults) {
-            results = await provider.getSubsearchResultSet(
-                previousResults,
-                this._terms,
-                this._cancellable);
-        } else {
-            results = await provider.getInitialResultSet(
-                this._terms,
-                this._cancellable);
+        let results = [];
+        try {
+            if (this._isSubSearch && previousResults) {
+                results = await provider.getSubsearchResultSet(
+                    previousResults,
+                    this._terms,
+                    this._cancellable);
+            } else {
+                results = await provider.getInitialResultSet(
+                    this._terms,
+                    this._cancellable);
+            }
+        } finally {
+            this._results[provider.id] = results;
+            this._updateResults(provider, results);
         }
-
-        this._results[provider.id] = results;
-        this._updateResults(provider, results);
     }
 
     _doSearch() {
@@ -734,7 +737,7 @@ export const SearchResultsView = GObject.registerClass({
         this._startingSearch = true;
 
         this._cancellable.cancel();
-        this._cancellable.reset();
+        this._cancellable = new Gio.Cancellable();
 
         if (terms.length === 0) {
             this._reset();

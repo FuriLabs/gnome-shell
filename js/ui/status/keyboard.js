@@ -481,19 +481,27 @@ export class InputSourceManager extends Signals.EventEmitter {
         this._settings.mruSources = sourcesList;
     }
 
-    _currentInputSourceChanged(newSource) {
+    _currentInputSourceChanged(newSource, interactive) {
         let oldSource;
         [oldSource, this._currentSource] = [this._currentSource, newSource];
 
         this.emit('current-source-changed', oldSource);
 
-        for (let i = 1; i < this._mruSources.length; ++i) {
-            if (this._mruSources[i] === newSource) {
-                let currentSource = this._mruSources.splice(i, 1);
-                this._mruSources = currentSource.concat(this._mruSources);
-                break;
-            }
+        this._mruSources = [
+            newSource,
+            ...this._mruSources.filter(s => s !== newSource),
+        ];
+
+        // Only track user-initiated switches in backup MRU.
+        // Internal (non-interactive) activations during reload/reapply must not affect restore order.
+        if (interactive && this._disableIBus && this._mruSourcesBackup) {
+            this._mruSourcesBackup = [
+                newSource,
+                ...this._mruSourcesBackup.filter(
+                    s => s.type !== newSource.type || s.id !== newSource.id),
+            ];
         }
+
         this._changePerWindowSource();
     }
 
@@ -510,24 +518,21 @@ export class InputSourceManager extends Signals.EventEmitter {
             KeyboardManager.holdKeyboard();
         this._keyboardManager.apply(is.xkbId);
 
-        // All the "xkb:..." IBus engines simply "echo" back symbols,
-        // despite their naming implying differently, so we always set
-        // one in order for XIM applications to work given that we set
-        // XMODIFIERS=@im=ibus in the first place so that they can
-        // work without restarting when/if the user adds an IBus input
-        // source.
         let engine;
-        if (is.type === INPUT_SOURCE_TYPE_IBUS)
+        if (is.type === INPUT_SOURCE_TYPE_IBUS) {
             engine = is.id;
-        else
-            engine = 'xkb:us::eng';
+        } else {
+            const [name, variant = ''] = is.id.split('+');
+            const [lang = 'eng'] = this._xkbInfo.get_languages_for_layout(is.id);
+            engine = `xkb:${name}:${variant}:${lang}`;
+        }
 
         this._ibusManager.setEngine(engine).then(() => {
             if (holdKeyboard)
                 KeyboardManager.releaseKeyboard();
         });
 
-        this._currentInputSourceChanged(is);
+        this._currentInputSourceChanged(is, interactive);
 
         if (interactive)
             this._updateMruSettings();

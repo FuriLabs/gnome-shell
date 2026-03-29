@@ -329,8 +329,6 @@ async function _initializeUI() {
     extensionManager = new ExtensionSystem.ExtensionManager();
     extensionManager.init();
 
-    LoginManager.registerSessionWithGDM();
-
     if (sessionMode.isGreeter && screenShield) {
         layoutManager.connect('startup-prepared', () => {
             screenShield.showDialog();
@@ -376,6 +374,8 @@ async function _initializeUI() {
         if (sessionMode.currentMode !== 'gdm' &&
             sessionMode.currentMode !== 'initial-setup')
             _handleLockScreenWarning();
+
+        LoginManager.registerSessionWithGDM();
 
         if (perfModule) {
             let perfOutput = GLib.getenv('SHELL_PERF_OUTPUT');
@@ -1057,11 +1057,11 @@ class AnimationsSettings {
     }
 
     _shouldEnableAnimations() {
-        if (this._handles.size > 0)
-            return false;
-
         if (global.force_animations)
             return true;
+
+        if (this._handles.size > 0)
+            return false;
 
         const backend = global.backend;
         if (!backend.is_rendering_hardware_accelerated())

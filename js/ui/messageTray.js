@@ -468,7 +468,13 @@ export class Notification extends GObject.Object {
     }
 
     activate() {
+        console.assert(!this._destroyed, 'Activating a destroyed notification');
+
         this.emit('activated');
+
+        // Avoid double destruction after activation
+        if (this._destroyed)
+            return;
 
         // We don't hide a resident notification when the user invokes one of its actions,
         // because it is common for such notifications to update themselves with new
@@ -482,6 +488,8 @@ export class Notification extends GObject.Object {
 
     destroy(reason = NotificationDestroyedReason.DISMISSED) {
         this.emit('destroy', reason);
+
+        this._destroyed = true;
 
         if (this._updateDatetimeId)
             GLib.source_remove(this._updateDatetimeId);
@@ -760,7 +768,8 @@ export const MessageTray = GObject.registerClass({
         Main.layoutManager.addChrome(this, {affectsInputRegion: false});
         Main.layoutManager.trackChrome(this._bannerBin, {affectsInputRegion: true});
 
-        global.display.connect('in-fullscreen-changed', this._updateState.bind(this));
+        global.display.connectObject('in-fullscreen-changed',
+            () => this._updateState(), this);
 
         Main.sessionMode.connect('updated', this._sessionUpdated.bind(this));
 

@@ -188,12 +188,6 @@ export class ScreenShield extends Signals.EventEmitter {
             return;
 
         this._dialog.cancel();
-        if (this._isGreeter) {
-            // LoginDialog.cancel() will grab the key focus
-            // on its own, so ensure it stays on lock screen
-            // instead
-            this._dialog.grab_key_focus();
-        }
     }
 
     _becomeModal() {
@@ -244,6 +238,7 @@ export class ScreenShield extends Signals.EventEmitter {
 
     _prepareForSleep(loginManager, aboutToSuspend) {
         if (aboutToSuspend) {
+            this._dialog?.cancel();
             if (this._settings.get_boolean(LOCK_ENABLED_KEY))
                 this.lock(true);
         } else {
@@ -439,7 +434,10 @@ export class ScreenShield extends Signals.EventEmitter {
         }
 
         this._dialog.allowCancel = allowCancel;
-        this._dialog.grab_key_focus();
+        if (this._isGreeter)
+            this._dialog.activate();
+        else
+            this._dialog.grab_key_focus();
         return true;
     }
 
@@ -479,7 +477,10 @@ export class ScreenShield extends Signals.EventEmitter {
             this._lockScreenShown({fadeToBlack, animateFade: false});
         }
 
-        this._dialog.grab_key_focus();
+        if (this._isGreeter)
+            this._dialog.activate();
+        else
+            this._dialog.grab_key_focus();
     }
 
     _lockScreenShown(params) {
