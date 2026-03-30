@@ -670,7 +670,10 @@ main (int argc, char **argv)
 
   shell_init_debug (g_getenv ("SHELL_DEBUG"));
 
-  shell_dbus_init ();
+  if (!g_getenv ("GNOME_SHELL_SKIP_DBUS") ||
+      g_strcmp0 (g_getenv ("GNOME_SHELL_SKIP_DBUS"), "1") != 0)
+    shell_dbus_init ();
+
   shell_a11y_init ();
   shell_perf_log_init ();
   shell_introspection_init ();
