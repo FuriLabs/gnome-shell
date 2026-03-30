@@ -1,5 +1,6 @@
-gnome-shell (50.0-0ubuntu3) UNRELEASED; urgency=medium
+gnome-shell (50.0-1ubuntu1) UNRELEASED; urgency=medium
 
+  * Merge with Debian version 50.0-1
   * Fix 2880-wide screens in match-plymouth-logo.patch (LP: #1872594)
   * Refresh patches:
     - debian/patches/ubuntu-authd/gdm-Add-support-unified-authentication.patch
