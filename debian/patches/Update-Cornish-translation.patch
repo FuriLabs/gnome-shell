@@ -2,7 +2,7 @@ From: Flynn Peck <cirilla@tuta.io>
 Date: Tue, 17 Mar 2026 21:53:36 +0000
 Subject: Update Cornish translation
 
-Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/a0d1712
+Origin: upstream, 50.1, commit:a0d1712946cb38d2f5b67770ea266c43085d989e
 ---
  po/kw.po | 404 +++++++++++++++++++++++++++++++--------------------------------
  1 file changed, 200 insertions(+), 204 deletions(-)

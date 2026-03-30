@@ -8,8 +8,7 @@ in the original Firefox code the method is based on.
 Remove it to shut up a new gcc warning (-Wunused-but-set-variable).
 
 Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4142>
-
-Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/ecb7dcc
+Origin: upstream, 50.1, commit:ecb7dcc5d67c33d2d5155ecfc32fc36a7e4cfa08
 ---
  src/shell-keyring-prompt.c | 5 +----
  1 file changed, 1 insertion(+), 4 deletions(-)

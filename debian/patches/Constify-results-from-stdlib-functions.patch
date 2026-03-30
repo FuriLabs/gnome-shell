@@ -24,8 +24,7 @@ which seem to originate from:
 https://sourceware.org/git/?p=glibc.git;a=commitdiff;h=cd748a63ab1a7ae846175c532a3daab341c62690;hp=64b6813338d836ad1b61969a153192fb739f8722
 
 Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4139>
-
-Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/38553e4
+Origin: upstream, 50.1, commit:38553e497fca7b3fb02c3d7a79b7a5716fa2c027
 ---
  src/shell-util.c      | 2 +-
  src/st/croco/cr-rgb.c | 2 +-

@@ -6,8 +6,7 @@ Theses variables are set, but never read. That's not very useful,
 and gcc now warns about them by default (-Wunused-but-set-variable).
 
 Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4141>
-
-Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/1fd541d
+Origin: upstream, 50.1, commit:1fd541ddc7fd0604d97ae7eea11840e130afc776
 ---
  src/st/croco/cr-input.c  | 4 +---
  src/st/croco/cr-parser.c | 8 --------

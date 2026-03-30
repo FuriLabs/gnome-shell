@@ -2,7 +2,7 @@ From: =?utf-8?b?0JzQsNGA0LrQviDQmtC+0YHRgtC40Zs=?= <marko.m.kostic@gmail.com>
 Date: Tue, 17 Mar 2026 12:11:14 +0000
 Subject: Update Serbian translation
 
-Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/93a1d5c
+Origin: upstream, 50.1, commit:93a1d5c45d54c03b47e1e5b3ad656a56bcb6d0a9
 ---
  po/sr.po | 2401 ++++++++++++++++++--------------------------------------------
  1 file changed, 673 insertions(+), 1728 deletions(-)

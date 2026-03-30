@@ -14,8 +14,7 @@ The algorithm is taken from listing 1 of the Dithering section on
 https://momentsingraphics.de/BlueNoise.html .
 
 Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4137>
-
-Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/1699004
+Origin: upstream, 50.1, commit:16990045a4904c3ed8a4fe1ad10610aa2cc77b83
 ---
  js/ui/lightbox.js | 5 +++--
  1 file changed, 3 insertions(+), 2 deletions(-)
