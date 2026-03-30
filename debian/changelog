@@ -1,7 +1,6 @@
-gnome-shell (50.0-1ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (50.0-1ubuntu1) resolute; urgency=medium
 
   * Merge with Debian version 50.0-1
-  * Fix 2880-wide screens in match-plymouth-logo.patch (LP: #1872594)
   * Refresh patches:
     - debian/patches/ubuntu-authd/gdm-Add-support-unified-authentication.patch
     - ubuntu-authd/gdm-loginDialog-Bind-login-option-button-visibility-to-me.patch
@@ -12,13 +11,16 @@ gnome-shell (50.0-1ubuntu1) UNRELEASED; urgency=medium
     - ubuntu-authd/start-abstracting-the-unified-mechanism-handler.patch
     - ubuntu/layout-Make-starting-in-the-overview-configurable-not-imp.patch
   * Modify patches:
-    - Standardize-icon-sizes-and-fit-the-grid-to-the-screen.patch
-      (LP: #2146524)
+    - match-plymouth-logo.patch: Fix login screen Ubuntu logo size on
+      2880-wide displays (LP: #1872594)
+    - Standardize-icon-sizes-and-fit-the-grid-to-the-screen.patch:
+      Fix app folder sizing (LP: #2146524) and eliminate the need for
+      the below patches...
   * Drop patches:
     - ubuntu/theme-Delete-deprecated-CSS-lines.patch
     - ubuntu/iconGrid-Force-automatic-default-spacing.patch
 
- -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Fri, 27 Mar 2026 12:33:50 +0800
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Mon, 30 Mar 2026 18:21:55 +0800
 
 gnome-shell (50.0-0ubuntu2) resolute; urgency=medium
 
