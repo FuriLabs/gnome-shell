@@ -1,5 +1,6 @@
 import Clutter from 'gi://Clutter';
 import GObject from 'gi://GObject';
+import GLib from 'gi://GLib';
 import IBus from 'gi://IBus';
 import Mtk from 'gi://Mtk';
 import St from 'gi://St';
@@ -8,6 +9,7 @@ import * as BoxPointer from './boxpointer.js';
 import * as Main from './main.js';
 
 const MAX_CANDIDATES_PER_PAGE = 16;
+const DISABLE_IBUS_CANDIDATE_POPUP = GLib.getenv('GNOME_SHELL_DISABLE_OSK') === '1';
 
 const DEFAULT_INDEX_LABELS = [
     '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
@@ -150,6 +152,10 @@ export const CandidatePopup = GObject.registerClass(
 class IbusCandidatePopup extends BoxPointer.BoxPointer {
     _init() {
         super._init(St.Side.TOP);
+
+        if (DISABLE_IBUS_CANDIDATE_POPUP)
+            return;
+
         this.visible = false;
         this.style_class = 'candidate-popup-boxpointer';
 
@@ -201,6 +207,9 @@ class IbusCandidatePopup extends BoxPointer.BoxPointer {
     }
 
     setPanelService(panelService) {
+        if (DISABLE_IBUS_CANDIDATE_POPUP)
+            return;
+
         this._panelService = panelService;
         if (!panelService)
             return;
