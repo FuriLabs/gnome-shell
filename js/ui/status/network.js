@@ -668,6 +668,12 @@ class NMModemDeviceItem extends NMDeviceItem {
     }
 
     get icon_name() {
+        if (!this._mobileDevice) {
+            return this._activeConnection
+                ? 'network-cellular-signal-none-symbolic'
+                : 'network-cellular-disabled-symbolic';
+        }
+
         switch (this.state) {
         case NM.ActiveConnectionState.ACTIVATING:
             return 'network-cellular-acquiring-symbolic';
@@ -683,6 +689,10 @@ class NMModemDeviceItem extends NMDeviceItem {
     }
 
     get name() {
+        if (!this._mobileDevice) {
+            return this._deviceName;
+        }
+
         return this._mobileDevice?.operator_name || this._deviceName;
     }
 
