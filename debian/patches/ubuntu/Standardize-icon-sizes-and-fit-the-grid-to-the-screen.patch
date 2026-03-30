@@ -14,31 +14,38 @@ Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/6186
 Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7020
 Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/7414
 Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/8029
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/2738
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/1987734
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/1969577
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/2067433
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/2146524
 ---
- data/theme/gnome-shell-sass/widgets/_app-grid.scss |  11 +-
+ data/theme/gnome-shell-sass/widgets/_app-grid.scss |  13 +-
  js/gdm/authPrompt.js                               |   4 +-
  js/ui/altTab.js                                    |  16 +-
- js/ui/appDisplay.js                                |   7 -
+ js/ui/appDisplay.js                                |  13 +-
  js/ui/components/polkitAgent.js                    |   4 +-
  js/ui/ctrlAltTab.js                                |   6 +-
  js/ui/dash.js                                      |  16 +-
  js/ui/endSessionDialog.js                          |   7 +-
- js/ui/iconGrid.js                                  | 208 ++++++++-------------
+ js/ui/iconGrid.js                                  | 222 +++++++++------------
  js/ui/main.js                                      |   6 +
  js/ui/shellMountOperation.js                       |   8 +-
  js/ui/switchMonitor.js                             |   5 +-
  js/ui/userWidget.js                                |   5 +-
  js/ui/windowPreview.js                             |   7 +-
- 14 files changed, 123 insertions(+), 187 deletions(-)
+ 14 files changed, 144 insertions(+), 188 deletions(-)
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_app-grid.scss b/data/theme/gnome-shell-sass/widgets/_app-grid.scss
-index 2fe110f..f282aeb 100644
+index 2fe110f..a116cb7 100644
 --- a/data/theme/gnome-shell-sass/widgets/_app-grid.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_app-grid.scss
-@@ -5,10 +5,13 @@ $app_folder_size: 720px;
+@@ -1,14 +1,17 @@
+ /* App Grid */
+ 
+ $app_icon_size: 96px;
+-$app_folder_size: 720px;
++$app_folder_size: 550px;
  
  // app icons
  .icon-grid {
@@ -133,7 +140,7 @@ index 1a6c705..c5852d2 100644
          }
  
 diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
-index 0769ef6..53f19bb 100644
+index 0769ef6..2504697 100644
 --- a/js/ui/appDisplay.js
 +++ b/js/ui/appDisplay.js
 @@ -2064,13 +2064,6 @@ class FolderGrid extends AppGrid {
@@ -150,6 +157,19 @@ index 0769ef6..53f19bb 100644
      }
  });
  
+@@ -2494,6 +2487,12 @@ export const AppFolderDialog = GObject.registerClass({
+             orientation: Clutter.Orientation.VERTICAL,
+         });
+ 
++        // Temporary workaround while themes still hard code bad values
++        // inherited from previous gnome-shell releases. Although making
++        // this reliably auto-sized would be better...
++        const sensibleAppFolderSize = 550;
++        this._viewBox.width = this._viewBox.height = sensibleAppFolderSize;
++
+         this.child = new St.Bin({
+             style_class: 'app-folder-dialog-container',
+             child: this._viewBox,
 diff --git a/js/ui/components/polkitAgent.js b/js/ui/components/polkitAgent.js
 index 68ee8db..d5258b6 100644
 --- a/js/ui/components/polkitAgent.js
@@ -285,7 +305,7 @@ index 7b666f0..291f5e9 100644
              userAvatar.update();
  
 diff --git a/js/ui/iconGrid.js b/js/ui/iconGrid.js
-index a67a1ee..3093b8d 100644
+index a67a1ee..136c393 100644
 --- a/js/ui/iconGrid.js
 +++ b/js/ui/iconGrid.js
 @@ -8,47 +8,18 @@ import St from 'gi://St';
@@ -456,7 +476,7 @@ index a67a1ee..3093b8d 100644
              natHeight = this._pageHeight;
              break;
          }
-@@ -996,12 +931,58 @@ export const IconGridLayout = GObject.registerClass({
+@@ -996,12 +931,63 @@ export const IconGridLayout = GObject.registerClass({
          this._pageHeight = pageHeight;
          this._pageSizeChanged = true;
  
@@ -470,6 +490,7 @@ index a67a1ee..3093b8d 100644
 +        const vPadding = this.pagePadding.top + this.pagePadding.bottom;
 +        const iconsWidth = pageWidth - hPadding;
 +        const iconsHeight = pageHeight - vPadding;
++        const [firstTile] = this._container;
 +
 +        if (this._fixedCols && this._fixedRows) {
 +            cols = this._fixedCols;
@@ -485,14 +506,18 @@ index a67a1ee..3093b8d 100644
 +                    break;
 +                }
 +            }
++        } else if (!firstTile) {
++            rows = cols = 0;
 +        } else {
 +            for (iconSize of iconSizes) {
-+                const colStride = iconSize + this.columnSpacing;
-+                const rowStride = iconSize + this.rowSpacing;
++                firstTile.icon.setIconSize(iconSize);
++                const [tileWidth, tileHeight] = firstTile.get_preferred_size();
++                const colStride = tileWidth + this.columnSpacing;
++                const rowStride = tileHeight + this.rowSpacing;
 +                const colsMinusOne =
-+                    Math.floor((iconsWidth - iconSize) / colStride);
++                    Math.floor((iconsWidth - tileWidth) / colStride);
 +                const rowsMinusOne =
-+                    Math.floor((iconsHeight - iconSize) / rowStride);
++                    Math.floor((iconsHeight - tileHeight) / rowStride);
 +                cols = colsMinusOne + 1;
 +                rows = rowsMinusOne + 1;
 +                if (cols >= 2 && rows >= 2)
@@ -517,7 +542,7 @@ index a67a1ee..3093b8d 100644
                      if (this._iconSize !== iconSize) {
                          this._iconSize = iconSize;
  
-@@ -1011,6 +992,8 @@ export const IconGridLayout = GObject.registerClass({
+@@ -1011,6 +997,8 @@ export const IconGridLayout = GObject.registerClass({
                          this.notify('icon-size');
                      }
  
@@ -526,7 +551,7 @@ index a67a1ee..3093b8d 100644
                      this._updateIconSizesLaterId = 0;
                      return GLib.SOURCE_REMOVE;
                  });
-@@ -1166,8 +1149,8 @@ export const IconGrid = GObject.registerClass({
+@@ -1166,8 +1154,8 @@ export const IconGrid = GObject.registerClass({
          layoutParams = Params.parse(layoutParams, {
              allow_incomplete_pages: false,
              orientation: Clutter.Orientation.HORIZONTAL,
@@ -537,7 +562,7 @@ index a67a1ee..3093b8d 100644
              page_halign: Clutter.ActorAlign.FILL,
              page_padding: new Clutter.Margin(),
              page_valign: Clutter.ActorAlign.FILL,
-@@ -1186,9 +1169,7 @@ export const IconGrid = GObject.registerClass({
+@@ -1186,9 +1174,7 @@ export const IconGrid = GObject.registerClass({
              y_expand: true,
          });
  
@@ -547,7 +572,7 @@ index a67a1ee..3093b8d 100644
  
          this.connect('destroy', () => layoutManager.disconnect(pagesChangedId));
      }
-@@ -1207,42 +1188,6 @@ export const IconGrid = GObject.registerClass({
+@@ -1207,42 +1193,6 @@ export const IconGrid = GObject.registerClass({
          this.goToPage(itemPage);
      }
  
@@ -590,7 +615,7 @@ index a67a1ee..3093b8d 100644
      vfunc_child_removed(child) {
          child.disconnect(child._iconGridKeyFocusInId);
          delete child._iconGridKeyFocusInId;
-@@ -1250,7 +1195,6 @@ export const IconGrid = GObject.registerClass({
+@@ -1250,7 +1200,6 @@ export const IconGrid = GObject.registerClass({
  
      vfunc_allocate(box) {
          const [width, height] = box.get_size();
@@ -598,7 +623,7 @@ index a67a1ee..3093b8d 100644
          this.layout_manager.adaptToSize(width, height);
          super.vfunc_allocate(box);
      }
-@@ -1259,10 +1203,17 @@ export const IconGrid = GObject.registerClass({
+@@ -1259,10 +1208,26 @@ export const IconGrid = GObject.registerClass({
          super.vfunc_style_changed();
  
          const node = this.get_theme_node();
@@ -606,20 +631,29 @@ index a67a1ee..3093b8d 100644
 -        this.layout_manager.row_spacing = node.get_length('row-spacing');
  
 -        let [found, value] = node.lookup_length('max-column-spacing', false);
-+        const defaultSpacing = this.layout_manager._iconSize * 1.25;
++        const defaultSpacing = this.layout_manager._iconSize * 0.5;
 +        let found, value;
 +
-+        [found, value] = node.lookup_length('column-spacing', false);
-+        this.layout_manager.column_spacing = found ? value : defaultSpacing;
++        // A temporary workaround while the accompanying changes have not yet
++        // been shipped to theme designers:
++        const allThemesUseSensibleSpacing = false;
++        if (allThemesUseSensibleSpacing) {
++            [found, value] = node.lookup_length('column-spacing', false);
++            this.layout_manager.column_spacing = found ? value : defaultSpacing;
 +
-+        [found, value] = node.lookup_length('row-spacing', false);
-+        this.layout_manager.row_spacing = found ? value : defaultSpacing;
++            [found, value] = node.lookup_length('row-spacing', false);
++            this.layout_manager.row_spacing = found ? value : defaultSpacing;
++        } else {
++            this.layout_manager.column_spacing =
++                this.layout_manager.row_spacing =
++                defaultSpacing;
++        }
 +
 +        [found, value] = node.lookup_length('max-column-spacing', false);
          this.layout_manager.max_column_spacing = found ? value : -1;
  
          [found, value] = node.lookup_length('max-row-spacing', false);
-@@ -1452,11 +1403,6 @@ export const IconGrid = GObject.registerClass({
+@@ -1452,11 +1417,6 @@ export const IconGrid = GObject.registerClass({
          return this.layout_manager.nPages;
      }
  

@@ -11,6 +11,12 @@ gnome-shell (50.0-1ubuntu1) UNRELEASED; urgency=medium
     - ubuntu-authd/loginDialog-Port-sessions-menu-over-to-AuthMenuButton.patch
     - ubuntu-authd/start-abstracting-the-unified-mechanism-handler.patch
     - ubuntu/layout-Make-starting-in-the-overview-configurable-not-imp.patch
+  * Modify patches:
+    - Standardize-icon-sizes-and-fit-the-grid-to-the-screen.patch
+      (LP: #2146524)
+  * Drop patches:
+    - ubuntu/theme-Delete-deprecated-CSS-lines.patch
+    - ubuntu/iconGrid-Force-automatic-default-spacing.patch
 
  -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Fri, 27 Mar 2026 12:33:50 +0800
 
