@@ -14,6 +14,7 @@ Gio._promisify(IBus.InputContext.prototype,
     'process_key_event_async', 'process_key_event_async_finish');
 
 const HIDE_PANEL_TIME = 50;
+const DISABLE_IBUS_INPUT_METHOD = GLib.getenv('GNOME_SHELL_DISABLE_OSK') === '1';
 
 const HAVE_REQUIRE_SURROUNDING_TEXT = GObject.signal_lookup('require-surrounding-text', IBus.InputContext);
 
@@ -24,6 +25,10 @@ export const InputMethod = GObject.registerClass({
 }, class InputMethod extends Clutter.InputMethod {
     _init() {
         super._init();
+
+        if (DISABLE_IBUS_INPUT_METHOD)
+            return;
+
         this._hints = 0;
         this._purpose = 0;
         this._currentFocus = null;
@@ -193,6 +198,9 @@ export const InputMethod = GObject.registerClass({
     }
 
     vfunc_focus_in(focus) {
+        if (DISABLE_IBUS_INPUT_METHOD)
+            return;
+
         this._currentFocus = focus;
         if (this._context) {
             this.update();
@@ -207,6 +215,9 @@ export const InputMethod = GObject.registerClass({
     }
 
     vfunc_focus_out() {
+        if (DISABLE_IBUS_INPUT_METHOD)
+            return;
+
         this._currentFocus = null;
         if (this._context) {
             this._fullReset();
@@ -329,6 +340,9 @@ export const InputMethod = GObject.registerClass({
     }
 
     vfunc_filter_key_event(event) {
+        if (DISABLE_IBUS_INPUT_METHOD)
+            return false;
+
         if (!this._context)
             return false;
         if (!this._currentSource)
@@ -393,6 +407,9 @@ export const InputMethod = GObject.registerClass({
     }
 
     update() {
+        if (DISABLE_IBUS_INPUT_METHOD)
+            return;
+
         if (!this._context)
             return;
         this._updateCapabilities();
