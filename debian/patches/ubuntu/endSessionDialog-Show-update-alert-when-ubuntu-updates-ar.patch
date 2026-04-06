@@ -1,0 +1,48 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Mon, 6 Apr 2026 19:58:06 +0200
+Subject: endSessionDialog: Show update alert when ubuntu updates are planned
+
+When ubuntu updates are happening on reboot we should show a relevant
+message to the users
+
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2147362
+---
+ js/ui/endSessionDialog.js | 11 ++++++++++-
+ 1 file changed, 10 insertions(+), 1 deletion(-)
+
+diff --git a/js/ui/endSessionDialog.js b/js/ui/endSessionDialog.js
+index 291f5e9..c08685b 100644
+--- a/js/ui/endSessionDialog.js
++++ b/js/ui/endSessionDialog.js
+@@ -41,6 +41,8 @@ const LOW_BATTERY_THRESHOLD = 30;
+ 
+ const EndSessionDialogIface = loadInterfaceXML('org.gnome.SessionManager.EndSessionDialog');
+ 
++const UBUNTU_REBOOT_REQUIRED = '/var/run/reboot-required';
++
+ const logoutDialogContent = {
+     subjectWithUser: C_('title', 'Log Out %s'),
+     subject: C_('title', 'Log Out'),
+@@ -337,7 +339,8 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
+         let subject = dialogContent.subject;
+ 
+         // Use different title when we are installing updates
+-        if (dialogContent.subjectWithUpdates && this._checkBox.checked)
++        if (dialogContent.subjectWithUpdates &&
++            (this._checkBox.checked || this._ubuntuRebootRequired))
+             subject = dialogContent.subjectWithUpdates;
+ 
+         this._batteryWarning.visible = this._shouldShowLowBatteryWarning(dialogContent);
+@@ -681,6 +684,12 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
+                 this._type = DialogType.UPDATE_RESTART;
+         }
+ 
++        this._ubuntuRebootRequired = GLib.file_test(UBUNTU_REBOOT_REQUIRED,
++            GLib.FileTest.EXISTS | GLib.FileTest.IS_REGULAR);
++
++        if (this._type === DialogType.RESTART && this._ubuntuRebootRequired)
++            this._type = DialogType.UPDATE_RESTART;
++
+         this._applications = [];
+         this._applicationSection.list.destroy_all_children();
+ 
