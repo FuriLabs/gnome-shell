@@ -5,6 +5,8 @@ lightbox-Use-triangular-noise-shape-for-dithering.patch
 croco-Remove-set-but-unused-variables.patch
 shell-Remove-set-but-unused-variable.patch
 shell-Fix-overcounting-of-misc.-symbols-for-password-stre.patch
+keyboard-Ensure-minimum-height-of-the-OSK-always-fits-on-.patch
+st-texture-cache-Add-missing-error-reporting.patch
 shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
 notificationDaemon-Do-not-ignore-GtkNotification-sources-.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
