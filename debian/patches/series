@@ -60,3 +60,4 @@ ubuntu-authd/gdm-authPrompt-Fix-key-focus-handling-on-choice-list.patch
 ubuntu/extensions-Include-snapd-prompting-extension.patch
 messageTray-Never-close-a-notification-banner-that-is-abo.patch
 lp-2127933-fix-unattended-ethernet-icon.patch
+ubuntu/sessionMode-Enable-the-networkAgent-within-the-unlock-dia.patch

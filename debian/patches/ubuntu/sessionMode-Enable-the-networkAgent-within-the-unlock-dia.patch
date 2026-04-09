@@ -1,0 +1,35 @@
+From: Mitchell Augustin <mitchell.augustin@canonical.com>
+Date: Mon, 6 Apr 2026 17:05:58 -0500
+Subject: sessionMode: Enable the networkAgent within the unlock-dialog
+
+This ensures that selecting a password-protected
+Wi-Fi network in quicksettings behaves the same
+on both the initial gdm screen (before any user
+has logged in, as enabled already in 4440a8210b456923678facd434ef8a23d48f63b6)
+and when the screen has been locked by an already logged-in user.
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4160>
+
+Author: Mitchell Augustin <mitchell.augustin@canonical.com>
+Bug-Ubuntu: https://launchpad.net/bugs/2147661
+Origin: upstream, https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/2d06616f24e5f372cb81030f8e0effa003a84195
+Last-Update: 2026-04-09
+---
+ js/ui/sessionMode.js | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/js/ui/sessionMode.js b/js/ui/sessionMode.js
+index 925c6e0..7d1be3e 100644
+--- a/js/ui/sessionMode.js
++++ b/js/ui/sessionMode.js
+@@ -72,7 +72,9 @@ const _modes = {
+     'unlock-dialog': {
+         isLocked: true,
+         unlockDialog: undefined,
+-        components: ['polkitAgent'],
++        components: Config.HAVE_NETWORKMANAGER
++            ? ['networkAgent', 'polkitAgent']
++            : ['polkitAgent'],
+         panel: {
+             left: [],
+             center: [],
