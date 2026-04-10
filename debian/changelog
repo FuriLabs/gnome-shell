@@ -1,3 +1,15 @@
+gnome-shell (50.0-1ubuntu3) resolute; urgency=medium
+
+  [ Mitchell Augustin ]
+  * d/p: sessionMode: Enable the networkAgent within the unlock-dialog
+    (LP: #2147661)
+
+  [ Alessandro Astone ]
+  * d/p: Unset window focus when focusing the shell with Ctrl+Alt+Tab
+    (LP: #2147922)
+
+ -- Alessandro Astone <alessandro.astone@canonical.com>  Fri, 10 Apr 2026 15:58:13 +0200
+
 gnome-shell (50.0-1ubuntu2) resolute; urgency=medium
 
   * d/p/ubuntu: Use update message strings if reboot implies updates
