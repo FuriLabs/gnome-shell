@@ -70,3 +70,4 @@ ubuntu-authd/js-Minify-the-authd-protocol-during-build.patch
 ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch
 ubuntu/endSessionDialog-Show-update-alert-when-ubuntu-updates-ar.patch
 ubuntu/sessionMode-Enable-the-networkAgent-within-the-unlock-dia.patch
+ubuntu/ctrlAltTab-Unset-input-focus-on-current-window-when-focus.patch

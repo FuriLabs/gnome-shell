@@ -1,0 +1,46 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 9 Apr 2026 01:35:36 +0200
+Subject: ctrlAltTab: Unset input focus on current window when focusing a
+ widget
+
+In case Ctrl+Alt+Tab is used to select the panel, the currently focused
+window is still marked (and drawn) as focused by mutter, despite not
+receiving any input event.
+
+To prevent this, in case we're selecting a group, unset any input focus
+first from the currently focused window.
+
+We do not do it while in overview, as it won't affect the user, as no
+window is focused anyways.
+
+While we do not do it if a custom focus callback si set, as in that case
+it's up to it to control what is focused, and currently it may just
+lead to an unneeded unfocus/focus dance for the windows case.
+
+Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4164
+Bug-Ubuntu: https://launchpad.net/bugs/2147922
+---
+ js/ui/ctrlAltTab.js | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/js/ui/ctrlAltTab.js b/js/ui/ctrlAltTab.js
+index 028bafb..618cf3e 100644
+--- a/js/ui/ctrlAltTab.js
++++ b/js/ui/ctrlAltTab.js
+@@ -54,10 +54,14 @@ export class CtrlAltTabManager {
+     }
+ 
+     focusGroup(item, timestamp) {
+-        if (item.focusCallback)
++        if (item.focusCallback) {
+             item.focusCallback(timestamp);
+-        else
++        } else {
++            if (!Main.overview.visible)
++                global.display.unset_input_focus(timestamp);
++
+             item.root.navigate_focus(null, St.DirectionType.TAB_FORWARD, false);
++        }
+     }
+ 
+     // Sort the items into a consistent order; panel first, tray last,
