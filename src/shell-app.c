@@ -1430,6 +1430,139 @@ spawn_desktop_exec_for_nested_wayland (ShellApp          *app,
   return TRUE;
 }
 
+static gboolean
+pid_is_tracked_by_app (ShellApp *app,
+                       pid_t     pid)
+{
+  g_autoptr (GSList) pids = NULL;
+  GSList *iter;
+
+  pids = shell_app_get_pids (app);
+  for (iter = pids; iter; iter = iter->next) {
+    if (GPOINTER_TO_INT (iter->data) == pid)
+      return TRUE;
+  }
+
+  return FALSE;
+}
+
+static char *
+get_desktop_exec_basename (GDesktopAppInfo *info)
+{
+  g_autofree char **argv = NULL;
+  g_autofree char *program = NULL;
+  const char *base;
+  GError *error = NULL;
+
+  if (!desktop_exec_to_argv_no_uris (info, &argv, &error)) {
+    if (error) {
+      g_warning ("Failed to parse desktop Exec line: %s", error->message);
+      g_clear_error (&error);
+    }
+
+    return NULL;
+  }
+
+  if (argv == NULL || argv[0] == NULL || argv[0][0] == '\0')
+    return NULL;
+
+  program = g_path_get_basename (argv[0]);
+  if (program == NULL || program[0] == '\0')
+    return NULL;
+
+  base = program;
+  return g_strdup (base);
+}
+
+static gboolean
+read_proc_comm (pid_t   pid,
+                char  **comm_out)
+{
+  g_autofree char *path = NULL;
+  g_autofree char *contents = NULL;
+  gsize len = 0;
+
+  g_return_val_if_fail (comm_out != NULL, FALSE);
+
+  *comm_out = NULL;
+
+  path = g_strdup_printf ("/proc/%d/comm", pid);
+  if (!g_file_get_contents (path, &contents, &len, NULL))
+    return FALSE;
+
+  g_strchomp (contents);
+  if (contents[0] == '\0')
+    return FALSE;
+
+  *comm_out = g_steal_pointer (&contents);
+  return TRUE;
+}
+
+static void
+kill_external_instances_for_app (ShellApp *app)
+{
+  g_autofree char *target_comm = NULL;
+  g_autoptr (GDir) proc_dir = NULL;
+  const char *name;
+  pid_t self_pid;
+
+  g_return_if_fail (SHELL_IS_APP (app));
+  g_return_if_fail (app->info != NULL);
+
+  target_comm = get_desktop_exec_basename (app->info);
+  if (target_comm == NULL) {
+    g_print ("Could not determine Exec basename for %s, not killing external instances\n",
+             shell_app_get_name (app));
+    return;
+  }
+
+  proc_dir = g_dir_open ("/proc", 0, NULL);
+  if (proc_dir == NULL) {
+    g_warning ("Failed to open /proc while looking for external instances of %s",
+               shell_app_get_name (app));
+    return;
+  }
+
+  self_pid = getpid ();
+
+  while ((name = g_dir_read_name (proc_dir)) != NULL) {
+    g_autofree char *comm = NULL;
+    pid_t pid;
+    char *endptr = NULL;
+
+    if (!g_ascii_isdigit (name[0]))
+      continue;
+
+    errno = 0;
+    pid = (pid_t) g_ascii_strtoll (name, &endptr, 10);
+    if (errno != 0 || endptr == NULL || *endptr != '\0' || pid <= 1)
+      continue;
+
+    if (pid == self_pid)
+      continue;
+
+    if (pid_is_tracked_by_app (app, pid))
+      continue;
+
+    if (!read_proc_comm (pid, &comm))
+      continue;
+
+    if (g_strcmp0 (comm, target_comm) != 0)
+      continue;
+
+    g_print ("Killing external instance of %s: pid=%d comm=%s\n",
+             shell_app_get_name (app),
+             (int) pid,
+             comm);
+
+    if (kill (pid, SIGTERM) != 0)
+      g_warning ("Failed to SIGTERM pid %d for %s: %s",
+                 (int) pid,
+                 shell_app_get_name (app),
+                 g_strerror (errno));
+  }
+}
+
 /**
  * shell_app_launch:
  * @timestamp: Event timestamp, or 0 for current event timestamp
@@ -1463,6 +1596,12 @@ shell_app_launch (ShellApp           *app,
         meta_window_activate (window, timestamp);
       return TRUE;
     }
+
+  const char *wayland_socket = g_getenv ("GNOME_SHELL_WAYLAND_SOCKET");
+
+  if (wayland_socket && *wayland_socket != '\0' &&
+      shell_app_get_state (app) != SHELL_APP_STATE_RUNNING)
+      kill_external_instances_for_app (app);
 
   global = shell_global_get ();
   context = shell_global_create_app_launch_context (global, timestamp, workspace);
