@@ -1,0 +1,39 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 15 Apr 2026 23:24:25 +0200
+Subject: dash: Use connectObject to track signal connection to global objects
+
+While the dash is never destroyed in vanilla gnome shell, various
+extensions (such as dash-to-dock) are using this code, potentially for
+every monitor.
+
+And so we should make sure that the signals are disconnected when the
+actor is destroyed.
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4180
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2148339
+---
+ js/ui/dash.js | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/js/ui/dash.js b/js/ui/dash.js
+index 17c1a25..539e7eb 100644
+--- a/js/ui/dash.js
++++ b/js/ui/dash.js
+@@ -377,11 +377,13 @@ export const Dash = GObject.registerClass({
+         this._workId = Main.initializeDeferredWork(this._box, this._redisplay.bind(this));
+ 
+         this._appSystem = Shell.AppSystem.get_default();
++        this._appSystem.connectObject(
++            'installed-changed', () => this._queueRedisplay(),
++            'app-state-changed', () => this._queueRedisplay(),
++            this);
+ 
+-        this._appSystem.connect('installed-changed', () =>
+-            this._queueRedisplay());
+-        AppFavorites.getAppFavorites().connect('changed', this._queueRedisplay.bind(this));
+-        this._appSystem.connect('app-state-changed', this._queueRedisplay.bind(this));
++        AppFavorites.getAppFavorites().connectObject('changed',
++            () => this._queueRedisplay(), this);
+ 
+         Main.overview.connectObject(
+             'item-drag-begin', () => this._onItemDragBegin(),

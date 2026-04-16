@@ -61,3 +61,7 @@ ubuntu-authd/js-Minify-the-authd-protocol-during-build.patch
 ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch
 ubuntu/endSessionDialog-Show-update-alert-when-ubuntu-updates-ar.patch
 ubuntu/ctrlAltTab-Unset-input-focus-on-current-window-when-focus.patch
+ubuntu/dash-Disconnect-overview-signals-on-destroy.patch
+ubuntu/appFavorites-Only-emit-changed-signal-on-changes.patch
+ubuntu/appFavorites-Move-installed-changed-where-it-belongs.patch
+ubuntu/dash-Use-connectObject-to-track-signal-connection-to-glob.patch
