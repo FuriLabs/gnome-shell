@@ -1,0 +1,60 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 15 Apr 2026 23:42:50 +0200
+Subject: ctrlAltTab: Only show the windows group if we actually have windows
+
+The Ctrl+Alt+Tab switcher is showing windows item even in a session that
+either do not support windows, or has no (normal) windows visible and
+this is misleading.
+
+So only show the windows group if any window is there.
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4181
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2148588
+---
+ js/ui/ctrlAltTab.js | 23 ++++++++++++++---------
+ 1 file changed, 14 insertions(+), 9 deletions(-)
+
+diff --git a/js/ui/ctrlAltTab.js b/js/ui/ctrlAltTab.js
+index 618cf3e..3a2b3ab 100644
+--- a/js/ui/ctrlAltTab.js
++++ b/js/ui/ctrlAltTab.js
+@@ -17,12 +17,6 @@ export const SortGroup = {
+ export class CtrlAltTabManager {
+     constructor() {
+         this._items = [];
+-        this.addGroup(global.window_group,
+-            _('Windows'),
+-            'shell-focus-windows-symbolic', {
+-                sortGroup: SortGroup.TOP,
+-                focusCallback: this._focusWindows.bind(this),
+-            });
+     }
+ 
+     addGroup(root, name, icon, params) {
+@@ -81,12 +75,23 @@ export class CtrlAltTabManager {
+     popup(backward, binding, mask) {
+         // Start with the set of focus groups that are currently mapped
+         const items = this._items.filter(item => item.proxy.mapped);
++        const display = global.display;
++        const workspaceManager = global.workspace_manager;
++        const activeWorkspace = workspaceManager.get_active_workspace();
++
++        if (Main.sessionMode.hasWindows && !Main.overview.visible &&
++            !!display.get_tab_list(Meta.TabList.WINDOWS, activeWorkspace).length) {
++            items.push({
++                name: _('Windows'),
++                proxy: global.window_group,
++                focusCallback: timestamp => this._focusWindows(timestamp),
++                iconName: 'shell-focus-windows-symbolic',
++                sortGroup: SortGroup.TOP,
++            });
++        }
+ 
+         // And add the windows metacity would show in its Ctrl-Alt-Tab list
+         if (Main.sessionMode.hasWindows && !Main.overview.visible) {
+-            const display = global.display;
+-            const workspaceManager = global.workspace_manager;
+-            const activeWorkspace = workspaceManager.get_active_workspace();
+             const windows = display.get_tab_list(Meta.TabList.DOCKS,
+                 activeWorkspace);
+             const windowTracker = Shell.WindowTracker.get_default();

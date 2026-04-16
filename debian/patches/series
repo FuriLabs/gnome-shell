@@ -67,3 +67,4 @@ ubuntu/appFavorites-Move-installed-changed-where-it-belongs.patch
 ubuntu/dash-Use-connectObject-to-track-signal-connection-to-glob.patch
 ubuntu/mpris-Only-expose-the-players-that-can-play.patch
 ubuntu/mpris-Do-not-send-player-removed-for-a-player-that-has-ne.patch
+ubuntu/ctrlAltTab-Only-show-the-windows-group-if-we-actually-hav.patch
