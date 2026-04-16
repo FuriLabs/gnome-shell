@@ -1,4 +1,4 @@
-gnome-shell (50.1-0ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (50.1-0ubuntu1) resolute; urgency=medium
 
   * New upstream release
   * d/p: Refresh and drop applied upstream.
@@ -39,7 +39,7 @@ gnome-shell (50.1-0ubuntu1) UNRELEASED; urgency=medium
     - d/p/ubuntu/workspacesView-Do-not-add-the-workspaces-view-to-the-focu.patch
     (LP: #2148587)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 16 Apr 2026 19:04:09 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 16 Apr 2026 19:34:19 +0200
 
 gnome-shell (50.0-1ubuntu3) resolute; urgency=medium
 
