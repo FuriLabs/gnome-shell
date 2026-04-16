@@ -1,0 +1,63 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 16 Apr 2026 03:56:39 +0200
+Subject: OverviewAdjustment: Add function to wait for adjustments changes
+
+In various cases we may want to be able to trigger an overview change
+and wait for the animation to be completed, so add an utility function
+to do so in an async way.
+
+We also support tracking an object for destruction to ensure that we do
+not end up either leaving unresolved promises around or completing a
+promise when the tracked object has been destroyed
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4181
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2148587
+---
+ js/ui/overviewControls.js | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
+
+diff --git a/js/ui/overviewControls.js b/js/ui/overviewControls.js
+index 1351681..5f951ab 100644
+--- a/js/ui/overviewControls.js
++++ b/js/ui/overviewControls.js
+@@ -16,6 +16,7 @@ import * as WindowManager from './windowManager.js';
+ import * as WorkspaceThumbnail from './workspaceThumbnail.js';
+ import * as WorkspacesView from './workspacesView.js';
+ 
++import {TransientSignalHolder} from '../misc/signalTracker.js';
+ import {STARTUP_ANIMATION_TIME} from './layout.js';
+ 
+ export const SMALL_WORKSPACE_RATIO = 0.15;
+@@ -307,6 +308,32 @@ export const OverviewAdjustment = GObject.registerClass({
+             progress,
+         };
+     }
++
++    waitForTransitionAsync(trackerObject = null) {
++        if (!trackerObject &&
++            !(trackerObject instanceof Clutter.Actor &&
++            !(trackerObject instanceof TransientSignalHolder)))
++            throw new Error('trackerObject must be a trackable object');
++
++        const transition = this.get_transition('value');
++        if (!transition)
++            return Promise.resolve();
++
++        return new Promise((resolve, reject) => {
++            let destroyID = 0;
++            const stoppedID = transition.connect('stopped', () => {
++                transition.disconnect(stoppedID);
++                trackerObject?.disconnect(destroyID);
++                resolve();
++            });
++
++            destroyID = trackerObject?.connect('destroy', () => {
++                transition.disconnect(stoppedID);
++                trackerObject.disconnect(destroyID);
++                reject(new Error('Tracker object destroyed'));
++            });
++        });
++    }
+ });
+ 
+ export const ControlsManager = GObject.registerClass(

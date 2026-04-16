@@ -68,3 +68,8 @@ ubuntu/dash-Use-connectObject-to-track-signal-connection-to-glob.patch
 ubuntu/mpris-Only-expose-the-players-that-can-play.patch
 ubuntu/mpris-Do-not-send-player-removed-for-a-player-that-has-ne.patch
 ubuntu/ctrlAltTab-Only-show-the-windows-group-if-we-actually-hav.patch
+ubuntu/st-focus-manager-Allow-to-get-the-group-from-a-ClutterAct.patch
+ubuntu/ctrlAltTab-Sort-items-taking-care-of-the-currently-focuse.patch
+ubuntu/workspacesView-Do-not-add-the-workspaces-view-to-the-focu.patch
+ubuntu/OverviewAdjustment-Add-function-to-wait-for-adjustments-c.patch
+ubuntu/overviewControls-Do-focus-navigation-on-Ctrl-Alt-Tab-afte.patch

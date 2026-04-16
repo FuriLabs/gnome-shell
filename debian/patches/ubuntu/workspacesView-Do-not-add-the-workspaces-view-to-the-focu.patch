@@ -1,0 +1,28 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 16 Apr 2026 03:30:04 +0200
+Subject: workspacesView: Do not add the workspaces view to the focus manager
+ group
+
+They are not focus groups, and by doing this we break the actual parent
+focus groups that we have, and in particular by doing this the
+WorkspacesDisplay won't never be considered a group for its children,
+breaking the focus check mechanism
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4181
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2148587
+---
+ js/ui/workspacesView.js | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/js/ui/workspacesView.js b/js/ui/workspacesView.js
+index b530265..c885273 100644
+--- a/js/ui/workspacesView.js
++++ b/js/ui/workspacesView.js
+@@ -36,7 +36,6 @@ const WorkspacesViewBase = GObject.registerClass({
+             y_expand: true,
+         });
+         this.connect('destroy', this._onDestroy.bind(this));
+-        global.focus_manager.add_group(this);
+ 
+         this._monitorIndex = monitorIndex;
+ 

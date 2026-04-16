@@ -1,0 +1,79 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 16 Apr 2026 04:02:29 +0200
+Subject: overviewControls: Do focus navigation on Ctrl+Alt+Tab after
+ animation
+
+The Ctrl+Alt+Tab focus switcher does not currently work as expected
+for Windows and AppGrid when animations are enabled in the overview.
+
+This is because once a selection has been done we toggle the mode and
+immediately navigate the keys, but this won't work as expected if the
+animation is being performed, since the selected view is not yet ready.
+
+So, wait for the adjustment transition and start the navigation only
+after the animation has been completed.
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4181
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2148587
+---
+ js/ui/ctrlAltTab.js       |  2 +-
+ js/ui/overviewControls.js | 24 ++++++++++++++++++------
+ 2 files changed, 19 insertions(+), 7 deletions(-)
+
+diff --git a/js/ui/ctrlAltTab.js b/js/ui/ctrlAltTab.js
+index 03f8c44..2c48ce6 100644
+--- a/js/ui/ctrlAltTab.js
++++ b/js/ui/ctrlAltTab.js
+@@ -49,7 +49,7 @@ export class CtrlAltTabManager {
+ 
+     focusGroup(item, timestamp) {
+         if (item.focusCallback) {
+-            item.focusCallback(timestamp);
++            item.focusCallback(timestamp)?.catch?.(logError);
+         } else {
+             if (!Main.overview.visible)
+                 global.display.unset_input_focus(timestamp);
+diff --git a/js/ui/overviewControls.js b/js/ui/overviewControls.js
+index 5f951ab..ff23fc9 100644
+--- a/js/ui/overviewControls.js
++++ b/js/ui/overviewControls.js
+@@ -422,10 +422,16 @@ class ControlsManager extends St.Widget {
+             _('Apps'),
+             'shell-focus-app-grid-symbolic', {
+                 proxy: this,
+-                focusCallback: () => {
++                focusCallback: async () => {
+                     this.dash.showAppsButton.checked = true;
+-                    this.appDisplay.navigate_focus(
+-                        null, St.DirectionType.TAB_FORWARD, false);
++
++                    try {
++                        await this._stateAdjustment.waitForTransitionAsync(this);
++                        if (this._stateAdjustment.value === ControlsState.APP_GRID) {
++                            this.appDisplay.navigate_focus(null,
++                                St.DirectionType.TAB_FORWARD, false);
++                        }
++                    } catch {}
+                 },
+             });
+ 
+@@ -434,10 +440,16 @@ class ControlsManager extends St.Widget {
+             _('Windows'),
+             'shell-focus-windows-symbolic', {
+                 proxy: this,
+-                focusCallback: () => {
++                focusCallback: async () => {
+                     this.dash.showAppsButton.checked = false;
+-                    this._workspacesDisplay.navigate_focus(
+-                        null, St.DirectionType.TAB_FORWARD, false);
++
++                    try {
++                        await this._stateAdjustment.waitForTransitionAsync(this);
++                        if (this._stateAdjustment.value === ControlsState.WINDOW_PICKER) {
++                            this._workspacesDisplay.navigate_focus(null,
++                                St.DirectionType.TAB_FORWARD, false);
++                        }
++                    } catch {}
+                 },
+             });
+ 

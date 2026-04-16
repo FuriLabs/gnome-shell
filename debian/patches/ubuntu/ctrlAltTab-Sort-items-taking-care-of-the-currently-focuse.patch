@@ -1,0 +1,77 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 15 Apr 2026 23:45:51 +0200
+Subject: ctrlAltTab: Sort items taking care of the currently focused group
+
+The sorting of ctrlAltTab is meant to follow the screen placement, but
+it still acts as a normal switcher, where the first element is supposed
+to be the currently selected item, followed by the next selectable
+elements.
+
+However this switch is not using this ordering at all, and so when it is
+initialized the first item is always the panel and the pre-selected one
+is going to be next widget, without caring about the current selection.
+
+Adjust the sorting of the switch items so that we follow the same logic
+of all the other switches:
+ - The focused group is always the first one
+ - The rest of widgets keep following the original logic
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4181
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2148587
+---
+ js/ui/ctrlAltTab.js | 21 +++++++++++++++++++--
+ 1 file changed, 19 insertions(+), 2 deletions(-)
+
+diff --git a/js/ui/ctrlAltTab.js b/js/ui/ctrlAltTab.js
+index 3a2b3ab..03f8c44 100644
+--- a/js/ui/ctrlAltTab.js
++++ b/js/ui/ctrlAltTab.js
+@@ -62,7 +62,17 @@ export class CtrlAltTabManager {
+     // and everything else in between, sorted by X coordinate, so that
+     // they will have the same left-to-right ordering in the
+     // Ctrl-Alt-Tab dialog as they do onscreen.
+-    _sortItems(a, b) {
++    _sortItems(focusGroup, a, b) {
++        if (focusGroup === a.root)
++            return -1;
++        if (focusGroup === b.root)
++            return 1;
++
++        if (a.isFocused?.())
++            return -1;
++        if (b.isFocused?.())
++            return 1;
++
+         if (a.sortGroup !== b.sortGroup)
+             return a.sortGroup - b.sortGroup;
+ 
+@@ -87,6 +97,9 @@ export class CtrlAltTabManager {
+                 focusCallback: timestamp => this._focusWindows(timestamp),
+                 iconName: 'shell-focus-windows-symbolic',
+                 sortGroup: SortGroup.TOP,
++                // This requires:
++                // https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4164
++                isFocused: () => !!global.display.get_focus_window(),
+             });
+         }
+ 
+@@ -111,6 +124,7 @@ export class CtrlAltTabManager {
+                     focusCallback: timestamp => {
+                         Main.activateWindow(windows[i], timestamp);
+                     },
++                    isFocused: () => windows[i].has_focus(),
+                     iconActor: icon,
+                     iconName,
+                     sortGroup: SortGroup.MIDDLE,
+@@ -121,7 +135,10 @@ export class CtrlAltTabManager {
+         if (!items.length)
+             return;
+ 
+-        items.sort(this._sortItems.bind(this));
++        const {keyFocus} = global.stage;
++        const focusGroup = keyFocus ? global.focus_manager.get_group(keyFocus) : null;
++
++        items.sort((a, b) => this._sortItems(focusGroup, a, b));
+ 
+         if (!this._popup) {
+             this._popup = new CtrlAltTabPopup(items);
