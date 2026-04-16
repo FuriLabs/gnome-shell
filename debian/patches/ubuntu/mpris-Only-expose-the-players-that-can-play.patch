@@ -1,0 +1,29 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 16 Apr 2026 18:35:57 +0200
+Subject: mpris: Only expose the players that can play
+
+In mpris we only emit "player-added" for players that can actually play,
+but during MessageList initialization we add them all, including those
+not having being technically added.
+
+So, be consistent and expose publicly only the players that can play
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4183
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2144732
+---
+ js/ui/mpris.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/mpris.js b/js/ui/mpris.js
+index 1ab2d40..44efbd6 100644
+--- a/js/ui/mpris.js
++++ b/js/ui/mpris.js
+@@ -204,7 +204,7 @@ export const MprisSource = GObject.registerClass({
+     }
+ 
+     get players() {
+-        return [...this._players.values()];
++        return [...this._players.values()].filter(player => player.canPlay);
+     }
+ 
+     _addPlayer(busName) {

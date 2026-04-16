@@ -65,3 +65,5 @@ ubuntu/dash-Disconnect-overview-signals-on-destroy.patch
 ubuntu/appFavorites-Only-emit-changed-signal-on-changes.patch
 ubuntu/appFavorites-Move-installed-changed-where-it-belongs.patch
 ubuntu/dash-Use-connectObject-to-track-signal-connection-to-glob.patch
+ubuntu/mpris-Only-expose-the-players-that-can-play.patch
+ubuntu/mpris-Do-not-send-player-removed-for-a-player-that-has-ne.patch
