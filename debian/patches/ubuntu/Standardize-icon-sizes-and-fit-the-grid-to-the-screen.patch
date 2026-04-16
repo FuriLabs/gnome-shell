@@ -140,10 +140,10 @@ index 1a6c705..c5852d2 100644
          }
  
 diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
-index 0769ef6..2504697 100644
+index 105796d..b4218f9 100644
 --- a/js/ui/appDisplay.js
 +++ b/js/ui/appDisplay.js
-@@ -2064,13 +2064,6 @@ class FolderGrid extends AppGrid {
+@@ -2065,13 +2065,6 @@ class FolderGrid extends AppGrid {
              page_halign: Clutter.ActorAlign.CENTER,
              page_valign: Clutter.ActorAlign.CENTER,
          });
@@ -157,7 +157,7 @@ index 0769ef6..2504697 100644
      }
  });
  
-@@ -2494,6 +2487,12 @@ export const AppFolderDialog = GObject.registerClass({
+@@ -2495,6 +2488,12 @@ export const AppFolderDialog = GObject.registerClass({
              orientation: Clutter.Orientation.VERTICAL,
          });
  
@@ -305,7 +305,7 @@ index 7b666f0..291f5e9 100644
              userAvatar.update();
  
 diff --git a/js/ui/iconGrid.js b/js/ui/iconGrid.js
-index a67a1ee..136c393 100644
+index e87225c..4344712 100644
 --- a/js/ui/iconGrid.js
 +++ b/js/ui/iconGrid.js
 @@ -8,47 +8,18 @@ import St from 'gi://St';

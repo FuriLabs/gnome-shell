@@ -1,12 +1,3 @@
-Update-Serbian-translation.patch
-Update-Cornish-translation.patch
-Constify-results-from-stdlib-functions.patch
-lightbox-Use-triangular-noise-shape-for-dithering.patch
-croco-Remove-set-but-unused-variables.patch
-shell-Remove-set-but-unused-variable.patch
-shell-Fix-overcounting-of-misc.-symbols-for-password-stre.patch
-keyboard-Ensure-minimum-height-of-the-OSK-always-fits-on-.patch
-st-texture-cache-Add-missing-error-reporting.patch
 shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
 notificationDaemon-Do-not-ignore-GtkNotification-sources-.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
@@ -69,5 +60,4 @@ ubuntu-authd/Implement-authd-support-via-the-unified-mechanism.patch
 ubuntu-authd/js-Minify-the-authd-protocol-during-build.patch
 ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch
 ubuntu/endSessionDialog-Show-update-alert-when-ubuntu-updates-ar.patch
-ubuntu/sessionMode-Enable-the-networkAgent-within-the-unlock-dia.patch
 ubuntu/ctrlAltTab-Unset-input-focus-on-current-window-when-focus.patch
