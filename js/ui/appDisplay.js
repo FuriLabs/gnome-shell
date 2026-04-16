@@ -1,3 +1,4 @@
+import Atk from 'gi://Atk';
 import Clutter from 'gi://Clutter';
 import Cogl from 'gi://Cogl';
 import GLib from 'gi://GLib';
@@ -1006,7 +1007,8 @@ var BaseAppView = GObject.registerClass({
             const position = page < nPages ? -1 : 0;
 
             this._moveItem(source, page, position);
-            this.goToPage(page);
+            const realPage = this._grid.getItemPage(source); // could be the next page, if the requested one was full
+            this.goToPage(realPage);
         } else if (this._delayedMoveData) {
             // Dropped before the icon was moved
             const {page, position} = this._delayedMoveData;
@@ -1400,7 +1402,8 @@ class AppDisplay extends BaseAppView {
     }
 
     _ensureDefaultFolders() {
-        if (this._folderSettings.get_user_value('folder-children') !== null)
+        if (this._folderSettings.get_user_value('folder-children') !== null ||
+            this._folderSettings.get_strv('folder-children').length > 0)
             return;
 
         const appSys = Shell.AppSystem.get_default();
@@ -2275,9 +2278,11 @@ export const FolderIcon = GObject.registerClass({
         super._init({
             style_class: 'overview-tile app-folder',
             button_mask: St.ButtonMask.ONE,
-            toggle_mode: true,
             can_focus: true,
         }, global.settings.is_writable('app-picker-layout'));
+
+        this.add_accessible_state(Atk.StateType.EXPANDABLE);
+
         this._id = id;
         this._name = '';
         this._parentView = parentView;
@@ -2297,6 +2302,9 @@ export const FolderIcon = GObject.registerClass({
         this.view = new FolderView(this._folder, id, parentView);
 
         this._folder.connectObject(
+            'changed', this._sync.bind(this), this);
+        const appFavorites = AppFavorites.getAppFavorites();
+        appFavorites.connectObject(
             'changed', this._sync.bind(this), this);
         this._sync();
     }
@@ -2435,8 +2443,10 @@ export const FolderIcon = GObject.registerClass({
                     delay: isOpen ? 0 : FOLDER_DIALOG_ANIMATION_TIME - duration,
                 });
 
-                if (!isOpen)
-                    this.checked = false;
+                if (isOpen)
+                    this.add_accessible_state(Atk.StateType.EXPANDED);
+                else
+                    this.remove_accessible_state(Atk.StateType.EXPANDED);
             });
         }
     }
@@ -2453,6 +2463,8 @@ export const AppFolderDialog = GObject.registerClass({
             x_expand: true,
             y_expand: true,
             reactive: true,
+            accessible_name: source.name,
+            accessible_role: Atk.Role.PANEL,
         });
 
         this.add_constraint(new Layout.MonitorConstraint({primary: true}));
@@ -2590,13 +2602,14 @@ export const AppFolderDialog = GObject.registerClass({
     }
 
     _switchActor(from, to) {
-        to.reactive = true;
+        to.reactive = to.can_focus = true;
         to.ease({
             opacity: 255,
             duration: 300,
             mode: Clutter.AnimationMode.EASE_OUT_QUAD,
         });
 
+        from.can_focus = false;
         from.ease({
             opacity: 0,
             duration: 300,

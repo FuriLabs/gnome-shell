@@ -15,6 +15,7 @@ import {ensureActorVisibleInScrollView} from '../misc/animationUtils.js';
 
 import {Highlighter} from '../misc/util.js';
 import {Spinner} from './animation.js';
+import {logErrorUnlessCancelled} from '../misc/errorUtils.js';
 
 const SEARCH_PROVIDERS_SCHEMA = 'org.gnome.desktop.search-providers';
 
@@ -225,11 +226,12 @@ const SearchResultsBase = GObject.registerClass({
             return;
 
         this._cancellable.cancel();
-        this._cancellable.reset();
+        const cancellable = new Gio.Cancellable();
+        this._cancellable = cancellable;
 
-        const metas = await this.provider.getResultMetas(metasNeeded, this._cancellable);
+        const metas = await this.provider.getResultMetas(metasNeeded, cancellable);
 
-        if (this._cancellable.is_cancelled()) {
+        if (cancellable.is_cancelled()) {
             if (metas.length > 0)
                 throw new Error(`Search provider ${this.provider.id} returned results after the request was canceled`);
         }
@@ -250,12 +252,11 @@ const SearchResultsBase = GObject.registerClass({
         });
     }
 
-    async updateSearch(providerResults, terms, callback) {
+    async updateSearch(providerResults, terms) {
         this._terms = terms;
         if (providerResults.length === 0) {
             this._clearResultDisplay();
             this.hide();
-            callback();
         } else {
             const maxResults = this._getMaxDisplayedResults();
             const results = maxResults > -1
@@ -275,10 +276,9 @@ const SearchResultsBase = GObject.registerClass({
                     resultId => this._addItem(this._resultDisplays[resultId]));
                 this._setMoreCount(this.provider.canLaunchSearch ? moreCount : 0);
                 this.show();
-                callback();
-            } catch {
+            } catch (e) {
+                logErrorUnlessCancelled(e);
                 this._clearResultDisplay();
-                callback();
             }
         }
     }
@@ -497,7 +497,7 @@ class GridSearchResults extends SearchResultsBase {
         super._onDestroy();
     }
 
-    updateSearch(...args) {
+    async updateSearch(...args) {
         if (this._notifyAllocationId)
             this.disconnect(this._notifyAllocationId);
         if (this._updateSearchLater) {
@@ -514,12 +514,12 @@ class GridSearchResults extends SearchResultsBase {
             const laters = global.compositor.get_laters();
             this._updateSearchLater = laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
                 delete this._updateSearchLater;
-                super.updateSearch(...args);
+                super.updateSearch(...args).catch(logErrorUnlessCancelled);
                 return GLib.SOURCE_REMOVE;
             });
         });
 
-        super.updateSearch(...args);
+        await super.updateSearch(...args);
     }
 
     _getMaxDisplayedResults() {
@@ -692,20 +692,23 @@ export const SearchResultsView = GObject.registerClass({
     async _doProviderSearch(provider, previousResults) {
         provider.searchInProgress = true;
 
-        let results;
-        if (this._isSubSearch && previousResults) {
-            results = await provider.getSubsearchResultSet(
-                previousResults,
-                this._terms,
-                this._cancellable);
-        } else {
-            results = await provider.getInitialResultSet(
-                this._terms,
-                this._cancellable);
+        let results = [];
+        const terms = this._terms;
+        try {
+            if (this._isSubSearch && previousResults) {
+                results = await provider.getSubsearchResultSet(
+                    previousResults,
+                    terms,
+                    this._cancellable);
+            } else {
+                results = await provider.getInitialResultSet(
+                    terms,
+                    this._cancellable);
+            }
+        } finally {
+            this._results[provider.id] = results;
+            await this._updateResults(provider, terms, results);
         }
-
-        this._results[provider.id] = results;
-        this._updateResults(provider, results);
     }
 
     _doSearch() {
@@ -716,7 +719,8 @@ export const SearchResultsView = GObject.registerClass({
 
         this._providers.forEach(provider => {
             const previousProviderResults = previousResults[provider.id];
-            this._doProviderSearch(provider, previousProviderResults);
+            this._doProviderSearch(provider, previousProviderResults).catch(
+                logErrorUnlessCancelled);
         });
 
         this._updateSearchProgress();
@@ -742,7 +746,7 @@ export const SearchResultsView = GObject.registerClass({
         this._startingSearch = true;
 
         this._cancellable.cancel();
-        this._cancellable.reset();
+        this._cancellable = new Gio.Cancellable();
 
         if (terms.length === 0) {
             this._reset();
@@ -851,16 +855,17 @@ export const SearchResultsView = GObject.registerClass({
         }
     }
 
-    _updateResults(provider, results) {
-        const terms = this._terms;
+    async _updateResults(provider, terms, results) {
         const display = provider.display;
 
-        display.updateSearch(results, terms, () => {
+        try {
+            await display.updateSearch(results, terms);
+        } finally {
             provider.searchInProgress = false;
 
             this._maybeSetInitialSelection();
             this._updateSearchProgress();
-        });
+        }
     }
 
     activateDefault() {

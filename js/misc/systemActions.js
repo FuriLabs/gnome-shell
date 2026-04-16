@@ -82,7 +82,11 @@ const SystemActions = GObject.registerClass({
         super._init();
 
         this._canHavePowerOff = true;
+        this._powerOffNeedsAuth = false;
+        this._canHaveReboot = true;
+        this._rebootNeedsAuth = false;
         this._canHaveSuspend = true;
+        this._suspendNeedsAuth = false;
 
         function tokenizeKeywords(keywords) {
             return keywords.split(';').map(keyword => GLib.str_tokenize_and_fold(keyword, null)).flat(2);
@@ -159,7 +163,6 @@ const SystemActions = GObject.registerClass({
         this._screenSaverSettings = new Gio.Settings({schema_id: SCREENSAVER_SCHEMA});
 
         this._session = new GnomeSession.SessionManager();
-        this._loginManager = LoginManager.getLoginManager();
         this._monitorManager = global.backend.get_monitor_manager();
 
         this._userManager = AccountsService.UserManager.get_default();
@@ -173,6 +176,10 @@ const SystemActions = GObject.registerClass({
         this._userManager.connect('user-removed',
             () => this._updateMultiUser());
 
+        this._user = this._userManager.get_user(GLib.get_user_name());
+
+        this._user.connect('notify::is-loaded', () => this._updateLogout());
+
         this._lockdownSettings.connect(`changed::${DISABLE_USER_SWITCH_KEY}`,
             () => this._updateSwitchUser());
         this._lockdownSettings.connect(`changed::${DISABLE_LOG_OUT_KEY}`,
@@ -183,11 +190,15 @@ const SystemActions = GObject.registerClass({
         this._lockdownSettings.connect(`changed::${DISABLE_LOCK_SCREEN_KEY}`,
             () => this._updateLockScreen());
 
-        this._lockdownSettings.connect(`changed::${DISABLE_LOG_OUT_KEY}`,
-            () => this._updateHaveShutdown());
+        this._lockdownSettings.connect(`changed::${DISABLE_LOG_OUT_KEY}`, () => {
+            this._updateHaveShutdown();
+            this._updateHaveReboot();
+        });
 
-        this._screenSaverSettings.connect(`changed::${RESTART_ENABLED_KEY}`,
-            () => this._updateHaveShutdown());
+        this._screenSaverSettings.connect(`changed::${RESTART_ENABLED_KEY}`, () => {
+            this._updateHaveShutdown();
+            this._updateHaveReboot();
+        });
 
         this.forceUpdate();
 
@@ -268,6 +279,7 @@ const SystemActions = GObject.registerClass({
     _sessionUpdated() {
         this._updateLockScreen();
         this._updatePowerOff();
+        this._updateReboot();
         this._updateSuspend();
         this._updateMultiUser();
     }
@@ -277,6 +289,7 @@ const SystemActions = GObject.registerClass({
         // settings and Polkit policy - we don't get change notifications for the
         // latter, so their value may be outdated; force an update now
         this._updateHaveShutdown();
+        this._updateHaveReboot();
         this._updateHaveSuspend();
     }
 
@@ -345,10 +358,12 @@ const SystemActions = GObject.registerClass({
 
     async _updateHaveShutdown() {
         try {
-            const [canShutdown] = await this._session.CanShutdownAsync();
-            this._canHavePowerOff = canShutdown;
+            const [availability] = await this._session.CanShutdownAsync();
+            this._canHavePowerOff = availability !== GnomeSession.ActionAvailability.UNAVAILABLE;
+            this._powerOffNeedsAuth = availability === GnomeSession.ActionAvailability.CHALLENGE;
         } catch {
             this._canHavePowerOff = false;
+            this._powerOffNeedsAuth = false;
         }
         this._updatePowerOff();
     }
@@ -356,25 +371,49 @@ const SystemActions = GObject.registerClass({
     _updatePowerOff() {
         const disabled = (Main.sessionMode.isLocked &&
                         !this._screenSaverSettings.get_boolean(RESTART_ENABLED_KEY)) ||
+                       (Main.sessionMode.isLocked && this._powerOffNeedsAuth) ||
                        (Main.sessionMode.isGreeter &&
                         this._loginScreenSettings.get_boolean(DISABLE_RESTART_KEY));
         this._actions.get(POWER_OFF_ACTION_ID).available = this._canHavePowerOff && !disabled;
         this.notify('can-power-off');
+    }
 
-        this._actions.get(RESTART_ACTION_ID).available = this._canHavePowerOff && !disabled;
+    async _updateHaveReboot() {
+        try {
+            const [availability] = await this._session.CanRebootAsync();
+            this._canHaveReboot = availability !== GnomeSession.ActionAvailability.UNAVAILABLE;
+            this._rebootNeedsAuth = availability === GnomeSession.ActionAvailability.CHALLENGE;
+        } catch {
+            this._canHaveReboot = false;
+            this._rebootNeedsAuth = false;
+        }
+        this._updateReboot();
+    }
+
+    _updateReboot() {
+        const disabled = (Main.sessionMode.isLocked &&
+                        !this._screenSaverSettings.get_boolean(RESTART_ENABLED_KEY)) ||
+                       (Main.sessionMode.isLocked && this._rebootNeedsAuth) ||
+                       (Main.sessionMode.isGreeter &&
+                        this._loginScreenSettings.get_boolean(DISABLE_RESTART_KEY));
+        this._actions.get(RESTART_ACTION_ID).available = this._canHaveReboot && !disabled;
         this.notify('can-restart');
     }
 
     async _updateHaveSuspend() {
-        const {canSuspend, needsAuth} = await this._loginManager.canSuspend();
-        this._canHaveSuspend = canSuspend;
-        this._suspendNeedsAuth = needsAuth;
+        try {
+            const [availability] = await this._session.CanSuspendAsync();
+            this._canHaveSuspend = availability !== GnomeSession.ActionAvailability.UNAVAILABLE;
+            this._suspendNeedsAuth = availability === GnomeSession.ActionAvailability.CHALLENGE;
+        } catch {
+            this._canHaveSuspend = false;
+            this._suspendNeedsAuth = false;
+        }
         this._updateSuspend();
     }
 
     _updateSuspend() {
-        const disabled = (Main.sessionMode.isLocked &&
-                        this._suspendNeedsAuth) ||
+        const disabled = (Main.sessionMode.isLocked && this._suspendNeedsAuth) ||
                        (Main.sessionMode.isGreeter &&
                         this._loginScreenSettings.get_boolean(DISABLE_RESTART_KEY));
         this._actions.get(SUSPEND_ACTION_ID).available = this._canHaveSuspend && !disabled;
@@ -399,12 +438,9 @@ const SystemActions = GObject.registerClass({
     }
 
     _updateLogout() {
-        const user = this._userManager.get_user(GLib.get_user_name());
-
         const allowLogout = !this._lockdownSettings.get_boolean(DISABLE_LOG_OUT_KEY);
         const alwaysShow = global.settings.get_boolean(ALWAYS_SHOW_LOG_OUT_KEY);
-        const systemAccount = user.system_account;
-        const localAccount = user.local_account;
+        const {systemAccount, localAccount} = this._user;
         const multiUser = this._userManager.has_multiple_users;
         const multiSession = Gdm.get_session_ids().length > 1;
         const shouldShowInMode = !Main.sessionMode.isLocked && !Main.sessionMode.isGreeter;
@@ -470,7 +506,7 @@ const SystemActions = GObject.registerClass({
         if (!this._actions.get(SUSPEND_ACTION_ID).available)
             throw new Error('The suspend action is not available!');
 
-        this._loginManager.suspend();
+        this._session.SuspendAsync().catch(logErrorUnlessCancelled);
     }
 
     activateScreenshotUI() {

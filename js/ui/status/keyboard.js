@@ -15,7 +15,6 @@ import * as Main from '../main.js';
 import * as PopupMenu from '../popupMenu.js';
 import * as PanelMenu from '../panelMenu.js';
 import * as SwitcherPopup from '../switcherPopup.js';
-import * as Util from '../../misc/util.js';
 
 export const INPUT_SOURCE_TYPE_XKB = 'xkb';
 export const INPUT_SOURCE_TYPE_IBUS = 'ibus';
@@ -484,19 +483,27 @@ export class InputSourceManager extends Signals.EventEmitter {
         this._settings.mruSources = sourcesList;
     }
 
-    _currentInputSourceChanged(newSource) {
+    _currentInputSourceChanged(newSource, interactive) {
         let oldSource;
         [oldSource, this._currentSource] = [this._currentSource, newSource];
 
         this.emit('current-source-changed', oldSource);
 
-        for (let i = 1; i < this._mruSources.length; ++i) {
-            if (this._mruSources[i] === newSource) {
-                const currentSource = this._mruSources.splice(i, 1);
-                this._mruSources = currentSource.concat(this._mruSources);
-                break;
-            }
+        this._mruSources = [
+            newSource,
+            ...this._mruSources.filter(s => s !== newSource),
+        ];
+
+        // Only track user-initiated switches in backup MRU.
+        // Internal (non-interactive) activations during reload/reapply must not affect restore order.
+        if (interactive && this._disableIBus && this._mruSourcesBackup) {
+            this._mruSourcesBackup = [
+                newSource,
+                ...this._mruSourcesBackup.filter(
+                    s => s.type !== newSource.type || s.id !== newSource.id),
+            ];
         }
+
         this._changePerWindowSource();
     }
 
@@ -514,7 +521,7 @@ export class InputSourceManager extends Signals.EventEmitter {
 
         this._ibusManager.setEngine(engine);
 
-        this._currentInputSourceChanged(is);
+        this._currentInputSourceChanged(is, interactive);
 
         if (interactive)
             this._updateMruSettings();
@@ -1169,8 +1176,10 @@ class InputSourceIndicator extends PanelMenu.Button {
     }
 
     _showLayout() {
-        Main.overview.hide();
+        const app =
+            Shell.AppSystem.get_default().lookup_app('org.gnome.Tecla.desktop');
 
-        Util.spawn(['tecla']);
+        Main.overview.hide();
+        app?.activate();
     }
 });

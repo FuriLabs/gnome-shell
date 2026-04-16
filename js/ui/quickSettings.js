@@ -667,10 +667,11 @@ const QuickSettingsLayout = GObject.registerClass({
         return [this.nColumns * childMin + spacing, this.nColumns * childNat + spacing];
     }
 
-    vfunc_get_preferred_height(container, _forWidth) {
+    vfunc_get_preferred_height(container, forWidth) {
         const rows = this._getRows(container);
 
-        let [minHeight, natHeight] = this._overlay.get_preferred_height(-1);
+        let [minHeight, natHeight] =
+            this._overlay.get_preferred_height(forWidth);
 
         const spacing = (rows.length - 1) * this.row_spacing;
         minHeight += spacing;
@@ -688,12 +689,13 @@ const QuickSettingsLayout = GObject.registerClass({
     vfunc_allocate(container, box) {
         const rows = this._getRows(container);
 
-        const [, overlayHeight] = this._overlay.get_preferred_height(-1);
+        const [, overlayHeight] =
+            this._overlay.get_preferred_height(box.get_width());
 
         const availWidth = box.get_width() - (this.nColumns - 1) * this.column_spacing;
         const childWidth = Math.floor(availWidth / this.nColumns);
 
-        this._overlay.allocate_available_size(0, 0, box.get_width(), box.get_height());
+        this._overlay.allocate_available_size(0, 0, box.get_width(), overlayHeight);
 
         const isRtl = container.text_direction === Clutter.TextDirection.RTL;
 
@@ -769,33 +771,41 @@ export const QuickSettingsMenu = class extends PopupMenu.PopupMenu {
         this.box.add_child(this._grid);
         this._grid.add_child(placeholder);
 
+        const xConstraint = new Clutter.BindConstraint({
+            coordinate: Clutter.BindCoordinate.X,
+            source: this._boxPointer,
+        });
         const yConstraint = new Clutter.BindConstraint({
             coordinate: Clutter.BindCoordinate.Y,
             source: this._boxPointer,
         });
 
         // Pick up additional spacing from any intermediate actors
-        const updateOffset = () => {
+        const updateOffset = (constraint, axis) => {
             const laters = global.compositor.get_laters();
             laters.add(Meta.LaterType.BEFORE_REDRAW, () => {
                 const offset = this._grid.apply_relative_transform_to_point(
                     this._boxPointer, new Graphene.Point3D());
-                yConstraint.offset = offset.y;
+                constraint.offset = offset[axis];
                 return GLib.SOURCE_REMOVE;
             });
         };
-        this._grid.connect('notify::y', updateOffset);
-        this.box.connect('notify::y', updateOffset);
-        this._boxPointer.bin.connect('notify::y', updateOffset);
 
+        this._grid.connect('notify::x', () => updateOffset(xConstraint, 'x'));
+        this.box.connect('notify::x', () => updateOffset(xConstraint, 'x'));
+        this._boxPointer.bin.connect('notify::x',
+            () => updateOffset(xConstraint, 'x'));
+
+        this._grid.connect('notify::y', () => updateOffset(yConstraint, 'y'));
+        this.box.connect('notify::y',  () => updateOffset(yConstraint, 'y'));
+        this._boxPointer.bin.connect('notify::y',
+            () => updateOffset(yConstraint, 'y'));
+
+        this._overlay.add_constraint(xConstraint);
         this._overlay.add_constraint(yConstraint);
         this._overlay.add_constraint(new Clutter.BindConstraint({
-            coordinate: Clutter.BindCoordinate.X,
-            source: this._boxPointer,
-        }));
-        this._overlay.add_constraint(new Clutter.BindConstraint({
             coordinate: Clutter.BindCoordinate.WIDTH,
-            source: this._boxPointer,
+            source: this._grid,
         }));
 
         this.actor.add_child(this._overlay);

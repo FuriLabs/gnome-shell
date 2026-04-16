@@ -67,7 +67,9 @@ const _modes = {
     'unlock-dialog': {
         isLocked: true,
         unlockDialog: undefined,
-        components: ['polkitAgent'],
+        components: Config.HAVE_NETWORKMANAGER
+            ? ['networkAgent', 'polkitAgent']
+            : ['polkitAgent'],
         panel: {
             left: [],
             center: [],
@@ -102,7 +104,7 @@ const _modes = {
 function _loadMode(file, info) {
     const name = info.get_name();
     const suffix = name.indexOf('.json');
-    const modeName = suffix === -1 ? name : name.slice(name, suffix);
+    const modeName = suffix === -1 ? name : name.slice(0, suffix);
 
     if (Object.prototype.hasOwnProperty.call(_modes, modeName))
         return;

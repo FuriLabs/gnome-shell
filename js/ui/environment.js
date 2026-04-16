@@ -34,7 +34,6 @@ Gio._promisify(Gio.File.prototype, 'query_info_async');
 Gio._promisify(Polkit.Permission, 'new');
 Gio._promisify(Shell.App.prototype, 'activate_action');
 Gio._promisify(Meta.Backend.prototype, 'set_keymap_async');
-Gio._promisify(Meta.Backend.prototype, 'set_keymap_layout_group_async');
 
 // We can't import shell JS modules yet, because they may have
 // variable initializations, etc, that depend on this file's
@@ -160,7 +159,7 @@ function _easeActor(actor, params) {
     const {promise, callback} = _makeEaseCallback(params, cleanup);
 
     // cancel overwritten transitions
-    const animatedProps = Object.keys(params).map(p => p.replace('_', '-', 'g'));
+    const animatedProps = Object.keys(params).map(p => p.replaceAll('_', '-'));
     animatedProps.forEach(p => actor.remove_transition(p));
 
     if (easingDuration > 0 || !isReversed)
@@ -183,8 +182,10 @@ function _easeActor(actor, params) {
     }
 
     if (transition) {
-        transition.connectObject('stopped', (t, finished) => callback(finished),
-            sessionSignalHolder);
+        transition.connectObject('stopped', (t, finished) => {
+            transition.disconnectObject(sessionSignalHolder);
+            callback(finished);
+        }, sessionSignalHolder);
     } else {
         callback(true);
     }
@@ -272,8 +273,10 @@ function _easeAnimatableProperty(animatable, propName, target, params) {
             prepare();
     }
 
-    transition.connectObject('stopped',
-        (t, finished) => callback(finished), sessionSignalHolder);
+    transition.connectObject('stopped', (t, finished) => {
+        transition.disconnectObject(sessionSignalHolder);
+        callback(finished);
+    }, sessionSignalHolder);
     return promise;
 }
 
