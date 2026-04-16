@@ -1,8 +1,45 @@
 gnome-shell (50.1-0ubuntu1) UNRELEASED; urgency=medium
 
   * New upstream release
+  * d/p: Refresh and drop applied upstream.
+    Applied Upstream:
+    - d/p/Constify-results-from-stdlib-functions.patch
+    - d/p/Update-Cornish-translation.patch
+    - d/p/Update-Serbian-translation.patch
+    - d/p/croco-Remove-set-but-unused-variables.patch
+    - d/p/keyboard-Ensure-minimum-height-of-the-OSK-always-fits-on-.patch
+    - d/p/lightbox-Use-triangular-noise-shape-for-dithering.patch
+    - d/p/shell-Fix-overcounting-of-misc.-symbols-for-password-stre.patch
+    - d/p/shell-Remove-set-but-unused-variable.patch
+    - d/p/st-texture-cache-Add-missing-error-reporting.patch
+    - d/p/ubuntu/sessionMode-Enable-the-networkAgent-within-the-unlock-dia.patch
+  * d/p/ubuntu: Disconnect from global signals on dock destruction.
+    While the upstream dash cannot be destroyed, in ubuntu we use use it in
+    dash-to-dock and each dash instance is destroyed every time we lock the
+    screen, thus it's important to disconnect from global signals or we end
+    up leaking them (and thus a memory hog) and potentially access to
+    destroyed data.
+    - d/p/ubuntu/appFavorites-Move-installed-changed-where-it-belongs.patch
+    - d/p/ubuntu/appFavorites-Only-emit-changed-signal-on-changes.patch
+    - d/p/ubuntu/dash-Disconnect-overview-signals-on-destroy.patch
+    - d/p/ubuntu/dash-Use-connectObject-to-track-signal-connection-to-glob.patch
+    (LP: #2148339)
+  * d/p/ubuntu: Do not throw when closing a music player.
+    - d/p/ubuntu/mpris-Do-not-send-player-removed-for-a-player-that-has-ne.patch
+    - d/p/ubuntu/mpris-Only-expose-the-players-that-can-play.patch
+    (LP: #2144732)
+  * d/p/ubuntu: Only show Windows item in focus switcher with open windows.
+    - d/p/ubuntu/ctrlAltTab-Only-show-the-windows-group-if-we-actually-hav.patch
+    (LP: #2148588)
+  * d/p/ubuntu: Fix sorting and focusing of a11y switcher items.
+    - d/p/ubuntu/OverviewAdjustment-Add-function-to-wait-for-adjustments-c.patch
+    - d/p/ubuntu/ctrlAltTab-Sort-items-taking-care-of-the-currently-focuse.patch
+    - d/p/ubuntu/overviewControls-Do-focus-navigation-on-Ctrl-Alt-Tab-afte.patch
+    - d/p/ubuntu/st-focus-manager-Allow-to-get-the-group-from-a-ClutterAct.patch
+    - d/p/ubuntu/workspacesView-Do-not-add-the-workspaces-view-to-the-focu.patch
+    (LP: #2148587)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 16 Apr 2026 16:15:13 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 16 Apr 2026 19:04:09 +0200
 
 gnome-shell (50.0-1ubuntu3) resolute; urgency=medium
 
