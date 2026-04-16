@@ -1,3 +1,9 @@
+gnome-shell (50.1-0ubuntu1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 16 Apr 2026 16:15:13 +0200
+
 gnome-shell (50.0-1ubuntu3) resolute; urgency=medium
 
   [ Mitchell Augustin ]
