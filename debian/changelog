@@ -1,3 +1,11 @@
+gnome-shell (46.0-0ubuntu6~24.04.14) noble; urgency=medium
+
+  [ Mitchell Augustin ]
+  * d/p: sessionMode: Enable the networkAgent within the unlock-dialog
+    (LP: #2147661)
+
+ -- Alessandro Astone <alessandro.astone@canonical.com>  Mon, 20 Apr 2026 10:46:16 +0200
+
 gnome-shell (46.0-0ubuntu6~24.04.13) noble; urgency=medium
 
   * d/p/lp-2127933-fix-unattended-ethernet-icon.patch:
