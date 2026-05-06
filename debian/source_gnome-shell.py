@@ -11,7 +11,7 @@ def is_process_running(proc):
     return True
 
 def add_info(report):
-    attach_related_packages(report, ['mutter-common'])
+    attach_related_packages(report, ['*mutter*'])
 
     attach_gsettings_package(report, 'gnome-shell-common')
     attach_gsettings_package(report, 'gsettings-desktop-schemas')
@@ -28,7 +28,7 @@ def add_info(report):
 
     result = ''
 
-    dm_list = apport.hookutils.command_output(['sh', '-c', 
+    dm_list = apport.hookutils.command_output(['sh', '-c',
 	'apt-cache search \"display manager\" | cut -d \' \' -f1 | grep -E \"dm$|^gdm3?\\b\"'])
 
     for line in dm_list.split('\n'):
