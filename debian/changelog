@@ -1,8 +1,11 @@
-gnome-shell (50.2-1) UNRELEASED; urgency=medium
+gnome-shell (50.2-1) experimental; urgency=medium
 
+  * Team upload
   * New upstream release
+  * d/patches: Drop patches that were applied upstream
+  * Standards-Version: 4.7.4 (no changes required)
 
- -- Simon McVittie <smcv@debian.org>  Sun, 31 May 2026 08:49:36 +0100
+ -- Simon McVittie <smcv@debian.org>  Sun, 31 May 2026 21:57:02 +0100
 
 gnome-shell (50.0-1) experimental; urgency=medium
 
