@@ -66,7 +66,7 @@ Build-Depends: appstream,
                systemd-dev [linux-any],
                xauth <!nocheck>,
                xwayland <!nocheck>
-Standards-Version: 4.7.3
+Standards-Version: 4.7.4
 Homepage: https://gitlab.gnome.org/GNOME/gnome-shell
 Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git
 Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell
