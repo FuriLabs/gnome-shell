@@ -248,7 +248,7 @@ shell_keyring_prompt_get_property (GObject    *obj,
     g_value_set_int (value, self->password_strength);
     break;
   case PROP_CALLER_WINDOW:
-    g_value_set_string (value, "");
+    g_value_set_static_string (value, "");
     break;
   case PROP_CONTINUE_LABEL:
     g_value_set_string (value, self->continue_label);
@@ -601,7 +601,7 @@ shell_keyring_prompt_get_confirm_actor (ShellKeyringPrompt *self)
 static guint
 calculate_password_strength (const gchar *password)
 {
-  int upper, lower, digit, misc;
+  int upper, digit, misc;
   gdouble pwstrength;
   int length, i;
 
@@ -619,7 +619,6 @@ calculate_password_strength (const gchar *password)
     return 0;
 
   upper = 0;
-  lower = 0;
   digit = 0;
   misc = 0;
 
@@ -627,11 +626,9 @@ calculate_password_strength (const gchar *password)
     {
       if (g_ascii_isdigit (password[i]))
         digit++;
-      else if (g_ascii_islower (password[i]))
-        lower++;
       else if (g_ascii_isupper (password[i]))
         upper++;
-      else
+      else if (!g_ascii_islower (password[i]))
         misc++;
     }
 

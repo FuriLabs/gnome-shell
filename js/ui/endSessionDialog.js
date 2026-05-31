@@ -491,6 +491,8 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
             } else {
                 await this._triggerOfflineUpdateCancel();
             }
+        } else if (this._type === DialogType.UPDATE_RESTART && (this._updatePrepared || this._updateScheduled)) {
+            await this._setPostUpdateAction(OFFLINE_UPDATE_ACTION_REBOOT);
         }
 
         this._fadeOutDialog();
@@ -668,11 +670,13 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
 
         try {
             const state = await this._getUpdateState();
+            this._updatePrepared = state === 'prepared';
             this._updateScheduled = state === 'scheduled';
         } catch (e) {
             if (this._softwareOfflineUpdatesProxy !== null)
                 log(`Failed to get update info from gnome-software: ${e.message}`);
 
+            this._updatePrepared = false;
             this._updateScheduled = false;
         }
 
@@ -709,7 +713,7 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
             this._loadSessions().catch(logError);
 
         _setCheckBoxLabel(this._checkBox, dialogContent.checkBoxText || '');
-        this._checkBox.visible = dialogContent.checkBoxText && this._updateScheduled;
+        this._checkBox.visible = dialogContent.checkBoxText && (this._updatePrepared || this._updateScheduled);
 
         this._checkBox.checked = this._checkBox.visible && !this._isBatteryLow();
 

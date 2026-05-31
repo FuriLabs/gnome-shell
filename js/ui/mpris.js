@@ -204,7 +204,7 @@ export const MprisSource = GObject.registerClass({
     }
 
     get players() {
-        return [...this._players.values()];
+        return [...this._players.values()].filter(player => player.canPlay);
     }
 
     _addPlayer(busName) {
@@ -244,7 +244,11 @@ export const MprisSource = GObject.registerClass({
             if (player) {
                 this._players.delete(name);
                 player.disconnectObject(this);
-                this.emit('player-removed', player);
+
+                // if !canPlay, the player has already been removed
+                // or was never exposed in our public players list
+                if (player.canPlay)
+                    this.emit('player-removed', player);
             }
         }
 

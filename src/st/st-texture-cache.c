@@ -301,17 +301,10 @@ texture_load_data_free (gpointer p)
 {
   AsyncTextureLoadData *data = p;
 
-  if (data->icon_info)
-    {
-      g_object_unref (data->icon_info);
-      if (data->colors)
-        st_icon_colors_unref (data->colors);
-    }
-  else if (data->file)
-    g_object_unref (data->file);
-
-  if (data->key)
-    g_free (data->key);
+  g_clear_object (&data->icon_info);
+  g_clear_pointer (&data->colors, st_icon_colors_unref);
+  g_clear_object (&data->file);
+  g_clear_pointer (&data->key, g_free);
 
   if (data->actors)
     g_slist_free_full (data->actors, (GDestroyNotify) g_object_unref);
@@ -488,15 +481,16 @@ load_pixbuf_async_finish (StTextureCache *cache, GAsyncResult *result, GError **
 }
 
 static ClutterContent *
-pixbuf_to_st_content_image (GdkPixbuf   *pixbuf,
-                            CoglContext *context,
-                            int          width,
-                            int          height,
-                            int          paint_scale,
-                            float        resource_scale)
+pixbuf_to_st_content_image (GdkPixbuf    *pixbuf,
+                            CoglContext  *context,
+                            int           width,
+                            int           height,
+                            int           paint_scale,
+                            float         resource_scale,
+                            GError      **error)
 {
   ClutterContent *image;
-  g_autoptr(GError) error = NULL;
+  g_autoptr(GError) local_error = NULL;
 
   float native_width, native_height;
 
@@ -533,11 +527,11 @@ pixbuf_to_st_content_image (GdkPixbuf   *pixbuf,
                              gdk_pixbuf_get_width (pixbuf),
                              gdk_pixbuf_get_height (pixbuf),
                              gdk_pixbuf_get_rowstride (pixbuf),
-                             &error);
+                             &local_error);
 
-  if (error)
+  if (local_error)
     {
-      g_warning ("Failed to allocate texture: %s", error->message);
+      g_propagate_error (error, g_steal_pointer (&local_error));
       g_clear_object (&image);
     }
 
@@ -702,13 +696,20 @@ finish_texture_load (AsyncTextureLoadData *data,
       if (!g_hash_table_lookup_extended (cache->keyed_cache, data->key,
                                          &orig_key, &value))
         {
+          g_autoptr (GError) error = NULL;
+
           image = pixbuf_to_st_content_image (pixbuf,
                                               data->cogl_context,
                                               data->width, data->height,
                                               data->paint_scale,
-                                              data->resource_scale);
+                                              data->resource_scale,
+                                              &error);
           if (!image)
-            goto out;
+            {
+              g_warning ("Failed to load pixbuf into a content: %s",
+                         error->message);
+              goto out;
+            }
 
           g_hash_table_insert (cache->keyed_cache, g_strdup (data->key),
                                g_object_ref (image));
@@ -720,13 +721,20 @@ finish_texture_load (AsyncTextureLoadData *data,
     }
   else
     {
+      g_autoptr (GError) error = NULL;
+
       image = pixbuf_to_st_content_image (pixbuf,
                                           data->cogl_context,
                                           data->width, data->height,
                                           data->paint_scale,
-                                          data->resource_scale);
+                                          data->resource_scale,
+                                          &error);
       if (!image)
-        goto out;
+        {
+          g_warning ("Failed to load pixbuf into a content: %s",
+                     error->message);
+          goto out;
+        }
     }
 
   if (data->icon_info)
@@ -783,6 +791,7 @@ load_texture_async (StTextureCache       *cache,
   if (data->file)
     {
       GTask *task = g_task_new (cache, NULL, on_pixbuf_loaded, data);
+      g_task_set_source_tag (task, load_texture_async);
       g_task_set_task_data (task, data, NULL);
       g_task_run_in_thread (task, load_pixbuf_thread);
       g_object_unref (task);
@@ -1221,7 +1230,8 @@ st_texture_cache_load_file_sync_to_cogl_texture (StTextureCache *cache,
 
       image = pixbuf_to_st_content_image (pixbuf, context,
                                           available_height, available_width,
-                                          paint_scale, resource_scale);
+                                          paint_scale, resource_scale,
+                                          error);
       g_object_unref (pixbuf);
 
       if (!image)

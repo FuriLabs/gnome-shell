@@ -65,7 +65,6 @@ class DashItemContainer extends St.Widget {
         this.label.hide();
         Main.layoutManager.addChrome(this.label);
         this.label.connectObject('destroy', () => (this.label = null), this);
-        this.label_actor = this.label;
 
         this.child = null;
         this.animatingOut = false;
@@ -379,26 +378,22 @@ export const Dash = GObject.registerClass({
         this._workId = Main.initializeDeferredWork(this._box, this._redisplay.bind(this));
 
         this._appSystem = Shell.AppSystem.get_default();
+        this._appSystem.connectObject(
+            'installed-changed', () => this._queueRedisplay(),
+            'app-state-changed', () => this._queueRedisplay(),
+            this);
 
-        this._appSystem.connect('installed-changed', () => {
-            AppFavorites.getAppFavorites().reload();
-            this._queueRedisplay();
-        });
-        AppFavorites.getAppFavorites().connect('changed', this._queueRedisplay.bind(this));
-        this._appSystem.connect('app-state-changed', this._queueRedisplay.bind(this));
+        AppFavorites.getAppFavorites().connectObject('changed',
+            () => this._queueRedisplay(), this);
 
-        Main.overview.connect('item-drag-begin',
-            this._onItemDragBegin.bind(this));
-        Main.overview.connect('item-drag-end',
-            this._onItemDragEnd.bind(this));
-        Main.overview.connect('item-drag-cancelled',
-            this._onItemDragCancelled.bind(this));
-        Main.overview.connect('window-drag-begin',
-            this._onWindowDragBegin.bind(this));
-        Main.overview.connect('window-drag-cancelled',
-            this._onWindowDragEnd.bind(this));
-        Main.overview.connect('window-drag-end',
-            this._onWindowDragEnd.bind(this));
+        Main.overview.connectObject(
+            'item-drag-begin', () => this._onItemDragBegin(),
+            'item-drag-end', () => this._onItemDragEnd(),
+            'item-drag-cancelled', () => this._onItemDragCancelled(),
+            'window-drag-begin', () => this._onWindowDragBegin(),
+            'window-drag-cancelled', () => this._onWindowDragEnd(),
+            'window-drag-end', () => this._onWindowDragEnd(),
+            this);
 
         // Translators: this is the name of the dock/favorites area on
         // the bottom of the overview
