@@ -132,7 +132,8 @@ class AutorunManager {
 
     enable() {
         this._volumeMonitor.connectObject(
-            'mount-added', this._onMountAdded.bind(this),
+            'mount-added',
+            (monitor, mount) => this._onMountAdded(monitor, mount).catch(logError),
             'mount-removed', this._onMountRemoved.bind(this), this);
     }
 
@@ -193,7 +194,7 @@ class AutorunDispatcher {
             title,
             body,
         });
-        notification.connect('activate', () => {
+        notification.connect('activated', () => {
             const app = Gio.app_info_get_default_for_type('inode/directory', false);
             startAppForMount(app, mount);
         });

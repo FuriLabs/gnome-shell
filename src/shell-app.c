@@ -15,7 +15,6 @@
 #include "shell-global.h"
 #include "shell-util.h"
 #include "shell-app-system-private.h"
-#include "shell-window-tracker-private.h"
 #include "st.h"
 #include "gtkactionmuxer.h"
 #include "org-gtk-application.h"
@@ -334,8 +333,7 @@ find_most_recent_transient_on_same_workspace (MetaDisplay *display,
    * returned from the sort_windows_by_stacking function)
    */
   transients_sorted = g_slist_reverse (transients_sorted);
-  g_slist_free (transients);
-  transients = NULL;
+  g_clear_slist (&transients, NULL);
 
   result = NULL;
   for (iter = transients_sorted; iter; iter = iter->next)
@@ -1324,7 +1322,7 @@ apply_discrete_gpu_env (GAppLaunchContext *context,
     }
 
   GVariant *gpu_list[] = { first_nondefault_discrete, first_discrete, first_nondefault };
-  
+
   for (i = 0; i < G_N_ELEMENTS (gpu_list); ++i)
     {
       GVariant *gpu = gpu_list[i];
@@ -1340,7 +1338,7 @@ apply_discrete_gpu_env (GAppLaunchContext *context,
         continue;
 
       env_s = g_variant_get_strv (env, NULL);
-      for (j = 0; env_s[j] != NULL; j = j + 2)
+      for (j = 0; env_s[j] != NULL && env_s[j+1] != NULL; j = j + 2)
         g_app_launch_context_setenv (context, env_s[j], env_s[j+1]);
       return;
     }
@@ -1701,8 +1699,7 @@ shell_app_update_app_actions (ShellApp   *app,
       if (application_object_path == NULL || unique_bus_name == NULL)
         return;
 
-      g_clear_pointer (&app->running_state->unique_bus_name, g_free);
-      app->running_state->unique_bus_name = g_strdup (unique_bus_name);
+      g_set_str (&app->running_state->unique_bus_name, unique_bus_name);
       actions = g_dbus_action_group_get (app->running_state->session, unique_bus_name, application_object_path);
       gtk_action_muxer_insert (app->running_state->muxer, "app", G_ACTION_GROUP (actions));
       g_object_unref (actions);

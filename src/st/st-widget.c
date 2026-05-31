@@ -257,8 +257,7 @@ st_widget_remove_transition (StWidget *widget)
   if (priv->transition_animation)
     {
       g_object_run_dispose (G_OBJECT (priv->transition_animation));
-      g_object_unref (priv->transition_animation);
-      priv->transition_animation = NULL;
+      g_clear_object (&priv->transition_animation);
     }
 }
 
@@ -525,11 +524,7 @@ st_widget_style_changed_internal (StWidget         *widget,
   StThemeNode *old_theme_node = NULL;
 
   priv->is_style_dirty = TRUE;
-  if (priv->theme_node)
-    {
-      old_theme_node = priv->theme_node;
-      priv->theme_node = NULL;
-    }
+  old_theme_node = g_steal_pointer (&priv->theme_node);
 
   /* update the style only if we are mapped */
   if (clutter_actor_is_mapped (CLUTTER_ACTOR (widget)))
@@ -1048,20 +1043,6 @@ find_class_name (const gchar *class_list,
 }
 
 static gboolean
-set_class_list (gchar       **class_list,
-                const gchar  *new_class_list)
-{
-  if (g_strcmp0 (*class_list, new_class_list) != 0)
-    {
-      g_free (*class_list);
-      *class_list = g_strdup (new_class_list);
-      return TRUE;
-    }
-  else
-    return FALSE;
-}
-
-static gboolean
 add_class_name (gchar       **class_list,
                 const gchar  *class_name)
 {
@@ -1140,7 +1121,7 @@ st_widget_set_style_class_name (StWidget    *actor,
 
   priv = st_widget_get_instance_private (actor);
 
-  if (set_class_list (&priv->style_class, style_class_list))
+  if (g_set_str (&priv->style_class, style_class_list))
     {
       st_widget_style_changed (actor);
       g_object_notify_by_pspec (G_OBJECT (actor), props[PROP_STYLE_CLASS]);
@@ -1309,7 +1290,7 @@ st_widget_set_style_pseudo_class (StWidget    *actor,
 
   priv = st_widget_get_instance_private (actor);
 
-  if (set_class_list (&priv->pseudo_class, pseudo_class_list))
+  if (g_set_str (&priv->pseudo_class, pseudo_class_list))
     {
       st_widget_style_changed (actor);
       g_object_notify_by_pspec (G_OBJECT (actor), props[PROP_PSEUDO_CLASS]);
@@ -1391,11 +1372,8 @@ st_widget_set_style (StWidget  *actor,
 
   priv = st_widget_get_instance_private (actor);
 
-  if (g_strcmp0 (style, priv->inline_style))
+  if (g_set_str (&priv->inline_style, style))
     {
-      g_free (priv->inline_style);
-      priv->inline_style = g_strdup (style);
-
       st_widget_style_changed (actor);
 
       g_object_notify_by_pspec (G_OBJECT (actor), props[PROP_STYLE]);
@@ -2341,7 +2319,7 @@ st_describe_actor (ClutterActor *actor)
 
   g_string_append_c (desc, ']');
 
-  return g_string_free (desc, FALSE);
+  return g_string_free_and_steal (desc);
 }
 
 /**
@@ -2382,8 +2360,7 @@ st_widget_set_label_actor (StWidget     *widget,
 
   if (priv->label_actor != label)
     {
-      if (priv->label_actor)
-        g_object_unref (priv->label_actor);
+      g_clear_object (&priv->label_actor);
 
       if (label != NULL)
         priv->label_actor = g_object_ref (label);

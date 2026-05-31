@@ -78,8 +78,7 @@ assert_font_features (StThemeNode *node,
       fail = TRUE;
     }
 
-  if (value)
-    g_free (value);
+  g_free (value);
 }
 
 static char *
@@ -101,7 +100,7 @@ text_decoration_to_string (StTextDecoration decoration)
   else
     g_string_append(result, "none");
 
-  return g_string_free (result, FALSE);
+  return g_string_free_and_steal (result);
 }
 
 static void
