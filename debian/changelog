@@ -1,3 +1,27 @@
+gnome-shell (50.2-3ubuntu1) stonking; urgency=medium
+
+  * Merge with Debian. Remaining changes:
+    - Add Build-Depends: terser, gnome-qr (for authd)
+    - Add Depends: ubuntu-wallpapers
+    - Add Recommends:
+      + ubuntu-session (| gnome-session) to have the Ubuntu session available
+      + yaru-theme-gnome-shell for the default Ubuntu theming
+    - Add Breaks:
+      + ubuntu-session, like gnome-session
+      + authd
+    - Move from Recommends to Suggests: gnome-browser-connector
+    - debian/gnome-shell-common.alternatives: Install tweaked GDM theme
+    - Add debian/ubuntu-session-mods/ubuntu.json & install it with
+      gnome-shell-common
+    - Add many ubuntu-specific patches
+    - Add patches to support authd authentication in GDM
+    - d/tests/control: Install ubuntu extensions
+    - d/tests/control: Skip running on i386
+  * d/p/u: Drop patches applied upstream
+  * d/p: Rebase patches
+
+ -- Alessandro Astone <alessandro.astone@canonical.com>  Fri, 19 Jun 2026 13:04:01 +0200
+
 gnome-shell (50.2-3) unstable; urgency=medium
 
   * Team upload
