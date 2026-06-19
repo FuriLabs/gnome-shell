@@ -70,7 +70,7 @@ Build-Depends: appstream,
                terser,
                xauth <!nocheck>,
                xwayland <!nocheck>
-Standards-Version: 4.7.3
+Standards-Version: 4.7.4
 Homepage: https://gitlab.gnome.org/GNOME/gnome-shell
 XS-Debian-Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git
 XS-Debian-Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell

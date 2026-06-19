@@ -196,7 +196,7 @@ cr_font_family_to_string (CRFontFamily const * a_this,
                                                 &stringue);
 
         if (status == CR_OK && stringue) {
-                result = (guchar *) g_string_free (stringue, FALSE);
+                result = (guchar *) g_string_free_and_steal (stringue);
                 stringue = NULL;
 
         } else {
@@ -229,10 +229,7 @@ cr_font_family_set_name (CRFontFamily * a_this, guchar * a_name)
                 return CR_BAD_PARAM_ERROR;
         }
 
-        if (a_this->name) {
-                g_free (a_this->name);
-                a_this->name = NULL;
-        }
+        g_clear_pointer (&a_this->name, g_free);
 
         a_this->name = a_name;
         return CR_OK;
@@ -303,10 +300,7 @@ cr_font_family_destroy (CRFontFamily * a_this)
         for (cur_ff = a_this; cur_ff && cur_ff->next; cur_ff = cur_ff->next) ;
 
         for (; cur_ff; cur_ff = cur_ff->prev) {
-                if (a_this->name) {
-                        g_free (a_this->name);
-                        a_this->name = NULL;
-                }
+                g_clear_pointer (&a_this->name, g_free);
 
                 if (cur_ff->next) {
                         g_free (cur_ff->next);

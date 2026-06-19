@@ -333,8 +333,7 @@ find_most_recent_transient_on_same_workspace (MetaDisplay *display,
    * returned from the sort_windows_by_stacking function)
    */
   transients_sorted = g_slist_reverse (transients_sorted);
-  g_slist_free (transients);
-  transients = NULL;
+  g_clear_slist (&transients, NULL);
 
   result = NULL;
   for (iter = transients_sorted; iter; iter = iter->next)
@@ -1339,7 +1338,7 @@ apply_discrete_gpu_env (GAppLaunchContext *context,
         continue;
 
       env_s = g_variant_get_strv (env, NULL);
-      for (j = 0; env_s[j] != NULL; j = j + 2)
+      for (j = 0; env_s[j] != NULL && env_s[j+1] != NULL; j = j + 2)
         g_app_launch_context_setenv (context, env_s[j], env_s[j+1]);
       return;
     }

@@ -897,8 +897,8 @@ global_stage_after_paint (ClutterStage     *stage,
 {
   /* At this point, we've finished all layout and painting, but haven't
    * actually flushed or swapped */
-
-  ClutterBackend *backend = clutter_get_default_backend ();
+  ClutterContext *context = clutter_actor_get_context (CLUTTER_ACTOR (stage));
+  ClutterBackend *backend = clutter_context_get_backend (context);
   CoglContext *cogl_context = clutter_backend_get_cogl_context (backend);
   CoglDisplay *cogl_display = cogl_context_get_display (cogl_context);
   CoglRenderer *cogl_renderer = cogl_display_get_renderer (cogl_display);
@@ -1267,14 +1267,13 @@ run_leisure_functions (gpointer data)
 
   /* We started more work since we scheduled the idle */
   if (global->work_count > 0)
-    return FALSE;
+    return G_SOURCE_REMOVE;
 
   /* No leisure closures, so we are done */
   if (global->leisure_closures == NULL)
-    return FALSE;
+    return G_SOURCE_REMOVE;
 
-  closures = global->leisure_closures;
-  global->leisure_closures = NULL;
+  closures = g_steal_pointer (&global->leisure_closures);
 
   for (iter = closures; iter; iter = iter->next)
     {
@@ -1289,7 +1288,7 @@ run_leisure_functions (gpointer data)
 
   g_slist_free (closures);
 
-  return FALSE;
+  return G_SOURCE_REMOVE;
 }
 
 static void
