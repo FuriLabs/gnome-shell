@@ -1,0 +1,35 @@
+From: Sergio Costas Rodriguez <sergio.costas@canonical.com>
+Date: Fri, 19 Jun 2026 12:10:11 +0200
+Subject: dash: Don't notify two elements for each icon
+
+When the user uses a screen reader and navigates through the
+dash, each element is notified as two: one panel with no label,
+and then a button with the application name as the label.
+
+This is because each icon has the BUTTON role, but is inside a
+container with the PANEL role, so each time the focus changes
+from an icon to the next, there is a change in the container,
+and the screen reader notifies this. But that container is
+useless for the screen reader.
+
+This bug is already fixed in Gnome 50.2 and, thus, in Stonking
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4182
+Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2157622
+
+---
+ js/ui/dash.js | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/js/ui/dash.js b/js/ui/dash.js
+index 539e7eb..9c8a471 100644
+--- a/js/ui/dash.js
++++ b/js/ui/dash.js
+@@ -65,7 +65,6 @@ class DashItemContainer extends St.Widget {
+         this.label.hide();
+         Main.layoutManager.addChrome(this.label);
+         this.label.connectObject('destroy', () => (this.label = null), this);
+-        this.label_actor = this.label;
+ 
+         this.child = null;
+         this.animatingOut = false;
