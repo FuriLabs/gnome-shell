@@ -16,7 +16,7 @@ As we may have different protocols under the hood.
  create mode 100644 js/gdm/unifiedMechanism.js
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 592a41c..831a0e5 100644
+index 7b1d5b3..847f779 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -246,12 +246,19 @@ export const AuthPrompt = GObject.registerClass({
@@ -62,10 +62,10 @@ index 0000000..ad854ca
 +export const SMARTCARD_ROLE_NAME = 'smartcard';
 +export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 4b0a3ef..365355c 100644
+index 003c346..9b4eafe 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -1183,11 +1183,11 @@ export const LoginDialog = GObject.registerClass({
+@@ -1185,11 +1185,11 @@ export const LoginDialog = GObject.registerClass({
  
          mechanisms.sort((a, b) => a.name.localeCompare(b.name));
  
@@ -231,7 +231,7 @@ index 0000000..77ba705
 +    }
 +}
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index e7782c4..657916e 100644
+index 073f518..2eddc2e 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -12,6 +12,8 @@ import {logErrorUnlessCancelled} from '../misc/errorUtils.js';
@@ -437,7 +437,7 @@ index e7782c4..657916e 100644
          } catch (e) {
              logErrorUnlessCancelled(e);
          }
-@@ -689,9 +777,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -696,9 +784,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              if (!definition)
                  return null;
  
@@ -449,7 +449,7 @@ index e7782c4..657916e 100644
          }
  
          return null;
-@@ -706,10 +794,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -713,10 +801,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              return;
  
          if (foregroundMechanism?.role === mechanism?.role &&
@@ -469,7 +469,7 @@ index e7782c4..657916e 100644
          this.emit('foreground-mechanism-changed');
      }
  
-@@ -848,15 +945,23 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -855,15 +952,23 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _startMechanismFromUnifiedService(mechanism) {
@@ -498,7 +498,7 @@ index e7782c4..657916e 100644
      }
  
      _shouldStartBackgroundService(serviceName) {
-@@ -906,6 +1011,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -913,6 +1018,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      _beginVerification() {
          const foregroundService = this._getForegroundService();
  
@@ -507,7 +507,7 @@ index e7782c4..657916e 100644
          this._mechanismsListChangedSignalId =
              this.connect('mechanisms-list-changed',
                  (_, ...args) => this._onMechanismsListChanged(...args));
-@@ -939,28 +1046,36 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -946,28 +1053,36 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this.emit('ask-question', serviceName, prompt, true);
      }
  
@@ -555,7 +555,7 @@ index e7782c4..657916e 100644
  
          const {init_prompt: initPrompt, link_prompt: linkPrompt, uri, code, role, timeout} = mechanisms[mechanismId];
  
-@@ -987,8 +1102,22 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -994,8 +1109,22 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          }
      }
  
@@ -578,7 +578,7 @@ index e7782c4..657916e 100644
          this._replyWithAuthSelectionResponse(serviceName, WEB_LOGIN_ROLE_NAME, {});
      }
  
-@@ -1015,73 +1144,29 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1022,73 +1151,29 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          });
      }
  
@@ -668,7 +668,7 @@ index e7782c4..657916e 100644
          }
      }
  
-@@ -1111,6 +1196,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1118,6 +1203,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      _onProblem(client, serviceName, problem) {
          this.emit(`service-request::${serviceName}`);
  
@@ -681,7 +681,7 @@ index e7782c4..657916e 100644
          const isFingerprint = this.serviceIsFingerprint(serviceName);
  
          if (!this.serviceIsForeground(serviceName) && !isFingerprint)
-@@ -1179,8 +1270,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1186,8 +1277,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const unifiedAuthAvailable = this._activeServices.has(UNIFIED_AUTH_SERVICE_NAME) && !this._unavailableServices.has(UNIFIED_AUTH_SERVICE_NAME);
          for (const definition of DiscreteServiceMechanismDefinitions) {
              const enabled = this._isDiscreteServiceEnabled(definition);
@@ -694,7 +694,7 @@ index e7782c4..657916e 100644
  
              const mechanismsList = [];
              if (enabled && available && !supportedByUnifiedAuth) {
-@@ -1201,6 +1294,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1208,6 +1301,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._activeServices.clear();
          this._unavailableServices.clear();
          this._activeServices.clear();

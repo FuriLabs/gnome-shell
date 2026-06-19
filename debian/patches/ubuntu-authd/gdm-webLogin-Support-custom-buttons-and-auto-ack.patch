@@ -9,7 +9,7 @@ Subject: gdm/webLogin: Support custom buttons and auto-ack
  3 files changed, 55 insertions(+), 24 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 2387ff6..d7f4058 100644
+index 3698c6a..ca8dc20 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -510,7 +510,7 @@ export const AuthPrompt = GObject.registerClass({
@@ -94,10 +94,10 @@ index 2387ff6..d7f4058 100644
          if (this._spinner)
              this._spinner.stop();
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 17d9d77..8091832 100644
+index 068cd19..8df3b28 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
-@@ -1142,7 +1142,11 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1149,7 +1149,11 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              return;
          }
  
@@ -110,7 +110,7 @@ index 17d9d77..8091832 100644
  
          if (!linkPrompt || !uri)
              return;
-@@ -1157,7 +1161,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1164,7 +1168,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          }
  
          this._pendingMechanisms.set(role, mechanismId);
@@ -119,7 +119,7 @@ index 17d9d77..8091832 100644
      }
  
      _clearWebLoginTimeout() {
-@@ -1179,6 +1183,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -1186,6 +1190,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._clearWebLoginTimeout();
  
          const mechanism = this._getPendingMechanismForRole(WEB_LOGIN_ROLE_NAME);

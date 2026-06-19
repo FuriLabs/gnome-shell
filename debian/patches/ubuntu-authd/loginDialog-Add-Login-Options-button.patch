@@ -15,7 +15,7 @@ https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/login-
  3 files changed, 186 insertions(+), 9 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index b4fa47d..12f7ec1 100644
+index c2b6444..2abb0d3 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -140,6 +140,7 @@ export const AuthPrompt = GObject.registerClass({
@@ -64,10 +64,10 @@ index b4fa47d..12f7ec1 100644
 +            this.reset({beginRequestType: BeginRequestType.REUSE_USERNAME});
 +    }
 +
-     _onShowMessage(_userVerifier, serviceName, message, type) {
-         let wiggleParameters = {duration: 0};
- 
-@@ -737,6 +751,11 @@ export const AuthPrompt = GObject.registerClass({
+     _onShowMessage(_userVerifier, serviceName, message, type, showMessageResolver) {
+         this.setMessage(message, type);
+         this.emit('prompted');
+@@ -731,6 +745,11 @@ export const AuthPrompt = GObject.registerClass({
              this._updateEntry(false);
      }
  
@@ -80,10 +80,10 @@ index b4fa47d..12f7ec1 100644
          let {beginRequestType, queryingService} = Params.parse(params, {
              beginRequestType: null,
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 1435e98..2b7aada 100644
+index e1b0760..750e24f 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -592,6 +592,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -594,6 +594,7 @@ export const LoginDialog = GObject.registerClass({
          this._authPrompt = new AuthPrompt.AuthPrompt(this._gdmClient, AuthPrompt.AuthPromptMode.UNLOCK_OR_LOG_IN);
          this._authPrompt.connect('prompted', this._onPrompted.bind(this));
          this._authPrompt.connect('reset', this._onReset.bind(this));
@@ -91,7 +91,7 @@ index 1435e98..2b7aada 100644
          this._authPrompt.hide();
          this.add_child(this._authPrompt);
  
-@@ -645,6 +646,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -647,6 +648,7 @@ export const LoginDialog = GObject.registerClass({
          });
          this.add_child(this._bottomButtonGroup);
  
@@ -99,7 +99,7 @@ index 1435e98..2b7aada 100644
          this._createSessionMenuButton();
  
          this._a11yMenuButton = new A11yMenuButton();
-@@ -691,6 +693,21 @@ export const LoginDialog = GObject.registerClass({
+@@ -693,6 +695,21 @@ export const LoginDialog = GObject.registerClass({
              this._updateDisableUserList.bind(this), this);
      }
  
@@ -121,7 +121,7 @@ index 1435e98..2b7aada 100644
      _createSessionMenuButton() {
          this._sessionMenuButton = new AuthMenuButton.AuthMenuButton({
              title: _('Session'),
-@@ -1150,6 +1167,34 @@ export const LoginDialog = GObject.registerClass({
+@@ -1152,6 +1169,34 @@ export const LoginDialog = GObject.registerClass({
          }
      }
  
@@ -156,7 +156,7 @@ index 1435e98..2b7aada 100644
      _onDefaultSessionChanged(client, sessionId) {
          this._sessionMenuButton.setActiveItem({id: sessionId});
      }
-@@ -1510,6 +1555,8 @@ export const LoginDialog = GObject.registerClass({
+@@ -1512,6 +1557,8 @@ export const LoginDialog = GObject.registerClass({
          });
  
          this._authPrompt.begin(params);
@@ -165,7 +165,7 @@ index 1435e98..2b7aada 100644
      }
  
      _setUserListExpanded(expanded) {
-@@ -1518,6 +1565,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1520,6 +1567,7 @@ export const LoginDialog = GObject.registerClass({
      }
  
      _hideUserList() {
@@ -173,7 +173,7 @@ index 1435e98..2b7aada 100644
          this._setUserListExpanded(false);
          if (this._userSelectionBox.visible)
              GdmUtil.cloneAndFadeOutActor(this._userSelectionBox);
-@@ -1537,6 +1585,8 @@ export const LoginDialog = GObject.registerClass({
+@@ -1539,6 +1587,8 @@ export const LoginDialog = GObject.registerClass({
          this._ensureUserListLoaded();
          this._authPrompt.hide();
          this._hideBannerView();
@@ -183,7 +183,7 @@ index 1435e98..2b7aada 100644
          this._setUserListExpanded(true);
          this._notListedButton.show();
 diff --git a/js/gdm/util.js b/js/gdm/util.js
-index d7339c1..47587ab 100644
+index eebbc8e..a2ba506 100644
 --- a/js/gdm/util.js
 +++ b/js/gdm/util.js
 @@ -29,6 +29,10 @@ export const FINGERPRINT_SERVICE_NAME = 'gdm-fingerprint';
@@ -258,7 +258,7 @@ index d7339c1..47587ab 100644
          if (this._userVerifier) {
              this._disconnectSignals();
              this._userVerifier.get_connection().disconnectObject(this);
-@@ -445,7 +482,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -452,7 +489,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _onCredentialManagerAuthenticated(credentialManager, _token) {
@@ -267,7 +267,7 @@ index d7339c1..47587ab 100644
          this.emit('credential-manager-authenticated');
      }
  
-@@ -481,9 +518,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -488,9 +525,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              this.smartcardDetected = smartcardDetected;
  
              if (this.smartcardDetected)
@@ -279,7 +279,7 @@ index d7339c1..47587ab 100644
  
              this.emit('smartcard-status-changed');
          }
-@@ -589,6 +626,50 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -596,6 +633,50 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          return this._defaultService;
      }
  
@@ -330,7 +330,7 @@ index d7339c1..47587ab 100644
      serviceIsForeground(serviceName) {
          return serviceName === this._getForegroundService();
      }
-@@ -669,6 +750,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -676,6 +757,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      async _startService(serviceName) {
@@ -338,7 +338,7 @@ index d7339c1..47587ab 100644
          this._hold.acquire();
          try {
              this._activeServices.add(serviceName);
-@@ -699,11 +781,6 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -706,11 +788,6 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this._hold.release();
      }
  
@@ -350,7 +350,7 @@ index d7339c1..47587ab 100644
      async _maybeStartFingerprintVerification() {
          if (this._userName &&
              this._fingerprintReaderType !== FingerprintReaderType.NONE &&
-@@ -711,6 +788,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -718,6 +795,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              await this._startService(FINGERPRINT_SERVICE_NAME);
      }
  
@@ -368,7 +368,7 @@ index d7339c1..47587ab 100644
      _onChoiceListQuery(client, serviceName, promptMessage, list) {
          if (!this.serviceIsForeground(serviceName))
              return;
-@@ -797,11 +885,30 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -804,11 +892,30 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          this.emit('ask-question', serviceName, secretQuestion, true);
      }
  
@@ -399,7 +399,7 @@ index d7339c1..47587ab 100644
          this._updateDefaultService();
  
          this.emit('reset');
-@@ -895,6 +1002,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -902,6 +1009,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      _onConversationStopped(client, serviceName) {
          this._activeServices.delete(serviceName);
@@ -407,7 +407,7 @@ index d7339c1..47587ab 100644
  
          // If the login failed with the preauthenticated oVirt credentials
          // then discard the credentials and revert to default authentication
-@@ -903,7 +1011,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -910,7 +1018,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          const isForeground = this.serviceIsForeground(serviceName);
          if (isCredentialManager && isForeground) {
              this._credentialManagers[serviceName].token = null;

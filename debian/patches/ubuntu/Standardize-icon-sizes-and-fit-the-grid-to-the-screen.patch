@@ -64,7 +64,7 @@ index 2fe110f..a116cb7 100644
    page-padding-bottom: $base_padding * 4;
    page-padding-left: $base_padding * 3;
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 1d5a5f2..f4d999e 100644
+index c01c6fe..0e898dd 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -11,6 +11,7 @@ import * as Animation from '../ui/animation.js';
@@ -224,10 +224,10 @@ index 1d8163f..028bafb 100644
          }
          box.add_child(icon);
 diff --git a/js/ui/dash.js b/js/ui/dash.js
-index 1df9414..d141040 100644
+index 970bf94..9c8a471 100644
 --- a/js/ui/dash.js
 +++ b/js/ui/dash.js
-@@ -301,8 +301,6 @@ class DashIconsLayout extends Clutter.BoxLayout {
+@@ -300,8 +300,6 @@ class DashIconsLayout extends Clutter.BoxLayout {
      }
  });
  
@@ -236,7 +236,7 @@ index 1df9414..d141040 100644
  export const Dash = GObject.registerClass({
      Signals: {'icon-size-changed': {}},
  }, class Dash extends St.Widget {
-@@ -319,7 +317,7 @@ export const Dash = GObject.registerClass({
+@@ -318,7 +316,7 @@ export const Dash = GObject.registerClass({
      _init() {
          this._maxWidth = -1;
          this._maxHeight = -1;
@@ -245,7 +245,7 @@ index 1df9414..d141040 100644
          this._shownInitially = false;
  
          this._separator = null;
-@@ -623,12 +621,14 @@ export const Dash = GObject.registerClass({
+@@ -618,12 +616,14 @@ export const Dash = GObject.registerClass({
          const maxIconSize = Math.min(availWidth / iconChildren.length, availHeight);
  
          const scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
@@ -266,7 +266,7 @@ index 1df9414..d141040 100644
  
          if (newIconSize === this.iconSize)
 diff --git a/js/ui/endSessionDialog.js b/js/ui/endSessionDialog.js
-index 7b666f0..291f5e9 100644
+index ee26bff..6b4ce4e 100644
 --- a/js/ui/endSessionDialog.js
 +++ b/js/ui/endSessionDialog.js
 @@ -29,6 +29,7 @@ import * as CheckBox from './checkBox.js';
@@ -286,7 +286,7 @@ index 7b666f0..291f5e9 100644
  const LOW_BATTERY_THRESHOLD = 30;
  
  const EndSessionDialogIface = loadInterfaceXML('org.gnome.SessionManager.EndSessionDialog');
-@@ -578,7 +577,7 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
+@@ -580,7 +579,7 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
          if (app && flags & GnomeSession.InhibitFlags.LOGOUT) {
              const [description] = inhibitor.GetReasonSync();
              const listItem = new Dialog.ListSectionItem({
@@ -295,7 +295,7 @@ index 7b666f0..291f5e9 100644
                  title: app.get_name(),
                  description,
              });
-@@ -622,7 +621,7 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
+@@ -624,7 +623,7 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
              const nSessions = this._sessions.push(session);
  
              const userAvatar = new UserWidget.Avatar(session.user, {

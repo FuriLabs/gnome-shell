@@ -64,7 +64,7 @@ index 5929ccc..a3b10c3 100644
    margin: 3em 0;
  }
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 443624c..1435e98 100644
+index 1ace301..e1b0760 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -28,9 +28,9 @@ import Pango from 'gi://Pango';
@@ -78,7 +78,7 @@ index 443624c..1435e98 100644
  import * as CtrlAltTab from '../ui/ctrlAltTab.js';
  import * as GdmUtil from './util.js';
  import * as Layout from '../ui/layout.js';
-@@ -645,14 +645,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -647,14 +647,7 @@ export const LoginDialog = GObject.registerClass({
          });
          this.add_child(this._bottomButtonGroup);
  
@@ -94,7 +94,7 @@ index 443624c..1435e98 100644
  
          this._a11yMenuButton = new A11yMenuButton();
          this._bottomButtonGroup.add_child(this._a11yMenuButton);
-@@ -698,6 +691,35 @@ export const LoginDialog = GObject.registerClass({
+@@ -700,6 +693,35 @@ export const LoginDialog = GObject.registerClass({
              this._updateDisableUserList.bind(this), this);
      }
  
@@ -130,7 +130,7 @@ index 443624c..1435e98 100644
      _getBannerAllocation(dialogBox) {
          const actorBox = new Clutter.ActorBox();
  
-@@ -1129,7 +1151,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1131,7 +1153,7 @@ export const LoginDialog = GObject.registerClass({
      }
  
      _onDefaultSessionChanged(client, sessionId) {
@@ -139,7 +139,7 @@ index 443624c..1435e98 100644
      }
  
      _shouldShowSessionMenuButton() {
-@@ -1515,8 +1537,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1517,8 +1539,7 @@ export const LoginDialog = GObject.registerClass({
          this._ensureUserListLoaded();
          this._authPrompt.hide();
          this._hideBannerView();

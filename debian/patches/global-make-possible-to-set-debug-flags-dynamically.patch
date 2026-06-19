@@ -138,7 +138,7 @@ index 6895de1..59d78ea 100644
    shell_dbus_init ();
    shell_a11y_init ();
 diff --git a/src/shell-global.c b/src/shell-global.c
-index 1fbc0dd..c6a0e27 100644
+index b6565a6..69ce893 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
 @@ -61,6 +61,7 @@ struct _ShellGlobal {
@@ -191,7 +191,7 @@ index 1fbc0dd..c6a0e27 100644
    g_object_class_install_properties (gobject_class, N_PROPS, props);
  }
  
-@@ -1777,3 +1792,40 @@ shell_global_set_frame_finish_timestamp (ShellGlobal *global,
+@@ -1776,3 +1791,40 @@ shell_global_set_frame_finish_timestamp (ShellGlobal *global,
        g_object_notify_by_pspec (G_OBJECT (global), props[PROP_FRAME_FINISH_TIMESTAMP]);
      }
  }

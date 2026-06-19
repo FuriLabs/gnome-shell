@@ -39,7 +39,7 @@ index a3b10c3..7d23ebc 100644
 +  }
 +}
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 12f7ec1..a7390a5 100644
+index 2abb0d3..d8b308a 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -12,6 +12,7 @@ import * as AuthList from './authList.js';
@@ -50,7 +50,7 @@ index 12f7ec1..a7390a5 100644
  import * as Params from '../misc/params.js';
  import * as ShellEntry from '../ui/shellEntry.js';
  import * as UserWidget from '../ui/userWidget.js';
-@@ -756,6 +757,28 @@ export const AuthPrompt = GObject.registerClass({
+@@ -750,6 +751,28 @@ export const AuthPrompt = GObject.registerClass({
          this._userVerifier.setForegroundMechanism(mechanism);
      }
  
