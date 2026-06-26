@@ -67,3 +67,4 @@ ubuntu/ctrlAltTab-Sort-items-taking-care-of-the-currently-focuse.patch
 ubuntu/workspacesView-Do-not-add-the-workspaces-view-to-the-focu.patch
 ubuntu/OverviewAdjustment-Add-function-to-wait-for-adjustments-c.patch
 ubuntu/overviewControls-Do-focus-navigation-on-Ctrl-Alt-Tab-afte.patch
+ubuntu/appDisplay-Display-two-lines-of-application-name-as-a-min.patch

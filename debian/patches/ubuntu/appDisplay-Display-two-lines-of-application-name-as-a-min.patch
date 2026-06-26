@@ -1,0 +1,41 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Thu, 28 May 2026 18:39:06 +0800
+Subject: appDisplay: Display two lines of application name as a minimum
+
+This requires the new ellipsize-line property of ClutterText.
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4246
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/work_items/5455
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/968213
+---
+ js/ui/appDisplay.js | 10 ++++++++--
+ 1 file changed, 8 insertions(+), 2 deletions(-)
+
+diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
+index b4218f9..0be0ace 100644
+--- a/js/ui/appDisplay.js
++++ b/js/ui/appDisplay.js
+@@ -1909,8 +1909,6 @@ class AppViewItem extends St.Button {
+             ? APP_ICON_TITLE_EXPAND_TIME
+             : APP_ICON_TITLE_COLLAPSE_TIME);
+         clutterText.set({
+-            line_wrap: expand,
+-            line_wrap_mode: expand ? Pango.WrapMode.WORD_CHAR : Pango.WrapMode.NONE,
+             ellipsize: expand ? Pango.EllipsizeMode.NONE : Pango.EllipsizeMode.END,
+         });
+     }
+@@ -2953,6 +2951,14 @@ export const AppIcon = GObject.registerClass({
+         this._iconContainer.add_child(this._dot);
+ 
+         this.label_actor = this.icon.label;
++        if (this.label_actor) {
++            this.label_actor.clutterText.set({
++                line_wrap: true,
++                line_wrap_mode: Pango.WrapMode.WORD_CHAR,
++                ellipsize: Pango.EllipsizeMode.END,
++                ellipsize_line: 2,
++            });
++        }
+ 
+         this.connect('popup-menu', this._onKeyboardPopupMenu.bind(this));
+ 
