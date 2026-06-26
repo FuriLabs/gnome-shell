@@ -20,30 +20,31 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/1969577
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/2067433
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/2146524
 ---
- data/theme/gnome-shell-sass/widgets/_app-grid.scss |  13 +-
+ data/theme/gnome-shell-sass/widgets/_app-grid.scss |   8 +-
  js/gdm/authPrompt.js                               |   4 +-
  js/ui/altTab.js                                    |  16 +-
- js/ui/appDisplay.js                                |  13 +-
+ js/ui/appDisplay.js                                |  11 +-
  js/ui/components/polkitAgent.js                    |   4 +-
  js/ui/ctrlAltTab.js                                |   6 +-
  js/ui/dash.js                                      |  16 +-
  js/ui/endSessionDialog.js                          |   7 +-
- js/ui/iconGrid.js                                  | 222 +++++++++------------
+ js/ui/iconGrid.js                                  | 205 ++++++++-------------
  js/ui/main.js                                      |   6 +
+ js/ui/overviewControls.js                          |   2 +-
  js/ui/shellMountOperation.js                       |   8 +-
  js/ui/switchMonitor.js                             |   5 +-
  js/ui/userWidget.js                                |   5 +-
  js/ui/windowPreview.js                             |   7 +-
- 14 files changed, 144 insertions(+), 188 deletions(-)
+ 15 files changed, 122 insertions(+), 188 deletions(-)
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_app-grid.scss b/data/theme/gnome-shell-sass/widgets/_app-grid.scss
-index 2fe110f..a116cb7 100644
+index 2fe110f..d7dc2f5 100644
 --- a/data/theme/gnome-shell-sass/widgets/_app-grid.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_app-grid.scss
-@@ -1,14 +1,17 @@
+@@ -1,12 +1,11 @@
  /* App Grid */
  
- $app_icon_size: 96px;
+-$app_icon_size: 96px;
 -$app_folder_size: 720px;
 +$app_folder_size: 550px;
  
@@ -51,18 +52,19 @@ index 2fe110f..a116cb7 100644
  .icon-grid {
 -  row-spacing: $base_padding * 2;
 -  column-spacing: $base_padding * 2;
--  max-row-spacing: $base_padding * 6;
--  max-column-spacing: $base_padding * 6;
-+  // You can define these but probably shouldn't. The default is relative to
-+  // the current icon size, which is not known until runtime.
-+  //
-+  // row-spacing:
-+  // column-spacing:
-+  // max-row-spacing:
-+  // max-column-spacing:
++  row-spacing: 32px;
++  column-spacing: 32px;
+   max-row-spacing: $base_padding * 6;
+   max-column-spacing: $base_padding * 6;
    page-padding-top: $base_padding * 4;
-   page-padding-bottom: $base_padding * 4;
-   page-padding-left: $base_padding * 3;
+@@ -140,7 +139,6 @@ $page_indicator_size: 10px;
+   background-color: transparentize($system_fg_color,.9);
+   color: $system_fg_color;
+   border-radius: $forced_circular_radius;
+-  icon-size: $app_icon_size * 0.5;
+   @if $contrast == 'high' {
+     box-shadow: inset 0 0 0 2px $hc_inset_color;
+   }
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
 index c01c6fe..0e898dd 100644
 --- a/js/gdm/authPrompt.js
@@ -140,7 +142,7 @@ index 1a6c705..c5852d2 100644
          }
  
 diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
-index 105796d..b4218f9 100644
+index 105796d..0f30d63 100644
 --- a/js/ui/appDisplay.js
 +++ b/js/ui/appDisplay.js
 @@ -2065,13 +2065,6 @@ class FolderGrid extends AppGrid {
@@ -157,14 +159,12 @@ index 105796d..b4218f9 100644
      }
  });
  
-@@ -2495,6 +2488,12 @@ export const AppFolderDialog = GObject.registerClass({
+@@ -2495,6 +2488,10 @@ export const AppFolderDialog = GObject.registerClass({
              orientation: Clutter.Orientation.VERTICAL,
          });
  
-+        // Temporary workaround while themes still hard code bad values
-+        // inherited from previous gnome-shell releases. Although making
-+        // this reliably auto-sized would be better...
-+        const sensibleAppFolderSize = 550;
++        // Temporary workaround to reflect CSS changes
++        const sensibleAppFolderSize = 550.0;
 +        this._viewBox.width = this._viewBox.height = sensibleAppFolderSize;
 +
          this.child = new St.Bin({
@@ -305,7 +305,7 @@ index ee26bff..6b4ce4e 100644
              userAvatar.update();
  
 diff --git a/js/ui/iconGrid.js b/js/ui/iconGrid.js
-index e87225c..4344712 100644
+index e87225c..24a1b6e 100644
 --- a/js/ui/iconGrid.js
 +++ b/js/ui/iconGrid.js
 @@ -8,47 +8,18 @@ import St from 'gi://St';
@@ -520,7 +520,7 @@ index e87225c..4344712 100644
 +                    Math.floor((iconsHeight - tileHeight) / rowStride);
 +                cols = colsMinusOne + 1;
 +                rows = rowsMinusOne + 1;
-+                if (cols >= 2 && rows >= 2)
++                if (cols >= 1 && rows >= 1)
 +                    break;
 +            }
 +        }
@@ -623,37 +623,19 @@ index e87225c..4344712 100644
          this.layout_manager.adaptToSize(width, height);
          super.vfunc_allocate(box);
      }
-@@ -1259,10 +1208,26 @@ export const IconGrid = GObject.registerClass({
+@@ -1259,8 +1208,9 @@ export const IconGrid = GObject.registerClass({
          super.vfunc_style_changed();
  
          const node = this.get_theme_node();
 -        this.layout_manager.column_spacing = node.get_length('column-spacing');
 -        this.layout_manager.row_spacing = node.get_length('row-spacing');
++        // Temporary workaround to reflect CSS changes
++        this.layout_manager.column_spacing =
++            this.layout_manager.row_spacing = 32.0;
  
--        let [found, value] = node.lookup_length('max-column-spacing', false);
-+        const defaultSpacing = this.layout_manager._iconSize * 0.5;
-+        let found, value;
-+
-+        // A temporary workaround while the accompanying changes have not yet
-+        // been shipped to theme designers:
-+        const allThemesUseSensibleSpacing = false;
-+        if (allThemesUseSensibleSpacing) {
-+            [found, value] = node.lookup_length('column-spacing', false);
-+            this.layout_manager.column_spacing = found ? value : defaultSpacing;
-+
-+            [found, value] = node.lookup_length('row-spacing', false);
-+            this.layout_manager.row_spacing = found ? value : defaultSpacing;
-+        } else {
-+            this.layout_manager.column_spacing =
-+                this.layout_manager.row_spacing =
-+                defaultSpacing;
-+        }
-+
-+        [found, value] = node.lookup_length('max-column-spacing', false);
+         let [found, value] = node.lookup_length('max-column-spacing', false);
          this.layout_manager.max_column_spacing = found ? value : -1;
- 
-         [found, value] = node.lookup_length('max-row-spacing', false);
-@@ -1452,11 +1417,6 @@ export const IconGrid = GObject.registerClass({
+@@ -1452,11 +1402,6 @@ export const IconGrid = GObject.registerClass({
          return this.layout_manager.nPages;
      }
  
@@ -682,6 +664,19 @@ index 3543d41..37d42fd 100644
  let _startDate;
  let _defaultCssStylesheet = null;
  let _cssStylesheet = null;
+diff --git a/js/ui/overviewControls.js b/js/ui/overviewControls.js
+index 1351681..9350dba 100644
+--- a/js/ui/overviewControls.js
++++ b/js/ui/overviewControls.js
+@@ -19,7 +19,7 @@ import * as WorkspacesView from './workspacesView.js';
+ import {STARTUP_ANIMATION_TIME} from './layout.js';
+ 
+ export const SMALL_WORKSPACE_RATIO = 0.15;
+-const DASH_MAX_HEIGHT_RATIO = 0.16;
++const DASH_MAX_HEIGHT_RATIO = 0.2;
+ const VERTICAL_SPACING_RATIO = 0.02;
+ const THUMBNAILS_SPACING_ADJUSTMENT_TOP = 0.6;
+ const THUMBNAILS_SPACING_ADJUSTMENT_BOTTOM = 0.4;
 diff --git a/js/ui/shellMountOperation.js b/js/ui/shellMountOperation.js
 index aa180ba..25420fa 100644
 --- a/js/ui/shellMountOperation.js
