@@ -1,0 +1,136 @@
+From: Daniel van Vugt <daniel.van.vugt@canonical.com>
+Date: Tue, 16 Jun 2026 15:17:02 +0800
+Subject: gdm/loginDialog: Load the logo image synchronously
+
+This ensures it fades in synchronously with the user selector instead
+of arriving slightly late on some systems.
+
+Also some systems (Ubuntu) may decide to omit the fade in order to
+retain the Plymouth boot logo. In this case, we *really* don't want
+any frames displayed before the image is fully loaded;
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4254
+Bug-Ubuntu: https://launchpad.net/bugs/2145786
+---
+ js/gdm/loginDialog.js     |  3 +-
+ src/st/st-texture-cache.c | 73 +++++++++++++++++++++++++++++++++++++++++++++++
+ src/st/st-texture-cache.h |  8 ++++++
+ 3 files changed, 83 insertions(+), 1 deletion(-)
+
+diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
+index 52c1909..b3fb14b 100644
+--- a/js/gdm/loginDialog.js
++++ b/js/gdm/loginDialog.js
+@@ -1080,7 +1080,8 @@ export const LoginDialog = GObject.registerClass({
+         const resourceScale = this._logoBin.get_resource_scale();
+         if (this._logoFile) {
+             const scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+-            const texture = this._textureCache.load_file_async(
++            const texture = this._textureCache.load_file_sync(
++                St.TextureCachePolicy.NONE,
+                 this._logoFile,
+                 -1, -1,
+                 scaleFactor, resourceScale);
+diff --git a/src/st/st-texture-cache.c b/src/st/st-texture-cache.c
+index 7d46df4..27ce025 100644
+--- a/src/st/st-texture-cache.c
++++ b/src/st/st-texture-cache.c
+@@ -1200,6 +1200,79 @@ st_texture_cache_load_file_async (StTextureCache *cache,
+   return actor;
+ }
+ 
++/**
++ * st_texture_cache_load_file_sync:
++ * @cache: A #StTextureCache
++ * @policy: The #StTextureCachePolicy to use
++ * @file: A #GFile of the image file to load
++ * @available_width: Available width for the image, can be -1 if not limited
++ * @available_height: Available height for the image, can be -1 if not limited
++ * @paint_scale: Scale factor of the display
++ * @resource_scale: Resource scale factor
++ *
++ * Synchronously load an image as an actor.
++ *
++ * Returns: (transfer none) (nullable): A new #ClutterActor
++ */
++ClutterActor *
++st_texture_cache_load_file_sync (StTextureCache       *cache,
++                                 StTextureCachePolicy  policy,
++                                 GFile                *file,
++                                 int                   available_width,
++                                 int                   available_height,
++                                 int                   paint_scale,
++                                 gfloat                resource_scale)
++{
++  g_autofree char *key = NULL;
++  g_autoptr (ClutterActor) actor = NULL;
++  ClutterContent *image;
++
++  key = g_strdup_printf (CACHE_PREFIX_FILE "%u%f",
++                         g_file_hash (file), resource_scale);
++  if (!key)
++    return NULL;
++
++  actor = create_invisible_actor ();
++  if (!actor)
++    return NULL;
++
++  image = g_hash_table_lookup (cache->keyed_cache, key);
++  if (!image)
++    {
++      g_autoptr (GdkPixbuf) pixbuf = NULL;
++      ClutterContext *clutter_context;
++      ClutterBackend *clutter_backend;
++      CoglContext *cogl_context;
++
++      pixbuf = impl_load_pixbuf_file (file, available_width, available_height,
++                                      paint_scale, resource_scale, NULL);
++      if (!pixbuf)
++        return NULL;
++
++      clutter_context = clutter_actor_get_context (actor);
++      clutter_backend = clutter_context_get_backend (clutter_context);
++      cogl_context = clutter_backend_get_cogl_context (clutter_backend);
++
++      image = pixbuf_to_st_content_image (pixbuf, cogl_context,
++                                          available_height, available_width,
++                                          paint_scale, resource_scale,
++                                          NULL);
++      if (!image)
++        return NULL;
++
++      if (policy == ST_TEXTURE_CACHE_POLICY_FOREVER)
++        {
++          g_hash_table_insert (cache->keyed_cache, g_strdup (key), image);
++          hash_table_insert_scale (cache->used_scales, (double)resource_scale);
++        }
++    }
++
++  set_content_from_image (actor, image);
++  ensure_monitor_for_file (cache, file);
++
++  return g_steal_pointer (&actor);
++}
++
+ static CoglTexture *
+ st_texture_cache_load_file_sync_to_cogl_texture (StTextureCache *cache,
+                                                  StTextureCachePolicy policy,
+diff --git a/src/st/st-texture-cache.h b/src/st/st-texture-cache.h
+index 4158298..e71f20d 100644
+--- a/src/st/st-texture-cache.h
++++ b/src/st/st-texture-cache.h
+@@ -58,6 +58,14 @@ ClutterActor *st_texture_cache_load_file_async (StTextureCache    *cache,
+                                                 int                paint_scale,
+                                                 gfloat             resource_scale);
+ 
++ClutterActor *st_texture_cache_load_file_sync (StTextureCache       *cache,
++                                               StTextureCachePolicy  policy,
++                                               GFile                *file,
++                                               int                   available_width,
++                                               int                   available_height,
++                                               int                   paint_scale,
++                                               gfloat                resource_scale);
++
+ CoglTexture     *st_texture_cache_load_file_to_cogl_texture (StTextureCache *cache,
+                                                              CoglContext    *context,
+                                                              GFile          *file,
