@@ -12,7 +12,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/968213
  1 file changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
-index b4218f9..0be0ace 100644
+index 0f30d63..cfff2c4 100644
 --- a/js/ui/appDisplay.js
 +++ b/js/ui/appDisplay.js
 @@ -1909,8 +1909,6 @@ class AppViewItem extends St.Button {
@@ -24,7 +24,7 @@ index b4218f9..0be0ace 100644
              ellipsize: expand ? Pango.EllipsizeMode.NONE : Pango.EllipsizeMode.END,
          });
      }
-@@ -2953,6 +2951,14 @@ export const AppIcon = GObject.registerClass({
+@@ -2951,6 +2949,14 @@ export const AppIcon = GObject.registerClass({
          this._iconContainer.add_child(this._dot);
  
          this.label_actor = this.icon.label;

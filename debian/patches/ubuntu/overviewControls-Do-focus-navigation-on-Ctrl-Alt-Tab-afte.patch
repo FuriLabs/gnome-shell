@@ -34,7 +34,7 @@ index 03f8c44..2c48ce6 100644
              if (!Main.overview.visible)
                  global.display.unset_input_focus(timestamp);
 diff --git a/js/ui/overviewControls.js b/js/ui/overviewControls.js
-index 5f951ab..ff23fc9 100644
+index dcb3f5f..ca8cd27 100644
 --- a/js/ui/overviewControls.js
 +++ b/js/ui/overviewControls.js
 @@ -422,10 +422,16 @@ class ControlsManager extends St.Widget {

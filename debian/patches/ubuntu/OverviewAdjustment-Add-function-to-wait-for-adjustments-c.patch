@@ -17,7 +17,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2148587
  1 file changed, 27 insertions(+)
 
 diff --git a/js/ui/overviewControls.js b/js/ui/overviewControls.js
-index 1351681..5f951ab 100644
+index 9350dba..dcb3f5f 100644
 --- a/js/ui/overviewControls.js
 +++ b/js/ui/overviewControls.js
 @@ -16,6 +16,7 @@ import * as WindowManager from './windowManager.js';
