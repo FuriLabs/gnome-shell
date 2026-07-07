@@ -18,7 +18,7 @@ It will be used later when Web Login support is added.
  2 files changed, 36 insertions(+)
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index a3b10c3..7d23ebc 100644
+index 6eb0559..c75452a 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 @@ -421,3 +421,16 @@ $_gdm_dialog_width: 25em;
@@ -39,7 +39,7 @@ index a3b10c3..7d23ebc 100644
 +  }
 +}
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 2abb0d3..d8b308a 100644
+index 5ec99bf..1dd7fd9 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -12,6 +12,7 @@ import * as AuthList from './authList.js';

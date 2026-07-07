@@ -21,7 +21,7 @@ https://gitlab.gnome.org/Teams/Design/os-mockups/-/blob/master/lock-login/web-lo
  create mode 100644 js/gdm/webLogin.js
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index 7d23ebc..4b84b29 100644
+index c75452a..414181c 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 @@ -38,7 +38,8 @@ $_gdm_dialog_width: 25em;
@@ -116,7 +116,7 @@ index 7d23ebc..4b84b29 100644
    background-color: transparent;
  
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index d8b308a..8ff943f 100644
+index 1dd7fd9..29c2b0c 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -16,6 +16,7 @@ import * as MessageTray from '../ui/messageTray.js';
@@ -603,10 +603,10 @@ index 0000000..efe9ae8
 +    }
 +});
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index b8b20a6..6200c7f 100644
+index 9f80290..e8f107b 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
-@@ -11,6 +11,7 @@
+@@ -12,6 +12,7 @@
      <file>gdm/realmd.js</file>
      <file>gdm/util.js</file>
      <file>gdm/vmware.js</file>
@@ -615,11 +615,11 @@ index b8b20a6..6200c7f 100644
      <file>extensions/extension.js</file>
      <file>extensions/sharedInternals.js</file>
 diff --git a/po/POTFILES.in b/po/POTFILES.in
-index ee0829c..5ec7365 100644
+index 37f4719..c46db97 100644
 --- a/po/POTFILES.in
 +++ b/po/POTFILES.in
-@@ -13,6 +13,7 @@ js/dbusServices/extensions/ui/extension-error-page.ui
- js/gdm/authPrompt.js
+@@ -14,6 +14,7 @@ js/gdm/authPrompt.js
+ js/gdm/conflictingSessionDialog.js
  js/gdm/loginDialog.js
  js/gdm/util.js
 +js/gdm/webLogin.js

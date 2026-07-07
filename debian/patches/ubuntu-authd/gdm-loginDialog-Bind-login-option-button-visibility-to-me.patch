@@ -8,10 +8,10 @@ Subject: gdm/loginDialog: Bind login option button visibility to mechanisms
  2 files changed, 2 insertions(+)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 9b4eafe..c249f9a 100644
+index a639c10..5fa47ef 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -1178,6 +1178,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1112,6 +1112,7 @@ export const LoginDialog = GObject.registerClass({
          const activeMechanism = this._loginOptionsButton.getActiveItem();
  
          this._loginOptionsButton.clearItems({serviceName});
@@ -20,10 +20,10 @@ index 9b4eafe..c249f9a 100644
              return;
  
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index d8a8a09..a54c498 100644
+index 993f642..64fb34d 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
-@@ -889,6 +889,7 @@ export const UnlockDialog = GObject.registerClass({
+@@ -890,6 +890,7 @@ export const UnlockDialog = GObject.registerClass({
          const activeMechanism = this._loginOptionsButton.getActiveItem();
  
          this._loginOptionsButton.clearItems({serviceName});

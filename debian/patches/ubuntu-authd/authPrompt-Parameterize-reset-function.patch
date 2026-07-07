@@ -12,7 +12,7 @@ querying service to be specified at reset time.
  1 file changed, 25 insertions(+), 20 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 1cf9002..c2b6444 100644
+index 4383e2b..4c4f166 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -731,7 +731,12 @@ export const AuthPrompt = GObject.registerClass({

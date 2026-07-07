@@ -16,7 +16,7 @@ As we may have different protocols under the hood.
  create mode 100644 js/gdm/unifiedMechanism.js
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 7b1d5b3..847f779 100644
+index 8d99517..bb58bf4 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -246,12 +246,19 @@ export const AuthPrompt = GObject.registerClass({
@@ -62,10 +62,10 @@ index 0000000..ad854ca
 +export const SMARTCARD_ROLE_NAME = 'smartcard';
 +export const FINGERPRINT_ROLE_NAME = 'fingerprint';
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 003c346..9b4eafe 100644
+index 6b967c7..a639c10 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -1185,11 +1185,11 @@ export const LoginDialog = GObject.registerClass({
+@@ -1119,11 +1119,11 @@ export const LoginDialog = GObject.registerClass({
  
          mechanisms.sort((a, b) => a.name.localeCompare(b.name));
  
@@ -703,17 +703,18 @@ index 073f518..2eddc2e 100644
              this.disconnect(this._mechanismsListChangedSignalId);
              this._mechanismsListChangedSignalId = 0;
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 6200c7f..1aaa8e8 100644
+index e8f107b..f232a7d 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
-@@ -5,12 +5,14 @@
+@@ -5,6 +5,7 @@
      <file>gdm/authMenuButton.js</file>
      <file>gdm/authPrompt.js</file>
      <file>gdm/batch.js</file>
 +    <file>gdm/const.js</file>
+     <file>gdm/conflictingSessionDialog.js</file>
      <file>gdm/credentialManager.js</file>
      <file>gdm/loginDialog.js</file>
-     <file>gdm/oVirt.js</file>
+@@ -12,6 +13,7 @@
      <file>gdm/realmd.js</file>
      <file>gdm/util.js</file>
      <file>gdm/vmware.js</file>
@@ -722,10 +723,10 @@ index 6200c7f..1aaa8e8 100644
  
      <file>extensions/extension.js</file>
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index 3f3848c..d8a8a09 100644
+index 00248eb..993f642 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
-@@ -896,11 +896,11 @@ export const UnlockDialog = GObject.registerClass({
+@@ -897,11 +897,11 @@ export const UnlockDialog = GObject.registerClass({
  
          mechanisms.sort((a, b) => a.name.localeCompare(b.name));
  

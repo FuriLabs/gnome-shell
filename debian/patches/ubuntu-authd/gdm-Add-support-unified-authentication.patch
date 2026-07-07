@@ -19,10 +19,10 @@ commits will add support for mechanisms that support other authentication
  3 files changed, 252 insertions(+), 13 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 750e24f..003c346 100644
+index d560583..6b967c7 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -550,7 +550,10 @@ export const LoginDialog = GObject.registerClass({
+@@ -483,7 +483,10 @@ export const LoginDialog = GObject.registerClass({
          this._gdmClient = new Gdm.Client();
  
          try {
@@ -426,7 +426,7 @@ index 3aefb84..6302a44 100644
              return;
  
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index 6b3cd1a..3f3848c 100644
+index 28d2ca4..00248eb 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
 @@ -530,6 +530,7 @@ export const UnlockDialog = GObject.registerClass({

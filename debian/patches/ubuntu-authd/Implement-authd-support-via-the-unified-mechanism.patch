@@ -6550,10 +6550,10 @@ index 8df3b28..75cd105 100644
          this._credentialManagers = {};
  
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 1aaa8e8..909109e 100644
+index f232a7d..a66a1e6 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
-@@ -15,6 +15,9 @@
+@@ -16,6 +16,9 @@
      <file>gdm/unifiedMechanism.js</file>
      <file>gdm/webLogin.js</file>
  
@@ -6564,7 +6564,7 @@ index 1aaa8e8..909109e 100644
      <file>extensions/sharedInternals.js</file>
  
 diff --git a/po/POTFILES.in b/po/POTFILES.in
-index 5ec7365..8ca4aac 100644
+index c46db97..6b58a39 100644
 --- a/po/POTFILES.in
 +++ b/po/POTFILES.in
 @@ -10,6 +10,7 @@ data/X-GNOME-Shell-System.directory.desktop.in
@@ -6573,5 +6573,5 @@ index 5ec7365..8ca4aac 100644
  js/dbusServices/extensions/ui/extension-error-page.ui
 +js/gdm/authd.js
  js/gdm/authPrompt.js
+ js/gdm/conflictingSessionDialog.js
  js/gdm/loginDialog.js
- js/gdm/util.js

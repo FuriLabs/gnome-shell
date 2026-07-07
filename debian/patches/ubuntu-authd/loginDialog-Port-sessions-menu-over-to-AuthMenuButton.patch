@@ -8,11 +8,11 @@ This commit changes the session menu over to use the new
 control.
 ---
  .../gnome-shell-sass/widgets/_login-lock.scss      | 27 +++++++++++++
- js/gdm/loginDialog.js                              | 45 ++++++++++++++++------
- 2 files changed, 60 insertions(+), 12 deletions(-)
+ js/gdm/loginDialog.js                              | 44 ++++++++++++++++------
+ 2 files changed, 60 insertions(+), 11 deletions(-)
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
-index 5929ccc..a3b10c3 100644
+index 93f8ee1..6eb0559 100644
 --- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 +++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
 @@ -37,6 +37,7 @@ $_gdm_dialog_width: 25em;
@@ -64,28 +64,25 @@ index 5929ccc..a3b10c3 100644
    margin: 3em 0;
  }
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 1ace301..e1b0760 100644
+index bb853a6..d4fbabf 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -28,9 +28,9 @@ import Pango from 'gi://Pango';
+@@ -28,6 +28,7 @@ import Pango from 'gi://Pango';
  import Shell from 'gi://Shell';
  import St from 'gi://St';
  
 +import * as AuthMenuButton from './authMenuButton.js';
  import * as AuthPrompt from './authPrompt.js';
  import * as Batch from './batch.js';
--import * as BoxPointer from '../ui/boxpointer.js';
- import * as CtrlAltTab from '../ui/ctrlAltTab.js';
- import * as GdmUtil from './util.js';
- import * as Layout from '../ui/layout.js';
-@@ -647,14 +647,7 @@ export const LoginDialog = GObject.registerClass({
+ import {ConflictingSessionDialog} from './conflictingSessionDialog.js';
+@@ -579,14 +580,7 @@ export const LoginDialog = GObject.registerClass({
          });
          this.add_child(this._bottomButtonGroup);
  
 -        this._sessionMenuButton = new SessionMenuButton();
 -        this._sessionMenuButton.connect('session-activated',
 -            (list, sessionId) => {
--                this._greeter.call_select_session_sync(sessionId, null);
+-                this._greeter.call_select_session(sessionId, null).catch(logError);
 -            });
 -        this._sessionMenuButton.opacity = 0;
 -        this._sessionMenuButton.show();
@@ -94,7 +91,7 @@ index 1ace301..e1b0760 100644
  
          this._a11yMenuButton = new A11yMenuButton();
          this._bottomButtonGroup.add_child(this._a11yMenuButton);
-@@ -700,6 +693,35 @@ export const LoginDialog = GObject.registerClass({
+@@ -632,6 +626,35 @@ export const LoginDialog = GObject.registerClass({
              this._updateDisableUserList.bind(this), this);
      }
  
@@ -130,7 +127,7 @@ index 1ace301..e1b0760 100644
      _getBannerAllocation(dialogBox) {
          const actorBox = new Clutter.ActorBox();
  
-@@ -1131,7 +1153,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1064,7 +1087,7 @@ export const LoginDialog = GObject.registerClass({
      }
  
      _onDefaultSessionChanged(client, sessionId) {
@@ -139,7 +136,7 @@ index 1ace301..e1b0760 100644
      }
  
      _shouldShowSessionMenuButton() {
-@@ -1517,8 +1539,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -1456,8 +1479,7 @@ export const LoginDialog = GObject.registerClass({
          this._ensureUserListLoaded();
          this._authPrompt.hide();
          this._hideBannerView();

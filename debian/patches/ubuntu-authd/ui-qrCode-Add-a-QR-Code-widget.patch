@@ -70,10 +70,10 @@ index 8d01ae8..d6f2d8e 100644
    'gnome-shell-sass/widgets/_screenshot.scss',
    'gnome-shell-sass/widgets/_scrollbars.scss',
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index b1c59f3..b8b20a6 100644
+index 3478d25..9f80290 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
-@@ -103,6 +103,7 @@
+@@ -104,6 +104,7 @@
      <file>ui/pointerWatcher.js</file>
      <file>ui/popupMenu.js</file>
      <file>ui/quickSettings.js</file>
