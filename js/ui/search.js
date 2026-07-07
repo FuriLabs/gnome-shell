@@ -1,3 +1,4 @@
+import Atk from 'gi://Atk';
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
@@ -111,6 +112,10 @@ class ListSearchResult extends SearchResult {
                 y_align: Clutter.ActorAlign.CENTER,
             });
             content.add_child(this._descriptionLabel);
+
+            this.get_accessible().add_relationship(
+                Atk.RelationType.DESCRIBED_BY,
+                this._descriptionLabel.get_accessible());
 
             this._resultsView.connectObject(
                 'terms-changed', this._highlightTerms.bind(this), this);
@@ -587,10 +592,6 @@ export const SearchResultsView = GObject.registerClass({
             child: this._content,
         });
 
-        const panGesture = new Clutter.PanGesture();
-        panGesture.connect('pan-update', this._onPanUpdate.bind(this));
-        this._scrollView.add_action(panGesture);
-
         this.add_child(this._scrollView);
 
         this._statusContainer = new St.BoxLayout({
@@ -767,13 +768,6 @@ export const SearchResultsView = GObject.registerClass({
         this._highlighter = new Highlighter(this._terms);
 
         this.emit('terms-changed');
-    }
-
-    _onPanUpdate(gesture) {
-        const adjustment = this._scrollView.vadjustment;
-        const delta = gesture.get_delta();
-
-        adjustment.value -= (delta.get_y() / this.height) * adjustment.page_size;
     }
 
     _focusChildChanged(provider) {

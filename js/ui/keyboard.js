@@ -198,15 +198,21 @@ class LanguageSelectionPopup extends PopupMenu.PopupMenu {
         return Clutter.EVENT_STOP;
     }
 
-    open(animate) {
-        super.open(animate);
+    open(params = {}) {
+        if (!super.open(params))
+            return false;
+
         global.stage.connectObject(
             'captured-event', this._onCapturedEvent.bind(this), this);
+        return true;
     }
 
-    close(animate) {
-        super.close(animate);
+    close(params = {}) {
+        if (!super.close(params))
+            return false;
+
         global.stage.disconnectObject(this);
+        return true;
     }
 
     destroy() {
@@ -352,7 +358,7 @@ const Key = GObject.registerClass({
     }
 
     _showSubkeys() {
-        this._boxPointer.open(BoxPointer.PopupAnimation.FULL);
+        this._boxPointer.open();
         global.stage.connectObject(
             'captured-event', this._onCapturedEvent.bind(this), this);
         this.keyButton.connectObject('notify::mapped', () => {
@@ -363,7 +369,7 @@ const Key = GObject.registerClass({
 
     _hideSubkeys() {
         if (this._boxPointer)
-            this._boxPointer.close(BoxPointer.PopupAnimation.FULL);
+            this._boxPointer.close();
         global.stage.disconnectObject(this);
         this.keyButton.disconnectObject(this);
         this._capturedPress = false;
@@ -1298,9 +1304,29 @@ export const Keyboard = GObject.registerClass({
         this._relayout();
     }
 
-    _onContentHintsChanged(controller, contentHint) {
-        this._contentHint = contentHint;
-        this._updateLevelFromHints(false);
+    _shouldShowEmoji() {
+        if ((this._contentHints & Clutter.InputContentHintFlags.NO_EMOJI) !== 0)
+            return false;
+
+        return this._purpose === Clutter.InputContentPurpose.NORMAL ||
+            this._purpose === Clutter.InputContentPurpose.ALPHA ||
+            this._purpose === Clutter.InputContentPurpose.PASSWORD ||
+            this._purpose === Clutter.InputContentPurpose.TERMINAL;
+    }
+
+    _onContentHintsChanged(controller, contentHints) {
+        this._contentHints = contentHints;
+
+        if (this.visible &&
+            (contentHints & Clutter.InputContentHintFlags.INHIBIT_OSK) !== 0) {
+            this.close();
+        } else {
+            const emojiVisible = this._shouldShowEmoji();
+            if (emojiVisible !== this._emojiVisible)
+                this._updateKeys();
+            else
+                this._updateLevelFromHints(false);
+        }
     }
 
     _updateLevelFromHints(userInputHappened) {
@@ -1308,7 +1334,7 @@ export const Keyboard = GObject.registerClass({
         if (this._latched)
             return;
 
-        if ((this._contentHint & Clutter.InputContentHintFlags.LOWERCASE) !== 0) {
+        if ((this._contentHints & Clutter.InputContentHintFlags.LOWERCASE) !== 0) {
             this._setActiveLevel('default');
             return;
         }
@@ -1316,12 +1342,12 @@ export const Keyboard = GObject.registerClass({
         if (!this._layers['shift'])
             return;
 
-        if ((this._contentHint & Clutter.InputContentHintFlags.UPPERCASE) !== 0) {
+        if ((this._contentHints & Clutter.InputContentHintFlags.UPPERCASE) !== 0) {
             this._setActiveLevel('shift');
             return;
         }
 
-        if ((this._contentHint &
+        if ((this._contentHints &
              (Clutter.InputContentHintFlags.AUTO_CAPITALIZATION |
               Clutter.InputContentHintFlags.TITLECASE)) !== 0) {
             if (this._surroundingTextId)
@@ -1338,12 +1364,12 @@ export const Keyboard = GObject.registerClass({
 
                     const beforeCursor = GLib.utf8_substring(text, 0, cursor);
 
-                    if ((this._contentHint & Clutter.InputContentHintFlags.TITLECASE) !== 0) {
+                    if ((this._contentHints & Clutter.InputContentHintFlags.TITLECASE) !== 0) {
                         if (beforeCursor.charAt(beforeCursor.length - 1) === ' ')
                             this._setActiveLevel('shift');
                         else
                             this._setActiveLevel('default');
-                    } else if ((this._contentHint & Clutter.InputContentHintFlags.AUTO_CAPITALIZATION) !== 0) {
+                    } else if ((this._contentHints & Clutter.InputContentHintFlags.AUTO_CAPITALIZATION) !== 0) {
                         if (beforeCursor.charAt(beforeCursor.trimEnd().length - 1) === '.')
                             this._setActiveLevel('shift');
                         else
@@ -1426,10 +1452,7 @@ export const Keyboard = GObject.registerClass({
                 return;
         }
 
-        const emojiVisible = purpose === Clutter.InputContentPurpose.NORMAL ||
-            purpose === Clutter.InputContentPurpose.ALPHA ||
-            purpose === Clutter.InputContentPurpose.PASSWORD ||
-            purpose === Clutter.InputContentPurpose.TERMINAL;
+        this._emojiVisible = this._shouldShowEmoji();
 
         keyboardModel.getLevels().forEach(currentLevel => {
             const levelLayout = new KeyContainer();
@@ -1439,7 +1462,7 @@ export const Keyboard = GObject.registerClass({
             const rows = currentLevel.rows;
             rows.forEach(row => {
                 levelLayout.appendRow();
-                this._addRowKeys(row, levelLayout, emojiVisible);
+                this._addRowKeys(row, levelLayout, this._emojiVisible);
             });
 
             layers[currentLevel.level] = levelLayout;
@@ -1659,6 +1682,9 @@ export const Keyboard = GObject.registerClass({
             enabled = this._keyboardVisible === false;
         else
             return;
+
+        if ((this._contentHints & Clutter.InputContentHintFlags.INHIBIT_OSK) !== 0)
+            enabled = false;
 
         if (enabled)
             this.open(Main.layoutManager.focusIndex);

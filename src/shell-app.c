@@ -2,9 +2,13 @@
 
 #include "config.h"
 
+#include <errno.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <glib/gi18n-lib.h>
+#include <glib/gstdio.h>
+#include <systemd/sd-journal.h>
 
 #include <meta/display.h>
 #include <meta/meta-context.h>
@@ -19,12 +23,6 @@
 #include "gtkactionmuxer.h"
 #include "org-gtk-application.h"
 #include "switcheroo-control.h"
-
-#ifdef HAVE_SYSTEMD
-#include <systemd/sd-journal.h>
-#include <errno.h>
-#include <unistd.h>
-#endif
 
 /* This is mainly a memory usage optimization - the user is going to
  * be running far fewer of the applications at one time than they have
@@ -1399,11 +1397,9 @@ shell_app_launch (ShellApp           *app,
 
   /* Optimized spawn path, avoiding a child_setup function */
   {
-    int journalfd = -1;
+    g_autofd int journalfd = -1;
 
-#ifdef HAVE_SYSTEMD
     journalfd = sd_journal_stream_fd (shell_app_get_id (app), LOG_INFO, FALSE);
-#endif /* HAVE_SYSTEMD */
 
     ret = g_desktop_app_info_launch_uris_as_manager_with_fds (app->info, NULL,
                                                               context,
@@ -1414,9 +1410,6 @@ shell_app_launch (ShellApp           *app,
                                                               journalfd,
                                                               journalfd,
                                                               error);
-
-    if (journalfd >= 0)
-      (void) close (journalfd);
   }
   g_object_unref (context);
 
@@ -1506,7 +1499,7 @@ on_activate_action_cb (GObject      *source,
                        GAsyncResult *res,
                        gpointer      user_data)
 {
-  GTask *task = G_TASK (user_data);
+  g_autoptr (GTask) task = G_TASK (user_data);
   g_autoptr (GVariant) value = NULL;
   g_autoptr (GError) error = NULL;
 
@@ -1524,12 +1517,14 @@ activate_action_get_bus_cb (GObject      *object,
                             GAsyncResult *result,
                             gpointer      user_data)
 {
-  GTask *task = G_TASK (user_data);
+  g_autoptr (GTask) task = G_TASK (user_data);
   ShellApp *app = NULL;
   g_autoptr (GDBusConnection) session_bus = NULL;
   g_autoptr (GError) error = NULL;
   g_autofree gchar *object_path = NULL;
   g_autofree gchar *app_id = NULL;
+  GVariant *task_data = NULL;
+  GCancellable *cancellable = NULL;
   gchar *last_dot;
 
   session_bus = g_bus_get_finish (result, &error);
@@ -1548,14 +1543,16 @@ activate_action_get_bus_cb (GObject      *object,
       *last_dot = '\0';
 
   object_path = object_path_from_app_id (app_id);
+  task_data = g_task_get_task_data (task);
+  cancellable = g_task_get_cancellable (task);
 
   g_dbus_connection_call (session_bus,
-                           app_id, object_path,
-                           "org.freedesktop.Application", "ActivateAction",
-                           g_task_get_task_data (task),
-                           NULL, G_DBUS_CALL_FLAGS_NONE, -1,
-                           g_task_get_cancellable (task),
-                           on_activate_action_cb, task);
+                          app_id, object_path,
+                          "org.freedesktop.Application", "ActivateAction",
+                          task_data,
+                          NULL, G_DBUS_CALL_FLAGS_NONE, -1,
+                          cancellable,
+                          on_activate_action_cb, g_steal_pointer (&task));
 }
 
 

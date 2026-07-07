@@ -743,11 +743,8 @@ export class PopupMenuBase extends Signals.EventEmitter {
         return !hasVisibleChildren;
     }
 
-    itemActivated(animate) {
-        if (animate === undefined)
-            animate = BoxPointer.PopupAnimation.FULL;
-
-        this._getTopMenu().close(animate);
+    itemActivated(params) {
+        this._getTopMenu().close(params);
     }
 
     _subMenuActiveChanged(submenu, submenuItem) {
@@ -784,7 +781,7 @@ export class PopupMenuBase extends Signals.EventEmitter {
             },
             'activate', () => {
                 this.emit('activate', menuItem);
-                this.itemActivated(BoxPointer.PopupAnimation.FULL);
+                this.itemActivated();
             }, GObject.ConnectFlags.AFTER,
             'destroy', () => {
                 if (menuItem === this._activeMenuItem)
@@ -888,7 +885,7 @@ export class PopupMenuBase extends Signals.EventEmitter {
             menuItem.menu.connectObject('active-changed',
                 this._subMenuActiveChanged.bind(this), this);
             this.connectObject('menu-closed', () => {
-                menuItem.menu.close(BoxPointer.PopupAnimation.NONE);
+                menuItem.menu.close({animate: false});
             }, menuItem);
         } else if (menuItem instanceof PopupSeparatorMenuItem) {
             this._connectItemSignals(menuItem);
@@ -937,11 +934,44 @@ export class PopupMenuBase extends Signals.EventEmitter {
         }
     }
 
+    /**
+     * @param {object} _params
+     * @param {bool} [_params.animate=true] whether to animate the transition
+     *
+     * @returns {bool} whether the open state changed
+     */
+    open(_params) {
+        if (this.isOpen)
+            return false;
+
+        if (this.isEmpty())
+            return false;
+
+        this.isOpen = true;
+        this.emit('open-state-changed', true);
+        return true;
+    }
+
+    /**
+     * @param {object} _params
+     * @param {bool} [_params.animate=true] whether to animate the transition
+     *
+     * @returns {bool} whether the open state changed
+     */
+    close(_params) {
+        if (!this.isOpen)
+            return false;
+
+        this.isOpen = false;
+        this.emit('open-state-changed', false);
+        return true;
+    }
+
     toggle() {
         if (this.isOpen)
-            this.close(BoxPointer.PopupAnimation.FULL);
+            this.close();
         else
-            this.open(BoxPointer.PopupAnimation.FULL);
+            this.open();
     }
 
     destroy() {
@@ -1049,20 +1079,33 @@ export class PopupMenu extends PopupMenuBase {
         this._boxPointer.setSourceAlignment(alignment);
     }
 
-    open(animate) {
-        if (this.isOpen)
-            return;
+    _getPopupAnimationFromParams(params = {}) {
+        const {animate = true, fadeOnly = false} = params;
+        if (!animate)
+            return BoxPointer.PopupAnimation.NONE;
 
-        if (this.isEmpty())
-            return;
+        return fadeOnly
+            ? BoxPointer.PopupAnimation.FADE
+            : BoxPointer.PopupAnimation.FULL;
+    }
+
+    /**
+     * @param {object} params
+     * @param {bool} [params.animate=true] whether to animate the transition
+     * @param {bool} [params.fadeOnly=false] whether to skip motion bits of the animation
+     *
+     * @returns {bool} whether the open state changed
+     */
+    open(params) {
+        if (!super.open(params))
+            return false;
 
         if (!this._systemModalOpenedId) {
             this._systemModalOpenedId =
                 Main.layoutManager.connect('system-modal-opened', () => this.close());
         }
 
-        this.isOpen = true;
-
+        const animate = this._getPopupAnimationFromParams(params);
         this._boxPointer.setPosition(this.sourceActor, this._arrowAlignment);
         this._boxPointer.open(animate);
 
@@ -1075,24 +1118,28 @@ export class PopupMenu extends PopupMenuBase {
         if (!this.sourceActor?.has_allocation())
             this.sourceActor?.get_parent().queue_relayout();
 
-        this.emit('open-state-changed', true);
+        return true;
     }
 
-    close(animate) {
+    /**
+     * @param {object} params
+     * @param {bool} [params.animate=true] whether to animate the transition
+     * @param {bool} [params.fadeOnly=false] whether to skip motion bits of the animation
+     *
+     * @returns {bool} whether the open state changed
+     */
+    close(params) {
         if (this._activeMenuItem)
             this._activeMenuItem.active = false;
 
         if (this._boxPointer.visible) {
+            const animate = this._getPopupAnimationFromParams(params);
             this._boxPointer.close(animate, () => {
                 this.emit('menu-closed');
             });
         }
 
-        if (!this.isOpen)
-            return;
-
-        this.isOpen = false;
-        this.emit('open-state-changed', false);
+        return super.close(params);
     }
 
     destroy() {
@@ -1182,18 +1229,19 @@ export class PopupSubMenu extends PopupMenuBase {
         return this.getSensitive();
     }
 
-    open(animate) {
-        if (this.isOpen)
-            return;
-
-        if (this.isEmpty())
-            return;
-
-        this.isOpen = true;
-        this.emit('open-state-changed', true);
+    /**
+     * @param {object} params
+     * @param {bool} [params.animate=true] whether to animate the transition
+     *
+     * @returns {bool} whether the open state changed
+     */
+    open(params = {}) {
+        if (!super.open(params))
+            return false;
 
         this.actor.show();
 
+        let {animate = true} = params;
         const needsScrollbar = this._needsScrollbar();
 
         // St.ScrollView always requests space horizontally for a possible vertical
@@ -1230,18 +1278,23 @@ export class PopupSubMenu extends PopupMenuBase {
             duration,
             mode: Clutter.AnimationMode.EASE_OUT_EXPO,
         });
+        return true;
     }
 
-    close(animate) {
-        if (!this.isOpen)
-            return;
-
-        this.isOpen = false;
-        this.emit('open-state-changed', false);
+    /**
+     * @param {object} params
+     * @param {bool} [params.animate=true] whether to animate the transition
+     *
+     * @returns {bool} whether the open state changed
+     */
+    close(params = {}) {
+        if (!super.close(params))
+            return false;
 
         if (this._activeMenuItem)
             this._activeMenuItem.active = false;
 
+        let {animate = true} = params;
         if (animate && this._needsScrollbar())
             animate = false;
 
@@ -1260,13 +1313,14 @@ export class PopupSubMenu extends PopupMenuBase {
             duration,
             mode: Clutter.AnimationMode.EASE_OUT_EXPO,
         });
+        return true;
     }
 
     _onKeyPressEvent(actor, event) {
         // Move focus back to parent menu if the user types Left.
 
         if (this.isOpen && event.get_key_symbol() === Clutter.KEY_Left) {
-            this.close(BoxPointer.PopupAnimation.FULL);
+            this.close();
             this.sourceActor._delegate.active = true;
             return Clutter.EVENT_STOP;
         }
@@ -1376,9 +1430,9 @@ class PopupSubMenuMenuItem extends PopupBaseMenuItem {
 
     setSubmenuShown(open) {
         if (open)
-            this.menu.open(BoxPointer.PopupAnimation.FULL);
+            this.menu.open();
         else
-            this.menu.close(BoxPointer.PopupAnimation.FULL);
+            this.menu.close();
     }
 
     _setOpenState(open) {
@@ -1465,7 +1519,7 @@ export class PopupMenuManager {
             const oldGrab = this._grab;
             this._grab = Main.pushModal(menu.actor, this._grabParams);
             this.activeMenu = menu;
-            oldMenu?.close(BoxPointer.PopupAnimation.FADE);
+            oldMenu?.close({fadeOnly: true});
             if (oldGrab)
                 Main.popModal(oldGrab);
 
@@ -1495,9 +1549,7 @@ export class PopupMenuManager {
     }
 
     _changeMenu(newMenu) {
-        newMenu.open(this.activeMenu
-            ? BoxPointer.PopupAnimation.FADE
-            : BoxPointer.PopupAnimation.FULL);
+        newMenu.open({fadeOnly: this.activeMenu != null});
     }
 
     _onCapturedEvent(actor, event) {
@@ -1511,7 +1563,7 @@ export class PopupMenuManager {
                 actor.navigate_focus(null, St.DirectionType.TAB_FORWARD, false);
                 return Clutter.EVENT_STOP;
             } else if (symbol === Clutter.KEY_Escape && menu.isOpen) {
-                menu.close(BoxPointer.PopupAnimation.FULL);
+                menu.close();
                 return Clutter.EVENT_STOP;
             }
         } else if (event.type() === Clutter.EventType.ENTER &&
@@ -1523,7 +1575,7 @@ export class PopupMenuManager {
         } else if ((event.type() === Clutter.EventType.BUTTON_PRESS ||
                     event.type() === Clutter.EventType.TOUCH_BEGIN) &&
                    !actor.contains(targetActor)) {
-            menu.close(BoxPointer.PopupAnimation.FULL);
+            menu.close();
         }
 
         return Clutter.EVENT_PROPAGATE;
@@ -1546,6 +1598,6 @@ export class PopupMenuManager {
         // on the BoxPointer ourselves, so we shouldn't
         // reanimate.
         if (isUser)
-            menu.close(BoxPointer.PopupAnimation.FULL);
+            menu.close();
     }
 }

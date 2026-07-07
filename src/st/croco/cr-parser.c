@@ -2767,7 +2767,6 @@ cr_parser_new (CRTknzr * a_tknzr)
  * cr_parser_new_from_buf:
  *@a_buf: the buffer to parse.
  *@a_len: the length of the data in the buffer.
- *@a_enc: the encoding of the input buffer a_buf.
  *@a_free_buf: if set to TRUE, a_buf will be freed
  *during the destruction of the newly built instance 
  *of #CRParser. If set to FALSE, it is up to the caller to
@@ -2780,7 +2779,6 @@ cr_parser_new (CRTknzr * a_tknzr)
 CRParser *
 cr_parser_new_from_buf (guchar * a_buf,
                         gulong a_len,
-                        enum CREncoding a_enc, 
                         gboolean a_free_buf)
 {
         CRParser *result = NULL;
@@ -2788,7 +2786,7 @@ cr_parser_new_from_buf (guchar * a_buf,
 
         g_return_val_if_fail (a_buf && a_len, NULL);
 
-        input = cr_input_new_from_buf (a_buf, a_len, a_enc, a_free_buf);
+        input = cr_input_new_from_buf (a_buf, a_len, a_free_buf);
         g_return_val_if_fail (input, NULL);
 
         result = cr_parser_new_from_input (input);
@@ -2820,30 +2818,6 @@ cr_parser_new_from_input (CRInput * a_input)
         result = cr_parser_new (tokenizer);
         g_return_val_if_fail (result, NULL);
 
-        return result;
-}
-
-/**
- * cr_parser_new_from_file:
- * @a_file_uri: the uri of the file to parse.
- * @a_enc: the file encoding to use.
- *
- * Returns the newly built parser.
- */
-CRParser *
-cr_parser_new_from_file (const guchar * a_file_uri, enum CREncoding a_enc)
-{
-        CRParser *result = NULL;
-        CRTknzr *tokenizer = NULL;
-
-        tokenizer = cr_tknzr_new_from_uri (a_file_uri, a_enc);
-        if (!tokenizer) {
-                cr_utils_trace_info ("Could not open input file");
-                return NULL;
-        }
-
-        result = cr_parser_new (tokenizer);
-        g_return_val_if_fail (result, NULL);
         return result;
 }
 
@@ -2957,39 +2931,6 @@ cr_parser_get_use_core_grammar (CRParser const * a_this,
         *a_use_core_grammar = PRIVATE (a_this)->use_core_grammar;
 
         return CR_OK;
-}
-
-/**
- * cr_parser_parse_file:
- *@a_this: a pointer to the current instance of #CRParser.
- *@a_file_uri: the uri to the file to load. For the time being,
- *@a_enc: the encoding of the file to parse.
- *only local files are supported.
- *
- *Parses a the given in parameter.
- *
- *Returns CR_OK upon successful completion, an error code otherwise.
- */
-enum CRStatus
-cr_parser_parse_file (CRParser * a_this,
-                      const guchar * a_file_uri, enum CREncoding a_enc)
-{
-        enum CRStatus status = CR_ERROR;
-        CRTknzr *tknzr = NULL;
-
-        g_return_val_if_fail (a_this && PRIVATE (a_this)
-                              && a_file_uri, CR_BAD_PARAM_ERROR);
-
-        tknzr = cr_tknzr_new_from_uri (a_file_uri, a_enc);
-
-        g_return_val_if_fail (tknzr != NULL, CR_ERROR);
-
-        status = cr_parser_set_tknzr (a_this, tknzr);
-        g_return_val_if_fail (status == CR_OK, CR_ERROR);
-
-        status = cr_parser_parse (a_this);
-
-        return status;
 }
 
 /**
@@ -4436,7 +4377,6 @@ cr_parser_get_parsing_location (CRParser const *a_this,
  *@a_this: the current instance of #CRparser
  *@a_buf: the input buffer
  *@a_len: the length of the input buffer
- *@a_enc: the encoding of the buffer
  *
  *Parses a stylesheet from a buffer
  *
@@ -4445,7 +4385,7 @@ cr_parser_get_parsing_location (CRParser const *a_this,
 enum CRStatus
 cr_parser_parse_buf (CRParser * a_this,
                      const guchar * a_buf,
-                     gulong a_len, enum CREncoding a_enc)
+                     gulong a_len)
 {
         enum CRStatus status = CR_ERROR;
         CRTknzr *tknzr = NULL;
@@ -4453,7 +4393,7 @@ cr_parser_parse_buf (CRParser * a_this,
         g_return_val_if_fail (a_this && PRIVATE (a_this)
                               && a_buf, CR_BAD_PARAM_ERROR);
 
-        tknzr = cr_tknzr_new_from_buf ((guchar*)a_buf, a_len, a_enc, FALSE);
+        tknzr = cr_tknzr_new_from_buf ((guchar*)a_buf, a_len, FALSE);
 
         g_return_val_if_fail (tknzr != NULL, CR_ERROR);
 
