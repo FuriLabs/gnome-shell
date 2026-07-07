@@ -4,9 +4,11 @@ gnome-shell (51~alpha-0ubuntu1) UNRELEASED; urgency=medium
   * Refreshed patches:
     - shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
     - ubuntu/Standardize-icon-sizes-and-fit-the-grid-to-the-screen.patch
+    - ubuntu/appDisplay-Display-two-lines-of-application-name-as-a-min.patch
     - ubuntu/background_login.patch
     - ubuntu/configure_login_screen.patch
     - ubuntu/desktop_detect.patch
+    - ubuntu/gdm-loginDialog-Load-the-logo-image-synchronously.patch
     - ubuntu/keep-ubuntu-logo-bright-lp1867133-v1.patch
     - ubuntu/main-Support-ubuntu-color-scheme-and-yaru-variants.patch
     - ubuntu/match-plymouth-logo.patch

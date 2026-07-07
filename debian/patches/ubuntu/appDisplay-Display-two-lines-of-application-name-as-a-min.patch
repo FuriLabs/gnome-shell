@@ -12,10 +12,10 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/968213
  1 file changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
-index 0f30d63..cfff2c4 100644
+index dc207bc..a01fa8a 100644
 --- a/js/ui/appDisplay.js
 +++ b/js/ui/appDisplay.js
-@@ -1909,8 +1909,6 @@ class AppViewItem extends St.Button {
+@@ -1917,8 +1917,6 @@ class AppViewItem extends St.Button {
              ? APP_ICON_TITLE_EXPAND_TIME
              : APP_ICON_TITLE_COLLAPSE_TIME);
          clutterText.set({
@@ -24,7 +24,7 @@ index 0f30d63..cfff2c4 100644
              ellipsize: expand ? Pango.EllipsizeMode.NONE : Pango.EllipsizeMode.END,
          });
      }
-@@ -2951,6 +2949,14 @@ export const AppIcon = GObject.registerClass({
+@@ -2961,6 +2959,14 @@ export const AppIcon = GObject.registerClass({
          this._iconContainer.add_child(this._dot);
  
          this.label_actor = this.icon.label;

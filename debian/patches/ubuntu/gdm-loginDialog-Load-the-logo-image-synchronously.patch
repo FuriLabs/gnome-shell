@@ -18,10 +18,10 @@ Bug-Ubuntu: https://launchpad.net/bugs/2145786
  3 files changed, 83 insertions(+), 1 deletion(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 52c1909..b3fb14b 100644
+index 5179157..3def97e 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -1080,7 +1080,8 @@ export const LoginDialog = GObject.registerClass({
+@@ -967,7 +967,8 @@ export const LoginDialog = GObject.registerClass({
          const resourceScale = this._logoBin.get_resource_scale();
          if (this._logoFile) {
              const scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
