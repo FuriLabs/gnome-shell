@@ -13,8 +13,6 @@ import * as Main from './main.js';
 import * as PopupMenu from './popupMenu.js';
 import {Slider} from './slider.js';
 
-import {PopupAnimation} from './boxpointer.js';
-
 const DIM_BRIGHTNESS = -0.4;
 export const POPUP_ANIMATION_TIME = 400;
 
@@ -456,12 +454,17 @@ class QuickToggleMenu extends PopupMenu.PopupMenuBase {
         headerLayout.attach_next_to(this._headerSpacer, actor, side, 1, 1);
     }
 
-    open(animate) {
-        if (this.isOpen)
-            return;
+    /**
+     * @param {object} params
+     * @param {bool} [params.animate=true] whether to animate the transition
+     *
+     * @returns {bool} whether the open state changed
+     */
+    open(params = {}) {
+        if (!super.open(params))
+            return false;
 
         this.actor.show();
-        this.isOpen = true;
 
         const previousHeight = this.actor.height;
         this.actor.height = -1;
@@ -469,7 +472,8 @@ class QuickToggleMenu extends PopupMenu.PopupMenuBase {
         this.actor.height = previousHeight;
         const distance = Math.abs(targetHeight - previousHeight);
 
-        const duration = animate !== PopupAnimation.NONE
+        const {animate = true} = params;
+        const duration = animate
             ? POPUP_ANIMATION_TIME / 2
             : 0;
 
@@ -485,15 +489,22 @@ class QuickToggleMenu extends PopupMenu.PopupMenuBase {
                 this.actor.height = -1;
             },
         });
-        this.emit('open-state-changed', true);
+        return true;
     }
 
-    close(animate) {
-        if (!this.isOpen)
-            return;
+    /**
+     * @param {object} params
+     * @param {bool} [params.animate=true] whether to animate the transition
+     *
+     * @returns {bool} whether the open state changed
+     */
+    close(params = {}) {
+        if (!super.close(params))
+            return false;
 
+        const {animate = true} = params;
         const {opacity} = this.box;
-        const duration = animate !== PopupAnimation.NONE
+        const duration = animate
             ? POPUP_ANIMATION_TIME / 2
             : 0;
 
@@ -512,8 +523,7 @@ class QuickToggleMenu extends PopupMenu.PopupMenuBase {
             },
         });
 
-        this.isOpen = false;
-        this.emit('open-state-changed', false);
+        return true;
     }
 
     _syncChecked() {
@@ -839,14 +849,20 @@ export const QuickSettingsMenu = class extends PopupMenu.PopupMenu {
         return this._grid.get_first_child();
     }
 
-    open(animate) {
+    open(params = {}) {
+        if (!super.open(params))
+            return false;
+
         this.actor.show();
-        super.open(animate);
+        return true;
     }
 
-    close(animate) {
-        this._activeMenu?.close(animate);
-        super.close(animate);
+    close(params = {}) {
+        if (!super.close(params))
+            return false;
+
+        this._activeMenu?.close(params);
+        return true;
     }
 
     _setDimmed(dim) {

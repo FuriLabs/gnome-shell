@@ -1,3 +1,12 @@
+gnome-shell (51~alpha-0ubuntu1) UNRELEASED; urgency=medium
+
+  * New upstream release 51.alpha
+  * Refreshed: shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
+  * Binary package 'gnome-shell-extension-prefs' has been removed and
+    relocated to upstream project 'gnome-extensions-app'.
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Tue, 07 Jul 2026 14:25:23 +0800
+
 gnome-shell (50.2-3ubuntu1) stonking; urgency=medium
 
   * Merge with Debian. Remaining changes:

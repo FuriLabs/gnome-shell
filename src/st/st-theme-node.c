@@ -2863,6 +2863,14 @@ st_theme_node_get_text_align(StThemeNode *node)
                 return st_theme_node_get_text_align(node->parent_node);
               return ST_TEXT_ALIGN_LEFT;
             }
+          else if (strcmp(term->content.str->stryng->str, "start") == 0)
+            {
+              return ST_TEXT_ALIGN_START;
+            }
+          else if (strcmp(term->content.str->stryng->str, "end") == 0)
+            {
+              return ST_TEXT_ALIGN_END;
+            }
           else if (strcmp(term->content.str->stryng->str, "left") == 0)
             {
               return ST_TEXT_ALIGN_LEFT;
@@ -2884,9 +2892,7 @@ st_theme_node_get_text_align(StThemeNode *node)
   if(node->parent_node)
     return st_theme_node_get_text_align(node->parent_node);
 
-  if (clutter_get_default_text_direction () == CLUTTER_TEXT_DIRECTION_RTL)
-    return ST_TEXT_ALIGN_RIGHT;
-  return ST_TEXT_ALIGN_LEFT;
+  return ST_TEXT_ALIGN_START;
 }
 
 /**
