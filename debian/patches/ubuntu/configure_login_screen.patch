@@ -94,10 +94,10 @@ index 0000000..ee8b3a2
 +  </schema>
 +</schemalist>
 diff --git a/data/meson.build b/data/meson.build
-index bc1c6ab..6db8b56 100644
+index e37f97b..a8746b9 100644
 --- a/data/meson.build
 +++ b/data/meson.build
-@@ -109,6 +109,12 @@ schema = configure_file(
+@@ -111,6 +111,12 @@ schema = configure_file(
    configuration: schemaconf,
    install_dir: schemadir
  )
@@ -110,7 +110,7 @@ index bc1c6ab..6db8b56 100644
  install_data('00_org.gnome.shell.gschema.override', install_dir: schemadir)
  
  if have_systemd
-@@ -129,7 +135,7 @@ endif
+@@ -131,7 +137,7 @@ endif
  
  # for unit tests - gnome.compile_schemas() only looks in srcdir
  compiled_schemas = custom_target('compile-schemas',
@@ -120,7 +120,7 @@ index bc1c6ab..6db8b56 100644
    command: [find_program('glib-compile-schemas'), '--strict', data_builddir],
  )
 diff --git a/js/ui/background.js b/js/ui/background.js
-index c22dc5f..8efdda0 100644
+index 1420b26..25b4f18 100644
 --- a/js/ui/background.js
 +++ b/js/ui/background.js
 @@ -535,7 +535,11 @@ export const SystemBackground = GObject.registerClass({

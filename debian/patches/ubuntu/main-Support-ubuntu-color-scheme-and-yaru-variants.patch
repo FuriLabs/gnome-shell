@@ -18,10 +18,10 @@ Forwarded: not-needed
  create mode 100644 data/org.gnome.shell.ubuntu.gschema.xml.in
 
 diff --git a/data/meson.build b/data/meson.build
-index 6db8b56..1ed4b20 100644
+index a8746b9..d94bfa9 100644
 --- a/data/meson.build
 +++ b/data/meson.build
-@@ -109,6 +109,12 @@ schema = configure_file(
+@@ -111,6 +111,12 @@ schema = configure_file(
    configuration: schemaconf,
    install_dir: schemadir
  )
@@ -34,7 +34,7 @@ index 6db8b56..1ed4b20 100644
  schema_ubuntu_login = configure_file(
    input: 'com.ubuntu.login-screen.gschema.xml.in',
    output: 'com.ubuntu.login-screen.gschema.xml',
-@@ -135,7 +141,7 @@ endif
+@@ -137,7 +143,7 @@ endif
  
  # for unit tests - gnome.compile_schemas() only looks in srcdir
  compiled_schemas = custom_target('compile-schemas',

@@ -66,7 +66,7 @@ index 2fe110f..d7dc2f5 100644
      box-shadow: inset 0 0 0 2px $hc_inset_color;
    }
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index c01c6fe..0e898dd 100644
+index ee994c2..3549903 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -11,6 +11,7 @@ import * as Animation from '../ui/animation.js';
@@ -142,10 +142,10 @@ index 1a6c705..c5852d2 100644
          }
  
 diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
-index 105796d..0f30d63 100644
+index 4a3f2d7..dc207bc 100644
 --- a/js/ui/appDisplay.js
 +++ b/js/ui/appDisplay.js
-@@ -2065,13 +2065,6 @@ class FolderGrid extends AppGrid {
+@@ -2073,13 +2073,6 @@ class FolderGrid extends AppGrid {
              page_halign: Clutter.ActorAlign.CENTER,
              page_valign: Clutter.ActorAlign.CENTER,
          });
@@ -159,7 +159,7 @@ index 105796d..0f30d63 100644
      }
  });
  
-@@ -2495,6 +2488,10 @@ export const AppFolderDialog = GObject.registerClass({
+@@ -2503,6 +2496,10 @@ export const AppFolderDialog = GObject.registerClass({
              orientation: Clutter.Orientation.VERTICAL,
          });
  

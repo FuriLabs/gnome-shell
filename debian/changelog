@@ -1,7 +1,16 @@
 gnome-shell (51~alpha-0ubuntu1) UNRELEASED; urgency=medium
 
   * New upstream release 51.alpha
-  * Refreshed: shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
+  * Refreshed patches:
+    - shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
+    - ubuntu/Standardize-icon-sizes-and-fit-the-grid-to-the-screen.patch
+    - ubuntu/background_login.patch
+    - ubuntu/configure_login_screen.patch
+    - ubuntu/desktop_detect.patch
+    - ubuntu/keep-ubuntu-logo-bright-lp1867133-v1.patch
+    - ubuntu/main-Support-ubuntu-color-scheme-and-yaru-variants.patch
+    - ubuntu/match-plymouth-logo.patch
+    - ubuntu/search-call-XUbuntuCancel-method-on-providers-when-no-dat.patch
   * Binary package 'gnome-shell-extension-prefs' has been removed and
     relocated to upstream project 'gnome-extensions-app'.
 
