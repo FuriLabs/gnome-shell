@@ -146,7 +146,7 @@ export const Button = GObject.registerClass({
         super.vfunc_hide();
 
         if (this.menu)
-            this.menu.close();
+            this.menu.close({animate: false});
     }
 
     _onMenuKeyPress(actor, event) {

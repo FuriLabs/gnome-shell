@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '50.2',
+  version: '51.alpha',
   meson_version: '>= 1.3.0',
   license: 'GPL-2.0-or-later',
 )
@@ -10,7 +10,7 @@ split_version = meson.project_version().split('.')
 # the Cogl and Clutter libraries also use this API version.
 # The API version is increased each development cycle,
 # starting with 0 in 3.23.x
-mutter_api_version = '18'
+mutter_api_version = '51'
 
 clutter_pc = 'mutter-clutter-' + mutter_api_version
 cogl_pc = 'mutter-cogl-' + mutter_api_version
@@ -24,7 +24,7 @@ gcr_req = '>= 3.90.0'
 gio_req = '>= 2.86.0'
 gjs_req = '>= 1.87.1'
 gtk_req = '>= 4.0'
-mutter_req = '>= 50.0'
+mutter_req = '>= 51.alpha'
 polkit_req = '>= 0.100'
 schemas_req = '>= 50.alpha'
 systemd_req = '>= 246'
@@ -123,14 +123,26 @@ else
   have_pipewire = false
 endif
 
+libsystemd_dep = dependency('libsystemd', version: systemd_req, required: false)
+
+if not libsystemd_dep.found()
+  libsystemd_dep = dependency('libelogind', required: false)
+endif
+
+if not libsystemd_dep.found()
+  error('No libsystemd provider found: tried libsystemd and libelogind')
+endif
+
 if get_option('systemd')
-  libsystemd_dep = dependency('libsystemd', version: systemd_req)
+  if libsystemd_dep.name() == 'libelogind'
+    error('systemd option conflicts with elogind libsystemd provider')
+  endif
+
   systemd_dep = dependency('systemd', version: systemd_req)
   systemduserunitdir = systemd_dep.get_variable('systemduserunitdir',
     pkgconfig_define: ['prefix', prefix])
   have_systemd = true
 else
-  libsystemd_dep = []
   have_systemd = false
 endif
 
@@ -282,19 +294,6 @@ if get_option('extensions_tool')
   )
 endif
 
-if get_option('extensions_app')
-  extensions_app = subproject('extensions-app',
-    default_options: [
-      'package_name=@0@'.format(meson.project_name()),
-    ]
-  )
-
-  extensions_app_version = extensions_app.get_variable('package_version')
-  assert(extensions_app_version == meson.project_version(),
-    'Extensions app version does not match project version'
-  )
-endif
-
 if get_option('tests')
   common_test_env = environment()
   common_test_env.set('GSETTINGS_SCHEMA_DIR', meson.project_build_root() / 'data')
@@ -337,7 +336,6 @@ summary_options = {
   'camera_monitor': get_option('camera_monitor'),
   'networkmanager': get_option('networkmanager'),
   'systemd': get_option('systemd'),
-  'extensions_app': get_option('extensions_app'),
   'extensions_tool': get_option('extensions_tool'),
   'man': get_option('man'),
   'gtk_doc': get_option('gtk_doc'),

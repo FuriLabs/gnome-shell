@@ -11,7 +11,6 @@ import St from 'gi://St';
 
 import * as AppFavorites from './appFavorites.js';
 import {AppMenu} from './appMenu.js';
-import * as BoxPointer from './boxpointer.js';
 import * as DND from './dnd.js';
 import * as GrabHelper from './grabHelper.js';
 import * as IconGrid from './iconGrid.js';
@@ -156,6 +155,8 @@ export const AppGrid = GObject.registerClass({
         super._init(layoutParams);
 
         this._indicatorsPadding = new Clutter.Margin();
+        this.set_accessible_name(_('App grid'));
+        this.set_accessible_role(Atk.Role.GROUPING);
     }
 
     _updatePadding() {
@@ -495,6 +496,7 @@ var BaseAppView = GObject.registerClass({
             y_expand: true,
             reactive: true,
             enable_mouse_scrolling: false,
+            enable_touch_scrolling: false,
             hscrollbar_policy: St.PolicyType.EXTERNAL,
             vscrollbar_policy: St.PolicyType.NEVER,
             child: this._grid,
@@ -1849,7 +1851,7 @@ class AppViewItem extends St.Button {
         super._init({
             pivot_point: new Graphene.Point({x: 0.5, y: 0.5}),
             reactive: true,
-            button_mask: St.ButtonMask.ONE | St.ButtonMask.TWO,
+            button_mask: St.ButtonMask.PRIMARY | St.ButtonMask.MIDDLE,
             can_focus: true,
             ...params,
         });
@@ -1896,16 +1898,22 @@ class AppViewItem extends St.Button {
         if (!layout.is_wrapped() && !layout.is_ellipsized())
             return;
 
-        label.remove_transition('allocation');
+        const expand = this._forcedHighlight || this.hover || this.has_key_focus();
+        if (this._expand === expand)
+            return;
+        this._expand = expand;
 
-        const id = label.connect('notify::allocation', () => {
-            label.restore_easing_state();
-            label.disconnect(id);
+        const leader = expand ? this : label;
+        leader.remove_transition('allocation');
+
+        const id = leader.connect('notify::allocation', () => {
+            leader.restore_easing_state();
+            leader.disconnect(id);
         });
 
-        const expand = this._forcedHighlight || this.hover || this.has_key_focus();
-        label.save_easing_state();
-        label.set_easing_duration(expand
+        this.icon.clip_to_allocation = expand;
+        leader.save_easing_state();
+        leader.set_easing_duration(expand
             ? APP_ICON_TITLE_EXPAND_TIME
             : APP_ICON_TITLE_COLLAPSE_TIME);
         clutterText.set({
@@ -2277,7 +2285,7 @@ export const FolderIcon = GObject.registerClass({
     _init(id, path, parentView) {
         super._init({
             style_class: 'overview-tile app-folder',
-            button_mask: St.ButtonMask.ONE,
+            button_mask: St.ButtonMask.PRIMARY,
             can_focus: true,
         }, global.settings.is_writable('app-picker-layout'));
 
@@ -2552,6 +2560,7 @@ export const AppFolderDialog = GObject.registerClass({
             style_class: 'folder-name-entry',
             opacity: 0,
             reactive: false,
+            accessible_name: _('Folder name'),
         });
         this._entry.clutter_text.set({
             x_expand: true,
@@ -2567,13 +2576,14 @@ export const AppFolderDialog = GObject.registerClass({
         // Edit button
         this._editButton = new St.Button({
             style_class: 'icon-button',
-            button_mask: St.ButtonMask.ONE,
+            button_mask: St.ButtonMask.PRIMARY,
             toggle_mode: true,
             reactive: true,
             can_focus: true,
             x_align: Clutter.ActorAlign.END,
             y_align: Clutter.ActorAlign.CENTER,
             icon_name: 'document-edit-symbolic',
+            accessible_name: _('Edit folder name'),
         });
 
         this._editButton.connect('notify::checked', () => {
@@ -3028,7 +3038,7 @@ export const AppIcon = GObject.registerClass({
                     this._onMenuPoppedDown();
             });
             Main.overview.connectObject('hiding',
-                () => this._menu.close(), this);
+                () => this._menu.close({animate: false}), this);
 
             Main.uiGroup.add_child(this._menu.actor);
             this._menuManager.addMenu(this._menu);
@@ -3036,7 +3046,7 @@ export const AppIcon = GObject.registerClass({
 
         this.emit('menu-state-changed', true);
 
-        this._menu.open(BoxPointer.PopupAnimation.FULL);
+        this._menu.open();
         this.emit('sync-tooltip');
 
         return false;

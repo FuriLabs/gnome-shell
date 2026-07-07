@@ -1034,7 +1034,7 @@ class InputSourceIndicator extends PanelMenu.Button {
 
             // We also hide if we have only one visible source unless
             // it's an IBus source with properties.
-            this.menu.close();
+            this.menu.close({animate: false});
             this.hide();
             return;
         }

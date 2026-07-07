@@ -53,10 +53,6 @@ has_devkit() {
   toolbox --container $TOOLBOX run gnome-shell --help | grep -q -- --devkit
 }
 
-has_nested() {
-  toolbox --container $TOOLBOX run gnome-shell --help | grep -q -- --nested
-}
-
 # load defaults
 if [[ -e "$CONFIG_FILE" ]]; then
   . $CONFIG_FILE
@@ -65,6 +61,7 @@ TOOLBOX=$DEFAULT_TOOLBOX
 
 SHELL_ENV=(XDG_CURRENT_DESKTOP=GNOME)
 SHELL_ARGS=()
+DEVKIT_ARGS=()
 
 # Some host OSes (like NixOS) have a weird $XDG_DATA_DIRS environment variable
 # that breaks GSettings schemas. Make sure it is set to something sensible.
@@ -114,7 +111,7 @@ while true; do
     ;;
 
     -2|--multi-monitor)
-      SHELL_ENV+=(MUTTER_DEBUG_NUM_DUMMY_MONITORS=2)
+      DEVKIT_ARGS+=(--add-monitor)
       shift
     ;;
 
@@ -166,9 +163,7 @@ done
 
 if should_run_nested; then
   if has_devkit; then
-    SHELL_ARGS+=( --devkit )
-  elif has_nested; then
-    SHELL_ARGS+=( --nested )
+    SHELL_ARGS+=( --devkit ${DEVKIT_ARGS+--devkit-args="${DEVKIT_ARGS[*]}"})
   else
     die Mutter has to be built with devkit or x11 support
   fi

@@ -33,13 +33,10 @@
 #endif
 
 #ifdef HAVE_SYSTEMD
-#include <systemd/sd-daemon.h>
 #include <systemd/sd-login.h>
-#else
-/* So we don't need to add ifdef's everywhere */
-#define sd_notify(u, m)            do {} while (0)
-#define sd_notifyf(u, m, ...)      do {} while (0)
-#endif
+#endif /* HAVE_SYSTEMD */
+
+#include <systemd/sd-daemon.h>
 
 static void
 stop_pick (ClutterActor *actor)

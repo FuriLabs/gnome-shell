@@ -5,7 +5,6 @@ import Pango from 'gi://Pango';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 
-import * as BoxPointer from './boxpointer.js';
 import * as Main from './main.js';
 import * as Params from '../misc/params.js';
 import * as PopupMenu from './popupMenu.js';
@@ -47,18 +46,21 @@ export class EntryMenu extends PopupMenu.PopupMenu {
             GObject.BindingFlags.SYNC_CREATE);
     }
 
-    open(animate) {
+    open(params = {}) {
+        if (!super.open(params))
+            return false;
+
         this._updatePasteItem();
         this._updateCopyItem();
         if (this._passwordItem)
             this._updatePasswordItem();
 
-        super.open(animate);
         this._entry.add_style_pseudo_class('focus');
 
         const direction = St.DirectionType.TAB_FORWARD;
         if (!this.actor.navigate_focus(null, direction, false))
             this.actor.grab_key_focus();
+        return true;
     }
 
     _updateCopyItem() {
@@ -110,11 +112,11 @@ function _setMenuAlignment(entry, stageX) {
 
 function _onMenuClickGesture(gesture, entry) {
     if (entry.menu.isOpen) {
-        entry.menu.close(BoxPointer.PopupAnimation.FULL);
+        entry.menu.close();
     } else if (gesture.get_button() === Clutter.BUTTON_SECONDARY) {
         const coords = gesture.get_coords_abs();
         _setMenuAlignment(entry, coords.x);
-        entry.menu.open(BoxPointer.PopupAnimation.FULL);
+        entry.menu.open();
     }
 }
 
@@ -123,7 +125,7 @@ function _onPopup(actor, entry) {
     const [success, textX, textY_, lineHeight_] = entry.clutter_text.position_to_coords(cursorPosition);
     if (success)
         entry.menu.setSourceAlignment(textX / entry.width);
-    entry.menu.open(BoxPointer.PopupAnimation.FULL);
+    entry.menu.open();
 }
 
 /**
