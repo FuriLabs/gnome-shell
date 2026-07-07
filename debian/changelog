@@ -4,11 +4,9 @@ gnome-shell (51~alpha-0ubuntu1) UNRELEASED; urgency=medium
   * Refreshed patches:
     - shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
     - ubuntu/Standardize-icon-sizes-and-fit-the-grid-to-the-screen.patch
-    - ubuntu/appDisplay-Display-two-lines-of-application-name-as-a-min.patch
     - ubuntu/background_login.patch
     - ubuntu/configure_login_screen.patch
     - ubuntu/desktop_detect.patch
-    - ubuntu/gdm-loginDialog-Load-the-logo-image-synchronously.patch
     - ubuntu/keep-ubuntu-logo-bright-lp1867133-v1.patch
     - ubuntu/main-Support-ubuntu-color-scheme-and-yaru-variants.patch
     - ubuntu/match-plymouth-logo.patch
@@ -33,6 +31,11 @@ gnome-shell (51~alpha-0ubuntu1) UNRELEASED; urgency=medium
     - ubuntu-authd/ui-qrCode-Add-a-QR-Code-widget.patch
     - ubuntu-authd/unlockDialog-Add-Login-Options-menu-button.patch
     - ubuntu-authd/unlockDialog-Support-request-type-of-REUSE_USERNAME.patch
+  * Add patches:
+    - ubuntu/appDisplay-Display-two-lines-of-application-name-as-a-min.patch
+      (LP: #968213)
+    - ubuntu/gdm-loginDialog-Load-the-logo-image-synchronously.patch
+      (LP: #2145786)
   * Binary package 'gnome-shell-extension-prefs' has been removed and
     relocated to upstream project 'gnome-extensions-app'.
 
