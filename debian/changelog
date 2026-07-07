@@ -1,3 +1,10 @@
+gnome-shell (51~alpha-0ubuntu2) stonking; urgency=medium
+
+  * Add some breaks on extensions to put the brakes on too rapid a
+    transition, even if unlikely.
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Tue, 07 Jul 2026 19:04:20 +0800
+
 gnome-shell (51~alpha-0ubuntu1) stonking; urgency=medium
 
   * New upstream release 51.alpha
