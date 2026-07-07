@@ -1,3 +1,10 @@
+gnome-shell (51~alpha-0ubuntu3) stonking; urgency=medium
+
+  * Reinstate debian/Revert-tests-Fail-on-warnings-too.patch because CI
+    is a noisier more fragile environment than a desktop.
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Tue, 07 Jul 2026 19:52:07 +0800
+
 gnome-shell (51~alpha-0ubuntu2) stonking; urgency=medium
 
   * Add some breaks on extensions to put the brakes on too rapid a
