@@ -32,6 +32,8 @@ ubuntu/layout-Make-starting-in-the-overview-configurable-not-imp.patch
 ubuntu/js-ui-shellDBus-Allow-Initial-Setup-to-trigger-transition.patch
 ubuntu/match-plymouth-logo.patch
 ubuntu/Standardize-icon-sizes-and-fit-the-grid-to-the-screen.patch
+ubuntu/appDisplay-Display-two-lines-of-application-name-as-a-min.patch
+ubuntu/gdm-loginDialog-Load-the-logo-image-synchronously.patch
 # ubuntu-authd/authPrompt-Right-align-cancel-button.patch
 # ubuntu-authd/unlockDialog-Support-request-type-of-REUSE_USERNAME.patch
 # ubuntu-authd/authPrompt-Parameterize-reset-function.patch
@@ -67,5 +69,3 @@ ubuntu/ctrlAltTab-Sort-items-taking-care-of-the-currently-focuse.patch
 ubuntu/workspacesView-Do-not-add-the-workspaces-view-to-the-focu.patch
 ubuntu/OverviewAdjustment-Add-function-to-wait-for-adjustments-c.patch
 ubuntu/overviewControls-Do-focus-navigation-on-Ctrl-Alt-Tab-afte.patch
-ubuntu/appDisplay-Display-two-lines-of-application-name-as-a-min.patch
-ubuntu/gdm-loginDialog-Load-the-logo-image-synchronously.patch
