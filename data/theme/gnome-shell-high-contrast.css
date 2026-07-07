@@ -1293,11 +1293,8 @@ StScrollBar {
   spacing-rows: 6px;
   spacing-columns: 12px; }
   .world-clocks-button .world-clocks-grid .world-clocks-time {
-    font-weight: bold; }
-    .world-clocks-button .world-clocks-grid .world-clocks-time:ltr {
-      text-align: right; }
-    .world-clocks-button .world-clocks-grid .world-clocks-time:rtl {
-      text-align: left; }
+    font-weight: bold;
+    text-align: end; }
   .world-clocks-button .world-clocks-grid .world-clocks-timezone {
     color: #ffffff; }
 
@@ -1409,11 +1406,8 @@ StScrollBar {
         font-weight: bold; }
       .message .message-header .message-header-content .event-time {
         color: #ffffff;
-        padding-bottom: 0.068em; }
-        .message .message-header .message-header-content .event-time:ltr {
-          text-align: right; }
-        .message .message-header .message-header-content .event-time:rtl {
-          text-align: left; }
+        padding-bottom: 0.068em;
+        text-align: end; }
     .message .message-header .message-expand-button,
     .message .message-header .message-close-button {
       border-radius: 999px;
@@ -3496,12 +3490,10 @@ StScrollBar {
   padding: 7.2px; }
 
 .login-dialog-auth-list-label:ltr {
-  padding-left: 15px;
-  text-align: left; }
+  padding-left: 15px; }
 
 .login-dialog-auth-list-label:rtl {
-  padding-right: 15px;
-  text-align: right; }
+  padding-right: 15px; }
 
 .login-dialog-user-list-view {
   width: 25em;
@@ -3593,7 +3585,7 @@ StScrollBar {
 .unlock-dialog-notifications-container {
   margin: 12px;
   spacing: 6px;
-  width: 25em;
+  width: 29em;
   background-color: transparent; }
   .unlock-dialog-notifications-container .summary-notification-stack-scrollview {
     padding-top: 0;
