@@ -4,6 +4,14 @@ gnome-shell (51~alpha-1) UNRELEASED; urgency=medium
   * Refreshed: shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
   * Binary package 'gnome-shell-extension-prefs' has been removed and
     relocated to upstream project 'gnome-extensions-app'.
+  * Drop patch debian/Revert-tests-Fail-on-warnings-too.patch because it's
+    it's good to fail sooner, but also counterintuitively it was causing
+    additional test failures (closeWithActiveWindows) as warnings on shutdown
+    were no longer fatal it was allowed to progress to a critical instead
+    (Object ... already disposed) which is *more* fatal than a warning on
+    shutdown. This is an upstream bug but it also doesn't happen upstream
+    without the Debian patch so we shouldn't be reintroducing the bug in
+    Debian.
 
  -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Tue, 07 Jul 2026 14:25:23 +0800
 
