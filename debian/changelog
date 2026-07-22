@@ -1,3 +1,11 @@
+gnome-shell (50.1-0ubuntu1.2) resolute; urgency=medium
+
+  * Add ubuntu/gdm-loginDialog-Load-the-logo-image-synchronously.patch to
+    ensure the Ubuntu logo is fully loaded before the first frame of
+    the login screen is displayed (LP: #2145786)
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 22 Jul 2026 15:30:44 +0800
+
 gnome-shell (50.1-0ubuntu1.1) resolute; urgency=medium
 
   [ Sergio Costas Rodriguez ]
