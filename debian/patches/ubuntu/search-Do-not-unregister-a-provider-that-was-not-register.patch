@@ -1,0 +1,29 @@
+From: htrex <hantarex@gmail.com>
+Date: Wed, 29 Jul 2026 11:51:52 +0200
+Subject: search: Do not unregister a provider that was not registered
+
+If the passed provider is not in this._providers, indexOf() returns -1 and
+splice(-1, 1) silently removes the LAST provider in the array - an arbitrary,
+unrelated provider.
+
+Bug: https://gitlab.gnome.org/GNOME/gnome-shell/-/work_items/9317
+Bug-Ubuntu: https://launchpad.net/bugs/2161808
+Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4308
+---
+ js/ui/search.js | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/js/ui/search.js b/js/ui/search.js
+index a1ca817..d586036 100644
+--- a/js/ui/search.js
++++ b/js/ui/search.js
+@@ -672,6 +672,9 @@ export const SearchResultsView = GObject.registerClass({
+ 
+     _unregisterProvider(provider) {
+         const index = this._providers.indexOf(provider);
++        if (index < 0)
++            return;
++
+         this._providers.splice(index, 1);
+ 
+         if (provider.display)
