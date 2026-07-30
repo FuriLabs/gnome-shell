@@ -1,4 +1,4 @@
-gnome-shell (50.1-0ubuntu1.2) resolute; urgency=medium
+gnome-shell (50.1-0ubuntu1.2) UNRELEASED; urgency=medium
 
   * Add ubuntu/gdm-loginDialog-Load-the-logo-image-synchronously.patch to
     ensure the Ubuntu logo is fully loaded before the first frame of
