@@ -1,3 +1,9 @@
+gnome-shell (51~alpha-0ubuntu4) stonking; urgency=medium
+
+  * d/p/u: Fix accidentally removing search providers (LP: #2161808)
+
+ -- Alessandro Astone <alessandro.astone@canonical.com>  Thu, 30 Jul 2026 21:03:07 +0200
+
 gnome-shell (51~alpha-0ubuntu3) stonking; urgency=medium
 
   * Reinstate debian/Revert-tests-Fail-on-warnings-too.patch because CI
