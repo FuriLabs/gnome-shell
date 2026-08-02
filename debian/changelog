@@ -1,3 +1,12 @@
+gnome-shell (50.3-1) UNRELEASED; urgency=medium
+
+  * New upstream stable release
+  * d/control, d/gbp.conf: Branch for GNOME 50.
+    The debian/latest branch now contains GNOME 51 prereleases, for
+    experimental.
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 02 Aug 2026 18:01:29 +0100
+
 gnome-shell (50.2-3) unstable; urgency=medium
 
   * Team upload
