@@ -68,7 +68,7 @@ Build-Depends: appstream,
                xwayland <!nocheck>
 Standards-Version: 4.7.4
 Homepage: https://gitlab.gnome.org/GNOME/gnome-shell
-Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git
+Vcs-Git: https://salsa.debian.org/gnome-team/gnome-shell.git -b debian/forky
 Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell
 
 Package: gnome-shell
