@@ -7,6 +7,16 @@ gnome-shell (51~alpha-1) UNRELEASED; urgency=medium
 
  -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Tue, 07 Jul 2026 14:25:23 +0800
 
+gnome-shell (50.3-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream stable release
+  * d/control, d/gbp.conf: Branch for GNOME 50.
+    The debian/latest branch now contains GNOME 51 prereleases, for
+    experimental.
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 03 Aug 2026 10:52:09 +0100
+
 gnome-shell (50.2-3) unstable; urgency=medium
 
   * Team upload
