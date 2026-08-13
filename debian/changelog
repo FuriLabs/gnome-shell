@@ -1,3 +1,9 @@
+gnome-shell (51~beta-1) UNRELEASED; urgency=medium
+
+  * New upstream release
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 20 Aug 2026 04:16:05 +0200
+
 gnome-shell (51~alpha-0ubuntu4) stonking; urgency=medium
 
   * d/p/u: Fix accidentally removing search providers (LP: #2161808)

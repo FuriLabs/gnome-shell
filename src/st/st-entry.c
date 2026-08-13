@@ -616,6 +616,90 @@ st_entry_clipboard_callback (StClipboard *clipboard,
   clutter_text_insert_text (ctext, text, cursor_pos);
 }
 
+static void
+st_entry_paste_clipboard (StEntry *entry)
+{
+  StClipboard *clipboard;
+
+  clipboard = st_clipboard_get_default ();
+
+  st_clipboard_get_text (clipboard,
+                         ST_CLIPBOARD_TYPE_CLIPBOARD,
+                         st_entry_clipboard_callback,
+                         entry);
+}
+
+static void
+st_entry_copy_clipboard (StEntry *entry)
+{
+  StEntryPrivate *priv = ST_ENTRY_PRIV (entry);
+  ClutterText *clutter_text = CLUTTER_TEXT (priv->entry);
+  StClipboard *clipboard;
+  g_autofree char *text = NULL;
+
+  if (clutter_text_get_password_char (clutter_text) != 0)
+    return;
+
+  clipboard = st_clipboard_get_default ();
+
+  text = clutter_text_get_selection (clutter_text);
+
+  if (text && strlen (text))
+    st_clipboard_set_text (clipboard,
+                           ST_CLIPBOARD_TYPE_CLIPBOARD,
+                           text);
+}
+
+static void
+st_entry_cut_clipboard (StEntry *entry)
+{
+  StEntryPrivate *priv = ST_ENTRY_PRIV (entry);
+  ClutterText *clutter_text = CLUTTER_TEXT (priv->entry);
+  StClipboard *clipboard;
+  g_autofree char *text = NULL;
+
+  if (clutter_text_get_password_char (clutter_text) != 0)
+    return;
+
+  clipboard = st_clipboard_get_default ();
+
+  text = clutter_text_get_selection (clutter_text);
+
+  if (text && strlen (text))
+    {
+      st_clipboard_set_text (clipboard,
+                             ST_CLIPBOARD_TYPE_CLIPBOARD,
+                             text);
+
+      /* now delete the text */
+      clutter_text_delete_selection (clutter_text);
+    }
+}
+
+static void
+st_entry_delete_to_line_start (StEntry *entry)
+{
+  StEntryPrivate *priv = ST_ENTRY_PRIV (entry);
+  ClutterText *clutter_text = CLUTTER_TEXT (priv->entry);
+  int pos;
+
+  pos = clutter_text_get_cursor_position (clutter_text);
+  clutter_text_delete_text (clutter_text, 0, pos);
+}
+
+static void
+st_entry_delete_to_line_end (StEntry *entry)
+{
+  StEntryPrivate *priv = ST_ENTRY_PRIV (entry);
+  ClutterText *clutter_text = CLUTTER_TEXT (priv->entry);
+  ClutterTextBuffer *buffer;
+  int pos;
+
+  buffer = clutter_text_get_buffer (clutter_text);
+  pos = clutter_text_get_cursor_position (clutter_text);
+  clutter_text_buffer_delete_text (buffer, pos, -1);
+}
+
 static gboolean
 clutter_text_button_press_event (ClutterActor *actor,
                                  ClutterEvent *event,
@@ -651,117 +735,6 @@ clutter_text_button_press_event (ClutterActor *actor,
     }
 
   return FALSE;
-}
-
-static gboolean
-st_entry_key_press_event (ClutterActor *actor,
-                          ClutterEvent *event)
-{
-  StEntryPrivate *priv = ST_ENTRY_PRIV (actor);
-  ClutterModifierType state;
-  uint32_t keyval;
-
-  /* This is expected to handle events that were emitted for the inner
-     ClutterText. They only reach this function if the ClutterText
-     didn't handle them */
-
-  /* paste */
-  state = clutter_event_get_state (event);
-  keyval = clutter_event_get_key_symbol (event);
-
-  if (((state & CLUTTER_CONTROL_MASK)
-       && keyval == CLUTTER_KEY_v) ||
-      ((state & CLUTTER_CONTROL_MASK)
-       && keyval == CLUTTER_KEY_V) ||
-      ((state & CLUTTER_SHIFT_MASK)
-       && keyval == CLUTTER_KEY_Insert))
-    {
-      StClipboard *clipboard;
-
-      clipboard = st_clipboard_get_default ();
-
-      st_clipboard_get_text (clipboard,
-                             ST_CLIPBOARD_TYPE_CLIPBOARD,
-                             st_entry_clipboard_callback,
-                             actor);
-
-      return TRUE;
-    }
-
-  /* copy */
-  if ((state & CLUTTER_CONTROL_MASK)
-      && (keyval == CLUTTER_KEY_c || keyval == CLUTTER_KEY_C) &&
-      clutter_text_get_password_char ((ClutterText*) priv->entry) == 0)
-    {
-      StClipboard *clipboard;
-      gchar *text;
-
-      clipboard = st_clipboard_get_default ();
-
-      text = clutter_text_get_selection ((ClutterText*) priv->entry);
-
-      if (text && strlen (text))
-        st_clipboard_set_text (clipboard,
-                               ST_CLIPBOARD_TYPE_CLIPBOARD,
-                               text);
-
-      g_free (text);
-
-      return TRUE;
-    }
-
-
-  /* cut */
-  if ((state & CLUTTER_CONTROL_MASK)
-      && (keyval == CLUTTER_KEY_x || keyval == CLUTTER_KEY_X) &&
-      clutter_text_get_password_char ((ClutterText*) priv->entry) == 0)
-    {
-      StClipboard *clipboard;
-      gchar *text;
-
-      clipboard = st_clipboard_get_default ();
-
-      text = clutter_text_get_selection ((ClutterText*) priv->entry);
-
-      if (text && strlen (text))
-        {
-          st_clipboard_set_text (clipboard,
-                                 ST_CLIPBOARD_TYPE_CLIPBOARD,
-                                 text);
-
-          /* now delete the text */
-          clutter_text_delete_selection ((ClutterText *) priv->entry);
-        }
-
-      g_free (text);
-
-      return TRUE;
-    }
-
-
-  /* delete to beginning of line */
-  if ((state & CLUTTER_CONTROL_MASK) &&
-      (keyval == CLUTTER_KEY_u || keyval == CLUTTER_KEY_U))
-    {
-      int pos = clutter_text_get_cursor_position ((ClutterText *)priv->entry);
-      clutter_text_delete_text ((ClutterText *)priv->entry, 0, pos);
-
-      return TRUE;
-    }
-
-
-  /* delete to end of line */
-  if ((state & CLUTTER_CONTROL_MASK) &&
-      (keyval == CLUTTER_KEY_k || keyval == CLUTTER_KEY_K))
-    {
-      ClutterTextBuffer *buffer = clutter_text_get_buffer ((ClutterText *)priv->entry);
-      int pos = clutter_text_get_cursor_position ((ClutterText *)priv->entry);
-      clutter_text_buffer_delete_text (buffer, pos, -1);
-
-      return TRUE;
-    }
-
-  return CLUTTER_ACTOR_CLASS (st_entry_parent_class)->key_press_event (actor, event);
 }
 
 static void
@@ -832,6 +805,7 @@ st_entry_class_init (StEntryClass *klass)
   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
   ClutterActorClass *actor_class = CLUTTER_ACTOR_CLASS (klass);
   StWidgetClass *widget_class = ST_WIDGET_CLASS (klass);
+  ClutterBindingPool *binding_pool;
 
   gobject_class->set_property = st_entry_set_property;
   gobject_class->get_property = st_entry_get_property;
@@ -844,7 +818,6 @@ st_entry_class_init (StEntryClass *klass)
   actor_class->paint_node = st_entry_paint_node;
   actor_class->get_paint_volume = st_entry_get_paint_volume;
 
-  actor_class->key_press_event = st_entry_key_press_event;
   actor_class->key_focus_in = st_entry_key_focus_in;
 
   widget_class->style_changed = st_entry_style_changed;
@@ -967,6 +940,124 @@ st_entry_class_init (StEntryClass *klass)
                   G_STRUCT_OFFSET (StEntryClass, secondary_icon_clicked),
                   NULL, NULL, NULL,
                   G_TYPE_NONE, 0);
+
+  binding_pool = clutter_binding_pool_get_for_class (klass);
+
+  /* paste */
+  clutter_binding_pool_install_action (binding_pool,
+                                       "paste-clipboard",
+                                       CLUTTER_KEY_v,
+                                       CLUTTER_CONTROL_MASK,
+                                       G_CALLBACK (st_entry_paste_clipboard),
+                                       NULL,
+                                       NULL);
+
+  clutter_binding_pool_install_action (binding_pool,
+                                       "paste-clipboard",
+                                       CLUTTER_KEY_V,
+                                       CLUTTER_CONTROL_MASK,
+                                       G_CALLBACK (st_entry_paste_clipboard),
+                                       NULL,
+                                       NULL);
+
+  clutter_binding_pool_install_action (binding_pool,
+                                       "paste-clipboard",
+                                       CLUTTER_KEY_Insert,
+                                       CLUTTER_SHIFT_MASK,
+                                       G_CALLBACK (st_entry_paste_clipboard),
+                                       NULL,
+                                       NULL);
+
+  clutter_binding_pool_install_action (binding_pool,
+                                       "paste-clipboard",
+                                       CLUTTER_KEY_Paste,
+                                       0,
+                                       G_CALLBACK (st_entry_paste_clipboard),
+                                       NULL,
+                                       NULL);
+
+  /* copy */
+  clutter_binding_pool_install_action (binding_pool,
+                                       "copy-clipboard",
+                                       CLUTTER_KEY_c,
+                                       CLUTTER_CONTROL_MASK,
+                                       G_CALLBACK (st_entry_copy_clipboard),
+                                       NULL,
+                                       NULL);
+
+  clutter_binding_pool_install_action (binding_pool,
+                                       "copy-clipboard",
+                                       CLUTTER_KEY_C,
+                                       CLUTTER_CONTROL_MASK,
+                                       G_CALLBACK (st_entry_copy_clipboard),
+                                       NULL,
+                                       NULL);
+
+  clutter_binding_pool_install_action (binding_pool,
+                                       "copy-clipboard",
+                                       CLUTTER_KEY_Copy,
+                                       0,
+                                       G_CALLBACK (st_entry_copy_clipboard),
+                                       NULL,
+                                       NULL);
+  /* cut */
+  clutter_binding_pool_install_action (binding_pool,
+                                       "cut-clipboard",
+                                       CLUTTER_KEY_x,
+                                       CLUTTER_CONTROL_MASK,
+                                       G_CALLBACK (st_entry_cut_clipboard),
+                                       NULL,
+                                       NULL);
+
+  clutter_binding_pool_install_action (binding_pool,
+                                       "cut-clipboard",
+                                       CLUTTER_KEY_X,
+                                       CLUTTER_CONTROL_MASK,
+                                       G_CALLBACK (st_entry_cut_clipboard),
+                                       NULL,
+                                       NULL);
+
+  clutter_binding_pool_install_action (binding_pool,
+                                       "cut-clipboard",
+                                       CLUTTER_KEY_Cut,
+                                       0,
+                                       G_CALLBACK (st_entry_cut_clipboard),
+                                       NULL,
+                                       NULL);
+
+  /* delete to beginning of line */
+  clutter_binding_pool_install_action (binding_pool,
+                                       "delete-to-line-start",
+                                       CLUTTER_KEY_u,
+                                       CLUTTER_CONTROL_MASK,
+                                       G_CALLBACK (st_entry_delete_to_line_start),
+                                       NULL,
+                                       NULL);
+
+  clutter_binding_pool_install_action (binding_pool,
+                                       "delete-to-line-start",
+                                       CLUTTER_KEY_U,
+                                       CLUTTER_CONTROL_MASK,
+                                       G_CALLBACK (st_entry_delete_to_line_start),
+                                       NULL,
+                                       NULL);
+
+  /* delete to end of line */
+  clutter_binding_pool_install_action (binding_pool,
+                                       "delete-to-line-end",
+                                       CLUTTER_KEY_k,
+                                       CLUTTER_CONTROL_MASK,
+                                       G_CALLBACK (st_entry_delete_to_line_end),
+                                       NULL,
+                                       NULL);
+
+  clutter_binding_pool_install_action (binding_pool,
+                                       "delete-to-line-end",
+                                       CLUTTER_KEY_K,
+                                       CLUTTER_CONTROL_MASK,
+                                       G_CALLBACK (st_entry_delete_to_line_end),
+                                       NULL,
+                                       NULL);
 }
 
 static void

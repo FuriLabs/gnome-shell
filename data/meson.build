@@ -21,6 +21,22 @@ foreach desktop_file : desktop_files
   )
 endforeach
 
+desktopconf = configuration_data()
+desktopconf.set('libexecdir', libexecdir)
+
+i18n.merge_file(
+  input: configure_file(
+    input: 'org.gnome.Shell.CalendarServer.desktop.in.in',
+    output: 'org.gnome.Shell.CalendarServer.desktop.in',
+    configuration: desktopconf
+  ),
+  output: 'org.gnome.Shell.CalendarServer.desktop',
+  po_dir: po_dir,
+  install: true,
+  install_dir: desktopdir,
+  type: 'desktop'
+)
+
 desktop_directories = [
   'X-GNOME-Shell-Utilities.directory',
   'X-GNOME-Shell-System.directory',
@@ -76,6 +92,11 @@ foreach resource : data_resources
     install_dir: pkgdatadir
   )
 endforeach
+
+cursor_theme_resource = gnome.compile_resources(
+  'gnome-shell-cursor-theme',
+  'gnome-shell-cursor-theme.gresource.xml',
+  source_dir: 'cursor-theme')
 
 perfconf = configuration_data()
 perfconf.set('datadir', datadir)

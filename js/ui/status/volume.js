@@ -180,19 +180,19 @@ const StreamSlider = GObject.registerClass({
         const value = this.slider.value;
         const volume = value * this._control.get_vol_max_norm();
         const prevMuted = this._stream.is_muted;
-        const prevVolume = this._stream.volume;
+        let volumeChanged;
         if (volume < 1) {
-            this._stream.volume = 0;
+            volumeChanged = this._stream.set_volume(0);
             if (!prevMuted)
                 this._stream.change_is_muted(true);
         } else {
-            this._stream.volume = volume;
+            volumeChanged = this._stream.set_volume(volume);
             if (prevMuted)
                 this._stream.change_is_muted(false);
         }
-        this._stream.push_volume();
+        if (volumeChanged)
+            this._stream.push_volume();
 
-        const volumeChanged = this._stream.volume !== prevVolume;
         if (volumeChanged && !this._notifyVolumeChangeId && !this._inDrag) {
             this._notifyVolumeChangeId = GLib.timeout_add_once(GLib.PRIORITY_DEFAULT, 30, () => {
                 this._notifyVolumeChange();
@@ -438,25 +438,25 @@ class VolumeIndicator extends SystemIndicator {
 
         this._indicator = this._addIndicator();
         this._indicator.reactive = true;
+
+        const scrollController = new Clutter.ScrollController({
+            flags: Clutter.ScrollControllerFlags.SCROLL_VERTICAL |
+                Clutter.ScrollControllerFlags.PHYSICAL_DIRECTION,
+        });
+        scrollController.connect(
+            'scroll',
+            (controller, sprite, source, dx, dy) => {
+                this._onScroll(source, dx, dy);
+            });
+        this._indicator.add_action(scrollController);
     }
 
-    _handleScrollEvent(item, event) {
-        if (event.get_flags() & Clutter.EventFlags.FLAG_POINTER_EMULATED)
-            return Clutter.EVENT_PROPAGATE;
+    _onScroll(_source, _dx, _dy) {
+        throw new GObject.NotImplementedError();
+    }
 
-        const direction = event.get_scroll_direction();
-        let nSteps = 0;
-        if (direction === Clutter.ScrollDirection.DOWN) {
-            nSteps = -1;
-        } else if (direction === Clutter.ScrollDirection.UP) {
-            nSteps = 1;
-        } else if (direction === Clutter.ScrollDirection.SMOOTH) {
-            const [, dy] = event.get_scroll_delta();
-            nSteps = -dy;
-            // Match physical direction
-            if (event.get_scroll_flags() & Clutter.ScrollFlags.INVERTED)
-                nSteps *= -1;
-        }
+    _handleScroll(item, delta) {
+        const nSteps = -delta;
 
         if (item.mapped || item.slider.step(nSteps))
             item.showOSD();
@@ -469,9 +469,6 @@ export const OutputIndicator = GObject.registerClass(
 class OutputIndicator extends VolumeIndicator {
     constructor() {
         super();
-
-        this._indicator.connect('scroll-event',
-            (actor, event) => this._handleScrollEvent(this._output, event));
 
         this._control = getMixerControl();
         this._control.connectObject(
@@ -493,6 +490,10 @@ class OutputIndicator extends VolumeIndicator {
         this._onControlStateChanged();
     }
 
+    _onScroll(_source, _dx, dy) {
+        this._handleScroll(this._output, dy);
+    }
+
     _onControlStateChanged() {
         if (this._control.get_state() === Gvc.MixerControlState.READY)
             this._readOutput();
@@ -509,9 +510,6 @@ export const InputIndicator = GObject.registerClass(
 class InputIndicator extends VolumeIndicator {
     constructor() {
         super();
-
-        this._indicator.connect('scroll-event',
-            (actor, event) => this._handleScrollEvent(this._input, event));
 
         this._control = getMixerControl();
         this._control.connectObject(
@@ -535,6 +533,10 @@ class InputIndicator extends VolumeIndicator {
         this.quickSettingsItems.push(this._input);
 
         this._onControlStateChanged();
+    }
+
+    _onScroll(_source, _dx, dy) {
+        this._handleScroll(this._input, dy);
     }
 
     _updatePrivacyIndicator() {

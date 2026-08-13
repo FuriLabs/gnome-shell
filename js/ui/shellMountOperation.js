@@ -23,6 +23,12 @@ const WORK_SPINNER_ICON_SIZE = 16;
 const REMEMBER_MOUNT_PASSWORD_KEY = 'remember-mount-password';
 
 /* ------ Common Utils ------- */
+
+/**
+ * @param {ModalDialog.ModalDialog} dialog
+ * @param {string[]} oldChoices
+ * @param {string[]} choices
+ **/
 function _setButtonsForChoices(dialog, oldChoices, choices) {
     const buttons = [];
     let buttonsChanged = oldChoices.length !== choices.length;
@@ -42,6 +48,10 @@ function _setButtonsForChoices(dialog, oldChoices, choices) {
         dialog.setButtons(buttons);
 }
 
+/**
+ * @param {Dialog.MessageDialogContent} content
+ * @param {string} message
+ **/
 function _setLabelsForMessage(content, message) {
     const labels = message.split('\n');
 
@@ -220,9 +230,25 @@ export class ShellMountOperation {
     }
 }
 
-const ShellMountQuestionDialog = GObject.registerClass({
-    Signals: {'response': {param_types: [GObject.TYPE_INT]}},
-}, class ShellMountQuestionDialog extends ModalDialog.ModalDialog {
+class ShellMountQuestionDialog extends ModalDialog.ModalDialog {
+    static [GObject.signals] = {
+        'response': {param_types: [GObject.TYPE_INT]},
+    };
+
+    static {
+        GObject.registerClass(this);
+
+        const bindingPool = this.get_binding_pool();
+
+        bindingPool.install_closure(
+            'close', Clutter.KEY_Escape, Clutter.RELEASE_MASK,
+            obj => {
+                obj.emit('response', -1);
+                return Clutter.EVENT_STOP;
+            }
+        );
+    }
+
     _init() {
         super._init({styleClass: 'mount-question-dialog'});
 
@@ -232,21 +258,12 @@ const ShellMountQuestionDialog = GObject.registerClass({
         this.contentLayout.add_child(this._content);
     }
 
-    vfunc_key_release_event(event) {
-        if (event.get_key_symbol() === Clutter.KEY_Escape) {
-            this.emit('response', -1);
-            return Clutter.EVENT_STOP;
-        }
-
-        return Clutter.EVENT_PROPAGATE;
-    }
-
     update(message, choices) {
         _setLabelsForMessage(this._content, message);
         _setButtonsForChoices(this, this._oldChoices, choices);
         this._oldChoices = choices;
     }
-});
+}
 
 const ShellMountPasswordDialog = GObject.registerClass({
     Signals: {
@@ -469,9 +486,25 @@ const ShellMountPasswordDialog = GObject.registerClass({
     }
 });
 
-const ShellProcessesDialog = GObject.registerClass({
-    Signals: {'response': {param_types: [GObject.TYPE_INT]}},
-}, class ShellProcessesDialog extends ModalDialog.ModalDialog {
+class ShellProcessesDialog extends ModalDialog.ModalDialog {
+    static [GObject.signals] = {
+        'response': {param_types: [GObject.TYPE_INT]},
+    };
+
+    static {
+        GObject.registerClass(this);
+
+        const bindingPool = this.get_binding_pool();
+
+        bindingPool.install_closure(
+            'close', Clutter.KEY_Escape, Clutter.RELEASE_MASK,
+            obj => {
+                obj.emit('response', -1);
+                return Clutter.EVENT_STOP;
+            }
+        );
+    }
+
     _init() {
         super._init({styleClass: 'processes-dialog'});
 
@@ -483,15 +516,6 @@ const ShellProcessesDialog = GObject.registerClass({
         this._applicationSection = new Dialog.ListSection();
         this._applicationSection.hide();
         this.contentLayout.add_child(this._applicationSection);
-    }
-
-    vfunc_key_release_event(event) {
-        if (event.get_key_symbol() === Clutter.KEY_Escape) {
-            this.emit('response', -1);
-            return Clutter.EVENT_STOP;
-        }
-
-        return Clutter.EVENT_PROPAGATE;
     }
 
     _setAppsForPids(pids) {
@@ -522,7 +546,7 @@ const ShellProcessesDialog = GObject.registerClass({
         _setButtonsForChoices(this, this._oldChoices, choices);
         this._oldChoices = choices;
     }
-});
+}
 
 const GnomeShellMountOpIface = loadInterfaceXML('org.Gtk.MountOperationHandler');
 

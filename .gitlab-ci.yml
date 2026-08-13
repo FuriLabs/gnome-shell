@@ -15,7 +15,6 @@ include:
   - component: "gitlab.gnome.org/GNOME/citemplates/gnomeos-build-sysext@25.5"
     inputs:
       meson-options:
-        -Dextensions_app=false
         -Dextensions-tool:bash_completion=disabled
 
 stages:
@@ -32,7 +31,7 @@ default:
   image: $MUTTER_CI_IMAGE
 
 variables:
-  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/44:x86_64-2026-06-02.0
+  MUTTER_CI_IMAGE: registry.gitlab.gnome.org/gnome/mutter/fedora/44:x86_64-2026-07-23.0
   TARBALL_ARTIFACT_PATH: build/meson-dist/$CI_PROJECT_NAME-$CI_COMMIT_TAG.tar.xz
 
 .pipeline-guard:
@@ -173,7 +172,13 @@ build:
     - meson mutter mutter/build --prefix=/usr
     - sudo meson install -C mutter/build
   script:
-    - meson setup . build -Dbuildtype=debugoptimized -Dman=false -Dgtk_doc=true --werror --fatal-meson-warnings
+    - meson setup . build
+        -Dbuildtype=debugoptimized
+        -Dman=false
+        -Dgtk_doc=true
+        -Db_sanitize='["address"]'
+        --werror
+        --fatal-meson-warnings
     - meson compile -C build
     - sudo meson install -C build
   artifacts:
