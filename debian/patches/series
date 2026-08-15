@@ -111,3 +111,4 @@ status-network-Update-Wi-Fi-quicksettings-icon-on-disconn.patch
 magnifier-Fix-delayed-variables-checking.patch
 lp-2127933-fix-unattended-ethernet-icon.patch
 sessionMode-Enable-the-networkAgent-within-the-unlock-dia.patch
+status-keyboard-Preserve-MRU-order-while-IBus-is-disabled.patch

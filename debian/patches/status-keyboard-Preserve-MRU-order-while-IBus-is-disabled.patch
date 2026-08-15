@@ -1,0 +1,57 @@
+From: Maksim Mazko <undeparg@gmail.com>
+Date: Mon, 2 Mar 2026 20:44:56 +0300
+Subject: status/keyboard: Preserve MRU order while IBus is disabled
+
+In password fields, IBus sources are temporarily disabled and a backup
+of the MRU list is created. If the user switches layouts in that state,
+the active MRU list is updated, but the backup is not.
+
+When IBus is enabled again, the stale backup is restored and the order
+the user just selected is lost. Sync the backup on interactive source
+switches while IBus is disabled, so the MRU order stays consistent.
+
+Closes: https://gitlab.gnome.org/GNOME/gnome-shell/-/issues/8538
+Origin: upstream, https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/8e0f850edc03ada8f79ef68412eabb05c5f76d02
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4101>
+---
+ js/ui/status/keyboard.js | 13 ++++++++++++-
+ 1 file changed, 12 insertions(+), 1 deletion(-)
+
+--- a/js/ui/status/keyboard.js
++++ b/js/ui/status/keyboard.js
+@@ -481,7 +481,7 @@
+         this._settings.mruSources = sourcesList;
+     }
+ 
+-    _currentInputSourceChanged(newSource) {
++    _currentInputSourceChanged(newSource, interactive) {
+         let oldSource;
+         [oldSource, this._currentSource] = [this._currentSource, newSource];
+ 
+@@ -494,6 +494,17 @@
+                 break;
+             }
+         }
++
++        // Only track user-initiated switches in backup MRU.
++        // Internal (non-interactive) activations during reload/reapply must not affect restore order.
++        if (interactive && this._disableIBus && this._mruSourcesBackup) {
++            this._mruSourcesBackup = [
++                newSource,
++                ...this._mruSourcesBackup.filter(
++                    s => s.type !== newSource.type || s.id !== newSource.id),
++            ];
++        }
++
+         this._changePerWindowSource();
+     }
+ 
+@@ -525,7 +536,7 @@
+             this._ibusManager.setEngine(engine, KeyboardManager.releaseKeyboard);
+         else
+             this._ibusManager.setEngine(engine);
+-        this._currentInputSourceChanged(is);
++        this._currentInputSourceChanged(is, interactive);
+ 
+         if (interactive)
+             this._updateMruSettings();

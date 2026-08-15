@@ -1,3 +1,11 @@
+gnome-shell (46.0-0ubuntu6~24.04.15) noble; urgency=medium
+
+  * d/p/status-keyboard-Preserve-MRU-order-while-IBus-is-disabled.patch:
+    Keep the keyboard layout chosen on the lock screen from reverting while
+    the password is being typed (LP: #2163564)
+
+ -- cbrhex <cbrhex@gmail.com>  Sat, 15 Aug 2026 14:28:41 +0300
+
 gnome-shell (46.0-0ubuntu6~24.04.14) noble; urgency=medium
 
   [ Mitchell Augustin ]
