@@ -22,10 +22,10 @@ index 86d101b..37281e8 100644
  }
  
 diff --git a/src/st/st-settings.h b/src/st/st-settings.h
-index 4c00188..796502a 100644
+index 0a81fbe..8628013 100644
 --- a/src/st/st-settings.h
 +++ b/src/st/st-settings.h
-@@ -44,6 +44,7 @@ typedef enum {
+@@ -49,6 +49,7 @@ typedef enum {
    ST_SYSTEM_ACCENT_COLOR_PINK = G_DESKTOP_ACCENT_COLOR_PINK,
    ST_SYSTEM_ACCENT_COLOR_PURPLE = G_DESKTOP_ACCENT_COLOR_PURPLE,
    ST_SYSTEM_ACCENT_COLOR_SLATE = G_DESKTOP_ACCENT_COLOR_SLATE,

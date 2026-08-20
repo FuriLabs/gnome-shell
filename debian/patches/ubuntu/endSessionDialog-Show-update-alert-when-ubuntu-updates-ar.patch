@@ -11,7 +11,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2147362
  1 file changed, 10 insertions(+), 1 deletion(-)
 
 diff --git a/js/ui/endSessionDialog.js b/js/ui/endSessionDialog.js
-index 6b4ce4e..4b74b13 100644
+index 9e270cc..b3dd35b 100644
 --- a/js/ui/endSessionDialog.js
 +++ b/js/ui/endSessionDialog.js
 @@ -41,6 +41,8 @@ const LOW_BATTERY_THRESHOLD = 30;
@@ -23,7 +23,7 @@ index 6b4ce4e..4b74b13 100644
  const logoutDialogContent = {
      subjectWithUser: C_('title', 'Log Out %s'),
      subject: C_('title', 'Log Out'),
-@@ -337,7 +339,8 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
+@@ -347,7 +349,8 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
          let subject = dialogContent.subject;
  
          // Use different title when we are installing updates

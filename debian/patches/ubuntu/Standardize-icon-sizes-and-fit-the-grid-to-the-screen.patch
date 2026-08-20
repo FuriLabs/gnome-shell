@@ -66,34 +66,34 @@ index 2fe110f..d7dc2f5 100644
      box-shadow: inset 0 0 0 2px $hc_inset_color;
    }
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index ee994c2..3549903 100644
+index 3b2188b..4b5604c 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -11,6 +11,7 @@ import * as Animation from '../ui/animation.js';
  import * as AuthList from './authList.js';
  import * as Batch from './batch.js';
- import * as GdmUtil from './util.js';
+ import {logErrorUnlessCancelled} from '../misc/errorUtils.js';
 +import * as Main from '../ui/main.js';
  import * as Params from '../misc/params.js';
  import * as ShellEntry from '../ui/shellEntry.js';
- import * as UserWidget from '../ui/userWidget.js';
-@@ -21,7 +22,6 @@ import {loadInterfaceXML} from '../misc/fileUtils.js';
+ import * as UserVerifier from './userVerifier.js';
+@@ -23,7 +24,6 @@ import {loadInterfaceXML} from '../misc/fileUtils.js';
  const TimerChildIface = loadInterfaceXML('org.freedesktop.MalcontentTimer1.Child');
  const TimerChildProxy = Gio.DBusProxy.makeProxyWrapper(TimerChildIface);
  
--const DEFAULT_BUTTON_WELL_ICON_SIZE = 16;
- const DEFAULT_BUTTON_WELL_ANIMATION_DELAY = 1000;
+-export const DEFAULT_BUTTON_WELL_ICON_SIZE = 16;
+ export const DEFAULT_BUTTON_WELL_ANIMATION_TIME = 300;
+ export const MESSAGE_FADE_OUT_ANIMATION_TIME = 500;
  
- // A widget displayed instead of the unlock prompt
-@@ -338,7 +338,7 @@ export const AuthPrompt = GObject.registerClass({
-         }));
-         this._mainBox.add_child(this._defaultButtonWell);
+@@ -373,7 +373,7 @@ export const AuthPrompt = GObject.registerClass({
+         this._nextButton.add_style_pseudo_class('default');
+         this._defaultButtonWell.add_child(this._nextButton);
  
 -        this._spinner = new Animation.Spinner(DEFAULT_BUTTON_WELL_ICON_SIZE);
 +        this._spinner = new Animation.Spinner(Main.smallestIconSize);
          this._defaultButtonWell.add_child(this._spinner);
-     }
  
+         this.setActorInDefaultButtonWell(this._nextButton);
 diff --git a/js/ui/altTab.js b/js/ui/altTab.js
 index 1a6c705..c5852d2 100644
 --- a/js/ui/altTab.js
@@ -142,10 +142,10 @@ index 1a6c705..c5852d2 100644
          }
  
 diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
-index 4a3f2d7..dc207bc 100644
+index 29c8dfb..359f157 100644
 --- a/js/ui/appDisplay.js
 +++ b/js/ui/appDisplay.js
-@@ -2073,13 +2073,6 @@ class FolderGrid extends AppGrid {
+@@ -2074,13 +2074,6 @@ class FolderGrid extends AppGrid {
              page_halign: Clutter.ActorAlign.CENTER,
              page_valign: Clutter.ActorAlign.CENTER,
          });
@@ -159,7 +159,7 @@ index 4a3f2d7..dc207bc 100644
      }
  });
  
-@@ -2503,6 +2496,10 @@ export const AppFolderDialog = GObject.registerClass({
+@@ -2504,6 +2497,10 @@ export const AppFolderDialog = GObject.registerClass({
              orientation: Clutter.Orientation.VERTICAL,
          });
  
@@ -266,7 +266,7 @@ index 970bf94..9c8a471 100644
  
          if (newIconSize === this.iconSize)
 diff --git a/js/ui/endSessionDialog.js b/js/ui/endSessionDialog.js
-index ee26bff..6b4ce4e 100644
+index 02028a0..9e270cc 100644
 --- a/js/ui/endSessionDialog.js
 +++ b/js/ui/endSessionDialog.js
 @@ -29,6 +29,7 @@ import * as CheckBox from './checkBox.js';
@@ -665,10 +665,10 @@ index 3543d41..37d42fd 100644
  let _defaultCssStylesheet = null;
  let _cssStylesheet = null;
 diff --git a/js/ui/overviewControls.js b/js/ui/overviewControls.js
-index 1351681..9350dba 100644
+index 06bae16..27ae0c8 100644
 --- a/js/ui/overviewControls.js
 +++ b/js/ui/overviewControls.js
-@@ -19,7 +19,7 @@ import * as WorkspacesView from './workspacesView.js';
+@@ -20,7 +20,7 @@ import * as WorkspacesView from './workspacesView.js';
  import {STARTUP_ANIMATION_TIME} from './layout.js';
  
  export const SMALL_WORKSPACE_RATIO = 0.15;
@@ -678,7 +678,7 @@ index 1351681..9350dba 100644
  const THUMBNAILS_SPACING_ADJUSTMENT_TOP = 0.6;
  const THUMBNAILS_SPACING_ADJUSTMENT_BOTTOM = 0.4;
 diff --git a/js/ui/shellMountOperation.js b/js/ui/shellMountOperation.js
-index aa180ba..25420fa 100644
+index c23123a..88793e2 100644
 --- a/js/ui/shellMountOperation.js
 +++ b/js/ui/shellMountOperation.js
 @@ -9,6 +9,7 @@ import St from 'gi://St';
@@ -699,7 +699,7 @@ index aa180ba..25420fa 100644
  const REMEMBER_MOUNT_PASSWORD_KEY = 'remember-mount-password';
  
  /* ------ Common Utils ------- */
-@@ -337,7 +335,7 @@ const ShellMountPasswordDialog = GObject.registerClass({
+@@ -354,7 +352,7 @@ const ShellMountPasswordDialog = GObject.registerClass({
          this.setInitialKeyFocus(this._passwordEntry);
          ShellEntry.addContextMenu(this._passwordEntry);
  
@@ -708,7 +708,7 @@ index aa180ba..25420fa 100644
              animate: true,
          });
  
-@@ -506,7 +504,7 @@ const ShellProcessesDialog = GObject.registerClass({
+@@ -530,7 +528,7 @@ class ShellProcessesDialog extends ModalDialog.ModalDialog {
                  return;
  
              const listItem = new Dialog.ListSectionItem({
@@ -743,7 +743,7 @@ index cb0f711..77a6e16 100644
          box.add_child(icon);
  
 diff --git a/js/ui/userWidget.js b/js/ui/userWidget.js
-index 9447308..dd88684 100644
+index cb4150a..92bf5d9 100644
 --- a/js/ui/userWidget.js
 +++ b/js/ui/userWidget.js
 @@ -6,10 +6,9 @@ import GLib from 'gi://GLib';
@@ -768,7 +768,7 @@ index 9447308..dd88684 100644
  
          super._init({
 diff --git a/js/ui/windowPreview.js b/js/ui/windowPreview.js
-index 8d0c002..d77c0e4 100644
+index 8afce1c..9297896 100644
 --- a/js/ui/windowPreview.js
 +++ b/js/ui/windowPreview.js
 @@ -9,6 +9,7 @@ import Shell from 'gi://Shell';
@@ -787,7 +787,7 @@ index 8d0c002..d77c0e4 100644
  const ICON_OVERLAP = 0.7;
  
  const ICON_TITLE_SPACING = 6;
-@@ -132,7 +132,8 @@ export const WindowPreview = GObject.registerClass({
+@@ -161,7 +161,8 @@ export class WindowPreview extends Shell.WindowPreview {
  
          const tracker = Shell.WindowTracker.get_default();
          const app = tracker.get_window_app(this.metaWindow);
@@ -797,7 +797,7 @@ index 8d0c002..d77c0e4 100644
          this._icon.add_style_class_name('window-icon');
          this._icon.add_style_class_name('icon-dropshadow');
          this._icon.set({
-@@ -167,7 +168,7 @@ export const WindowPreview = GObject.registerClass({
+@@ -196,7 +197,7 @@ export class WindowPreview extends Shell.WindowPreview {
              source: windowContainer,
              coordinate: Clutter.BindCoordinate.X,
          }));

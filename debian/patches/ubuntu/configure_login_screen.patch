@@ -94,10 +94,10 @@ index 0000000..ee8b3a2
 +  </schema>
 +</schemalist>
 diff --git a/data/meson.build b/data/meson.build
-index e37f97b..a8746b9 100644
+index 6f9da96..0bcbbe2 100644
 --- a/data/meson.build
 +++ b/data/meson.build
-@@ -111,6 +111,12 @@ schema = configure_file(
+@@ -132,6 +132,12 @@ schema = configure_file(
    configuration: schemaconf,
    install_dir: schemadir
  )
@@ -110,7 +110,7 @@ index e37f97b..a8746b9 100644
  install_data('00_org.gnome.shell.gschema.override', install_dir: schemadir)
  
  if have_systemd
-@@ -131,7 +137,7 @@ endif
+@@ -152,7 +158,7 @@ endif
  
  # for unit tests - gnome.compile_schemas() only looks in srcdir
  compiled_schemas = custom_target('compile-schemas',
@@ -136,7 +136,7 @@ index 1420b26..25b4f18 100644
                  backgroundColor = dummyBgActor.get_theme_node().get_background_color();
                  dummyBgActor.destroy();
 diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js
-index d318b1d..cfee34a 100644
+index ac17784..4c93795 100644
 --- a/js/ui/screenShield.js
 +++ b/js/ui/screenShield.js
 @@ -31,6 +31,12 @@ const DISABLE_LOCK_KEY = 'disable-lock-screen';
@@ -169,7 +169,7 @@ index d318b1d..cfee34a 100644
          this._grab = null;
          this._isGreeter = false;
          this._isActive = false;
-@@ -201,6 +217,31 @@ export class ScreenShield extends Signals.EventEmitter {
+@@ -207,6 +223,31 @@ export class ScreenShield extends Signals.EventEmitter {
          });
      }
  
@@ -201,7 +201,7 @@ index d318b1d..cfee34a 100644
      async _syncInhibitor() {
          const lockEnabled = this._settings.get_boolean(LOCK_ENABLED_KEY) ||
                              this._settings.get_boolean(SUSPEND_LOCK_ENABLED_KEY);
-@@ -410,6 +451,7 @@ export class ScreenShield extends Signals.EventEmitter {
+@@ -414,6 +455,7 @@ export class ScreenShield extends Signals.EventEmitter {
              }
  
              this._dialog = new constructor(this._lockDialogGroup);

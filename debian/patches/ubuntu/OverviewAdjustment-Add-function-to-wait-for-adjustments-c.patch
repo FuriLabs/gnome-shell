@@ -17,10 +17,10 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2148587
  1 file changed, 27 insertions(+)
 
 diff --git a/js/ui/overviewControls.js b/js/ui/overviewControls.js
-index 9350dba..dcb3f5f 100644
+index 27ae0c8..e8ddb16 100644
 --- a/js/ui/overviewControls.js
 +++ b/js/ui/overviewControls.js
-@@ -16,6 +16,7 @@ import * as WindowManager from './windowManager.js';
+@@ -17,6 +17,7 @@ import * as WindowManager from './windowManager.js';
  import * as WorkspaceThumbnail from './workspaceThumbnail.js';
  import * as WorkspacesView from './workspacesView.js';
  
@@ -28,7 +28,7 @@ index 9350dba..dcb3f5f 100644
  import {STARTUP_ANIMATION_TIME} from './layout.js';
  
  export const SMALL_WORKSPACE_RATIO = 0.15;
-@@ -307,6 +308,32 @@ export const OverviewAdjustment = GObject.registerClass({
+@@ -308,6 +309,32 @@ export const OverviewAdjustment = GObject.registerClass({
              progress,
          };
      }

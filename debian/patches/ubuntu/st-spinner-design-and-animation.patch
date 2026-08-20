@@ -11,7 +11,7 @@ Last-Update: 2025-06-28
  1 file changed, 137 insertions(+), 1 deletion(-)
 
 diff --git a/src/st/st-spinner-content.c b/src/st/st-spinner-content.c
-index 810e654..0c40a82 100644
+index 897db84..6fc36a5 100644
 --- a/src/st/st-spinner-content.c
 +++ b/src/st/st-spinner-content.c
 @@ -20,7 +20,9 @@

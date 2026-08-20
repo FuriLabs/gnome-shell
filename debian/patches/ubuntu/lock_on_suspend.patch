@@ -8,7 +8,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/1063110
  1 file changed, 5 insertions(+), 2 deletions(-)
 
 diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js
-index 515dc82..d318b1d 100644
+index cc30e6a..ac17784 100644
 --- a/js/ui/screenShield.js
 +++ b/js/ui/screenShield.js
 @@ -24,6 +24,7 @@ import {adjustAnimationTime} from '../misc/animationUtils.js';
@@ -27,7 +27,7 @@ index 515dc82..d318b1d 100644
  
          this._lockSettings = new Gio.Settings({schema_id: LOCKDOWN_SCHEMA});
          this._lockSettings.connect(`changed::${DISABLE_LOCK_KEY}`, this._syncInhibitor.bind(this));
-@@ -200,7 +202,8 @@ export class ScreenShield extends Signals.EventEmitter {
+@@ -206,7 +208,8 @@ export class ScreenShield extends Signals.EventEmitter {
      }
  
      async _syncInhibitor() {
@@ -37,7 +37,7 @@ index 515dc82..d318b1d 100644
          const lockLocked = this._lockSettings.get_boolean(DISABLE_LOCK_KEY);
          const inhibit = !!this._loginSession && this._loginSession.Active &&
                           !this._isActive && lockEnabled && !lockLocked &&
-@@ -232,7 +235,7 @@ export class ScreenShield extends Signals.EventEmitter {
+@@ -238,7 +241,7 @@ export class ScreenShield extends Signals.EventEmitter {
      _prepareForSleep(loginManager, aboutToSuspend) {
          if (aboutToSuspend) {
              this._dialog?.cancel();

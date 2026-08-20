@@ -18,10 +18,10 @@ Forwarded: not-needed
  create mode 100644 data/org.gnome.shell.ubuntu.gschema.xml.in
 
 diff --git a/data/meson.build b/data/meson.build
-index a8746b9..d94bfa9 100644
+index 0bcbbe2..589bc4e 100644
 --- a/data/meson.build
 +++ b/data/meson.build
-@@ -111,6 +111,12 @@ schema = configure_file(
+@@ -132,6 +132,12 @@ schema = configure_file(
    configuration: schemaconf,
    install_dir: schemadir
  )
@@ -34,7 +34,7 @@ index a8746b9..d94bfa9 100644
  schema_ubuntu_login = configure_file(
    input: 'com.ubuntu.login-screen.gschema.xml.in',
    output: 'com.ubuntu.login-screen.gschema.xml',
-@@ -137,7 +143,7 @@ endif
+@@ -158,7 +164,7 @@ endif
  
  # for unit tests - gnome.compile_schemas() only looks in srcdir
  compiled_schemas = custom_target('compile-schemas',
@@ -130,28 +130,28 @@ index b3c5afe..86d101b 100644
      let stylesheet = null;
      const name = sessionMode.stylesheetName;
 diff --git a/src/st/st-settings.c b/src/st/st-settings.c
-index 5fe1842..fe0a5c5 100644
+index f7e313d..89ecdb9 100644
 --- a/src/st/st-settings.c
 +++ b/src/st/st-settings.c
-@@ -34,6 +34,7 @@
- #define KEY_ACCENT_COLOR          "accent-color"
+@@ -35,6 +35,7 @@
  #define KEY_HIGH_CONTRAST         "high-contrast"
+ #define KEY_REDUCED_MOTION        "reduced-motion"
  #define KEY_GTK_ICON_THEME        "icon-theme"
 +#define KEY_GTK_THEME             "gtk-theme"
  #define KEY_MAGNIFIER_ACTIVE      "screen-magnifier-enabled"
  #define KEY_DISABLE_SHOW_PASSWORD "disable-show-password"
  
-@@ -46,7 +47,9 @@ enum {
-   PROP_COLOR_SCHEME,
+@@ -48,7 +49,9 @@ enum {
    PROP_ACCENT_COLOR,
    PROP_HIGH_CONTRAST,
+   PROP_REDUCED_MOTION,
 +  PROP_GTK_THEME,
    PROP_GTK_ICON_THEME,
 +  PROP_SHELL_COLOR_SCHEME,
    PROP_MAGNIFIER_ACTIVE,
    PROP_SLOW_DOWN_FACTOR,
    PROP_DISABLE_SHOW_PASSWORD,
-@@ -63,10 +66,12 @@ struct _StSettings
+@@ -65,10 +68,12 @@ struct _StSettings
    GSettings *a11y_applications_settings;
    GSettings *a11y_interface_settings;
    GSettings *lockdown_settings;
@@ -164,7 +164,7 @@ index 5fe1842..fe0a5c5 100644
    int inhibit_animations_count;
    gboolean enable_animations;
    gboolean primary_paste;
-@@ -228,7 +233,9 @@ st_settings_finalize (GObject *object)
+@@ -239,7 +244,9 @@ st_settings_finalize (GObject *object)
    g_object_unref (settings->a11y_applications_settings);
    g_object_unref (settings->a11y_interface_settings);
    g_object_unref (settings->lockdown_settings);
@@ -174,7 +174,7 @@ index 5fe1842..fe0a5c5 100644
    g_free (settings->gtk_icon_theme);
  
    G_OBJECT_CLASS (st_settings_parent_class)->finalize (object);
-@@ -280,6 +287,19 @@ st_settings_get_property (GObject    *object,
+@@ -294,6 +301,19 @@ st_settings_get_property (GObject    *object,
      case PROP_GTK_ICON_THEME:
        g_value_set_string (value, settings->gtk_icon_theme);
        break;
@@ -194,7 +194,7 @@ index 5fe1842..fe0a5c5 100644
      case PROP_COLOR_SCHEME:
        g_value_set_enum (value, settings->color_scheme);
        break;
-@@ -383,6 +403,26 @@ st_settings_class_init (StSettingsClass *klass)
+@@ -407,6 +427,26 @@ st_settings_class_init (StSettingsClass *klass)
                                                  ST_TYPE_SYSTEM_ACCENT_COLOR,
                                                  ST_SYSTEM_ACCENT_COLOR_BLUE,
                                                  ST_PARAM_READABLE);
@@ -221,7 +221,7 @@ index 5fe1842..fe0a5c5 100644
  
    /**
     * StSettings:magnifier-active:
-@@ -414,6 +454,25 @@ st_settings_class_init (StSettingsClass *klass)
+@@ -438,6 +478,25 @@ st_settings_class_init (StSettingsClass *klass)
    g_object_class_install_properties (object_class, N_PROPS, props);
  }
  
@@ -247,7 +247,7 @@ index 5fe1842..fe0a5c5 100644
  static void
  on_interface_settings_changed (GSettings   *g_settings,
                                 const gchar *key,
-@@ -435,6 +494,10 @@ on_interface_settings_changed (GSettings   *g_settings,
+@@ -459,6 +518,10 @@ on_interface_settings_changed (GSettings   *g_settings,
        settings->font_name = g_settings_get_string (g_settings, key);
        g_object_notify_by_pspec (G_OBJECT (settings), props[PROP_FONT_NAME]);
      }
@@ -258,7 +258,7 @@ index 5fe1842..fe0a5c5 100644
    else if (g_str_equal (key, KEY_GTK_ICON_THEME))
      {
        g_free (settings->gtk_icon_theme);
-@@ -455,6 +518,18 @@ on_interface_settings_changed (GSettings   *g_settings,
+@@ -479,6 +542,18 @@ on_interface_settings_changed (GSettings   *g_settings,
      }
  }
  
@@ -277,7 +277,7 @@ index 5fe1842..fe0a5c5 100644
  static void
  on_mouse_settings_changed (GSettings   *g_settings,
                             const gchar *key,
-@@ -510,6 +585,10 @@ st_settings_init (StSettings *settings)
+@@ -539,6 +614,10 @@ st_settings_init (StSettings *settings)
    g_signal_connect (settings->interface_settings, "changed",
                      G_CALLBACK (on_interface_settings_changed), settings);
  
@@ -288,7 +288,7 @@ index 5fe1842..fe0a5c5 100644
    settings->mouse_settings = g_settings_new ("org.gnome.desktop.peripherals.mouse");
    g_signal_connect (settings->mouse_settings, "changed",
                      G_CALLBACK (on_mouse_settings_changed), settings);
-@@ -526,6 +605,8 @@ st_settings_init (StSettings *settings)
+@@ -555,6 +634,8 @@ st_settings_init (StSettings *settings)
    g_signal_connect (settings->lockdown_settings, "changed",
                      G_CALLBACK (on_lockdown_settings_changed), settings);
  

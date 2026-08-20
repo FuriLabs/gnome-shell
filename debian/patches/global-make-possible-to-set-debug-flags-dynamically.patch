@@ -21,7 +21,7 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  3 files changed, 103 insertions(+), 14 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index 6895de1..59d78ea 100644
+index 001227f..77ed30e 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -359,14 +359,14 @@ shell_a11y_init (void)
@@ -138,7 +138,7 @@ index 6895de1..59d78ea 100644
    shell_dbus_init ();
    shell_a11y_init ();
 diff --git a/src/shell-global.c b/src/shell-global.c
-index b6565a6..69ce893 100644
+index eb16266..c31c8a0 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
 @@ -61,6 +61,7 @@ struct _ShellGlobal {
@@ -157,7 +157,7 @@ index b6565a6..69ce893 100644
  
    N_PROPS
  };
-@@ -238,6 +240,9 @@ shell_global_set_property(GObject         *object,
+@@ -236,6 +238,9 @@ shell_global_set_property(GObject         *object,
      case PROP_AUTOMATION_SCRIPT:
        g_set_object (&global->automation_script, g_value_get_object (value));
        break;
@@ -167,7 +167,7 @@ index b6565a6..69ce893 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -318,6 +323,9 @@ shell_global_get_property(GObject         *object,
+@@ -316,6 +321,9 @@ shell_global_get_property(GObject         *object,
      case PROP_AUTOMATION_SCRIPT:
        g_value_set_object (value, global->automation_script);
        break;
@@ -177,7 +177,7 @@ index b6565a6..69ce893 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -631,6 +639,13 @@ shell_global_class_init (ShellGlobalClass *klass)
+@@ -625,6 +633,13 @@ shell_global_class_init (ShellGlobalClass *klass)
                           G_TYPE_FILE,
                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS);
  
@@ -191,7 +191,7 @@ index b6565a6..69ce893 100644
    g_object_class_install_properties (gobject_class, N_PROPS, props);
  }
  
-@@ -1776,3 +1791,40 @@ shell_global_set_frame_finish_timestamp (ShellGlobal *global,
+@@ -1758,3 +1773,40 @@ shell_global_set_frame_finish_timestamp (ShellGlobal *global,
        g_object_notify_by_pspec (G_OBJECT (global), props[PROP_FRAME_FINISH_TIMESTAMP]);
      }
  }

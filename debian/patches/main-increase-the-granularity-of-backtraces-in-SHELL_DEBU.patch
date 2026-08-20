@@ -15,7 +15,7 @@ Forwarded: https://gitlab.gnome.org/GNOME/gnome-shell/merge_requests/6
  2 files changed, 66 insertions(+), 21 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
-index 59d78ea..06425b7 100644
+index 77ed30e..b93d033 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -42,16 +42,27 @@ static char *session_mode = NULL;
@@ -146,10 +146,10 @@ index 59d78ea..06425b7 100644
    shell_dbus_init ();
    shell_a11y_init ();
 diff --git a/src/shell-global.c b/src/shell-global.c
-index 69ce893..20e0575 100644
+index c31c8a0..f028b49 100644
 --- a/src/shell-global.c
 +++ b/src/shell-global.c
-@@ -1809,11 +1809,15 @@ shell_global_get_debug_flags (ShellGlobal *global)
+@@ -1791,11 +1791,15 @@ shell_global_get_debug_flags (ShellGlobal *global)
  /**
   * shell_global_set_debug_flags:
   * @global: a #ShellGlobal
