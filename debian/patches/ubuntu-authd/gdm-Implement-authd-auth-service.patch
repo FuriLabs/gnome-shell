@@ -3,22 +3,22 @@ Date: Sun, 26 Jul 2026 07:00:57 +0200
 Subject: gdm: Implement authd auth service
 
 ---
- js/gdm/authd.js               | 1003 ++++++++
+ js/gdm/authd.js               | 1008 ++++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/userVerifier.js        |    2 +
  js/js-resources.gresource.xml |    3 +
  js/ui/popupMenu.js            |    5 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6680 insertions(+)
+ 6 files changed, 6685 insertions(+)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..3a545c5
+index 0000000..bfb98d1
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,1003 @@
+@@ -0,0 +1,1008 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +import GLib from 'gi://GLib';
 +import GObject from 'gi://GObject';
@@ -275,6 +275,11 @@ index 0000000..3a545c5
 +            return;
 +        if (!this._authMechanisms[mechanism.id])
 +            return;
++
++        if (this._stage === AuthdPam.Stage.authModeSelection) {
++            this._selectAuthMode(mechanism.id);
++            return;
++        }
 +
 +        const maybeSwitchMechanism = () => {
 +            if (this._stage !== AuthdPam.Stage.challenge)
