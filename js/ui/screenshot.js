@@ -250,17 +250,14 @@ class UIAreaIndicator extends St.Widget {
     }
 });
 
+const CTRL_SELECTION_KEYBOARD_INCREMENT = 1;
+const SELECTION_KEYBOARD_INCREMENT = 5;
+
 const UIAreaSelector = GObject.registerClass({
     Signals: {'drag-started': {}, 'drag-ended': {}},
 }, class UIAreaSelector extends St.Widget {
     _init(params) {
         super._init(params);
-
-        // During a drag, this can be Clutter.BUTTON_PRIMARY,
-        // Clutter.BUTTON_SECONDARY or the string "touch" to identify the source
-        // of the drag operation.
-        this._dragButton = 0;
-        this._dragSequence = null;
 
         this._areaIndicator = new UIAreaIndicator();
         this._areaIndicator.add_constraint(new Clutter.BindConstraint({
@@ -292,6 +289,22 @@ const UIAreaSelector = GObject.registerClass({
             }
         });
 
+        this._panGesture = new Clutter.PanGesture({
+            begin_threshold: 0,
+            required_button: 0,
+        });
+        this._panGesture.connect('recognize', () => this._onPanBegin());
+        this._panGesture.connect('pan-update', () => this._onPanUpdate());
+        this._panGesture.connect('end', () => this._onPanEnd());
+        this.add_action(this._panGesture);
+
+        this._motionController = new Clutter.MotionController();
+        this._motionController.connect('motion', this._onMotion.bind(this));
+        this._motionController.connect('leave', () => {
+            this.set_cursor_type(Clutter.Cursor.INHERIT);
+        });
+        this.add_action(this._motionController);
+
         // Initialize area to out of bounds so reset() below resets it.
         this._startX = -1;
         this._startY = 0;
@@ -305,6 +318,9 @@ const UIAreaSelector = GObject.registerClass({
         this.stopDrag();
         this.set_cursor_type(Clutter.CursorType.INHERIT);
 
+        this._currentSide = St.DirectionType.LEFT;
+        this._lastResizeDirection = St.DirectionType.LEFT;
+
         // Preserve area selection if possible. If the area goes out of bounds,
         // the monitors might have changed, so reset the area.
         const [x, y, w, h] = this.getGeometry();
@@ -316,19 +332,197 @@ const UIAreaSelector = GObject.registerClass({
             this._lastX = 0;
             this._lastY = 0;
 
-            // This can happen when running headless without any monitors.
-            if (Main.layoutManager.primaryIndex !== -1) {
-                const monitor =
-                    Main.layoutManager.monitors[Main.layoutManager.primaryIndex];
-
-                this._startX = monitor.x + Math.floor(monitor.width * 3 / 8);
-                this._startY = monitor.y + Math.floor(monitor.height * 3 / 8);
-                this._lastX = monitor.x + Math.floor(monitor.width * 5 / 8) - 1;
-                this._lastY = monitor.y + Math.floor(monitor.height * 5 / 8) - 1;
-            }
-
-            this._updateSelectionRect();
+            this.resetArea();
         }
+    }
+
+    _maybeChangeResizeDirection(direction) {
+        function isVertical(dir) {
+            return dir === St.DirectionType.UP || dir === St.DirectionType.DOWN;
+        }
+
+        if (isVertical(direction) && isVertical(this._lastResizeDirection))
+            return false;
+
+        if (!isVertical(direction) && !isVertical(this._lastResizeDirection))
+            return false;
+
+        this._lastResizeDirection = direction;
+        this._currentSide = direction;
+        return true;
+    }
+
+    resetArea() {
+        // This can called when running headless without any monitors.
+        if (Main.layoutManager.primaryIndex !== -1) {
+            const monitor =
+                Main.layoutManager.monitors[Main.layoutManager.primaryIndex];
+
+            this._startX = monitor.x + Math.floor(monitor.width * 3 / 8);
+            this._startY = monitor.y + Math.floor(monitor.height * 3 / 8);
+            this._lastX = monitor.x + Math.floor(monitor.width * 5 / 8) - 1;
+            this._lastY = monitor.y + Math.floor(monitor.height * 5 / 8) - 1;
+        }
+
+        this._updateSelectionRect();
+    }
+
+    _centerCursor() {
+        const [leftX, topY, selectionWidth, selectionHeight] = this.getGeometry();
+        const [rightX, bottomY] = [leftX + selectionWidth - 1, topY + selectionHeight - 1];
+        const seat = global.stage.context.get_backend().get_default_seat();
+        const cursorX = ((rightX - leftX) / 2) + leftX;
+        const cursorY = ((topY - bottomY) / 2) + bottomY;
+
+        seat.warp_pointer(cursorX, cursorY);
+        this._updateCursor(cursorX, cursorY);
+    }
+
+    _moveCursorToSide(direction) {
+        const seat = global.stage.context.get_backend().get_default_seat();
+        const [leftX, topY, width, height] = this.getGeometry();
+        const [rightX, bottomY] = [leftX + width - 1, topY + height - 1];
+        let cursorX, cursorY;
+
+        switch (direction) {
+        case St.DirectionType.LEFT:
+            cursorX = this._startX < this._lastX ? leftX : rightX;
+            cursorY = ((topY - bottomY) / 2) + bottomY;
+            break;
+        case St.DirectionType.RIGHT:
+            cursorX = this._startX < this._lastX ? rightX : leftX;
+            cursorY = ((topY - bottomY) / 2) + bottomY;
+            break;
+        case St.DirectionType.UP:
+            cursorX = ((rightX - leftX) / 2) + leftX;
+            cursorY = this._startY < this._lastY ? topY : bottomY;
+            break;
+        case St.DirectionType.DOWN:
+            cursorX = ((rightX - leftX) / 2) + leftX;
+            cursorY = this._startY < this._lastY ? bottomY : topY;
+            break;
+        }
+        seat.warp_pointer(cursorX, cursorY);
+        this._updateCursor(cursorX, cursorY);
+    }
+
+    moveInDirection(direction, increment) {
+        const [,, selectionWidth, selectionHeight] = this.getGeometry();
+
+        let newStartX = this._startX;
+        let newStartY = this._startY;
+        let newLastX = this._lastX;
+        let newLastY = this._lastY;
+
+        switch (direction) {
+        case St.DirectionType.LEFT:
+            newStartX -= increment;
+            newLastX -= increment;
+            break;
+        case St.DirectionType.RIGHT:
+            newStartX += increment;
+            newLastX += increment;
+            break;
+        case St.DirectionType.UP:
+            newStartY -= increment;
+            newLastY -= increment;
+            break;
+        case St.DirectionType.DOWN:
+            newStartY += increment;
+            newLastY += increment;
+            break;
+        }
+
+        // Ensure area does not move off the stage edge.
+        if (newStartX < 0 || newLastX < 0) {
+            newStartX = 0;
+            newLastX = newStartX + (selectionWidth - 1);
+        } else if (newLastX > this.width - 1) {
+            newLastX = this.width - 1;
+            newStartX = newLastX - (selectionWidth - 1);
+        }
+
+        if (newStartY < 0 || newLastY < 0) {
+            newStartY = 0;
+            newLastY = newStartY + (selectionHeight - 1);
+        } else if (newLastY > this.height - 1) {
+            newLastY = this.height - 1;
+            newStartY = newLastY - (selectionHeight - 1);
+        }
+
+        // Update selection rectangle props.
+        this._startX = newStartX;
+        this._startY = newStartY;
+        this._lastX = newLastX;
+        this._lastY = newLastY;
+
+        this._updateSelectionRect();
+
+        // Update cursor to center of the selection rectangle
+        this._centerCursor();
+    }
+
+    resizeInDirection(direction, increment) {
+        // Only move the current side of the area selected in the corresponding
+        // direction to the key just pressed if the pressed key is on the same axis,
+        // otherwise change cursor direction and exit early.
+        if (this._maybeChangeResizeDirection(direction)) {
+            this._moveCursorToSide(direction);
+            return;
+        }
+
+        let newStartX = this._startX;
+        let newStartY = this._startY;
+        let newLastX = this._lastX;
+        let newLastY = this._lastY;
+
+        switch (direction) {
+        case St.DirectionType.LEFT:
+            if (this._currentSide === St.DirectionType.LEFT)
+                newStartX -= increment;
+            else if (this._currentSide === St.DirectionType.RIGHT)
+                newLastX -= increment;
+            break;
+
+        case St.DirectionType.RIGHT:
+            if (this._currentSide === St.DirectionType.LEFT)
+                newStartX += increment;
+            else if (this._currentSide === St.DirectionType.RIGHT)
+                newLastX += increment;
+            break;
+
+        case St.DirectionType.UP:
+            if (this._currentSide === St.DirectionType.UP)
+                newStartY -= increment;
+            else if (this._currentSide === St.DirectionType.DOWN)
+                newLastY -= increment;
+            break;
+
+        case St.DirectionType.DOWN:
+            if (this._currentSide === St.DirectionType.UP)
+                newStartY += increment;
+            else if (this._currentSide === St.DirectionType.DOWN)
+                newLastY += increment;
+            break;
+        }
+
+        // Ensure new resized area does not go off the stage edge.
+        newStartX = Math.clamp(newStartX, 0, this.width - 1);
+        newLastX = Math.clamp(newLastX, 0, this.width - 1);
+
+        newStartY = Math.clamp(newStartY, 0, this.height - 1);
+        newLastY = Math.clamp(newLastY, 0, this.height - 1);
+
+        // Update selection rectangle props.
+        this._startX = newStartX;
+        this._startY = newStartY;
+        this._lastX = newLastX;
+        this._lastY = newLastY;
+        this._lastResizeDirection = direction;
+
+        this._updateSelectionRect();
+
+        this._moveCursorToSide(this._currentSide);
     }
 
     getGeometry() {
@@ -398,16 +592,10 @@ const UIAreaSelector = GObject.registerClass({
     }
 
     stopDrag() {
-        if (!this._dragButton)
-            return;
-
         if (this._dragGrab) {
             this._dragGrab.dismiss();
             this._dragGrab = null;
         }
-
-        this._dragButton = 0;
-        this._dragSequence = null;
 
         if (this._dragCursor === Clutter.CursorType.CROSSHAIR &&
             this._lastX === this._startX && this._lastY === this._startY) {
@@ -448,34 +636,28 @@ const UIAreaSelector = GObject.registerClass({
         this.set_cursor_type(cursor);
     }
 
-    _onPress(event, button, sequence) {
-        if (this._dragButton)
-            return Clutter.EVENT_PROPAGATE;
-
-        const [x, y] = event.get_coords();
-        const cursor = this._computeCursorType(x, y);
+    _onPanBegin() {
+        const centroid = this._panGesture.get_centroid_abs();
+        const cursor = this._computeCursorType(centroid.x, centroid.y);
 
         // Clicking outside of the selection, or using the right mouse button,
         // or with Ctrl results in dragging a new selection from scratch.
         if (cursor === Clutter.CursorType.CROSSHAIR ||
-            button === Clutter.BUTTON_SECONDARY ||
-            (event.get_state() & Clutter.ModifierType.CONTROL_MASK)) {
-            this._dragButton = button;
-
+            this._panGesture.get_button() === Clutter.BUTTON_SECONDARY ||
+            this._panGesture.get_state() & Clutter.ModifierType.CONTROL_MASK) {
             this._dragCursor = Clutter.CursorType.CROSSHAIR;
-            this.set_cursor_type(Clutter.CursorType.CROSSHAIR);
+            this.set_cursor_type(this._dragCursor);
 
-            [this._startX, this._startY] = event.get_coords();
+            [this._startX, this._startY] = [centroid.x, centroid.y];
             this._lastX = this._startX = Math.floor(this._startX);
             this._lastY = this._startY = Math.floor(this._startY);
 
             this._updateSelectionRect();
         } else {
             // This is a move or resize operation.
-            this._dragButton = button;
 
             this._dragCursor = cursor;
-            [this._dragStartX, this._dragStartY] = event.get_coords();
+            [this._dragStartX, this._dragStartY] = [centroid.x, centroid.y];
 
             const [leftX, topY, width, height] = this.getGeometry();
             const rightX = leftX + width - 1;
@@ -556,49 +738,27 @@ const UIAreaSelector = GObject.registerClass({
             }
         }
 
-        if (this._dragButton) {
-            this._dragGrab = global.stage.grab(this);
-            this._dragSequence = sequence;
-
-            this.emit('drag-started');
-
-            return Clutter.EVENT_STOP;
-        }
-
-        return Clutter.EVENT_PROPAGATE;
+        this._dragGrab = global.stage.grab(this);
+        this.emit('drag-started');
     }
 
-    _onRelease(event, button, sequence) {
-        if (this._dragButton !== button ||
-            this._dragSequence?.get_slot() !== sequence?.get_slot())
-            return Clutter.EVENT_PROPAGATE;
-
+    _onPanEnd() {
         this.stopDrag();
 
         // We might have finished creating a new selection, so we need to
         // update the cursor.
-        const [x, y] = event.get_coords();
+        const {x, y} = this._panGesture.get_centroid_abs();
         this._updateCursor(x, y);
-
-        return Clutter.EVENT_STOP;
     }
 
-    _onMotion(event, sequence) {
-        if (!this._dragButton) {
-            const [x, y] = event.get_coords();
-            this._updateCursor(x, y);
-            return Clutter.EVENT_PROPAGATE;
-        }
-
-        if (sequence?.get_slot() !== this._dragSequence?.get_slot())
-            return Clutter.EVENT_PROPAGATE;
-
+    _onPanUpdate() {
+        const centroid = this._panGesture.get_centroid_abs();
         if (this._dragCursor === Clutter.CursorType.CROSSHAIR) {
-            [this._lastX, this._lastY] = event.get_coords();
+            [this._lastX, this._lastY] = [centroid.x, centroid.y];
             this._lastX = Math.floor(this._lastX);
             this._lastY = Math.floor(this._lastY);
         } else {
-            const [x, y] = event.get_coords();
+            const {x, y} = centroid;
             let dx = Math.round(x - this._dragStartX);
             let dy = Math.round(y - this._dragStartY);
 
@@ -716,47 +876,11 @@ const UIAreaSelector = GObject.registerClass({
         }
 
         this._updateSelectionRect();
-
-        return Clutter.EVENT_STOP;
     }
 
-    vfunc_button_press_event(event) {
-        const button = event.get_button();
-        if (button === Clutter.BUTTON_PRIMARY ||
-            button === Clutter.BUTTON_SECONDARY)
-            return this._onPress(event, button, null);
-
-        return Clutter.EVENT_PROPAGATE;
-    }
-
-    vfunc_button_release_event(event) {
-        const button = event.get_button();
-        if (button === Clutter.BUTTON_PRIMARY ||
-            button === Clutter.BUTTON_SECONDARY)
-            return this._onRelease(event, button, null);
-
-        return Clutter.EVENT_PROPAGATE;
-    }
-
-    vfunc_motion_event(event) {
-        return this._onMotion(event, null);
-    }
-
-    vfunc_touch_event(event) {
-        const eventType = event.type();
-        if (eventType === Clutter.EventType.TOUCH_BEGIN)
-            return this._onPress(event, 'touch', event.get_event_sequence());
-        else if (eventType === Clutter.EventType.TOUCH_END)
-            return this._onRelease(event, 'touch', event.get_event_sequence());
-        else if (eventType === Clutter.EventType.TOUCH_UPDATE)
-            return this._onMotion(event, event.get_event_sequence());
-
-        return Clutter.EVENT_PROPAGATE;
-    }
-
-    vfunc_leave_event(event) {
-        this.set_cursor_type(Clutter.Cursor.INHERIT);
-        return super.vfunc_leave_event(event);
+    _onMotion(_controller, _sprite, x, y) {
+        if (this._panGesture.get_state() === Clutter.GestureState.WAITING)
+            this._updateCursor(x, y);
     }
 });
 
@@ -1113,18 +1237,279 @@ const ScreencastPhase = {
     RECORDING: 'RECORDING',
 };
 
-export const ScreenshotUI = GObject.registerClass({
-    Properties: {
+export class ScreenshotUI extends St.Widget {
+    static [GObject.properties] = {
         'screencast-in-progress': GObject.ParamSpec.boolean(
             'screencast-in-progress', null, null,
             GObject.ParamFlags.READABLE,
             false),
-    },
-    Signals: {
+    };
+
+    static [GObject.signals] = {
         'screenshot-taken': {param_types: [Gio.File.$gtype]},
         'closed': {},
-    },
-}, class ScreenshotUI extends St.Widget {
+    };
+
+    static {
+        GObject.registerClass(this);
+
+        const bindingPool = this.get_binding_pool();
+
+        bindingPool.install_closure(
+            'activate', Clutter.KEY_Return, 0,
+            obj => {
+                obj._activate();
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'activate', Clutter.KEY_KP_Enter, 0,
+            obj => {
+                obj._activate();
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'activate', Clutter.KEY_ISO_Enter, 0,
+            obj => {
+                obj._activate();
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'activate', Clutter.KEY_space, 0,
+            obj => {
+                obj._activate();
+                return Clutter.EVENT_STOP;
+            }
+        );
+
+        bindingPool.install_closure(
+            'selection', Clutter.KEY_s, 0,
+            obj => {
+                obj._selectionButton.checked = true;
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'screen', Clutter.KEY_c, 0,
+            obj => {
+                obj._screenButton.checked = true;
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'window', Clutter.KEY_w, 0,
+            obj => {
+                if (obj._windowButton.reactive)
+                    obj._windowButton.checked = true;
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'screencast', Clutter.KEY_v, 0,
+            obj => {
+                if (obj._castButton.reactive)
+                    obj._castButton.checked = !obj._castButton.checked;
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'pointer', Clutter.KEY_p, 0,
+            obj => {
+                obj._showPointerButton.checked = !obj._showPointerButton.checked;
+                return Clutter.EVENT_STOP;
+            }
+        );
+
+        bindingPool.install_closure(
+            'move-left', Clutter.KEY_Left, 0,
+            obj => {
+                obj._moveFocus(St.DirectionType.LEFT);
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'move-right', Clutter.KEY_Right, 0,
+            obj => {
+                obj._moveFocus(St.DirectionType.RIGHT);
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'move-up', Clutter.KEY_Up, 0,
+            obj => {
+                obj._moveFocus(St.DirectionType.UP);
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'move-down', Clutter.KEY_Down, 0,
+            obj => {
+                obj._moveFocus(St.DirectionType.DOWN);
+                return Clutter.EVENT_STOP;
+            }
+        );
+
+        bindingPool.install_closure(
+            'resize-selection-left-control', Clutter.KEY_Left, Clutter.ModifierType.CONTROL_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._resizeSelection(St.DirectionType.LEFT, modifier);
+                return Clutter.EVENT_STOP;
+            }
+        );
+
+        bindingPool.install_closure(
+            'resize-selection-left-shift', Clutter.KEY_Left, Clutter.ModifierType.SHIFT_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._resizeSelection(St.DirectionType.LEFT, modifier);
+                return Clutter.EVENT_STOP;
+            }
+        );
+
+        bindingPool.install_closure(
+            'resize-selection-right-control', Clutter.KEY_Right, Clutter.ModifierType.CONTROL_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._resizeSelection(St.DirectionType.RIGHT, modifier);
+                return Clutter.EVENT_STOP;
+            }
+        );
+
+        bindingPool.install_closure(
+            'resize-selection-right-shift', Clutter.KEY_Right, Clutter.ModifierType.SHIFT_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._resizeSelection(St.DirectionType.RIGHT, modifier);
+                return Clutter.EVENT_STOP;
+            }
+        );
+
+        bindingPool.install_closure(
+            'resize-selection-up-control', Clutter.KEY_Up, Clutter.ModifierType.CONTROL_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._resizeSelection(St.DirectionType.UP, modifier);
+                return Clutter.EVENT_STOP;
+            }
+        );
+
+        bindingPool.install_closure(
+            'resize-selection-up-shift', Clutter.KEY_Up, Clutter.ModifierType.SHIFT_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._resizeSelection(St.DirectionType.UP, modifier);
+                return Clutter.EVENT_STOP;
+            }
+        );
+
+        bindingPool.install_closure(
+            'resize-selection-down-control', Clutter.KEY_Down, Clutter.ModifierType.CONTROL_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._resizeSelection(St.DirectionType.DOWN, modifier);
+                return Clutter.EVENT_STOP;
+            }
+        );
+
+        bindingPool.install_closure(
+            'resize-selection-down-shift', Clutter.KEY_Down, Clutter.ModifierType.SHIFT_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._resizeSelection(St.DirectionType.DOWN, modifier);
+                return Clutter.EVENT_STOP;
+            }
+        );
+
+        bindingPool.install_closure(
+            'move-selection-left', Clutter.KEY_Left, Clutter.ModifierType.MOD1_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._areaSelector.moveInDirection(St.DirectionType.LEFT, obj._getIncrement(modifier));
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'move-selection-right', Clutter.KEY_Right, Clutter.ModifierType.MOD1_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._areaSelector.moveInDirection(St.DirectionType.RIGHT, obj._getIncrement(modifier));
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'move-selection-up', Clutter.KEY_Up, Clutter.ModifierType.MOD1_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._areaSelector.moveInDirection(St.DirectionType.UP, obj._getIncrement(modifier));
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'move-selection-down', Clutter.KEY_Down, Clutter.ModifierType.MOD1_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._areaSelector.moveInDirection(St.DirectionType.DOWN, obj._getIncrement(modifier));
+                return Clutter.EVENT_STOP;
+            }
+        );
+
+        bindingPool.install_closure(
+            'move-selection-left-control', Clutter.KEY_Left, Clutter.ModifierType.MOD1_MASK + Clutter.ModifierType.CONTROL_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._areaSelector.moveInDirection(St.DirectionType.LEFT, obj._getIncrement(St.DirectionType.LEFT, modifier));
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'move-selection-left-shift', Clutter.KEY_Left, Clutter.ModifierType.MOD1_MASK + Clutter.ModifierType.SHIFT_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._areaSelector.moveInDirection(St.DirectionType.LEFT, obj._getIncrement(St.DirectionType.LEFT, modifier));
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'move-selection-right-control', Clutter.KEY_Right, Clutter.ModifierType.MOD1_MASK + Clutter.ModifierType.CONTROL_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._areaSelector.moveInDirection(St.DirectionType.RIGHT, obj._getIncrement(St.DirectionType.RIGHT, modifier));
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'move-selection-right-shift', Clutter.KEY_Right, Clutter.ModifierType.MOD1_MASK + Clutter.ModifierType.SHIFT_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._areaSelector.moveInDirection(St.DirectionType.RIGHT, obj._getIncrement(St.DirectionType.RIGHT, modifier));
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'move-selection-up-control', Clutter.KEY_Up, Clutter.ModifierType.MOD1_MASK + Clutter.ModifierType.CONTROL_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._areaSelector.moveInDirection(St.DirectionType.UP, obj._getIncrement(St.DirectionType.UP, modifier));
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'move-selection-up-shift', Clutter.KEY_Up, Clutter.ModifierType.MOD1_MASK + Clutter.ModifierType.SHIFT_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._areaSelector.moveInDirection(St.DirectionType.UP, obj._getIncrement(St.DirectionType.UP, modifier));
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'move-selection-down-control', Clutter.KEY_Down, Clutter.ModifierType.MOD1_MASK + Clutter.ModifierType.CONTROL_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._areaSelector.moveInDirection(St.DirectionType.DOWN, obj._getIncrement(St.DirectionType.DOWN, modifier));
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'move-selection-down-shift', Clutter.KEY_Down, Clutter.ModifierType.MOD1_MASK + Clutter.ModifierType.SHIFT_MASK,
+            (obj, _actionName, _keyVal, modifier) => {
+                obj._areaSelector.moveInDirection(St.DirectionType.DOWN, obj._getIncrement(St.DirectionType.DOWN, modifier));
+                return Clutter.EVENT_STOP;
+            }
+        );
+
+        bindingPool.install_closure(
+            'reset', Clutter.KEY_r, 0,
+            obj => {
+                obj._areaSelector.resetArea();
+                return Clutter.EVENT_STOP;
+            }
+        );
+    }
+
     _init() {
         super._init({
             name: 'screenshot-ui',
@@ -2195,72 +2580,47 @@ export const ScreenshotUI = GObject.registerClass({
         this.notify('screencast-in-progress');
     }
 
-    vfunc_key_press_event(event) {
-        const symbol = event.get_key_symbol();
-        if (symbol === Clutter.KEY_Return || symbol === Clutter.KEY_space ||
-            symbol === Clutter.KEY_KP_Enter || symbol === Clutter.KEY_ISO_Enter ||
-            ((event.get_state() & Clutter.ModifierType.CONTROL_MASK) &&
-             (symbol === Clutter.KEY_c || symbol === Clutter.KEY_C))) {
-            this._onCaptureButtonClicked().catch(logError);
-            return Clutter.EVENT_STOP;
-        }
-
-        if (symbol === Clutter.KEY_s || symbol === Clutter.KEY_S) {
-            this._selectionButton.checked = true;
-            return Clutter.EVENT_STOP;
-        }
-
-        if (symbol === Clutter.KEY_c || symbol === Clutter.KEY_C) {
-            this._screenButton.checked = true;
-            return Clutter.EVENT_STOP;
-        }
-
-        if (this._windowButton.reactive &&
-            (symbol === Clutter.KEY_w || symbol === Clutter.KEY_W)) {
-            this._windowButton.checked = true;
-            return Clutter.EVENT_STOP;
-        }
-
-        if (symbol === Clutter.KEY_p || symbol === Clutter.KEY_P) {
-            this._showPointerButton.checked = !this._showPointerButton.checked;
-            return Clutter.EVENT_STOP;
-        }
-
-        if (this._castButton.reactive &&
-            (symbol === Clutter.KEY_v || symbol === Clutter.KEY_V)) {
-            this._castButton.checked = !this._castButton.checked;
-            return Clutter.EVENT_STOP;
-        }
-
-        if (symbol === Clutter.KEY_Left || symbol === Clutter.KEY_Right ||
-            symbol === Clutter.KEY_Up || symbol === Clutter.KEY_Down) {
-            let direction;
-            if (symbol === Clutter.KEY_Left)
-                direction = St.DirectionType.LEFT;
-            else if (symbol === Clutter.KEY_Right)
-                direction = St.DirectionType.RIGHT;
-            else if (symbol === Clutter.KEY_Up)
-                direction = St.DirectionType.UP;
-            else if (symbol === Clutter.KEY_Down)
-                direction = St.DirectionType.DOWN;
-
-            if (this._windowButton.checked) {
-                const window =
-                    this._windowSelectors.flatMap(selector => selector.windows())
-                        .find(win => win.checked) ?? null;
-                this.navigate_focus(window, direction, false);
-            } else if (this._screenButton.checked) {
-                const screen =
-                    this._screenSelectors.find(selector => selector.checked) ?? null;
-                this.navigate_focus(screen, direction, false);
-            }
-
-            return Clutter.EVENT_STOP;
-        }
-
-        return super.vfunc_key_press_event(event);
+    _activate() {
+        this._onCaptureButtonClicked().catch(logError);
     }
-});
+
+    _getIncrement(direction, modifier) {
+        let increment;
+
+        if (modifier & Clutter.ModifierType.CONTROL_MASK) {
+            increment = CTRL_SELECTION_KEYBOARD_INCREMENT;
+        } else if (modifier & Clutter.ModifierType.SHIFT_MASK) {
+            if (direction === St.DirectionType.LEFT || direction === St.DirectionType.RIGHT)
+                increment = Main.layoutManager.primaryMonitor.width;
+            else if (direction === St.DirectionType.DOWN || direction === St.DirectionType.UP)
+                increment = Main.layoutManager.primaryMonitor.height;
+        } else {
+            increment = SELECTION_KEYBOARD_INCREMENT;
+        }
+
+        return increment;
+    }
+
+    _resizeSelection(direction, modifier) {
+        if (this._selectionButton.checked)
+            this._areaSelector.resizeInDirection(direction, this._getIncrement(direction, modifier));
+    }
+
+    _moveFocus(direction) {
+        if (this._windowButton.checked) {
+            const window =
+                  this._windowSelectors.flatMap(selector => selector.windows())
+                  .find(win => win.checked) ?? null;
+            this.navigate_focus(window, direction, false);
+        } else if (this._screenButton.checked) {
+            const screen =
+                  this._screenSelectors.find(selector => selector.checked) ?? null;
+            this.navigate_focus(screen, direction, false);
+        } else {
+            this._resizeSelection(direction, null);
+        }
+    }
+}
 
 /**
  * Stores a PNG-encoded screenshot into the clipboard and a file, and shows a
@@ -3074,6 +3434,12 @@ class PickPixel extends St.Widget {
         });
         this.add_action(clickGesture);
 
+        const motionController = new Clutter.MotionController();
+        motionController.connect('motion', (_sprite, x, y) => {
+            this._pickColor(x, y);
+        });
+        this.add_action(motionController);
+
         this._recolorEffect = new RecolorEffect({
             chroma: new Cogl.Color({
                 red: 80,
@@ -3127,12 +3493,6 @@ class PickPixel extends St.Widget {
 
         this._recolorEffect.color = this._color;
         this._previewCursor.show();
-    }
-
-    vfunc_motion_event(event) {
-        const [x, y] = event.get_coords();
-        this._pickColor(x, y);
-        return Clutter.EVENT_PROPAGATE;
     }
 });
 

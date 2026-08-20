@@ -7,12 +7,33 @@ import * as BarLevel from './barLevel.js';
 const SLIDER_SCROLL_STEP = 0.02; /* Slider scrolling step in % */
 const SNAP_THRESHOLD = 0.04; /* Snap to marks within 4% */
 
-export const Slider = GObject.registerClass({
-    Signals: {
+export class Slider extends BarLevel.BarLevel {
+    static [GObject.signals] = {
         'drag-begin': {},
         'drag-end': {},
-    },
-}, class Slider extends BarLevel.BarLevel {
+    };
+
+    static {
+        GObject.registerClass(this);
+
+        const bindingPool = this.get_binding_pool();
+
+        bindingPool.install_closure(
+            'left', Clutter.KEY_Left, 0,
+            obj => {
+                obj._moveLeft();
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'right', Clutter.KEY_Right, 0,
+            obj => {
+                obj._moveRight();
+                return Clutter.EVENT_STOP;
+            }
+        );
+    }
+
     _init(value) {
         super._init({
             value,
@@ -34,6 +55,22 @@ export const Slider = GObject.registerClass({
         this._panGesture.connect('pan-update', this._onPanUpdate.bind(this));
         this._panGesture.connect('end', this._onPanEnd.bind(this));
         this.add_action(this._panGesture);
+
+        const smoothScrollController = new Clutter.ScrollController({
+            flags: Clutter.ScrollControllerFlags.PHYSICAL_DIRECTION |
+                Clutter.ScrollControllerFlags.SCROLL_HORIZONTAL,
+        });
+        smoothScrollController.connect('scroll', this._onScroll.bind(this));
+        this.add_action(smoothScrollController);
+
+        const discreteScrollController = new Clutter.ScrollController({
+            flags: Clutter.ScrollControllerFlags.DISCRETE |
+                Clutter.ScrollControllerFlags.SCROLL_VERTICAL,
+        });
+        discreteScrollController.connect('scroll', (_c, _sprite, _source, _dx, dy) => {
+            this.step(-dy);
+        });
+        this.add_action(discreteScrollController);
 
         this._customAccessible.connect('get-minimum-increment', this._getMinimumIncrement.bind(this));
 
@@ -146,42 +183,26 @@ export const Slider = GObject.registerClass({
         return this._applyDelta(nSteps * SLIDER_SCROLL_STEP);
     }
 
-    vfunc_scroll_event(event) {
-        const direction = event.get_scroll_direction();
+    _onScroll(_controller, _sprite, _source, dx) {
         let nSteps = 0;
 
-        if (event.get_flags() & Clutter.EventFlags.FLAG_POINTER_EMULATED)
-            return Clutter.EVENT_PROPAGATE;
-
-        if (direction === Clutter.ScrollDirection.DOWN) {
-            nSteps = -1;
-        } else if (direction === Clutter.ScrollDirection.UP) {
-            nSteps = 1;
-        } else if (direction === Clutter.ScrollDirection.SMOOTH) {
-            const [dx] = event.get_scroll_delta();
-            nSteps = dx;
-            // Match physical direction
-            if (event.get_scroll_flags() & Clutter.ScrollFlags.INVERTED)
-                nSteps *= -1;
-            if (this.get_text_direction() === Clutter.TextDirection.RTL)
-                nSteps *= -1;
-        }
+        nSteps = dx;
+        if (this.get_text_direction() === Clutter.TextDirection.RTL)
+            nSteps *= -1;
 
         this.step(nSteps);
-
-        return Clutter.EVENT_STOP;
     }
 
-    vfunc_key_press_event(event) {
-        const key = event.get_key_symbol();
-        if (key === Clutter.KEY_Right || key === Clutter.KEY_Left) {
-            const rtl = this.get_text_direction() === Clutter.TextDirection.RTL;
-            const increaseKey = rtl ? Clutter.KEY_Left : Clutter.KEY_Right;
-            const delta = key === increaseKey ? 0.1 : -0.1;
-            this._applyDelta(delta);
-            return Clutter.EVENT_STOP;
-        }
-        return super.vfunc_key_press_event(event);
+    _moveLeft() {
+        const rtl = this.get_text_direction() === Clutter.TextDirection.RTL;
+        const delta = rtl ? 0.1 : -0.1;
+        this._applyDelta(delta);
+    }
+
+    _moveRight() {
+        const rtl = this.get_text_direction() === Clutter.TextDirection.RTL;
+        const delta = rtl ? -0.1 : 0.1;
+        this._applyDelta(delta);
     }
 
     _moveHandle(x, _y) {
@@ -206,4 +227,4 @@ export const Slider = GObject.registerClass({
     _getMinimumIncrement() {
         return 0.1;
     }
-});
+}
