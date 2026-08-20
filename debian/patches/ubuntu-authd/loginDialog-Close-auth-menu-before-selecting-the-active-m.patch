@@ -1,0 +1,76 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Wed, 19 Aug 2026 23:31:06 +0200
+Subject: loginDialog: Close auth menu before selecting the active mechanism
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+The mechanism selection synchronously triggers a mechanisms-changed
+signal that rebuilds (and disposes) the items, so we must deactivate /
+close the menu while the items are still alive, otherwise
+PopupMenuBase._activeMenuItem ends up pointing at a disposed object.
+
+    (gnome-shell:1769639): Gjs-CRITICAL **: 23:28:15.033: Object
+    Gjs_gdm_authMenuButton_AuthMenuItem (0x5a6aaaa886f0), has been
+    already disposed — impossible to access it.
+    This might be caused by the object having been destroyed from C code
+    using something such as destroy(), dispose(), or remove() vfuncs.
+    == Stack trace for context 0x5a6aa6c74f90 ==
+    #0 i resource:///org/gnome/shell/ui/popupMenu.js:209
+    #1 i resource:///org/gnome/shell/ui/popupMenu.js:1138
+    #2 b resource:///org/gnome/shell/gdm/authMenuButton.js:426
+    #3 b resource:///org/gnome/shell/gdm/loginDialog.js:564
+    #4 i resource:///org/gnome/shell/gdm/authMenuButton.js:409
+    #5 i resource:///org/gnome/shell/gdm/loginDialog.js:1112
+    #6 i resource:///org/gnome/shell/gdm/authPrompt.js:189
+    #7 b resource:///org/gnome/gjs/modules/core/_signals.js:130
+    #8 b resource:///org/gnome/gjs/modules/core/_signals.js:119
+    #9 b resource:///org/gnome/shell/gdm/userVerifier.js:490
+    #10 b resource:///org/gnome/shell/gdm/userVerifier.js:426
+    #11 i resource:///org/gnome/shell/gdm/authServices.js:299
+    #12 i resource:///org/gnome/shell/gdm/authd.js:819
+    #13 i resource:///org/gnome/shell/gdm/userVerifier.js:151
+    #14 b self-hosted:157
+    #15 i resource:///org/gnome/shell/gdm/userVerifier.js:151
+    #16 i resource:///org/gnome/shell/gdm/authPrompt.js:964
+    #17 i resource:///org/gnome/shell/gdm/authPrompt.js:682
+    #18 i resource:///org/gnome/shell/gdm/authPrompt.js:193
+    #19 b resource:///org/gnome/gjs/modules/core/_signals.js:130
+    #20 b resource:///org/gnome/gjs/modules/core/_signals.js:119
+    #21 i resource:///org/gnome/shell/gdm/userVerifier.js:423
+    #22 i resource:///org/gnome/shell/gdm/authServicesLegacy.js:99
+    #23 i resource:///org/gnome/shell/gdm/authServices.js:220
+    #24 i resource:///org/gnome/shell/gdm/userVerifier.js:116
+    #25 b self-hosted:175
+    #26 b resource:///org/gnome/shell/gdm/userVerifier.js:116
+    #27 b resource:///org/gnome/shell/gdm/authPrompt.js:945
+    #28 b resource:///org/gnome/shell/gdm/loginDialog.js:605
+    #29 b resource:///org/gnome/shell/gdm/loginDialog.js:560
+    #30 i resource:///org/gnome/shell/gdm/authMenuButton.js:409
+    #31 i resource:///org/gnome/shell/gdm/authMenuButton.js:280
+    #32 i resource:///org/gnome/shell/ui/popupMenu.js:193
+    #33 i resource:///org/gnome/shell/ui/popupMenu.js:110
+    #34 i resource:///org/gnome/shell/ui/init.js:20
+---
+ js/gdm/loginDialog.js | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
+index 21c57f7..8919d1f 100644
+--- a/js/gdm/loginDialog.js
++++ b/js/gdm/loginDialog.js
+@@ -553,12 +553,12 @@ export const LoginDialog = GObject.registerClass({
+             if (!item)
+                 return;
+ 
++            this._authMenuButton.closeMenu();
++
+             if (sectionName === _PRIMARY_LOGIN_METHOD_SECTION_NAME)
+                 this._selectAuthMechanism(item);
+             else if (sectionName === _SESSION_TYPE_SECTION_NAME)
+                 this._greeter.call_select_session(item.id, null).catch(logError);
+-
+-            this._authMenuButton.closeMenu();
+         });
+         this._bottomButtonGroup.add_child(this._authMenuButton);
+     }

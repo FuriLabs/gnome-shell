@@ -1,0 +1,87 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 20:19:27 +0200
+Subject: loginDialog/unlockDialog: Rely on user verifier mechanism selection
+
+Authentication mechanisms are recreated when their providers update.
+The login and unlock dialogs kept their own selected mechanism cache,
+which can survive a verifier reset after the service-local selection was
+cleared. In such case a copy of the cached mechanism might have been
+treated as already selected, so the selection was not forwarded to the
+verifier and its service did not start.
+
+Expose the verifier selected mechanism through AuthPrompt and use it for
+mechanism comparison and menu rollback in both dialogs. This makes the
+verifier the single source of truth for mechanism selection.
+---
+ js/gdm/authPrompt.js  | 4 ++++
+ js/gdm/loginDialog.js | 9 ++++-----
+ js/ui/unlockDialog.js | 7 +++----
+ 3 files changed, 11 insertions(+), 9 deletions(-)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 7306ffc..cd68625 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -404,6 +404,10 @@ export const AuthPrompt = GObject.registerClass({
+         }));
+     }
+ 
++    get selectedMechanism() {
++        return this._userVerifier.selectedMechanism;
++    }
++
+     _updateCancelButton() {
+         if (this._mode === AuthPromptMode.UNLOCK_OR_LOG_IN)
+             return;
+diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
+index 383d9c2..901bcdb 100644
+--- a/js/gdm/loginDialog.js
++++ b/js/gdm/loginDialog.js
+@@ -593,17 +593,16 @@ export const LoginDialog = GObject.registerClass({
+     }
+ 
+     _selectAuthMechanism(authMechanism) {
+-        const oldMechanism = this._selectedAuthMechanism;
++        const oldMechanism = this._authPrompt.selectedMechanism;
+ 
+-        if (authMechanism?.equals?.(oldMechanism))
++        if (authMechanism?.equals(oldMechanism))
+             return;
+ 
+         if (!this._authPrompt.selectMechanism(authMechanism)) {
+-            this._authMenuButton.setActiveItem(oldMechanism);
++            if (oldMechanism)
++                this._authMenuButton.setActiveItem(oldMechanism);
+             return;
+         }
+-
+-        this._selectedAuthMechanism = authMechanism;
+     }
+ 
+     _getBannerAllocation(dialogBox) {
+diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
+index 2efa4ae..9be17d9 100644
+--- a/js/ui/unlockDialog.js
++++ b/js/ui/unlockDialog.js
+@@ -763,18 +763,17 @@ export const UnlockDialog = GObject.registerClass({
+     }
+ 
+     _selectAuthMechanism(authMechanism) {
+-        const oldMechanism = this._selectedAuthMechanism;
++        const oldMechanism = this._authPrompt.selectedMechanism;
+ 
+         if (authMechanism?.equals(oldMechanism))
+             return;
+ 
+         if (!this._authPrompt.selectMechanism(authMechanism)) {
+-            this._authMenuButton.setActiveItem(oldMechanism);
++            if (oldMechanism)
++                this._authMenuButton.setActiveItem(oldMechanism);
+             return;
+         }
+ 
+-        this._selectedAuthMechanism = authMechanism;
+-
+         this._clock.selectAuthHint(authMechanism?.hint);
+     }
+ 

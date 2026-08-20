@@ -1,0 +1,29 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 04:46:55 +0200
+Subject: gdm/authServices: Do not call handleSelectMechanism if no mechanism
+ is found
+
+In case there's no selected mechanism for the given auth service,
+there's no need to call into the handler code
+---
+ js/gdm/authServices.js | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
+index afbe042..2299d74 100644
+--- a/js/gdm/authServices.js
++++ b/js/gdm/authServices.js
+@@ -201,9 +201,11 @@ export class AuthServices extends GObject.Object {
+         this._selectedMechanism = this._enabledMechanisms?.find(
+             m => this._mechanismEquals(m, mechanism));
+ 
+-        this._handleSelectMechanism();
++        if (!this._selectedMechanism)
++            return false;
+ 
+-        return !!this._selectedMechanism;
++        this._handleSelectMechanism();
++        return true;
+     }
+ 
+     needsUsername() {

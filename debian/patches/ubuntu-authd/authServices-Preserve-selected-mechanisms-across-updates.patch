@@ -1,0 +1,57 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 15:18:59 +0200
+Subject: authServices: Preserve selected mechanisms across updates
+
+Changing authentication mechanism may reset the verification and rebuild the
+enabled mechanisms. This happens, for example, when selecting (legacy)
+smartcard from another authentication service.
+
+We were clearing the selected mechanism before rebuilding the list. As a
+result, even if the selected mechanism was still available after the update,
+it was lost and its service did not start on the next verification attempt.
+
+Keep the previous mechanism and resolve it in the rebuilt list instead. Also
+avoid clearing the legacy selection before updating its enabled roles.
+
+This lets a selected mechanism keep control across a reset while it remains
+available, fixing switches from another service to legacy smartcard (or
+or password) authentication.
+---
+ js/gdm/authServices.js       | 4 +++-
+ js/gdm/authServicesLegacy.js | 1 -
+ 2 files changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
+index 20ba560..ac4f8da 100644
+--- a/js/gdm/authServices.js
++++ b/js/gdm/authServices.js
+@@ -280,7 +280,7 @@ export class AuthServices extends GObject.Object {
+     }
+ 
+     _updateEnabledMechanisms() {
+-        this._selectedMechanism = null;
++        const selectedMechanism = this._selectedMechanism;
+         this._enabledMechanisms = [];
+ 
+         this._handleUpdateEnabledMechanisms();
+@@ -289,6 +289,8 @@ export class AuthServices extends GObject.Object {
+             ...m,
+             ...RoleProperties[m.role],
+         }));
++        this._selectedMechanism = this._enabledMechanisms.find(mechanism =>
++            this._mechanismEquals(mechanism, selectedMechanism));
+ 
+         this.emit('mechanisms-changed');
+     }
+diff --git a/js/gdm/authServicesLegacy.js b/js/gdm/authServicesLegacy.js
+index 03a08a1..c721ba5 100644
+--- a/js/gdm/authServicesLegacy.js
++++ b/js/gdm/authServicesLegacy.js
+@@ -154,7 +154,6 @@ export class AuthServicesLegacy extends AuthServices {
+     }
+ 
+     _handleUpdateEnabledRoles() {
+-        this._selectedMechanism = null;
+         this._updateEnabledMechanisms();
+     }
+ 

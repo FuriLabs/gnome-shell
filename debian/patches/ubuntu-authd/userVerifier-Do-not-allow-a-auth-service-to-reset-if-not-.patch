@@ -1,0 +1,276 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 12:57:28 +0200
+Subject: userVerifier: Do not allow a auth service to reset if not in control
+
+Authentication services share the same user verifier. A reset emitted by any
+of them is propagated to the auth prompt, where it cancels the current
+verification and starts it again. It is therefore a service-scoped control
+operation, not only a UI update.
+
+This allowed a background service to interrupt the foreground service. For
+example, after selecting one mechanism, a reset emitted by another service
+could cancel its conversation and restart verification. Conversely, when
+switching mechanisms, the new service may synchronously reset to start its
+conversation while the previous service is still considered in control.
+
+Include the emitting service name in reset parameters and apply the same
+foreground-service filtering used for other auth-service signals. Set the
+new foreground service before invoking its selection handler, because that
+handler may synchronously reset to start its conversation. If no service
+accepts the requested mechanism, restore the previous foreground service.
+
+Finally, preserve the emitting service across a soft reset. A soft reset is
+used to restart verification for the newly selected mechanism, so clearing
+its service name would make the next verification fall back to another
+auto-selectable service instead of continuing with the selected mechanism.
+
+This prevents background services or started-but-not-selected services from
+resetting the active conversation while allowing a foreground service to
+restart and take control of its own verification.
+---
+ js/gdm/authPrompt.js                 |  5 +++--
+ js/gdm/authServices.js               | 11 +++++++++--
+ js/gdm/authServicesLegacy.js         | 10 +++++-----
+ js/gdm/authServicesSSSDSwitchable.js | 16 ++++++++--------
+ js/gdm/userVerifier.js               | 18 +++++++++++-------
+ 5 files changed, 36 insertions(+), 24 deletions(-)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 4b5604c..7306ffc 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -946,9 +946,10 @@ export const AuthPrompt = GObject.registerClass({
+     }
+ 
+     reset(params) {
+-        let {reuseEntryText, softReset} = Params.parse(params, {
++        let {reuseEntryText, softReset, serviceName} = Params.parse(params, {
+             reuseEntryText: false,
+             softReset: false,
++            serviceName: null,
+         });
+ 
+         const oldStatus = this.verificationStatus;
+@@ -958,7 +959,7 @@ export const AuthPrompt = GObject.registerClass({
+         this.promptStep = 0;
+ 
+         if (softReset)
+-            this._userVerifier?.cancel();
++            this._userVerifier?.cancel({serviceName});
+         else
+             this._userVerifier?.reset();
+ 
+diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
+index fed9dc2..5652b99 100644
+--- a/js/gdm/authServices.js
++++ b/js/gdm/authServices.js
+@@ -327,7 +327,7 @@ export class AuthServices extends GObject.Object {
+             'conversation-started', (_, ...args) => this._onConversationStarted(...args),
+             'conversation-stopped', (_, ...args) => this._onConversationStopped(...args),
+             'service-unavailable', (_, ...args) => this._onServiceUnavailable(...args),
+-            'reset', () => this.emit('reset', {}),
++            'reset', () => this._emitReset(),
+             'verification-complete', (_, ...args) => this._onVerificationComplete(...args),
+             this);
+ 
+@@ -411,7 +411,7 @@ export class AuthServices extends GObject.Object {
+ 
+         try {
+             await this._waitPendingMessages();
+-            this.emit('reset', {softReset: !doneTrying});
++            this._emitReset({softReset: !doneTrying, serviceName});
+         } catch (e) {
+             logErrorUnlessCancelled(e);
+         }
+@@ -473,6 +473,13 @@ export class AuthServices extends GObject.Object {
+         }
+     }
+ 
++    _emitReset(params = {}) {
++        this.emit('reset', {
++            serviceName: this._selectedMechanism?.serviceName,
++            ...params,
++        });
++    }
++
+     _handleGetSupportedRoles() {
+         return this.constructor.SupportedRoles;
+     }
+diff --git a/js/gdm/authServicesLegacy.js b/js/gdm/authServicesLegacy.js
+index 77f9cec..315bdd7 100644
+--- a/js/gdm/authServicesLegacy.js
++++ b/js/gdm/authServicesLegacy.js
+@@ -96,7 +96,7 @@ export class AuthServicesLegacy extends AuthServices {
+ 
+     _handleSelectMechanism() {
+         if (this._selectedMechanism)
+-            this.emit('reset', {softReset: true});
++            this._emitReset({softReset: true});
+     }
+ 
+     _handleNeedsUsername() {
+@@ -391,7 +391,7 @@ export class AuthServicesLegacy extends AuthServices {
+         delete this._credentialManagers[serviceName];
+ 
+         if (this._selectedMechanism?.serviceName === serviceName)
+-            this.emit('reset');
++            this._emitReset({serviceName});
+     }
+ 
+     _connectSmartcardManager() {
+@@ -417,7 +417,7 @@ export class AuthServicesLegacy extends AuthServices {
+             this._smartcardInProgress && this._smartcardManager.hasInsertedTokens())
+             return;
+ 
+-        this.emit('reset', {softReset: true});
++        this._emitReset({softReset: true});
+     }
+ 
+     _onFingerprintChanged() {
+@@ -425,7 +425,7 @@ export class AuthServicesLegacy extends AuthServices {
+             return;
+ 
+         this._updateEnabledMechanisms();
+-        this.emit('reset', {softReset: true, reuseEntryText: true});
++        this._emitReset({softReset: true, reuseEntryText: true});
+     }
+ 
+     _onCredentialManagerAuthenticated(credentialManager) {
+@@ -434,6 +434,6 @@ export class AuthServicesLegacy extends AuthServices {
+             role: Role.PASSWORD,
+             ...RoleProperties[Role.PASSWORD],
+         };
+-        this.emit('reset', {softReset: true});
++        this._emitReset({softReset: true});
+     }
+ }
+diff --git a/js/gdm/authServicesSSSDSwitchable.js b/js/gdm/authServicesSSSDSwitchable.js
+index cf6a4e1..7f4eb1c 100644
+--- a/js/gdm/authServicesSSSDSwitchable.js
++++ b/js/gdm/authServicesSSSDSwitchable.js
+@@ -159,7 +159,7 @@ export class AuthServicesSSSDSwitchable extends AuthServices {
+         case Role.PASSWORD:
+             // Waiting for authentication response: soft reset
+             if (this._promptStatus === PromptStatus.PASSWORD_WAITING) {
+-                this.emit('reset', {softReset: true});
++                this._emitReset({softReset: true});
+                 return true;
+             }
+             // At password prompt: hard reset
+@@ -168,7 +168,7 @@ export class AuthServicesSSSDSwitchable extends AuthServices {
+         case Role.SMARTCARD:
+             // Waiting for PIN verification response: soft reset
+             if (this._promptStatus === PromptStatus.PIN_WAITING) {
+-                this.emit('reset', {softReset: true});
++                this._emitReset({softReset: true});
+                 return true;
+             }
+             // At PIN entry after selecting from multiple certificates:
+@@ -186,7 +186,7 @@ export class AuthServicesSSSDSwitchable extends AuthServices {
+             // At touch confirmation after PIN submission: soft reset
+             // back to PIN entry (PIN response was already sent to SSSD)
+             if (this._promptStatus === PromptStatus.TOUCH_PROMPT) {
+-                this.emit('reset', {softReset: true});
++                this._emitReset({softReset: true});
+                 return true;
+             }
+             // At PIN entry or key insertion prompt: hard reset
+@@ -195,7 +195,7 @@ export class AuthServicesSSSDSwitchable extends AuthServices {
+         case Role.WEB_LOGIN:
+             // At login dialog after "Done" clicked: soft reset to retry
+             if (this._promptStatus === PromptStatus.WEB_LOGIN_DIALOG_WAITING) {
+-                this.emit('reset', {softReset: true});
++                this._emitReset({softReset: true});
+                 return true;
+             }
+             // At login dialog with a login button available:
+@@ -292,7 +292,7 @@ export class AuthServicesSSSDSwitchable extends AuthServices {
+                 if (this._selectedMechanism?.role !== Role.WEB_LOGIN)
+                     webLoginMechanism.needsRefresh = true;
+                 else
+-                    this.emit('reset', {softReset: true});
++                    this._emitReset({softReset: true});
+ 
+                 this._webLoginTimeoutId = 0;
+             });
+@@ -551,7 +551,7 @@ export class AuthServicesSSSDSwitchable extends AuthServices {
+             return;
+ 
+         if (needsRefresh) {
+-            this.emit('reset', {softReset: true});
++            this._emitReset({softReset: true});
+             return;
+         }
+ 
+@@ -626,7 +626,7 @@ export class AuthServicesSSSDSwitchable extends AuthServices {
+             !this._enabledMechanisms.some(({role}) => role === Role.SMARTCARD))
+             return;
+ 
+-        this.emit('reset', {softReset: true, reuseEntryText: true});
++        this._emitReset({softReset: true, reuseEntryText: true});
+     }
+ 
+     _onFido2TokenChanged() {
+@@ -634,6 +634,6 @@ export class AuthServicesSSSDSwitchable extends AuthServices {
+             !this._enabledMechanisms.some(({role}) => role === Role.PASSKEY))
+             return;
+ 
+-        this.emit('reset', {softReset: true, reuseEntryText: true});
++        this._emitReset({softReset: true, reuseEntryText: true});
+     }
+ }
+diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
+index 0541b28..48caa36 100644
+--- a/js/gdm/userVerifier.js
++++ b/js/gdm/userVerifier.js
+@@ -106,13 +106,16 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     selectMechanism(mechanism) {
++        const previousServiceName = this._selectedServiceName;
++        this._selectedServiceName = mechanism.serviceName;
++
+         // Every authServices needs to update its selected mechanism
+         const selected = this._authServices
+             .map(s => s.selectMechanism(mechanism))
+             .some(Boolean);
+ 
+-        if (selected)
+-            this._selectedServiceName = mechanism.serviceName;
++        if (!selected)
++            this._selectedServiceName = previousServiceName;
+ 
+         return selected;
+     }
+@@ -147,17 +150,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+             s.selectedMechanism === selectedMechanism)?.cancelRequested() ?? false;
+     }
+ 
+-    cancel() {
++    cancel({serviceName = null} = {}) {
+         this._authServices.forEach(s => s.cancel());
+ 
+         this._userVerifier?.call_cancel_sync(null);
+ 
+-        this.clear();
++        this.clear({serviceName});
+     }
+ 
+-    clear() {
++    clear({serviceName = null} = {}) {
+         this._authServices.forEach(s => s.clear());
+-        this._selectedServiceName = null;
++        this._selectedServiceName = serviceName;
+         this._redistributeRoles();
+ 
+         this._clearMessageQueue();
+@@ -434,7 +437,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+                 'verification-failed', (_, args) => maybeForwardSignal(args,
+                     () => this._verificationFailed(args)),
+                 'verification-complete', () => this.emit('verification-complete'),
+-                'reset', (_, args) => this.emit('reset', args),
++                'reset', (_, args) => maybeForwardSignal(args,
++                    () => this.emit('reset', args)),
+                 'show-choice-list', (_, args) => maybeForwardSignal(args,
+                     () => this.emit('show-choice-list', args)),
+                 'show-button', (_, args) => maybeForwardSignal(args,

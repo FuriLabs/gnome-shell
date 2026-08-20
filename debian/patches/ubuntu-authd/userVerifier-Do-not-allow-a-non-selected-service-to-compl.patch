@@ -1,0 +1,63 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 20:08:42 +0200
+Subject: userVerifier: Do not allow a non-selected service to complete
+ verification
+
+Authentication services share the same user verifier. Completion was not
+associated with the service that emitted it, unlike the other
+service-scoped signals.
+
+This allowed a background service to complete verification and unlock
+the session while another service owned the authentication UI.
+
+Include the service name when forwarding verification completion from an
+auth service and apply the normal foreground-service filter before
+emitting the verifier-level completion signal.
+
+This ensures only the service controlling the UI can complete
+authentication, while background services can still provide their usual
+non-completion signals.
+---
+ js/gdm/authServices.js | 7 +++++--
+ js/gdm/userVerifier.js | 3 ++-
+ 2 files changed, 7 insertions(+), 3 deletions(-)
+
+diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
+index 01080a6..42fd447 100644
+--- a/js/gdm/authServices.js
++++ b/js/gdm/authServices.js
+@@ -79,7 +79,10 @@ export class AuthServices extends GObject.Object {
+          * @param {boolean} [canRetry]
+          */
+         'verification-failed': {param_types: [GObject.TYPE_JSOBJECT]},
+-        'verification-complete': {},
++        /**
++         * @param {string} serviceName
++         */
++        'verification-complete': {param_types: [GObject.TYPE_JSOBJECT]},
+         /**
+          * @param {string} serviceName
+          * @param {string} question
+@@ -409,7 +412,7 @@ export class AuthServices extends GObject.Object {
+ 
+     _onVerificationComplete(serviceName) {
+         this._handleOnVerificationComplete(serviceName);
+-        this.emit('verification-complete');
++        this.emit('verification-complete', {serviceName});
+     }
+ 
+     _onChoiceListQuery(serviceName, promptMessage, list) {
+diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
+index 163855a..8984a05 100644
+--- a/js/gdm/userVerifier.js
++++ b/js/gdm/userVerifier.js
+@@ -451,7 +451,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+                     () => this._filterServiceMessages(args)),
+                 'verification-failed', (_, args) => maybeForwardSignal(args,
+                     () => this._verificationFailed(args)),
+-                'verification-complete', () => this.emit('verification-complete'),
++                'verification-complete', (_, args) => maybeForwardSignal(args,
++                    () => this.emit('verification-complete')),
+                 'reset', (_, args) => maybeForwardSignal(args,
+                     () => this.emit('reset', args)),
+                 'show-choice-list', (_, args) => maybeForwardSignal(args,

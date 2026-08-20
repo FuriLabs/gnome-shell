@@ -1,0 +1,166 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 14:13:37 +0200
+Subject: authMenuButton: Drop JSON parsing/stringification for mechanisms
+
+They are just JS objects so we can treat them natively
+---
+ js/gdm/authMenuButton.js | 64 ++++++++++++++++++++++--------------------------
+ 1 file changed, 29 insertions(+), 35 deletions(-)
+
+diff --git a/js/gdm/authMenuButton.js b/js/gdm/authMenuButton.js
+index 5aaa45f..2fd4a15 100644
+--- a/js/gdm/authMenuButton.js
++++ b/js/gdm/authMenuButton.js
+@@ -183,8 +183,8 @@ export class AuthMenuButton extends St.Button {
+         for (const menuItem of this._items.values())
+             menuItem.setOrnament(PopupMenu.Ornament.NO_DOT);
+ 
+-        for (const itemKey of this._activeItems) {
+-            const menuItem = this._items.get(itemKey);
++        for (const item of this._activeItems) {
++            const menuItem = this._items.get(item);
+             if (menuItem)
+                 menuItem.setOrnament(PopupMenu.Ornament.DOT);
+         }
+@@ -219,9 +219,7 @@ export class AuthMenuButton extends St.Button {
+ 
+     _findItems(searchCriteria) {
+         const items = [];
+-        for (const itemKey of this._items.keys()) {
+-            const item = JSON.parse(itemKey);
+-
++        for (const item of this._items.keys()) {
+             let criteriaMismatch = false;
+             for (const key of Object.keys(searchCriteria)) {
+                 if (this._deepEquals(item[key], searchCriteria[key]))
+@@ -234,22 +232,22 @@ export class AuthMenuButton extends St.Button {
+             if (criteriaMismatch)
+                 continue;
+ 
+-            items.push(itemKey);
++            items.push(item);
+         }
+ 
+         return items;
+     }
+ 
+     getItems(searchCriteria = {}) {
+-        return this._findItems(searchCriteria).map(itemKey => JSON.parse(itemKey));
++        return this._findItems(searchCriteria);
+     }
+ 
+     clearItems(searchCriteria = {}) {
+-        this._findItems(searchCriteria).forEach(itemKey => {
+-            const menuItem = this._items.get(itemKey);
+-            this._activeItems.delete(itemKey);
++        this._findItems(searchCriteria).forEach(item => {
++            const menuItem = this._items.get(item);
++            this._activeItems.delete(item);
+             menuItem.destroy();
+-            this._items.delete(itemKey);
++            this._items.delete(item);
+         });
+ 
+         this._sections.keys().forEach(sectionName => {
+@@ -268,12 +266,11 @@ export class AuthMenuButton extends St.Button {
+     }
+ 
+     addItem(item) {
+-        const itemKey = JSON.stringify(item);
+-        if (this._items.has(itemKey))
+-            throw new Error(`Duplicate item ${itemKey}`);
++        if (this._findItems(item).length > 0)
++            throw new Error(`Duplicate item ${item.name}`);
+ 
+         if (!item.name)
+-            throw new Error(`item ${itemKey} lacks name`);
++            throw new Error('item lacks name');
+ 
+         const menuItem = new AuthMenuItem(item, {reactive: !this.readOnly});
+         menuItem.connect('activate', () => {
+@@ -283,7 +280,7 @@ export class AuthMenuButton extends St.Button {
+         const section = this._getSection(item.sectionName);
+         section.addMenuItem(menuItem);
+ 
+-        this._items.set(itemKey, menuItem);
++        this._items.set(item, menuItem);
+         this.updateVisibility();
+     }
+ 
+@@ -373,16 +370,16 @@ export class AuthMenuButton extends St.Button {
+     }
+ 
+     _resolveItem(searchCriteria) {
+-        const itemKeys = this._findItems(searchCriteria);
++        const items = this._findItems(searchCriteria);
+ 
+-        if (itemKeys.length !== 1) {
+-            if (itemKeys.length > 1)
++        if (items.length !== 1) {
++            if (items.length > 1)
+                 logError(`Matched multiple items with criteria ${JSON.stringify(searchCriteria)}`);
+             return null;
+         }
+ 
+-        const item = JSON.parse(itemKeys[0]);
+-        const menuItem = this._items.get(itemKeys[0]);
++        const [item] = items;
++        const menuItem = this._items.get(item);
+         return {item, menuItem};
+     }
+ 
+@@ -392,34 +389,32 @@ export class AuthMenuButton extends St.Button {
+             return;
+ 
+         const {item} = resolved;
+-        const itemKey = JSON.stringify(item);
+-
+-        if (this._activeItems.has(itemKey))
++        if (this._activeItems.has(item))
+             return;
+ 
+         const sectionName = item.sectionName ?? null;
+         const activeInSection = this._findItems({sectionName})
+-            .filter(key => this._activeItems.has(key));
++            .filter(activeItem => this._activeItems.has(activeItem));
+ 
+-        for (const key of activeInSection)
+-            this._activeItems.delete(key);
++        for (const activeItem of activeInSection)
++            this._activeItems.delete(activeItem);
+ 
+-        this._activeItems.add(itemKey);
++        this._activeItems.add(item);
+         this._updateOrnament();
+         this.emit('active-item-changed', sectionName);
+     }
+ 
+     getActiveItem(searchCriteria = {}) {
+-        const activeKeys = this._findItems(searchCriteria)
+-            .filter(key => this._activeItems.has(key));
++        const activeItems = this._findItems(searchCriteria)
++            .filter(item => this._activeItems.has(item));
+ 
+-        if (activeKeys.length === 0)
++        if (activeItems.length === 0)
+             return null;
+ 
+-        if (activeKeys.length > 1)
++        if (activeItems.length > 1)
+             throw new Error(`Multiple active items found with criteria ${JSON.stringify(searchCriteria)}`);
+ 
+-        return JSON.parse(activeKeys[0]);
++        return activeItems[0];
+     }
+ 
+     closeMenu() {
+@@ -489,8 +484,7 @@ export class AuthMenuButtonIndicator extends AuthMenuButton {
+     }
+ 
+     clearItems(searchCriteria = {}) {
+-        this._findItems(searchCriteria).forEach(itemKey => {
+-            const item = JSON.parse(itemKey);
++        this._findItems(searchCriteria).forEach(item => {
+             if (item.iconName) {
+                 this._iconsBox.get_children()
+                     .find(icon => icon.icon_name === item.iconName)

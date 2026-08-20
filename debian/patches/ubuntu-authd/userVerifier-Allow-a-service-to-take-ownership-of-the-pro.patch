@@ -1,0 +1,131 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 20:48:39 +0200
+Subject: userVerifier: Allow a service to take ownership of the prompt UI
+
+Selecting a mechanism selects the service expected to authenticate the user.
+That service should control ordinary verification signals while no prompt UI
+has been shown yet.
+
+However, a selected mechanism can be a provisional fallback. Another service
+may need to present bootstrap UI first, such as a choice list needed to
+discover or select its authentication method. The selected fallback must not
+prevent that UI from being shown.
+
+Track the selected service separately from the service owning prompt UI.
+Until a service owns UI, ordinary signals are accepted from the selected
+service. A service that emits a UI-producing signal takes ownership of the
+prompt and becomes selected itself. After that, only the UI owner and
+background services may update the prompt.
+
+Resetting or changing mechanism clears UI ownership, while a failed
+mechanism selection restores both the previous selected service and UI owner.
+---
+ js/gdm/userVerifier.js | 41 ++++++++++++++++++++++++++++++-----------
+ 1 file changed, 30 insertions(+), 11 deletions(-)
+
+diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
+index 8984a05..353e834 100644
+--- a/js/gdm/userVerifier.js
++++ b/js/gdm/userVerifier.js
+@@ -63,6 +63,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this._authServices = [];
+         this._driverService = null;
+         this._selectedServiceName = null;
++        this._uiOwnerServiceName = null;
+ 
+         this._messageQueue = [];
+         this._messageQueueTimeoutId = 0;
+@@ -123,15 +124,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+ 
+     selectMechanism(mechanism) {
+         const previousServiceName = this._selectedServiceName;
++        const previousUIOwnerServiceName = this._uiOwnerServiceName;
+         this._selectedServiceName = mechanism.serviceName;
++        this._uiOwnerServiceName = null;
+ 
+         // Every authServices needs to update its selected mechanism
+         const selected = this._authServices
+             .map(s => s.selectMechanism(mechanism))
+             .some(Boolean);
+ 
+-        if (!selected)
++        if (!selected) {
+             this._selectedServiceName = previousServiceName;
++            this._uiOwnerServiceName = previousUIOwnerServiceName;
++        }
+ 
+         return selected;
+     }
+@@ -177,6 +182,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     clear({serviceName = null} = {}) {
+         this._authServices.forEach(s => s.clear());
+         this._selectedServiceName = serviceName;
++        this._uiOwnerServiceName = null;
+         this._redistributeRoles();
+ 
+         this._clearMessageQueue();
+@@ -424,28 +430,41 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     _connectAuthServices() {
+-        // Safety guard: once a mechanism is selected, only that mechanism's own
+-        // service is allowed to emit signals. Any signal coming from a different
+-        // service is dropped, so only the selected and background mechanisms can act.
++        // Once a service owns prompt UI, only it and background mechanisms may
++        // update it. The selected mechanism is kept separately: automatic
++        // fallback selection must not prevent another service from presenting
++        // its bootstrap UI.
+         const isBackgroundService = serviceName => this._authServices
+                 .flatMap(s => s.enabledMechanisms ?? [])
+                 .some(m => m.serviceName === serviceName && m.background);
+         const maybeForwardSignal = (args, handler) => {
+             const {serviceName} = args ?? {};
+-            if (this._selectedServiceName && this._selectedServiceName !== serviceName &&
++            const ownerServiceName = this._uiOwnerServiceName ?? this._selectedServiceName;
++            if (ownerServiceName && ownerServiceName !== serviceName &&
+                 !isBackgroundService(serviceName))
+                 return;
+ 
+             handler();
+         };
+ 
++        const maybeForwardUISignal = (args, handler) => {
++            const {serviceName} = args ?? {};
++
++            if (!this._uiOwnerServiceName && !isBackgroundService(serviceName)) {
++                this._uiOwnerServiceName = serviceName;
++                this._selectedServiceName = serviceName;
++            }
++
++            maybeForwardSignal(args, handler);
++        };
++
+         this._authServices.forEach(authServices => {
+             authServices.connectObject(
+-                'ask-question', (_, args) => maybeForwardSignal(args,
++                'ask-question', (_, args) => maybeForwardUISignal(args,
+                     () => this.emit('ask-question', args)),
+-                'queue-message', (_, args) => maybeForwardSignal(args,
++                'queue-message', (_, args) => maybeForwardUISignal(args,
+                     () => this._queueMessage(args)),
+-                'queue-priority-message', (_, args) => maybeForwardSignal(args,
++                'queue-priority-message', (_, args) => maybeForwardUISignal(args,
+                     () => this._queuePriorityMessage(args)),
+                 'filter-messages', (_, args) => maybeForwardSignal(args,
+                     () => this._filterServiceMessages(args)),
+@@ -455,12 +474,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+                     () => this.emit('verification-complete')),
+                 'reset', (_, args) => maybeForwardSignal(args,
+                     () => this.emit('reset', args)),
+-                'show-choice-list', (_, args) => maybeForwardSignal(args,
++                'show-choice-list', (_, args) => maybeForwardUISignal(args,
+                     () => this.emit('show-choice-list', args)),
+-                'show-button', (_, args) => maybeForwardSignal(args,
++                'show-button', (_, args) => maybeForwardUISignal(args,
+                     () => this.emit('show-button', args)),
+                 'mechanisms-changed', () => this._onMechanismsChanged(),
+-                'web-login', (_, args) => maybeForwardSignal(args,
++                'web-login', (_, args) => maybeForwardUISignal(args,
+                     () => this.emit('web-login', args)),
+                 this);
+         });

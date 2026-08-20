@@ -1,0 +1,120 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 02:23:18 +0200
+Subject: userVerifier: Do not auto-select services that are not
+ auto-selectable
+
+We are currently trying to start a service like gdm-smartcard even if no
+token has been inserted.
+
+In such case make it lower priority, and just make it visible in the
+menu for manual selection (e.g. to wait for the token being inserted)
+but do not start the service automatically
+---
+ js/gdm/authServices.js               |  2 ++
+ js/gdm/authServicesLegacy.js         | 21 ++++++++++++++++-----
+ js/gdm/authServicesSSSDSwitchable.js | 11 ++++++++++-
+ js/gdm/userVerifier.js               |  4 ++--
+ 4 files changed, 30 insertions(+), 8 deletions(-)
+
+diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
+index 5652b99..afbe042 100644
+--- a/js/gdm/authServices.js
++++ b/js/gdm/authServices.js
+@@ -27,6 +27,7 @@ export const RoleProperties = {
+     [Role.PASSWORD]: {
+         selectable: true,
+         preemptiveInput: true,
++        autoSelectable: true,
+     },
+     [Role.SMARTCARD]: {
+         selectable: true,
+@@ -38,6 +39,7 @@ export const RoleProperties = {
+     },
+     [Role.WEB_LOGIN]: {
+         selectable: true,
++        autoSelectable: true,
+     },
+     [Role.FINGERPRINT]: {
+         iconName: 'fingerprint-auth-symbolic',
+diff --git a/js/gdm/authServicesLegacy.js b/js/gdm/authServicesLegacy.js
+index 315bdd7..03a08a1 100644
+--- a/js/gdm/authServicesLegacy.js
++++ b/js/gdm/authServicesLegacy.js
+@@ -159,10 +159,18 @@ export class AuthServicesLegacy extends AuthServices {
+     }
+ 
+     _handleUpdateEnabledMechanisms() {
+-        this._enabledMechanisms.push(...Mechanisms.filter(m =>
+-            this._enabledRoles.includes(m.role) &&
+-            this._settings.get_boolean(m.setting)
+-        ));
++        this._enabledMechanisms.push(...Mechanisms
++            .filter(m => this._enabledRoles.includes(m.role) &&
++                this._settings.get_boolean(m.setting))
++            .map(m => ({
++                ...m,
++                // Smartcard is only auto-selected when a token is present,
++                // otherwise it stays available but must not be started by
++                // default (only via explicit selection from the menu).
++                autoSelectable: m.role === Role.SMARTCARD
++                    ? this._smartcardManager.hasInsertedTokens()
++                    : true,
++            })));
+ 
+         if (!this._fingerprintManager?.readerFound) {
+             this._enabledMechanisms = this._enabledMechanisms.filter(m =>
+@@ -414,8 +422,11 @@ export class AuthServicesLegacy extends AuthServices {
+ 
+     _onSmartcardChanged() {
+         if (this._selectedMechanism?.role !== Role.SMARTCARD ||
+-            this._smartcardInProgress && this._smartcardManager.hasInsertedTokens())
++            this._smartcardInProgress &&
++            this._smartcardManager.hasInsertedTokens()) {
++            this._updateEnabledMechanisms();
+             return;
++        }
+ 
+         this._emitReset({softReset: true});
+     }
+diff --git a/js/gdm/authServicesSSSDSwitchable.js b/js/gdm/authServicesSSSDSwitchable.js
+index 7f4eb1c..0eb0422 100644
+--- a/js/gdm/authServicesSSSDSwitchable.js
++++ b/js/gdm/authServicesSSSDSwitchable.js
+@@ -260,7 +260,16 @@ export class AuthServicesSSSDSwitchable extends AuthServices {
+                 ...this._mechanisms[id],
+             }))
+             // filter out mechanisms with roles that are not enabled
+-            .filter(m => this._enabledRoles.includes(m.role)));
++            .filter(m => this._enabledRoles.includes(m.role))
++            // Passkey (like smartcard) is only auto-selected when a token
++            // is actually inserted, otherwise it stays available but must
++            // not be started by default.
++            .map(m => ({
++                ...m,
++                autoSelectable: m.role === Role.PASSKEY
++                    ? this._fido2TokenManager.hasInsertedTokens
++                    : true,
++            })));
+ 
+         this._trackWebLoginTimeout();
+ 
+diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
+index 48caa36..ffd85d8 100644
+--- a/js/gdm/userVerifier.js
++++ b/js/gdm/userVerifier.js
+@@ -500,13 +500,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+ 
+         // Report the currently selected mechanism. If one is already selected
+         // we keep it (matching by service); otherwise we pick the first
+-        // selectable mechanism in priority order.
++        // auto-selectable mechanism in priority order.
+         let selectedMechanism = this._selectedServiceName
+             ? mechanisms.find(m => m.serviceName === this._selectedServiceName)
+             : null;
+ 
+         if (!selectedMechanism)
+-            selectedMechanism = mechanisms.find(m => m.selectable);
++            selectedMechanism = mechanisms.find(m => m.autoSelectable);
+ 
+         if (!this._selectedServiceName && selectedMechanism?.serviceName)
+             this._selectedServiceName = selectedMechanism.serviceName;

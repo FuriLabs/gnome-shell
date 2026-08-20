@@ -1,0 +1,174 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 02:21:15 +0200
+Subject: userVerifier: Do not allow any other service to take control of the
+ UI
+
+Authentication services share the same user verifier. Once a mechanism is
+selected, only its service should be able to update the prompt or otherwise
+take control of the UI, except for services exposing background mechanisms.
+
+Track the selected service separately from the per-service selected
+mechanism. This allows filtering service-scoped signals, including resets,
+when they are emitted by a service that is not controlling verification.
+
+The selected service may stop exposing a mechanism after available roles are
+updated. In that case, do not leave the UI without a selected mechanism:
+fall back to the first auto-selectable mechanism instead.
+
+This prevents background or unrelated services from taking over the prompt
+while keeping selection valid when the set of available mechanisms changes.
+---
+ js/gdm/authServices.js |  1 +
+ js/gdm/userVerifier.js | 77 +++++++++++++++++++++++++++++++++++++++-----------
+ 2 files changed, 62 insertions(+), 16 deletions(-)
+
+diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
+index d0f7659..fed9dc2 100644
+--- a/js/gdm/authServices.js
++++ b/js/gdm/authServices.js
+@@ -42,6 +42,7 @@ export const RoleProperties = {
+     [Role.FINGERPRINT]: {
+         iconName: 'fingerprint-auth-symbolic',
+         description: _('Unlock with fingerprint'),
++        background: true,
+     },
+ };
+ 
+diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
+index 7428450..0541b28 100644
+--- a/js/gdm/userVerifier.js
++++ b/js/gdm/userVerifier.js
+@@ -62,6 +62,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this._cancellable = null;
+         this._authServices = [];
+         this._driverService = null;
++        this._selectedServiceName = null;
+ 
+         this._messageQueue = [];
+         this._messageQueueTimeoutId = 0;
+@@ -106,9 +107,14 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+ 
+     selectMechanism(mechanism) {
+         // Every authServices needs to update its selected mechanism
+-        return this._authServices
++        const selected = this._authServices
+             .map(s => s.selectMechanism(mechanism))
+             .some(Boolean);
++
++        if (selected)
++            this._selectedServiceName = mechanism.serviceName;
++
++        return selected;
+     }
+ 
+     needsUsername() {
+@@ -133,6 +139,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     cancelRequested() {
++        if (!this._selectedServiceName)
++            return false;
++
+         const {selectedMechanism} = this;
+         return this._authServices.find(s =>
+             s.selectedMechanism === selectedMechanism)?.cancelRequested() ?? false;
+@@ -148,6 +157,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+ 
+     clear() {
+         this._authServices.forEach(s => s.clear());
++        this._selectedServiceName = null;
+         this._redistributeRoles();
+ 
+         this._clearMessageQueue();
+@@ -396,20 +406,42 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     _connectAuthServices() {
++        // Safety guard: once a mechanism is selected, only that mechanism's own
++        // service is allowed to emit signals. Any signal coming from a different
++        // service is dropped, so only the selected and background mechanisms can act.
++        const isBackgroundService = serviceName => this._authServices
++                .flatMap(s => s.enabledMechanisms ?? [])
++                .some(m => m.serviceName === serviceName && m.background);
++        const maybeForwardSignal = (args, handler) => {
++            const {serviceName} = args ?? {};
++            if (this._selectedServiceName && this._selectedServiceName !== serviceName &&
++                !isBackgroundService(serviceName))
++                return;
++
++            handler();
++        };
++
+         this._authServices.forEach(authServices => {
+             authServices.connectObject(
+-                'ask-question', (_, args) => this.emit('ask-question', args),
+-                'queue-message', (_, args) => this._queueMessage(args),
+-                'queue-priority-message', (_, args) => this._queuePriorityMessage(args),
+-                'wait-pending-messages', (_, args) => this._waitPendingMessages(args),
+-                'filter-messages', (_, args) => this._filterServiceMessages(args),
+-                'verification-failed', (_, args) => this._verificationFailed(args),
++                'ask-question', (_, args) => maybeForwardSignal(args,
++                    () => this.emit('ask-question', args)),
++                'queue-message', (_, args) => maybeForwardSignal(args,
++                    () => this._queueMessage(args)),
++                'queue-priority-message', (_, args) => maybeForwardSignal(args,
++                    () => this._queuePriorityMessage(args)),
++                'filter-messages', (_, args) => maybeForwardSignal(args,
++                    () => this._filterServiceMessages(args)),
++                'verification-failed', (_, args) => maybeForwardSignal(args,
++                    () => this._verificationFailed(args)),
+                 'verification-complete', () => this.emit('verification-complete'),
+                 'reset', (_, args) => this.emit('reset', args),
+-                'show-choice-list', (_, args) => this.emit('show-choice-list', args),
+-                'show-button', (_, args) => this.emit('show-button', args),
++                'show-choice-list', (_, args) => maybeForwardSignal(args,
++                    () => this.emit('show-choice-list', args)),
++                'show-button', (_, args) => maybeForwardSignal(args,
++                    () => this.emit('show-button', args)),
+                 'mechanisms-changed', () => this._onMechanismsChanged(),
+-                'web-login', (_, args) => this.emit('web-login', args),
++                'web-login', (_, args) => maybeForwardSignal(args,
++                    () => this.emit('web-login', args)),
+                 this);
+         });
+     }
+@@ -420,8 +452,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+     }
+ 
+     get selectedMechanism() {
+-        return this._authServices
+-            .find(s => s.selectedMechanism)?.selectedMechanism ?? null;
++        const {selectedMechanism} = this._authServices
++            .find(s => s.selectedMechanism?.serviceName === this._selectedServiceName) ?? {};
++        return selectedMechanism ?? null;
+     }
+ 
+     _redistributeRoles() {
+@@ -461,11 +494,23 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+                 return visibleMechanisms;
+             });
+ 
+-        const selectedMechanism = this.selectedMechanism ??
+-            mechanisms.find(m => m.selectable) ??
+-            {};
++        // Report the currently selected mechanism. If one is already selected
++        // we keep it (matching by service); otherwise we pick the first
++        // selectable mechanism in priority order.
++        let selectedMechanism = this._selectedServiceName
++            ? mechanisms.find(m => m.serviceName === this._selectedServiceName)
++            : null;
++
++        if (!selectedMechanism)
++            selectedMechanism = mechanisms.find(m => m.selectable);
+ 
+-        this.emit('mechanisms-changed', {mechanisms, selectedMechanism});
++        if (!this._selectedServiceName && selectedMechanism?.serviceName)
++            this._selectedServiceName = selectedMechanism.serviceName;
++
++        this.emit('mechanisms-changed', {
++            mechanisms,
++            selectedMechanism: selectedMechanism ?? {},
++        });
+     }
+ 
+     async _waitPendingMessages({task}) {

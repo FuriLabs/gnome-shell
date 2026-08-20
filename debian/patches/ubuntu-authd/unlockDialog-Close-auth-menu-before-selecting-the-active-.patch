@@ -1,0 +1,26 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 15:24:34 +0200
+Subject: unlockDialog: Close auth menu before selecting the active mechanism
+
+The selected mechanism may synchronously emit a mechanisms-changed
+signal, which rebuilds and disposes the menu items.
+Close the menu first, while its active item is still alive, so
+PopupMenu can deactivate it before selection triggers the rebuild.
+---
+ js/ui/unlockDialog.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
+index 5d92a6b..d751017 100644
+--- a/js/ui/unlockDialog.js
++++ b/js/ui/unlockDialog.js
+@@ -685,8 +685,8 @@ export const UnlockDialog = GObject.registerClass({
+             if (!authMechanism)
+                 return;
+ 
+-            this._selectAuthMechanism(authMechanism);
+             this._authMenuButton.closeMenu();
++            this._selectAuthMechanism(authMechanism);
+         });
+         this._bottomButtonGroup.add_child(this._authMenuButton);
+ 

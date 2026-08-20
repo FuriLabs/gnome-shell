@@ -1,0 +1,80 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 15:27:22 +0200
+Subject: loginDialog,
+ unlockDialog: Deeply check if authentication mechanisms changed
+
+Authentication mechanisms are recreated whenever their enabled state is
+updated. We were comparing them by object identity in the login and
+unlock dialogs, so a rebuilt copy of the same mechanism was considered
+a new one.
+
+This causes the dialogs to select the mechanism again, even though it
+did not actually change.
+Such a selection may reset the current verification.
+
+Expose an equality function on each mechanism, using the equality logic
+of the auth service that provides it.
+This lets auth services customize how their mechanisms are compared,
+while login and unlock dialogs can avoid reselecting a mechanism that
+did not change.
+---
+ js/gdm/authServices.js | 18 ++++++++++++++----
+ js/gdm/loginDialog.js  |  2 +-
+ js/ui/unlockDialog.js  |  2 +-
+ 3 files changed, 16 insertions(+), 6 deletions(-)
+
+diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
+index ac4f8da..01080a6 100644
+--- a/js/gdm/authServices.js
++++ b/js/gdm/authServices.js
+@@ -285,10 +285,20 @@ export class AuthServices extends GObject.Object {
+ 
+         this._handleUpdateEnabledMechanisms();
+ 
+-        this._enabledMechanisms = this._enabledMechanisms.map(m => ({
+-            ...m,
+-            ...RoleProperties[m.role],
+-        }));
++        this._enabledMechanisms = this._enabledMechanisms.map(m => {
++            const mechanism = {
++                ...m,
++                ...RoleProperties[m.role],
++            };
++
++            Object.defineProperty(mechanism, 'equals', {
++                value: other => this._mechanismEquals(mechanism, other),
++                enumerable: true,
++            });
++
++            return mechanism;
++        });
++
+         this._selectedMechanism = this._enabledMechanisms.find(mechanism =>
+             this._mechanismEquals(mechanism, selectedMechanism));
+ 
+diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
+index 8919d1f..383d9c2 100644
+--- a/js/gdm/loginDialog.js
++++ b/js/gdm/loginDialog.js
+@@ -595,7 +595,7 @@ export const LoginDialog = GObject.registerClass({
+     _selectAuthMechanism(authMechanism) {
+         const oldMechanism = this._selectedAuthMechanism;
+ 
+-        if (authMechanism === oldMechanism)
++        if (authMechanism?.equals?.(oldMechanism))
+             return;
+ 
+         if (!this._authPrompt.selectMechanism(authMechanism)) {
+diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
+index d751017..2efa4ae 100644
+--- a/js/ui/unlockDialog.js
++++ b/js/ui/unlockDialog.js
+@@ -765,7 +765,7 @@ export const UnlockDialog = GObject.registerClass({
+     _selectAuthMechanism(authMechanism) {
+         const oldMechanism = this._selectedAuthMechanism;
+ 
+-        if (authMechanism === oldMechanism)
++        if (authMechanism?.equals(oldMechanism))
+             return;
+ 
+         if (!this._authPrompt.selectMechanism(authMechanism)) {

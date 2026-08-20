@@ -1,0 +1,47 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 14:57:28 +0200
+Subject: authServices: Do not increase the failed counter for unavailable
+ services
+
+Services that are not available are not explicit failures, so we should
+not retry with them or increase the fail counter
+---
+ js/gdm/authServices.js | 13 +++++++++----
+ 1 file changed, 9 insertions(+), 4 deletions(-)
+
+diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
+index 2299d74..29d9c0a 100644
+--- a/js/gdm/authServices.js
++++ b/js/gdm/authServices.js
+@@ -182,7 +182,9 @@ export class AuthServices extends GObject.Object {
+             if (e.cause?.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
+                 return;
+ 
+-            this._failCounter++;
++            if (!e.cause?.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND))
++                this._failCounter++;
++
+             throw e;
+         }
+ 
+@@ -462,14 +464,17 @@ export class AuthServices extends GObject.Object {
+                     serviceName, cancellable);
+             }
+         } catch (e) {
++            let cause = e;
+             this._activeServices.delete(serviceName);
+             if (e instanceof GLib.Error &&
+                 Gio.DBusError.is_remote_error(e) &&
+                 Gio.DBusError.get_remote_error(e) ===
+-                'org.gnome.DisplayManager.SessionWorker.Error.ServiceUnavailable')
+-                this._unavailableServices.add(serviceName);
++                'org.gnome.DisplayManager.SessionWorker.Error.ServiceUnavailable') {
++                cause = new GLib.Error(Gio.IOErrorEnum, Gio.IOErrorEnum.NOT_FOUND, e.message);
++                this._onServiceUnavailable(serviceName);
++            }
+ 
+-            throw new InitError(e,
++            throw new InitError(cause,
+                 this._userName
+                     ? `Failed to start ${serviceName} verification for user`
+                     : `Failed to start ${serviceName} verification`,

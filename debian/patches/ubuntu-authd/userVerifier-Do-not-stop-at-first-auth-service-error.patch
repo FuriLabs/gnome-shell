@@ -1,0 +1,56 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 14:50:11 +0200
+Subject: userVerifier: Do not stop at first auth service error
+
+We do support multiple auth services, each one may provide multiple
+authentication roles, in case one fails because it's not there or
+something else prevented it to start we should stop trying with other
+services that may be around.
+
+And only if none is found we should then report an error
+---
+ js/gdm/userVerifier.js | 28 ++++++++++++++++++++++------
+ 1 file changed, 22 insertions(+), 6 deletions(-)
+
+diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
+index 7713a2c..e4b098e 100644
+--- a/js/gdm/userVerifier.js
++++ b/js/gdm/userVerifier.js
+@@ -91,15 +91,31 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         try {
+             const proxies = await this._getUserVerifierProxies(userName, this._cancellable);
+             this._setUserVerifier(proxies.userVerifier);
++
++            let lastInitError;
++            let anyBegan = false;
+             for (const s of this._authServices) {
+-                // eslint-disable-next-line no-await-in-loop
+-                await s.beginVerification(userName, proxies);
++                try {
++                    // eslint-disable-next-line no-await-in-loop
++                    await s.beginVerification(userName, proxies);
++                    anyBegan = true;
++                } catch (e) {
++                    if (e instanceof InitError) {
++                        console.warn(`${e.message}: ${e.cause.message}`);
++                        lastInitError = e;
++                        continue;
++                    }
++
++                    throw e;
++                }
++
++                this._redistributeRoles();
+             }
++
++            if (!anyBegan && lastInitError)
++                this._reportInitError(lastInitError);
+         } catch (e) {
+-            if (e instanceof InitError)
+-                this._reportInitError(e);
+-            else
+-                logErrorUnlessCancelled(e);
++            logErrorUnlessCancelled(e);
+         }
+ 
+         hold?.release();

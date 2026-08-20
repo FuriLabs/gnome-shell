@@ -1,0 +1,51 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 15:08:06 +0200
+Subject: userVerifier: Do not override fallback roles for unavailable
+ services
+
+An authentication service may declare roles without having a mechanism
+ready to perform them yet. This happens, for example, when a service
+cannot start or it's being started.
+
+In such case we still disable the same role from lower priority
+services, even though the higher priority service cannot provide it.
+This prevents the fallback gdm-password service from starting if another
+auth service provides the password role.
+
+Use the roles exposed by enabled mechanisms instead. Such mechanisms are
+already filtered by their ready property, so only services that can
+actually provide a role disable it from others.
+---
+ js/gdm/authServices.js | 5 +++++
+ js/gdm/userVerifier.js | 2 +-
+ 2 files changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
+index 29d9c0a..20ba560 100644
+--- a/js/gdm/authServices.js
++++ b/js/gdm/authServices.js
+@@ -170,6 +170,11 @@ export class AuthServices extends GObject.Object {
+         return this._handleGetSupportedRoles();
+     }
+ 
++    get claimedRoles() {
++        return [...new Set(
++            (this.enabledMechanisms ?? []).map(mechanism => mechanism.role))];
++    }
++
+     async beginVerification(userName, userVerifierProxies) {
+         this._cancellable?.cancel();
+         this._cancellable = new Gio.Cancellable();
+diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
+index e4b098e..163855a 100644
+--- a/js/gdm/userVerifier.js
++++ b/js/gdm/userVerifier.js
+@@ -488,7 +488,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         for (let i = 1; i < authServices.length; i++) {
+             const prev = authServices[i - 1];
+             const current = authServices[i];
+-            current.updateEnabledRoles({disableRoles: prev.supportedRoles});
++            current.updateEnabledRoles({disableRoles: prev.claimedRoles});
+         }
+ 
+         this._redistributingRoles = false;
