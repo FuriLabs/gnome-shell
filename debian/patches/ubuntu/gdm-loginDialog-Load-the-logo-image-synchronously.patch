@@ -12,25 +12,37 @@ any frames displayed before the image is fully loaded;
 Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4254
 Bug-Ubuntu: https://launchpad.net/bugs/2145786
 ---
- js/gdm/loginDialog.js     |  3 +-
+ js/gdm/loginDialog.js     | 15 ++++++----
  src/st/st-texture-cache.c | 73 +++++++++++++++++++++++++++++++++++++++++++++++
  src/st/st-texture-cache.h |  8 ++++++
- 3 files changed, 83 insertions(+), 1 deletion(-)
+ 3 files changed, 91 insertions(+), 5 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 5179157..3def97e 100644
+index d4250be..21c57f7 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -967,7 +967,8 @@ export const LoginDialog = GObject.registerClass({
+@@ -964,11 +964,16 @@ export const LoginDialog = GObject.registerClass({
          const resourceScale = this._logoBin.get_resource_scale();
          if (this._logoFile) {
              const scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
 -            const texture = this._textureCache.load_file_async(
-+            const texture = this._textureCache.load_file_sync(
-+                St.TextureCachePolicy.NONE,
-                 this._logoFile,
-                 -1, -1,
-                 scaleFactor, resourceScale);
+-                this._logoFile,
+-                -1, -1,
+-                scaleFactor, resourceScale);
+-            this._logoBin.add_child(texture);
++            try {
++                const texture = this._textureCache.load_file_sync(
++                    St.TextureCachePolicy.NONE,
++                    this._logoFile,
++                    -1, -1,
++                    scaleFactor, resourceScale);
++                this._logoBin.add_child(texture);
++            } catch (e) {
++                logError(e);
++            }
+         }
+     }
+ 
 diff --git a/src/st/st-texture-cache.c b/src/st/st-texture-cache.c
 index 7d46df4..27ce025 100644
 --- a/src/st/st-texture-cache.c
