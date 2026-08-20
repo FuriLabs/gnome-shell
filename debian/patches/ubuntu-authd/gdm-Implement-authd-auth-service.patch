@@ -15,7 +15,7 @@ Subject: gdm: Implement authd auth service
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..767ee9b
+index 0000000..3a545c5
 --- /dev/null
 +++ b/js/gdm/authd.js
 @@ -0,0 +1,1003 @@
@@ -962,7 +962,7 @@ index 0000000..767ee9b
 +
 +        switch (response.access) {
 +        case AuthResult.Granted:
-+            this.emit('verification-complete');
++            this.emit('verification-complete', {serviceName: SERVICE_NAME});
 +            break;
 +
 +        case AuthResult.Retry:
@@ -1019,12 +1019,12 @@ index 0000000..767ee9b
 +
 +    _cancelAndReset() {
 +        this.emit('cancel');
-+        this.emit('reset');
++        this._emitReset();
 +    }
 +}
 diff --git a/js/gdm/authdProtocol.js b/js/gdm/authdProtocol.js
 new file mode 100644
-index 0000000..a371827
+index 0000000..ad2b5ea
 --- /dev/null
 +++ b/js/gdm/authdProtocol.js
 @@ -0,0 +1,5666 @@
