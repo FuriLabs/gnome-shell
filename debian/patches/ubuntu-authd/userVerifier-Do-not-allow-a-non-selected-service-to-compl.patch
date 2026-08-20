@@ -48,7 +48,7 @@ index 01080a6..42fd447 100644
  
      _onChoiceListQuery(serviceName, promptMessage, list) {
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 163855a..8984a05 100644
+index 589e8ba..102e299 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -451,7 +451,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {

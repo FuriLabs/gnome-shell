@@ -19,7 +19,7 @@ verifier the single source of truth for mechanism selection.
  3 files changed, 11 insertions(+), 9 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 7306ffc..cd68625 100644
+index b45cc5a..cb42d47 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -404,6 +404,10 @@ export const AuthPrompt = GObject.registerClass({
@@ -34,7 +34,7 @@ index 7306ffc..cd68625 100644
          if (this._mode === AuthPromptMode.UNLOCK_OR_LOG_IN)
              return;
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 383d9c2..901bcdb 100644
+index 5c16c6c..21445cc 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -593,17 +593,16 @@ export const LoginDialog = GObject.registerClass({

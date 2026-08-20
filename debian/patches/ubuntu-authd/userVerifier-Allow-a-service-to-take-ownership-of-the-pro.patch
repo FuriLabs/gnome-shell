@@ -24,7 +24,7 @@ mechanism selection restores both the previous selected service and UI owner.
  1 file changed, 30 insertions(+), 11 deletions(-)
 
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 8984a05..353e834 100644
+index 102e299..f8f6d22 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -63,6 +63,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {

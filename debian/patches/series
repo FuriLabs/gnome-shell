@@ -1,3 +1,8 @@
+gdm-userVerifier-Use-every-in-needsUsername.patch
+gdm-authServicesLegacy-Fix-credentialManagers-authenticat.patch
+qrCode-Rename-url-property-to-text.patch
+authPrompt-Fix-the-profile-picture-vanishing-when-pressin.patch
+style-Fix-color-styles-to-adapt-when-on-light-mode-classi.patch
 shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
 notificationDaemon-Do-not-ignore-GtkNotification-sources-.patch
 debian/Revert-tests-Fail-on-warnings-too.patch

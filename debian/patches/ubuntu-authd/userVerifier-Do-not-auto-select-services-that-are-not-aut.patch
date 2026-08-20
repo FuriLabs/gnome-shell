@@ -37,7 +37,7 @@ index 5652b99..afbe042 100644
      [Role.FINGERPRINT]: {
          iconName: 'fingerprint-auth-symbolic',
 diff --git a/js/gdm/authServicesLegacy.js b/js/gdm/authServicesLegacy.js
-index 315bdd7..03a08a1 100644
+index 179daf1..2f49f57 100644
 --- a/js/gdm/authServicesLegacy.js
 +++ b/js/gdm/authServicesLegacy.js
 @@ -159,10 +159,18 @@ export class AuthServicesLegacy extends AuthServices {
@@ -63,7 +63,7 @@ index 315bdd7..03a08a1 100644
  
          if (!this._fingerprintManager?.readerFound) {
              this._enabledMechanisms = this._enabledMechanisms.filter(m =>
-@@ -414,8 +422,11 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -425,8 +433,11 @@ export class AuthServicesLegacy extends AuthServices {
  
      _onSmartcardChanged() {
          if (this._selectedMechanism?.role !== Role.SMARTCARD ||
@@ -99,7 +99,7 @@ index 7f4eb1c..0eb0422 100644
          this._trackWebLoginTimeout();
  
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 48caa36..ffd85d8 100644
+index 701e752..ad430de 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -500,13 +500,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {

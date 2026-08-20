@@ -36,7 +36,7 @@ restart and take control of its own verification.
  5 files changed, 36 insertions(+), 24 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 4b5604c..7306ffc 100644
+index 03235a9..b45cc5a 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
 @@ -946,9 +946,10 @@ export const AuthPrompt = GObject.registerClass({
@@ -97,7 +97,7 @@ index fed9dc2..5652b99 100644
          return this.constructor.SupportedRoles;
      }
 diff --git a/js/gdm/authServicesLegacy.js b/js/gdm/authServicesLegacy.js
-index 77f9cec..315bdd7 100644
+index 12adc63..179daf1 100644
 --- a/js/gdm/authServicesLegacy.js
 +++ b/js/gdm/authServicesLegacy.js
 @@ -96,7 +96,7 @@ export class AuthServicesLegacy extends AuthServices {
@@ -109,7 +109,7 @@ index 77f9cec..315bdd7 100644
      }
  
      _handleNeedsUsername() {
-@@ -391,7 +391,7 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -402,7 +402,7 @@ export class AuthServicesLegacy extends AuthServices {
          delete this._credentialManagers[serviceName];
  
          if (this._selectedMechanism?.serviceName === serviceName)
@@ -118,7 +118,7 @@ index 77f9cec..315bdd7 100644
      }
  
      _connectSmartcardManager() {
-@@ -417,7 +417,7 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -428,7 +428,7 @@ export class AuthServicesLegacy extends AuthServices {
              this._smartcardInProgress && this._smartcardManager.hasInsertedTokens())
              return;
  
@@ -127,7 +127,7 @@ index 77f9cec..315bdd7 100644
      }
  
      _onFingerprintChanged() {
-@@ -425,7 +425,7 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -436,7 +436,7 @@ export class AuthServicesLegacy extends AuthServices {
              return;
  
          this._updateEnabledMechanisms();
@@ -136,7 +136,7 @@ index 77f9cec..315bdd7 100644
      }
  
      _onCredentialManagerAuthenticated(credentialManager) {
-@@ -434,6 +434,6 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -445,6 +445,6 @@ export class AuthServicesLegacy extends AuthServices {
              role: Role.PASSWORD,
              ...RoleProperties[Role.PASSWORD],
          };
@@ -220,7 +220,7 @@ index cf6a4e1..7f4eb1c 100644
      }
  }
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 0541b28..48caa36 100644
+index fe3e9b6..701e752 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -106,13 +106,16 @@ export class ShellUserVerifier extends Signals.EventEmitter {

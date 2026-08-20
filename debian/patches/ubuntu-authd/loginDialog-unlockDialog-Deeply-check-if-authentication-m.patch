@@ -53,7 +53,7 @@ index ac4f8da..01080a6 100644
              this._mechanismEquals(mechanism, selectedMechanism));
  
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 8919d1f..383d9c2 100644
+index 7e7ca0c..5c16c6c 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -595,7 +595,7 @@ export const LoginDialog = GObject.registerClass({

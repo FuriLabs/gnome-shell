@@ -37,7 +37,7 @@ index 29d9c0a..20ba560 100644
          this._cancellable?.cancel();
          this._cancellable = new Gio.Cancellable();
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index e4b098e..163855a 100644
+index af130a0..589e8ba 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -488,7 +488,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {

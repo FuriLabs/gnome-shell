@@ -9,7 +9,7 @@ least notify the user about instead of leaving them with an empty screen
  1 file changed, 4 insertions(+)
 
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 353e834..f19b4ce 100644
+index f8f6d22..c65a65f 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -116,6 +116,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {

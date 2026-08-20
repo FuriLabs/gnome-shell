@@ -44,7 +44,7 @@ index 20ba560..ac4f8da 100644
          this.emit('mechanisms-changed');
      }
 diff --git a/js/gdm/authServicesLegacy.js b/js/gdm/authServicesLegacy.js
-index 03a08a1..c721ba5 100644
+index 2f49f57..088c765 100644
 --- a/js/gdm/authServicesLegacy.js
 +++ b/js/gdm/authServicesLegacy.js
 @@ -154,7 +154,6 @@ export class AuthServicesLegacy extends AuthServices {

@@ -1,0 +1,59 @@
+From: Joan Torres Lopez <joantolo@redhat.com>
+Date: Fri, 7 Aug 2026 11:42:37 +0200
+Subject: style: Fix color styles to adapt when on light-mode (classic-mode)
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4338>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/eae8328
+---
+ data/theme/gnome-shell-sass/widgets/_login-lock.scss | 8 ++++----
+ data/theme/gnome-shell-sass/widgets/_qr-code.scss    | 1 +
+ 2 files changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
+index 094718e..7d50e62 100644
+--- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
++++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
+@@ -95,12 +95,12 @@ $_gdm_dialog_width: 25em;
+     &-label {
+       @include fontsize($base_font_size - 1);
+       font-weight: bold;
+-      color: $_gdm_fg;
++      color: $fg_color;
+     }
+   }
+ 
+   .login-dialog-auth-menu-item-icon {
+-    color: $_gdm_fg;
++    color: $fg_color;
+     icon-size: $scalable_icon_size;
+     margin-right: $base_margin * 2;
+   }
+@@ -109,13 +109,13 @@ $_gdm_dialog_width: 25em;
+     spacing: $base_padding * .5;
+ 
+     &-name {
+-      color: $_gdm_fg;
++      color: $fg_color;
+       @include fontsize($base_font_size);
+       font-weight: bold;
+     }
+ 
+     &-description {
+-      color: $_gdm_fg;
++      color: $fg_color;
+       @include fontsize($base_font_size - 1);
+     }
+   }
+diff --git a/data/theme/gnome-shell-sass/widgets/_qr-code.scss b/data/theme/gnome-shell-sass/widgets/_qr-code.scss
+index da04425..98ecf7b 100644
+--- a/data/theme/gnome-shell-sass/widgets/_qr-code.scss
++++ b/data/theme/gnome-shell-sass/widgets/_qr-code.scss
+@@ -6,6 +6,7 @@
+     $qrcode_bg_color: mix($fg_color, $bg_color, 8%);
+     background-color: $qrcode_bg_color;
+     border-color: $qrcode_bg_color;
++    color: $fg_color;
+   } @else {
+     background-color: $system_fg_color;
+     border-color: $system_fg_color;

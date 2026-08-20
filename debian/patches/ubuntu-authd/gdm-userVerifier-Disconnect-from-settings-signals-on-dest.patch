@@ -8,7 +8,7 @@ Also drop the manual disposal of the settings object
  1 file changed, 1 insertion(+), 2 deletions(-)
 
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index ffd85d8..7713a2c 100644
+index ad430de..77021dd 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -68,7 +68,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {

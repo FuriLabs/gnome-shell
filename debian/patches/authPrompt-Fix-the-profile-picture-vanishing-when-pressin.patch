@@ -1,0 +1,43 @@
+From: =?utf-8?q?Joaqu=C3=ADn_Vacas_Ver=C3=ADsimo?= <jknvv13@gmail.com>
+Date: Wed, 19 Aug 2026 16:26:30 +0200
+Subject: authPrompt: Fix the profile picture vanishing when pressing Escape
+
+On the lock screen, cancelling the password prompt using the ESC key
+made the profile picture disappear instantly at the start of the
+animation back to the clock.
+
+This didn't happen when using touch, trackpad or mouse drag,
+with this fix it behaves the same when using the key as well
+
+Part-of: <https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4326>
+
+Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/1ad5c46
+---
+ js/gdm/authPrompt.js  | 1 -
+ js/gdm/loginDialog.js | 1 +
+ 2 files changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 3b2188b..06a8758 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -967,7 +967,6 @@ export const AuthPrompt = GObject.registerClass({
+         this._queryingService = null;
+         this.clear({reuseEntryText});
+         this._message.opacity = 0;
+-        this.setUser(null);
+         this.updateEntry(true);
+ 
+         if (oldStatus === AuthPromptStatus.VERIFICATION_FAILED)
+diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
+index c309b87..54690d1 100644
+--- a/js/gdm/loginDialog.js
++++ b/js/gdm/loginDialog.js
+@@ -1442,6 +1442,7 @@ export const LoginDialog = GObject.registerClass({
+ 
+     _hideUserListAndBeginVerification() {
+         this._hideUserList();
++        this._authPrompt.setUser(null);
+         this._authPrompt.begin();
+     }
+ 
