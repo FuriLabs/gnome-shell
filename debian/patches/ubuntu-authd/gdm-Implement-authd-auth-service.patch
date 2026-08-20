@@ -3,22 +3,22 @@ Date: Sun, 26 Jul 2026 07:00:57 +0200
 Subject: gdm: Implement authd auth service
 
 ---
- js/gdm/authd.js               | 1008 ++++++++
+ js/gdm/authd.js               | 1020 ++++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/userVerifier.js        |    2 +
  js/js-resources.gresource.xml |    3 +
  js/ui/popupMenu.js            |    5 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6685 insertions(+)
+ 6 files changed, 6697 insertions(+)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..bfb98d1
+index 0000000..512b380
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,1008 @@
+@@ -0,0 +1,1020 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +import GLib from 'gi://GLib';
 +import GObject from 'gi://GObject';
@@ -650,9 +650,21 @@ index 0000000..bfb98d1
 +
 +        case AuthdPam.Stage.brokerSelection:
 +            this._authModes = {};
++            this._authMechanisms = {
++                [AuthMechanismIDs.BrokerSelection]: {
++                    name: _('Authd Authentication'),
++                    selectable: true,
++                    role: AuthdRoles.Message,
++                    id: AuthMechanismIDs.BrokerSelection,
++                    prompt: '',
++                    serviceName: SERVICE_NAME,
++                    autoSelectable: true,
++                },
++            };
 +            this._uiLayout = null;
 +            this._authenticationStarted = false;
 +            this._selectedAuthMode = null;
++            this._updateEnabledMechanisms();
 +            this._maybeStartBrokerSelection();
 +            break;
 +
