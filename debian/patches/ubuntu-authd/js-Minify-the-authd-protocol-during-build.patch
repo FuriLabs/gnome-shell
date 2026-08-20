@@ -11,17 +11,17 @@ Subject: js: Minify the authd protocol during build
  create mode 100644 js/gdm/meson.build
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
-index 4df2779..51ff09c 100644
+index 767ee9b..a65f354 100644
 --- a/js/gdm/authd.js
 +++ b/js/gdm/authd.js
-@@ -2,7 +2,7 @@
- import GLib from 'gi://GLib';
+@@ -3,7 +3,7 @@ import GLib from 'gi://GLib';
+ import GObject from 'gi://GObject';
  
- import {MessageType} from './util.js';
+ import {MessageType} from './userVerifier.js';
 -import {authd as Authd, gdm as AuthdGdm, pam as AuthdPam} from './authdProtocol.js';
 +import {authd as Authd, gdm as AuthdGdm, pam as AuthdPam} from './authdProtocol.min.js';
- import {UnifiedAuthService} from './unifiedMechanism.js';
- import * as Const from './const.js';
+ import {AuthServices, Role} from './authServices.js';
+ import {logErrorUnlessCancelled} from '../misc/errorUtils.js';
  
 diff --git a/js/gdm/meson.build b/js/gdm/meson.build
 new file mode 100644
@@ -42,10 +42,10 @@ index 0000000..858cc16
 +  capture: true,
 +)
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index a66a1e6..9a47de4 100644
+index 89acdef..b3d1dfd 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
-@@ -17,7 +17,7 @@
+@@ -23,7 +23,7 @@
      <file>gdm/webLogin.js</file>
  
      <file>gdm/authd.js</file>

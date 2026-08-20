@@ -1,35 +1,36 @@
 From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
-Date: Thu, 29 Feb 2024 21:30:36 +0100
-Subject: Implement authd support via the unified mechanism
+Date: Sun, 26 Jul 2026 07:00:57 +0200
+Subject: gdm: Implement authd auth service
 
 ---
- js/gdm/authd.js               |  815 ++++++
+ js/gdm/authd.js               | 1003 ++++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
- js/gdm/const.js               |    3 +
- js/gdm/util.js                |    4 +-
+ js/gdm/userVerifier.js        |    2 +
  js/js-resources.gresource.xml |    3 +
+ js/ui/popupMenu.js            |    5 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6491 insertions(+), 1 deletion(-)
+ 6 files changed, 6680 insertions(+)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..4df2779
+index 0000000..767ee9b
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,815 @@
+@@ -0,0 +1,1003 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +import GLib from 'gi://GLib';
++import GObject from 'gi://GObject';
 +
-+import {MessageType} from './util.js';
++import {MessageType} from './userVerifier.js';
 +import {authd as Authd, gdm as AuthdGdm, pam as AuthdPam} from './authdProtocol.js';
-+import {UnifiedAuthService} from './unifiedMechanism.js';
-+import * as Const from './const.js';
++import {AuthServices, Role} from './authServices.js';
++import {logErrorUnlessCancelled} from '../misc/errorUtils.js';
 +
 +export const SERVICE_NAME = 'gdm-authd';
 +
-+const STRING_PROTOCOL_NAME = 'com.ubuntu.authd.gdm';
++const STRING_PROTOCOL_NAME_ = 'com.ubuntu.authd.gdm';
 +const STRING_PROTOCOL_VERSION_ = 1;
 +
 +const AUTO_SELECTION_MAX_WAIT = 1000;
@@ -63,6 +64,13 @@ index 0000000..4df2779
 +    DigitsPassword: 'digits_password',
 +});
 +
++const AuthdRoles = Object.freeze({
++    Password: Role.PASSWORD,
++    PlainText: 'plain-text',
++    WebLogin: Role.WEB_LOGIN,
++    Message: 'message',
++});
++
 +function isEntryPassword(entryType) {
 +    switch (entryType) {
 +    case EntryTypes.Chars:
@@ -83,49 +91,96 @@ index 0000000..4df2779
 +    }
 +}
 +
-+export class AuthdSwitchableHandler extends UnifiedAuthService {
-+    get protocolName() {
-+        return STRING_PROTOCOL_NAME;
++export class AuthServicesAuthd extends AuthServices {
++    static {
++        GObject.registerClass(this);
 +    }
 +
-+    getSupportedRoles() {
-+        return [
-+            Const.PASSWORD_ROLE_NAME,
-+            Const.WEB_LOGIN_ROLE_NAME,
-+            Const.CHOICE_LIST_ROLE_NAME,
-+            Const.PLAIN_TEXT_ROLE_NAME,
-+            Const.MESSAGE_ROLE_NAME,
-+        ];
-+    }
++    static SupportedRoles = [
++        AuthdRoles.Password,
++        AuthdRoles.PlainText,
++        AuthdRoles.Message,
++        AuthdRoles.WebLogin,
++    ];
 +
-+    constructor() {
-+        super();
++    static RoleToService = {
++        [AuthdRoles.Password]: SERVICE_NAME,
++        [AuthdRoles.PlainText]: SERVICE_NAME,
++        [AuthdRoles.Message]: SERVICE_NAME,
++        [AuthdRoles.WebLogin]: SERVICE_NAME,
++    };
++
++    constructor(params) {
++        super(params);
 +        this._brokers = {};
 +        this._authModes = {};
 +        this._authMechanisms = {};
++        this._enabledMechanisms = [];
 +        this._pendingEvents = [];
 +        this._stage = undefined;
 +        this._pendingStage = undefined;
 +        this._pendingNewChallenge = null;
 +    }
 +
-+    handleProtocolRequest(protocol, version, json) {
++    _handleCanStartService(serviceName) {
++        return serviceName === SERVICE_NAME;
++    }
++
++    _handleOnInfo(serviceName, info) {
++        if (serviceName !== SERVICE_NAME)
++            return;
++
++        this.emit('queue-message', {
++            serviceName,
++            message: info,
++            messageType: MessageType.INFO,
++        });
++    }
++
++    _handleOnInfoQuery(serviceName, question) {
++        if (serviceName !== SERVICE_NAME)
++            return;
++
++        this.emit('ask-question', {
++            serviceName,
++            question,
++            answerHandler: answer => this._userVerifier.call_answer_query(
++                serviceName, answer, this._cancellable).catch(logErrorUnlessCancelled),
++        });
++    }
++
++    _handleOnSecretInfoQuery(serviceName, secretQuestion) {
++        if (serviceName !== SERVICE_NAME)
++            return;
++
++        this.emit('ask-question', {
++            serviceName,
++            question: secretQuestion,
++            secret: true,
++            answerHandler: answer => this._userVerifier.call_answer_query(
++                serviceName, answer, this._cancellable).catch(logErrorUnlessCancelled),
++        });
++    }
++
++    _handleOnProblem(serviceName, problem) {
++        if (serviceName !== SERVICE_NAME)
++            return;
++
++        console.log(`authd: Got a problem: ${problem}`);
++        this.emit('queue-priority-message', {
++            serviceName,
++            messageType: MessageType.ERROR,
++            message: problem,
++        });
++        this.reset();
++    }
++
++    _handleOnCustomJSONRequest(serviceName, protocol, version, json) {
 +        const authdData = AuthdGdm.Data.fromObject(JSON.parse(json));
 +        const reply = this._handleAuthdProtocol(authdData);
-+        this.sendProtocolResponse(reply.toJSON(), {ignoreMessageWait: true});
-+    }
-+
-+    handleProblem(problem) {
-+        console.log(`authd: Got a problem: ${problem}`);
-+
-+        this.emit('queue-priority-message', problem, MessageType.ERROR);
-+        this.reset();
-+
-+        return true;
-+    }
-+
-+    getProtocolResponse(_mechanism, _role, _response) {
-+        throw new Error('This should not be called!');
++        this._userVerifierCustomJSON.call_reply(
++            serviceName, JSON.stringify(reply.toJSON()), this._cancellable).catch(
++            logErrorUnlessCancelled);
 +    }
 +
 +    _handleAuthdProtocol(authdData) {
@@ -206,17 +261,27 @@ index 0000000..4df2779
 +        }
 +    }
 +
-+    setForegroundMechanism(mechanism) {
++    _mechanismEquals(m1, m2) {
++        return m1?.id === m2?.id &&
++            m1?.serviceName === m2?.serviceName;
++    }
++
++    _handleSelectMechanism() {
++        const mechanism = this.selectedMechanism;
++
++        if (!mechanism)
++            return;
 +        if (this._selectedAuthMode === mechanism.id)
-+            return true;
++            return;
 +        if (!this._authMechanisms[mechanism.id])
-+            return true;
++            return;
 +
 +        const maybeSwitchMechanism = () => {
 +            if (this._stage !== AuthdPam.Stage.challenge)
 +                return;
 +
-+            this._pendingStage = AuthdGdm.EventType.challenge;
++            this._pendingStage = AuthdPam.Stage.challenge;
++            this._uiLayout = null;
 +            this._selectAuthMode(mechanism.id);
 +        };
 +
@@ -228,21 +293,76 @@ index 0000000..4df2779
 +                    isAuthenticatedCancelled: new AuthdGdm.Events.IsAuthenticatedCancelled(),
 +                }));
 +
-+            return true;
++            return;
 +        }
 +
 +        maybeSwitchMechanism();
-+        return true;
 +    }
 +
-+    handleMechanism(mechanism) {
-+        if (!this._selectedAuthMode || this._stage !== AuthdPam.Stage.challenge)
-+            return mechanism.role !== Const.CHOICE_LIST_ROLE_NAME;
++    _selectAndStartMechanism(mechanism) {
++        log('authd: Selecting mechanism', mechanism.id);
++        this.selectMechanism(mechanism);
 +
-+        if (this._selectedAuthMode !== mechanism.id)
-+            return true;
++        switch (mechanism.role) {
++        case AuthdRoles.Password:
++            this.emit('ask-question', {
++                serviceName: SERVICE_NAME,
++                question: mechanism.prompt,
++                secret: true,
++                answerHandler: answer => {
++                    if (this.selectedMechanism?.id !== mechanism.id) {
++                        throw new Error(`${this.selectedMechanism?.id} not matching expected ` +
++                            `${mechanism.id}`);
++                    }
 +
-+        return false;
++                    this.handleAuthSelectionResponse(this.selectedMechanism,
++                        mechanism.role,
++                        {password: answer});
++                },
++            });
++            break;
++        case AuthdRoles.PlainText:
++            this.emit('ask-question', {
++                serviceName: SERVICE_NAME,
++                question: mechanism.prompt,
++                secret: false,
++                answerHandler: answer => {
++                    if (this.selectedMechanism?.id !== mechanism.id) {
++                        throw new Error(`${this.selectedMechanism?.id} not matching expected ` +
++                            `${mechanism.id}`);
++                    }
++
++                    this.handleAuthSelectionResponse(this.selectedMechanism, mechanism.role,
++                        {text: answer});
++                },
++            });
++            break;
++        case AuthdRoles.WebLogin:
++            // FIXME: Use join of mechanism data, but need to adjuts the props names.
++            this.emit('web-login', {
++                serviceName: SERVICE_NAME,
++                message: mechanism.init_prompt,
++                url: mechanism.link_prompt,
++                code: mechanism.code,
++                buttons: mechanism.buttons,
++            });
++            this.handleAuthSelectionResponse(this.selectMechanism, mechanism.role);
++            break;
++        case AuthdRoles.Message:
++            this.emit('show-choice-list', {
++                serviceName: SERVICE_NAME,
++                promptMessage: mechanism.name,
++            });
++            this.emit('queue-priority-message', {
++                serviceName: SERVICE_NAME,
++                messageType: MessageType.INFO,
++                message: mechanism.prompt,
++            });
++            break;
++        default:
++            throw new Error(
++                `Unhandled role ${mechanism.role} for selected mechanism ${mechanism.id}`);
++        }
 +    }
 +
 +    _newPasswordConfirmed(newPassword) {
@@ -250,16 +370,24 @@ index 0000000..4df2779
 +            return true;
 +
 +        if (!this._pendingNewChallenge?.length) {
-+            let msg = _('Please, type the new passphrase again');
++            let message = _('Please, type the new passphrase again');
 +            if (isEntryPIN(this._uiLayout.entry))
-+                msg = _('Please, type the new PIN again');
-+            this.emit('queue-priority-message', msg, MessageType.INFO);
++                message = _('Please, type the new PIN again');
++            this.emit('queue-priority-message', {
++                serviceName: SERVICE_NAME,
++                messageType: MessageType.INFO,
++                message,
++            });
 +            this._pendingNewChallenge = newPassword;
 +        } else {
-+            let msg = _('The provided passphrases do not match, please try again');
++            let message = _('The provided passphrases do not match, please try again');
 +            if (isEntryPIN(this._uiLayout.entry))
-+                msg = _('The provided PIN numbers do not match, please try again');
-+            this.emit('queue-priority-message', msg, MessageType.ERROR);
++                message = _('The provided PIN numbers do not match, please try again');
++            this.emit('queue-priority-message', {
++                serviceName: SERVICE_NAME,
++                messageType: MessageType.ERROR,
++                message,
++            });
 +            this._pendingNewChallenge = null;
 +        }
 +
@@ -267,18 +395,13 @@ index 0000000..4df2779
 +    }
 +
 +    handleAuthSelectionResponse(mechanism, role, response) {
-+        if (role !== Const.CHOICE_LIST_ROLE_NAME &&
-+            role !== Const.MESSAGE_ROLE_NAME) {
++        if (role !== AuthdRoles.Message) {
 +            this._pendingEvents = this._pendingEvents.filter(ev =>
 +                ev.type !== AuthdGdm.EventType.isAuthenticatedRequested);
 +        }
 +
 +        switch (role) {
-+        case Const.CHOICE_LIST_ROLE_NAME:
-+            this._onChoiceSelected(mechanism, response);
-+            break;
-+
-+        case Const.PASSWORD_ROLE_NAME:
++        case AuthdRoles.Password:
 +            if (this._uiLayout.type === UILayoutTypes.NewPassword &&
 +                !this._newPasswordConfirmed(response.password)) {
 +                this._showChallenge();
@@ -296,7 +419,7 @@ index 0000000..4df2779
 +                }));
 +            break;
 +
-+        case Const.PLAIN_TEXT_ROLE_NAME:
++        case AuthdRoles.PlainText:
 +            if (this._uiLayout.type === UILayoutTypes.NewPassword &&
 +                !this._newPasswordConfirmed(response.text)) {
 +                this._showChallenge();
@@ -314,7 +437,7 @@ index 0000000..4df2779
 +                }));
 +            break;
 +
-+        case Const.WEB_LOGIN_ROLE_NAME:
++        case AuthdRoles.WebLogin:
 +            this._pendingEvents.push(
 +                new AuthdGdm.EventData({
 +                    type: AuthdGdm.EventType.isAuthenticatedRequested,
@@ -439,23 +562,21 @@ index 0000000..4df2779
 +            });
 +    }
 +
-+    _showChoiceList(id, prompt, choices) {
-+        const choiceListMechanism = {
-+            name: 'Choices list',
-+            selectable: false,
-+            role: Const.CHOICE_LIST_ROLE_NAME,
++    _showChoiceList(id, promptMessage, choiceList) {
++        this.emit('show-choice-list', {
 +            serviceName: SERVICE_NAME,
-+            protocol: this.protocolName,
-+            id,
-+            prompt,
-+            choices,
-+        };
-+
-+        this.emit('mechanisms-changed', {[id]: choiceListMechanism});
++            promptMessage,
++            choiceList,
++            // FIXME: move choiceHandler to argument.
++            choiceHandler: key => this._handleSelectChoice(SERVICE_NAME, id, key),
++        });
 +    }
 +
-+    _onChoiceSelected(mechanism, key) {
-+        switch (mechanism.id) {
++    _handleSelectChoice(serviceName, id, key) {
++        if (serviceName !== SERVICE_NAME)
++            return;
++
++        switch (id) {
 +        case AuthMechanismIDs.BrokerSelection:
 +            this._selectBroker(key);
 +            break;
@@ -467,6 +588,8 @@ index 0000000..4df2779
 +    }
 +
 +    cancelRequested() {
++        log('authd: Cancel requested');
++
 +        let prevStage = this._stage - 1;
 +
 +        switch (this._stage) {
@@ -491,7 +614,10 @@ index 0000000..4df2779
 +        default:
 +            // Mark the verification as failed, as we do not to want
 +            // to rely on the default allowedFailures value.
-+            this.emit('verification-failed', /* should retry */ false);
++            this.emit('verification-failed', {
++                serviceName: SERVICE_NAME,
++                canRetry: false,
++            });
 +            return false;
 +        }
 +
@@ -501,7 +627,12 @@ index 0000000..4df2779
 +
 +    _onStageChanged(stage) {
 +        if (this._pendingStage !== stage) {
-+            this.emit('clear-message-queue');
++            // this.emit('filter-messages', SERVICE_NAME, MessageType.ERROR);
++            this.emit('queue-priority-message', {
++                serviceName: SERVICE_NAME,
++                messageType: MessageType.ERROR,
++                message: null,
++            });
 +            this._pendingStage = stage;
 +
 +            this._maybeCancelPendingAutoSelection();
@@ -541,7 +672,12 @@ index 0000000..4df2779
 +        case AuthdGdm.EventType.brokersReceived:
 +            this._brokers = {};
 +            event.brokersReceived.brokersInfos.forEach(brokerInfo => {
-+                this._brokers[brokerInfo.id] = brokerInfo.name;
++                this._brokers[brokerInfo.id] = {
++                    title: brokerInfo.name,
++                    // FIXME: We need to support the icon, but it requires Gio.Icon()
++                    // support in StButton.
++                    // iconName: brokerInfo.brandIcon,
++                };
 +            });
 +            this._maybeStartBrokerSelection();
 +
@@ -551,9 +687,6 @@ index 0000000..4df2779
 +            this._maybeCancelPendingAutoSelection();
 +
 +            this._selectedBroker = event.brokerSelected.brokerId;
-+            if (this._stage === AuthdPam.Stage.brokerSelection)
-+                this.emit('choice-list-selected', this._selectedBroker);
-+
 +            console.log('authd: Broker selected', this._selectedBroker);
 +            break;
 +
@@ -561,19 +694,25 @@ index 0000000..4df2779
 +            this._authMechanisms = {};
 +            this._authModes = {};
 +            event.authModesReceived.authModes.forEach(authMode => {
-+                this._authModes[authMode.id] = authMode.label;
++                this._authModes[authMode.id] = {
++                    title: authMode.label,
++                };
 +                this._authMechanisms[authMode.id] = {
 +                    name: authMode.label,
 +                    selectable: true,
 +                    /* FIXME: we can't really define the real role until the mechanism is selected */
-+                    role: Const.PASSWORD_ROLE_NAME,
++                    role: AuthdRoles.Password,
++                    // FIXME: We can probably just use the ID as role now, prefixed to avoid collisions,
++                    // but we need to check if the role is used in other places.
++                    // Since a role is an unique string.
 +                    id: authMode.id,
 +                    prompt: authMode.label,
 +                    serviceName: SERVICE_NAME,
-+                    protocol: this.protocolName,
++                    autoSelectable: true,
 +                };
 +            });
 +
++            this._updateEnabledMechanisms();
 +            this._maybeStartAuthModeSelection();
 +            break;
 +
@@ -584,7 +723,12 @@ index 0000000..4df2779
 +                return;
 +
 +            this._selectedAuthMode = event.authModeSelected.authModeId;
-+            this.emit('clear-message-queue');
++            // this.emit('filter-messages', SERVICE_NAME, MessageType.ERROR);
++            this.emit('queue-priority-message', {
++                serviceName: SERVICE_NAME,
++                messageType: MessageType.ERROR,
++                message: null,
++            });
 +
 +            if (this._stage >= AuthdPam.Stage.brokerSelection)
 +                this._maybeStartChallenge();
@@ -634,7 +778,27 @@ index 0000000..4df2779
 +        this._authMechanisms = {};
 +        this._authModes = {};
 +        this._authCancelledAction = null;
-+        this.emit('mechanisms-changed', {});
++        this._updateEnabledMechanisms();
++    }
++
++    _handleOnConversationStopped(serviceName) {
++        if (serviceName !== SERVICE_NAME)
++            return;
++
++        this._verificationFailed(serviceName, true);
++    }
++
++    _handleClear() {
++        this.cancel();
++    }
++
++    _handleUpdateEnabledRoles() {
++        this._selectedMechanism = null;
++        this._updateEnabledMechanisms();
++    }
++
++    _handleUpdateEnabledMechanisms() {
++        this._enabledMechanisms = Object.values(this._authMechanisms);
 +    }
 +
 +    _maybeStartChallenge() {
@@ -713,22 +877,29 @@ index 0000000..4df2779
 +                    }
 +                }
 +
-+                if (!isEntryPassword(this._uiLayout.entry))
-+                    mechanism.role = Const.PLAIN_TEXT_ROLE_NAME;
++                if (isEntryPassword(this._uiLayout.entry))
++                    mechanism.preemptiveInput = true;
++                else
++                    mechanism.role = AuthdRoles.PlainText;
 +            } else {
 +                // FIXME: We need to add other roles to show wait actions.
-+                // mechanism.role = Const.PLAIN_TEXT_ROLE_NAME;
-+                // delete mechanism.role;
-+                mechanism.role = Const.MESSAGE_ROLE_NAME;
++                mechanism.role = AuthdRoles.Message;
 +                prompt = infoMsg;
 +            }
 +
 +            mechanism.prompt = prompt ?? '';
-+            this.emit('mechanisms-changed', this._authMechanisms);
++            this._handleUpdateEnabledMechanisms();
++            this._selectAndStartMechanism(mechanism);
 +
-+            if (infoMsg?.length && mechanism.prompt !== infoMsg)
-+                this.emit('queue-message', infoMsg, MessageType.INFO);
++            if (infoMsg?.length && mechanism.prompt !== infoMsg) {
++                this.emit('queue-message', {
++                    serviceName: SERVICE_NAME,
++                    messageType: MessageType.INFO,
++                    message: infoMsg,
++                });
++            }
 +
++            // Just do this after so that we can catch the qr code too!
 +            if (!this._isWaitingLayout())
 +                break;
 +
@@ -748,7 +919,7 @@ index 0000000..4df2779
 +
 +        case UILayoutTypes.QrCode: {
 +            const mechanism = this._authMechanisms[this._selectedAuthMode];
-+            mechanism.role = Const.WEB_LOGIN_ROLE_NAME;
++            mechanism.role = AuthdRoles.WebLogin;
 +            mechanism.link_prompt = this._uiLayout.label;
 +            mechanism.init_prompt = null;
 +            mechanism.uri = this._uiLayout.content;
@@ -756,7 +927,7 @@ index 0000000..4df2779
 +            mechanism.autoAck = true;
 +
 +            if (this._uiLayout.button) {
-+                mechanism.customButton = {
++                mechanism.buttons = [{
 +                    default: true,
 +                    label: this._uiLayout.button,
 +                    action: () => {
@@ -766,10 +937,11 @@ index 0000000..4df2779
 +                                reselectAuthMode: new AuthdGdm.Events.ReselectAuthMode(),
 +                            }));
 +                    },
-+                };
++                }];
 +            }
 +
-+            this.emit('mechanisms-changed', this._authMechanisms);
++            this._handleUpdateEnabledMechanisms();
++            this._selectAndStartMechanism(mechanism);
 +            break;
 +        }
 +
@@ -788,16 +960,20 @@ index 0000000..4df2779
 +        if (response.access !== AuthResult.Retry)
 +            this._uiLayout = null;
 +
-+        this.emit('service-request', {authResponse: response.access});
-+
 +        switch (response.access) {
 +        case AuthResult.Granted:
++            this.emit('verification-complete');
 +            break;
 +
 +        case AuthResult.Retry:
 +        case AuthResult.Denied: {
-+            if (response?.msg)
-+                this.emit('queue-priority-message', response.msg, MessageType.ERROR);
++            if (response.msg) {
++                this.emit('queue-priority-message', {
++                    serviceName: SERVICE_NAME,
++                    messageType: MessageType.ERROR,
++                    message: response.msg,
++                });
++            }
 +
 +            if (response.access === AuthResult.Denied)
 +                this._failVerification();
@@ -813,9 +989,17 @@ index 0000000..4df2779
 +        }
 +
 +        case AuthResult.Next: {
-+            this.emit('clear-message-queue');
-+            this.emit('queue-priority-message', response.msg, MessageType.INFO);
++            this.emit('filter-messages', {
++                serviceName: SERVICE_NAME,
++                messageType: MessageType.INFO,
++            });
++            this.emit('queue-priority-message', {
++                serviceName: SERVICE_NAME,
++                messageType: MessageType.INFO,
++                message: response.msg,
++            });
 +            this._authModes = {};
++            this._updateEnabledMechanisms();
 +            break;
 +        }
 +        }
@@ -824,9 +1008,13 @@ index 0000000..4df2779
 +    _failVerification() {
 +        this._authMechanisms = {};
 +        this._authModes = {};
-+        this.emit('mechanisms-changed', {});
++        this._selectedAuthMode = null;
++        this._updateEnabledMechanisms();
 +
-+        this.emit('verification-failed', /* should retry */ false);
++        this.emit('verification-failed', {
++            serviceName: SERVICE_NAME,
++            canRetry: false,
++        });
 +    }
 +
 +    _cancelAndReset() {
@@ -6506,55 +6694,32 @@ index 0000000..a371827
 +})();
 +
 +export { authd, $root as default, gdm, pam };
-diff --git a/js/gdm/const.js b/js/gdm/const.js
-index ad854ca..b6ed4cd 100644
---- a/js/gdm/const.js
-+++ b/js/gdm/const.js
-@@ -1,6 +1,9 @@
- // -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
+diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
+index 3338324..c64cb98 100644
+--- a/js/gdm/userVerifier.js
++++ b/js/gdm/userVerifier.js
+@@ -5,6 +5,7 @@ import * as Signals from '../misc/signals.js';
+ import {logErrorUnlessCancelled} from '../misc/errorUtils.js';
+ import * as Params from '../misc/params.js';
+ import {AuthServicesLegacy} from './authServicesLegacy.js';
++import {AuthServicesAuthd} from './authd.js';
+ import {AuthServicesSSSDSwitchable} from './authServicesSSSDSwitchable.js';
+ import {LOGIN_SCREEN_SCHEMA, ALLOWED_FAILURES_KEY} from './settings.js';
  
- export const WEB_LOGIN_ROLE_NAME = 'eidp';
-+export const PLAIN_TEXT_ROLE_NAME = 'text';
-+export const MESSAGE_ROLE_NAME = 'message';
- export const PASSWORD_ROLE_NAME = 'password';
- export const SMARTCARD_ROLE_NAME = 'smartcard';
- export const FINGERPRINT_ROLE_NAME = 'fingerprint';
-+export const CHOICE_LIST_ROLE_NAME = 'choice-list';
-diff --git a/js/gdm/util.js b/js/gdm/util.js
-index 8df3b28..75cd105 100644
---- a/js/gdm/util.js
-+++ b/js/gdm/util.js
-@@ -4,6 +4,7 @@ import Gio from 'gi://Gio';
- import GLib from 'gi://GLib';
- import * as Signals from '../misc/signals.js';
- 
-+import * as Authd from './authd.js';
- import * as Batch from './batch.js';
- import * as OVirt from './oVirt.js';
- import * as Vmware from './vmware.js';
-@@ -26,7 +27,7 @@ Gio._promisify(Gdm.UserVerifierProxy.prototype,
-     'call_begin_verification_for_user');
- Gio._promisify(Gdm.UserVerifierProxy.prototype, 'call_begin_verification');
- 
--export const UNIFIED_AUTH_SERVICE_NAME = 'gdm-unified-auth';
-+export const UNIFIED_AUTH_SERVICE_NAME = Authd.SERVICE_NAME;
- export const PASSWORD_SERVICE_NAME = 'gdm-password';
- export const FINGERPRINT_SERVICE_NAME = 'gdm-fingerprint';
- export const SMARTCARD_SERVICE_NAME = 'gdm-smartcard';
-@@ -171,6 +172,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
- 
-         this._unifiedAuthServices = new Map();
-         this.addUnifiedAuthService(new UnifiedMechanism.UnifiedMechanismProtocolHandler());
-+        this.addUnifiedAuthService(new Authd.AuthdSwitchableHandler());
- 
-         this._credentialManagers = {};
+@@ -34,6 +35,7 @@ export const MessageType = {
+ // cascade to the next authServices in the array.
+ const AuthServicesClasses = [
+     AuthServicesSSSDSwitchable,
++    AuthServicesAuthd,
+     AuthServicesLegacy,
+ ];
  
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index f232a7d..a66a1e6 100644
+index 4fa9b7b..89acdef 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
-@@ -16,6 +16,9 @@
-     <file>gdm/unifiedMechanism.js</file>
+@@ -22,6 +22,9 @@
+     <file>gdm/vmware.js</file>
      <file>gdm/webLogin.js</file>
  
 +    <file>gdm/authd.js</file>
@@ -6563,15 +6728,31 @@ index f232a7d..a66a1e6 100644
      <file>extensions/extension.js</file>
      <file>extensions/sharedInternals.js</file>
  
+diff --git a/js/ui/popupMenu.js b/js/ui/popupMenu.js
+index 8e4eb02..a90b3ec 100644
+--- a/js/ui/popupMenu.js
++++ b/js/ui/popupMenu.js
+@@ -798,6 +798,11 @@ export class PopupMenuBase extends Signals.EventEmitter {
+                     this._activeMenuItem = null;
+             }, this);
+ 
++        // menuItem.connect('destroy', () => {
++        //     if (menuItem === this._activeMenuItem)
++        //         this._activeMenuItem = null;
++        // });
++
+         this.connectObject('notify::sensitive',
+             () => menuItem.syncSensitive(), menuItem);
+     }
 diff --git a/po/POTFILES.in b/po/POTFILES.in
-index c46db97..6b58a39 100644
+index 7a4b97b..03dfc73 100644
 --- a/po/POTFILES.in
 +++ b/po/POTFILES.in
-@@ -10,6 +10,7 @@ data/X-GNOME-Shell-System.directory.desktop.in
+@@ -11,6 +11,7 @@ data/X-GNOME-Shell-System.directory.desktop.in
  data/X-GNOME-Shell-Utilities.directory.desktop.in
  js/dbusServices/extensions/extensionPrefsDialog.js
  js/dbusServices/extensions/ui/extension-error-page.ui
 +js/gdm/authd.js
  js/gdm/authPrompt.js
- js/gdm/conflictingSessionDialog.js
- js/gdm/loginDialog.js
+ js/gdm/authServices.js
+ js/gdm/authServicesLegacy.js
