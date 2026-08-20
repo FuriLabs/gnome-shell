@@ -65,3 +65,4 @@ ubuntu/ctrlAltTab-Sort-items-taking-care-of-the-currently-focuse.patch
 ubuntu/workspacesView-Do-not-add-the-workspaces-view-to-the-focu.patch
 ubuntu/OverviewAdjustment-Add-function-to-wait-for-adjustments-c.patch
 ubuntu/overviewControls-Do-focus-navigation-on-Ctrl-Alt-Tab-afte.patch
+gnome-shell-test-tool-Wait-before-final-cleanup.patch

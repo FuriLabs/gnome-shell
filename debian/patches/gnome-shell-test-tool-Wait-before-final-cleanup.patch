@@ -1,0 +1,34 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Thu, 20 Aug 2026 12:46:23 +0200
+Subject: gnome-shell-test-tool: Wait before final cleanup
+
+We have random test failures because of mesa shaders cache being
+populated while the shell is shutting down, so let's give some time to
+it rather than failing because of that non-error
+---
+ src/gnome-shell-test-tool.in | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/src/gnome-shell-test-tool.in b/src/gnome-shell-test-tool.in
+index a16d2be..d2d4d7e 100755
+--- a/src/gnome-shell-test-tool.in
++++ b/src/gnome-shell-test-tool.in
+@@ -11,6 +11,7 @@ import os
+ import subprocess
+ import sys
+ import tempfile
++import time
+ from configparser import ConfigParser
+ from pathlib import Path
+ 
+@@ -108,6 +109,10 @@ def run_shell(wrap=None, perf_output=None):
+         # in the same process group
+         shell = start_shell(xdg_home=xdg_home, wrap=wrap, perf_output=perf_output)
+         shell.wait()
++        # Give any lingering child processes (e.g. the mesa shader cache
++        # writer) a moment to release the temporary directory before it is
++        # removed, otherwise cleanup can fail with "Directory not empty".
++        time.sleep(1)
+     return shell.returncode == 0
+ 
+ def gnome_hwtest_log(*args):
