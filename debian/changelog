@@ -1,8 +1,23 @@
-gnome-shell (51~beta-1) UNRELEASED; urgency=medium
+gnome-shell (51~beta-0ubuntu1) UNRELEASED; urgency=medium
 
   * New upstream release
+  * debian/source_gnome-shell.py: Add all mutter package versions
+  * d/p: Refresh git indexes, drop applied upstream
+  * d/p/gdm-load-logo-sync: Do not crash if logo is missing
+  * d/p/ubuntu-authd: Drop legacy or applied-upstream patches
+  * d/p/ubuntu-authd: Update the authd authService to work with upstream code
+  * d/p: Add patches to improve the auth mechanism selection
+  * debian/control: Update build and runtime dependencies
+  * d/p/ubuntu-authd: Update reset mechanism
+  * d/p: Wait after shell tests to prevent cleanup issues
+  * d/p/ubuntu-authd: Select auth modes mechanisms menu during mode selection
+  * d/p/ubuntu-authd: Expose broker selection as a mechanism
+  * debian/control: Bump recommends on yaru gnome shell theme for 26.10
+  * d/p/ubuntu-authd: Reset mechanisms between challenges
+  * d/ubuntu-session-mods/ubuntu: Add myna-shell@canonical.com to extensions
+  * d/p: Cherry-pick upstream fixes for login and unlock view
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 20 Aug 2026 04:16:05 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 20 Aug 2026 23:34:05 +0200
 
 gnome-shell (51~alpha-0ubuntu4) stonking; urgency=medium
 
