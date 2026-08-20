@@ -17,7 +17,7 @@ import * as Main from './main.js';
 import * as Overview from './overview.js';
 import * as MessageTray from './messageTray.js';
 import * as ShellDBus from './shellDBus.js';
-import * as SmartcardManager from '../misc/smartcardManager.js';
+import * as SmartcardManager from '../gdm/smartcardManager.js';
 
 import {adjustAnimationTime} from '../misc/animationUtils.js';
 
@@ -138,6 +138,12 @@ export class ScreenShield extends Signals.EventEmitter {
 
         this.idleMonitor = global.backend.get_core_idle_monitor();
         this._cursorTracker = global.backend.get_cursor_tracker();
+
+        this._motionListener = new Clutter.MotionController({
+            enabled: false,
+        });
+        this._motionListener.connect('motion', () => this._showPointer());
+        this._lockDialogGroup.add_action(this._motionListener);
 
         this._syncInhibitor();
     }
@@ -344,10 +350,7 @@ export class ScreenShield extends Signals.EventEmitter {
             this._cursorVisibleInhibited = false;
         }
 
-        if (this._motionId) {
-            this._lockDialogGroup.disconnect(this._motionId);
-            this._motionId = 0;
-        }
+        this._motionListener.enabled = false;
     }
 
     _hidePointer() {
@@ -360,13 +363,7 @@ export class ScreenShield extends Signals.EventEmitter {
     }
 
     _hidePointerUntilMotion() {
-        const eventActor = this._lockDialogGroup;
-        this._motionId = eventActor.connect('captured-event', (_, event) => {
-            if (event.type() === Clutter.EventType.MOTION)
-                this._showPointer();
-
-            return Clutter.EVENT_PROPAGATE;
-        });
+        this._motionListener.enabled = true;
         this._hidePointer();
     }
 
@@ -387,8 +384,15 @@ export class ScreenShield extends Signals.EventEmitter {
         const velocity = height / CURTAIN_SLIDE_TIME;
         const duration = animate ? delta / velocity : 0;
 
+        const {reducedMotion} = St.Settings.get();
+        const useMotion = reducedMotion !== St.ReducedMotion.REDUCE;
+
+        const easeParams = useMotion
+            ? {translation_y: -height}
+            : {opacity: 0};
+
         this._lockDialogGroup.ease({
-            translation_y: -height,
+            ...easeParams,
             duration,
             mode: Clutter.AnimationMode.EASE_OUT_QUAD,
             onComplete: () => this._hideLockScreenComplete(),
@@ -450,10 +454,21 @@ export class ScreenShield extends Signals.EventEmitter {
         const fadeToBlack = params.fadeToBlack;
 
         if (params.animateLockScreen) {
-            this._lockDialogGroup.translation_y = -global.screen_height;
+            const {reducedMotion} = St.Settings.get();
+            const useMotion = reducedMotion !== St.ReducedMotion.REDUCE;
+
+            const easeParams = useMotion
+                ? {translation_y: 0}
+                : {opacity: 255};
+
+            if (useMotion)
+                this._lockDialogGroup.translation_y = -global.screen_height;
+            else
+                this._lockDialogGroup.opacity = 0;
+
             this._lockDialogGroup.remove_all_transitions();
             this._lockDialogGroup.ease({
-                translation_y: 0,
+                ...easeParams,
                 duration: Overview.ANIMATION_TIME,
                 mode: Clutter.AnimationMode.EASE_OUT_QUAD,
                 onComplete: () => {
@@ -462,6 +477,7 @@ export class ScreenShield extends Signals.EventEmitter {
             });
         } else {
             this._lockDialogGroup.translation_y = 0;
+            this._lockDialogGroup.opacity = 255;
             this._lockScreenShown({fadeToBlack, animateFade: false});
         }
 
@@ -551,8 +567,15 @@ export class ScreenShield extends Signals.EventEmitter {
         this._longLightbox.lightOff();
         this._shortLightbox.lightOff();
 
+        const {reducedMotion} = St.Settings.get();
+        const useMotion = reducedMotion !== St.ReducedMotion.REDUCE;
+
+        const easeParams = useMotion
+            ? {translation_y: -global.screen_height}
+            : {opacity: 0};
+
         this._lockDialogGroup.ease({
-            translation_y: -global.screen_height,
+            ...easeParams,
             duration: Overview.ANIMATION_TIME,
             mode: Clutter.AnimationMode.EASE_OUT_QUAD,
             onComplete: () => this._completeDeactivate(),

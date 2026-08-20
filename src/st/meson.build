@@ -6,6 +6,7 @@ st_headers = [
   'st-box-layout.h',
   'st-button.h',
   'st-clipboard.h',
+  'st-cursor.h',
   'st-dnd-start-gesture.h',
   'st-drawing-area.h',
   'st-entry.h',
@@ -114,6 +115,7 @@ st_sources = [
   'st-box-layout.c',
   'st-button.c',
   'st-clipboard.c',
+  'st-cursor.c',
   'st-dnd-start-gesture.c',
   'st-drawing-area.c',
   'st-entry.c',
@@ -178,12 +180,15 @@ st_deps = [
 
 # Currently meson requires a shared library for building girs
 libst = shared_library('st-' + mutter_api_version,
-  sources: st_gir_sources + st_nogir_sources + croco_sources,
+  sources: st_gir_sources + st_nogir_sources + croco_sources + cursor_theme_resource,
   c_args: st_cflags,
   dependencies: st_deps + [
     libxml_dep,
     m_dep,
     schemas_dep,
+    json_glib_dep,
+    rsvg_dep,
+    cairo_dep,
   ],
   build_rpath: mutter_typelibdir,
   install_rpath: mutter_typelibdir,

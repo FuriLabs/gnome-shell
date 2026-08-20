@@ -55,6 +55,7 @@ const CLUTTER_DEBUG_FLAG_CATEGORIES = new Map([
     // ['PickDebugFlag', { argPos: 2, exclude: [] }],
 ]);
 
+/** @returns {string[]} **/
 function _getAutoCompleteGlobalKeywords() {
     const keywords = ['true', 'false', 'null', 'new'];
     // Don't add the private properties of globalThis (i.e., ones starting with '_')
@@ -70,8 +71,11 @@ class AutoComplete extends Signals.EventEmitter {
         super();
 
         this._entry = entry;
-        this._entry.connect('key-press-event', this._entryKeyPressEvent.bind(this));
         this._lastTabTime = global.get_current_time();
+
+        const keyController = new Clutter.KeyController();
+        keyController.connect('key-press', this._entryKeyPress.bind(this));
+        this._entry.add_action(keyController);
     }
 
     _processCompletionRequest(event) {
@@ -111,14 +115,16 @@ class AutoComplete extends Signals.EventEmitter {
         this._lastTabTime = time;
     }
 
-    _entryKeyPressEvent(actor, event) {
+    _entryKeyPress(controller) {
         const cursorPos = this._entry.clutter_text.get_cursor_position();
         let text = this._entry.get_text();
         if (cursorPos !== -1)
             text = text.slice(0, cursorPos);
 
-        if (event.get_key_symbol() === Clutter.KEY_Tab)
-            this._handleCompletions(text, event.get_time()).catch(logError);
+        const [, key] = controller.get_key();
+
+        if (key === Clutter.KEY_Tab)
+            this._handleCompletions(text, Clutter.get_current_event_time()).catch(logError);
         return Clutter.EVENT_PROPAGATE;
     }
 
@@ -265,6 +271,7 @@ const Notebook = GObject.registerClass({
     }
 });
 
+/** @param {Any} o **/
 function objectToString(o) {
     if (typeof o === typeof objectToString) {
         // special case this since the default is way, way too verbose
@@ -399,8 +406,21 @@ const WindowList = GObject.registerClass({
     }
 });
 
-const ObjInspector = GObject.registerClass(
 class ObjInspector extends St.ScrollView {
+    static {
+        GObject.registerClass(this);
+
+        const bindingPool = this.get_binding_pool();
+
+        bindingPool.install_closure(
+            'close', Clutter.KEY_Escape, 0,
+            obj => {
+                obj.close();
+                return Clutter.EVENT_STOP;
+            }
+        );
+    }
+
     _init(lookingGlass) {
         super._init({
             name: 'LookingGlassPropertyInspector',
@@ -512,15 +532,6 @@ class ObjInspector extends St.ScrollView {
         this._obj = null;
     }
 
-    vfunc_key_press_event(event) {
-        const symbol = event.get_key_symbol();
-        if (symbol === Clutter.KEY_Escape) {
-            this.close();
-            return Clutter.EVENT_STOP;
-        }
-        return super.vfunc_key_press_event(event);
-    }
-
     _onInsert() {
         const obj = this._obj;
         this.close();
@@ -530,7 +541,7 @@ class ObjInspector extends St.ScrollView {
     _onBack() {
         this.selectObject(this._previousObj, true);
     }
-});
+}
 
 const RedBorderEffect = GObject.registerClass(
 class RedBorderEffect extends Clutter.Effect {
@@ -605,12 +616,35 @@ export const Inspector = GObject.registerClass({
         this._displayText = new St.Label({x_expand: true});
         eventHandler.add_child(this._displayText);
 
-        eventHandler.connect('key-press-event', this._onKeyPressEvent.bind(this));
-        eventHandler.connect('button-press-event', this._onButtonPressEvent.bind(this));
-        eventHandler.connect('scroll-event', this._onScrollEvent.bind(this));
-        eventHandler.connect('motion-event', this._onMotionEvent.bind(this));
+        const motionController = new Clutter.MotionController();
+        motionController.connect('motion', (_controller, sprite) => {
+            const {x, y} = sprite.get_coords();
+            this._update(x, y);
+        });
+        eventHandler.add_action(motionController);
+
+        const scrollController = new Clutter.ScrollController({
+            flags: Clutter.ScrollControllerFlags.DISCRETE |
+                Clutter.ScrollControllerFlags.SCROLL_VERTICAL,
+        });
+        scrollController.connect('scroll', this._onScroll.bind(this));
+        eventHandler.add_action(scrollController);
+
+        const clickGesture = new Clutter.ClickGesture();
+        clickGesture.set_recognize_on_press(true);
+        clickGesture.connect('recognize', this._onButtonPress.bind(this));
+        eventHandler.add_action(clickGesture);
+
+        const keyController = new Clutter.KeyController();
+        keyController.connect('key-press', () => {
+            const [, symbol] = keyController.get_key();
+            if (symbol === Clutter.KEY_Escape)
+                this._close();
+        });
+        eventHandler.add_action(keyController);
 
         this._grab = global.stage.grab(eventHandler);
+        eventHandler.grab_key_focus();
 
         // this._target is the actor currently shown by the inspector.
         // this._pointerTarget is the actor directly under the pointer.
@@ -652,34 +686,26 @@ export const Inspector = GObject.registerClass({
         this.emit('closed');
     }
 
-    _onKeyPressEvent(actor, event) {
-        if (event.get_key_symbol() === Clutter.KEY_Escape)
-            this._close();
-        return Clutter.EVENT_STOP;
-    }
-
-    _onButtonPressEvent(actor, event) {
+    _onButtonPress(clickGesture) {
         if (this._target) {
-            const [stageX, stageY] = event.get_coords();
-            this.emit('target', this._target, stageX, stageY);
+            const {x, y} = clickGesture.get_coords_abs();
+            this.emit('target', this._target, x, y);
         }
         this._close();
         return Clutter.EVENT_STOP;
     }
 
-    _onScrollEvent(actor, event) {
-        switch (event.get_scroll_direction()) {
-        case Clutter.ScrollDirection.UP: {
+    _onScroll(_controller, sprite, _source, _dx, dy) {
+        const {x, y} = sprite.get_coords();
+
+        if (dy < 0) {
             // select parent
             const parent = this._target.get_parent();
             if (parent != null) {
                 this._target = parent;
-                this._update(event);
+                this._update(x, y);
             }
-            break;
-        }
-
-        case Clutter.ScrollDirection.DOWN:
+        } else if (dy > 0) {
             // select child
             if (this._target !== this._pointerTarget) {
                 let child = this._pointerTarget;
@@ -691,24 +717,13 @@ export const Inspector = GObject.registerClass({
                 }
                 if (child) {
                     this._target = child;
-                    this._update(event);
+                    this._update(x, y);
                 }
             }
-            break;
-
-        default:
-            break;
         }
-        return Clutter.EVENT_STOP;
     }
 
-    _onMotionEvent(actor, event) {
-        this._update(event);
-        return Clutter.EVENT_STOP;
-    }
-
-    _update(event) {
-        const [stageX, stageY] = event.get_coords();
+    _update(stageX, stageY) {
         const target = global.stage.get_actor_at_pos(
             Clutter.PickMode.ALL, stageX, stageY);
 
@@ -1367,8 +1382,35 @@ class DebugFlags extends St.BoxLayout {
 });
 
 
-export const LookingGlass = GObject.registerClass(
-class LookingGlass extends St.BoxLayout {
+export class LookingGlass extends St.BoxLayout {
+    static {
+        GObject.registerClass(this);
+
+        const bindingPool = this.get_binding_pool();
+
+        bindingPool.install_closure(
+            'close', Clutter.KEY_Escape, 0,
+            obj => {
+                obj.close();
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'next-tab', Clutter.KEY_Page_Down, Clutter.ModifierType.CONTROL_MASK,
+            obj => {
+                obj._notebook.prevTab();
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'prev-tab', Clutter.KEY_Page_Up, Clutter.ModifierType.CONTROL_MASK,
+            obj => {
+                obj._notebook.nextTab();
+                return Clutter.EVENT_STOP;
+            }
+        );
+    }
+
     _init() {
         super._init({
             name: 'LookingGlassDialog',
@@ -1472,6 +1514,7 @@ class LookingGlass extends St.BoxLayout {
         this._entryArea.add_child(label);
 
         this._entry = new St.Entry({
+            input_purpose: Clutter.InputContentPurpose.TERMINAL,
             can_focus: true,
             x_expand: true,
         });
@@ -1519,13 +1562,6 @@ class LookingGlass extends St.BoxLayout {
         });
 
         this._resize();
-    }
-
-    vfunc_captured_event(event) {
-        if (Main.keyboard.maybeHandleEvent(event))
-            return Clutter.EVENT_STOP;
-
-        return Clutter.EVENT_PROPAGATE;
     }
 
     setBorderPaintTarget(obj) {
@@ -1680,23 +1716,6 @@ class LookingGlass extends St.BoxLayout {
         this._objInspector.selectObject(obj);
     }
 
-    // Handle key events which are relevant for all tabs of the LookingGlass
-    vfunc_key_press_event(event) {
-        const symbol = event.get_key_symbol();
-        if (symbol === Clutter.KEY_Escape) {
-            this.close();
-            return Clutter.EVENT_STOP;
-        }
-        // Ctrl+PgUp and Ctrl+PgDown switches tabs in the notebook view
-        if (event.get_state() & Clutter.ModifierType.CONTROL_MASK) {
-            if (symbol === Clutter.KEY_Page_Up)
-                this._notebook.prevTab();
-            else if (symbol === Clutter.KEY_Page_Down)
-                this._notebook.nextTab();
-        }
-        return super.vfunc_key_press_event(event);
-    }
-
     open() {
         if (this._open)
             return;
@@ -1752,4 +1771,4 @@ class LookingGlass extends St.BoxLayout {
     get isOpen() {
         return this._open;
     }
-});
+}

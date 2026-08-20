@@ -233,6 +233,7 @@ export const LayoutManager = GObject.registerClass({
             const adoptedUiGroupActors = [
                 global.window_group,
                 global.top_window_group,
+                global.compositor.get_input_panel_group(),
                 global.compositor.get_feedback_group(),
             ];
 
@@ -293,12 +294,16 @@ export const LayoutManager = GObject.registerClass({
         });
         this.uiGroup.add_child(this.modalDialogGroup);
 
+        const inputPanelGroup = global.compositor.get_input_panel_group();
+        global.stage.remove_child(inputPanelGroup);
+        this.uiGroup.add_child(inputPanelGroup);
+
         this.keyboardBox = new St.BoxLayout({
             name: 'keyboardBox',
             reactive: true,
             track_hover: true,
         });
-        this.addTopChrome(this.keyboardBox);
+        inputPanelGroup.add_child(this.keyboardBox);
         this._keyboardHeightNotifyId = 0;
 
         this.screenshotUIGroup = new St.Widget({

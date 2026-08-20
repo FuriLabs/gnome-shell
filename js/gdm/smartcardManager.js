@@ -1,7 +1,7 @@
 import Gio from 'gi://Gio';
-import * as Signals from './signals.js';
+import * as Signals from '../misc/signals.js';
 
-import * as ObjectManager from './objectManager.js';
+import * as ObjectManager from '../misc/objectManager.js';
 
 const SmartcardTokenIface = `
 <node>
@@ -70,6 +70,12 @@ class SmartcardManager extends Signals.EventEmitter {
     }
 
     _addToken(token) {
+        // This is an alias, mirroring the real token.
+        // Skip it to avoid duplicate events
+        const objectPath = token.get_object_path();
+        if (objectPath.endsWith('/login_token'))
+            return;
+
         this._updateToken(token);
 
         token.connectObject('g-properties-changed', (proxy, properties) => {
