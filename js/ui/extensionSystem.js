@@ -115,7 +115,7 @@ export class ExtensionManager extends Signals.EventEmitter {
                 this._unloadExtensionStylesheet(ext);
                 this._loadExtensionStylesheet(ext);
             } catch (e) {
-                this._callExtensionDisable(ext.uuid);
+                this._callExtensionDisableWithRebase(ext.uuid);
                 this.logExtensionError(ext.uuid, e);
             }
         }
@@ -180,7 +180,15 @@ export class ExtensionManager extends Signals.EventEmitter {
         return false;
     }
 
-    async _callExtensionDisable(uuid) {
+    _callExtensionDisable(extension) {
+        try {
+            extension.stateObj.disable();
+        } catch (e) {
+            this.logExtensionError(extension.uuid, e);
+        }
+    }
+
+    async _callExtensionDisableWithRebase(uuid) {
         const extension = this.lookup(uuid);
         if (!extension)
             return;
@@ -204,20 +212,11 @@ export class ExtensionManager extends Signals.EventEmitter {
 
         for (let i = 0; i < orderReversed.length; i++) {
             const otherUuid = orderReversed[i];
-            try {
-                console.debug(`Temporarily disable extension ${otherUuid}`);
-                this.lookup(otherUuid).stateObj.disable();
-            } catch (e) {
-                this.logExtensionError(otherUuid, e);
-            }
+            console.debug(`Temporarily disable extension ${otherUuid}`);
+            this._callExtensionDisable(this.lookup(otherUuid));
         }
 
-        try {
-            extension.stateObj.disable();
-        } catch (e) {
-            this.logExtensionError(uuid, e);
-        }
-
+        this._callExtensionDisable(extension);
         this._unloadExtensionStylesheet(extension);
 
         for (let i = 0; i < order.length; i++) {
@@ -448,7 +447,7 @@ export class ExtensionManager extends Signals.EventEmitter {
         // Try to disable it -- if it's ERROR'd, we can't guarantee that,
         // but it will be removed on next reboot, and hopefully nothing
         // broke too much.
-        await this._callExtensionDisable(uuid);
+        await this._callExtensionDisableWithRebase(uuid);
 
         this._changeExtensionState(extension, ExtensionState.UNINSTALLED);
 
@@ -580,7 +579,7 @@ export class ExtensionManager extends Signals.EventEmitter {
 
         for (const uuid of extensionsToDisable) {
             // eslint-disable-next-line no-await-in-loop
-            await this._callExtensionDisable(uuid);
+            await this._callExtensionDisableWithRebase(uuid);
         }
 
         // Find and enable all the newly enabled extensions: UUIDs found in the
@@ -775,7 +774,7 @@ export class ExtensionManager extends Signals.EventEmitter {
 
         for (const uuid of extensionsToDisable) {
             // eslint-disable-next-line no-await-in-loop
-            await this._callExtensionDisable(uuid);
+            await this._callExtensionDisableWithRebase(uuid);
         }
     }
 

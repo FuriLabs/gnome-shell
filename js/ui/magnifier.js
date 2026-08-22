@@ -1315,10 +1315,12 @@ class ZoomRegion {
      */
     scrollToMousePos() {
         this._followingCursor = true;
-        if (this._mouseTrackingMode !== GDesktopEnums.MagnifierMouseTrackingMode.NONE)
+        if (this._mouseTrackingMode !== GDesktopEnums.MagnifierMouseTrackingMode.NONE) {
             this._changeROI({redoCursorTracking: true});
-        else
+        } else {
+            this._updateCloneGeometry();
             this._updateMousePosition();
+        }
 
         this._clearScrollContentsTimer();
         this._scrollContentsTimerId = GLib.timeout_add_once(GLib.PRIORITY_DEFAULT, POINTER_REST_TIME, () => {
@@ -1790,11 +1792,12 @@ class ZoomRegion {
         });
 
         const [mouseX, mouseY] = this._getMousePosition();
+        const sourceMouseScale = this._mouseSourceActor.get_resource_scale();
         this._mouseActor.ease({
             x: mouseX,
             y: mouseY,
-            scale_x: this._xMagFactor,
-            scale_y: this._yMagFactor,
+            scale_x: this._xMagFactor / sourceMouseScale,
+            scale_y: this._yMagFactor / sourceMouseScale,
             mode: Clutter.AnimationMode.EASE_OUT_QUAD,
             duration: animate ? 100 : 0,
         });
