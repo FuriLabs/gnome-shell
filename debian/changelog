@@ -11,6 +11,14 @@ gnome-shell (51~alpha-1) UNRELEASED; urgency=medium
 
  -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Tue, 07 Jul 2026 14:25:23 +0800
 
+gnome-shell (50.4-1) unstable; urgency=medium
+
+  * Team upload
+  * d/watch: Only watch for version 50.x on this branch
+  * New upstream release
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 23 Aug 2026 13:28:02 +0100
+
 gnome-shell (50.3-1) unstable; urgency=medium
 
   * Team upload
