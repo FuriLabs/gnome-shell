@@ -1,9 +1,10 @@
-gnome-shell (50.4-1) UNRELEASED; urgency=medium
+gnome-shell (50.4-1) unstable; urgency=medium
 
+  * Team upload
   * d/watch: Only watch for version 50.x on this branch
   * New upstream release
 
- -- Simon McVittie <smcv@debian.org>  Sat, 22 Aug 2026 16:09:47 +0100
+ -- Simon McVittie <smcv@debian.org>  Sun, 23 Aug 2026 13:28:02 +0100
 
 gnome-shell (50.3-1) unstable; urgency=medium
 
