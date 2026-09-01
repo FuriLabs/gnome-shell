@@ -1,4 +1,4 @@
-gnome-shell (46.3.1-1ubuntu1~24.04.1authd11) UNRELEASED; urgency=medium
+gnome-shell (46.3.1-1ubuntu1~24.04.1authd11) noble; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
   * debian/gbp.conf: Update upstream branch
@@ -6,7 +6,7 @@ gnome-shell (46.3.1-1ubuntu1~24.04.1authd11) UNRELEASED; urgency=medium
   [ Adrian Dombeck ]
   * d/p/ubuntu-authd: Reset mechanisms between challenges (LP: #2160622)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 01 Sep 2026 16:57:07 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Tue, 01 Sep 2026 17:09:33 +0200
 
 gnome-shell (46.3.1-1ubuntu1~24.04.1authd10) noble; urgency=medium
 
