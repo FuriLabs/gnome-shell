@@ -1,3 +1,14 @@
+gnome-shell (50.1-0ubuntu1.3) resolute; urgency=medium
+
+  [ Adrian Dombeck ]
+  * d/p/ubuntu-authd: Reset mechanisms between challenges.
+    Clear the UI-visible mechanisms when authd advances to the next
+    challenge. This removes the stale device-auth selection before the
+    local-password mechanism is published, so the new default is activated
+    reliably. (LP: #2160622)
+
+ -- Alessandro Astone <alessandro.astone@canonical.com>  Wed, 02 Sep 2026 15:33:07 +0200
+
 gnome-shell (50.1-0ubuntu1.2) resolute; urgency=medium
 
   [ Daniel van Vugt ]
