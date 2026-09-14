@@ -34,6 +34,28 @@
 #define CACHE_PREFIX_FILE "file:"
 #define CACHE_PREFIX_FILE_FOR_CAIRO "file-for-cairo:"
 
+#define MAX_PARALLEL_LOAD_TASKS 25
+
+/* This struct corresponds to a request for an texture.
+ * It's creasted when something needs a new texture,
+ * and destroyed when the texture data is loaded. */
+typedef struct {
+  StTextureCache *cache;
+  StTextureCachePolicy policy;
+  char *key;
+
+  guint width;
+  guint height;
+  guint paint_scale;
+  gfloat resource_scale;
+  GSList *actors;
+
+  StIconInfo *icon_info;
+  StIconColors *colors;
+  GFile *file;
+  CoglContext *cogl_context;
+} AsyncTextureLoadData;
+
 typedef struct _StTextureCache
 {
   GObject parent;
@@ -53,10 +75,17 @@ typedef struct _StTextureCache
   GHashTable *file_monitors; /* char * -> GFileMonitor * */
 
   GCancellable *cancellable;
+
+  uint32_t loading_textures_counter;
+
+  GQueue *pending_tasks;
 } StTextureCache;
 
 static void st_texture_cache_dispose (GObject *object);
 static void st_texture_cache_finalize (GObject *object);
+
+static void load_texture_async (StTextureCache       *cache,
+                                AsyncTextureLoadData *data);
 
 enum
 {
@@ -68,6 +97,22 @@ enum
 
 static guint signals[LAST_SIGNAL] = { 0, };
 G_DEFINE_FINAL_TYPE (StTextureCache, st_texture_cache, G_TYPE_OBJECT);
+
+static void
+texture_load_data_free (gpointer p)
+{
+  AsyncTextureLoadData *data = p;
+
+  g_clear_object (&data->icon_info);
+  g_clear_pointer (&data->colors, st_icon_colors_unref);
+  g_clear_object (&data->file);
+  g_clear_pointer (&data->key, g_free);
+
+  if (data->actors)
+    g_slist_free_full (data->actors, (GDestroyNotify) g_object_unref);
+
+  g_free (data);
+}
 
 /* We want to preserve the aspect ratio by default, also the default
  * pipeline for an empty texture is full opacity white, which we
@@ -100,6 +145,10 @@ st_texture_cache_class_init (StTextureCacheClass *klass)
 
   gobject_class->dispose = st_texture_cache_dispose;
   gobject_class->finalize = st_texture_cache_finalize;
+
+  COGL_TRACE_DEFINE_COUNTER_INT (StTextureCacheLoadingTextures,
+                                 "LoadingTextures",
+                                 "number of textures loading");
 
   /**
    * StTextureCache::icon-theme-changed:
@@ -184,6 +233,7 @@ st_texture_cache_init (StTextureCache *self)
                                                g_object_unref, g_object_unref);
 
   self->cancellable = g_cancellable_new ();
+  self->pending_tasks = g_queue_new ();
 }
 
 static void
@@ -192,6 +242,12 @@ st_texture_cache_dispose (GObject *object)
   StTextureCache *self = (StTextureCache*)object;
 
   g_cancellable_cancel (self->cancellable);
+
+  if (self->pending_tasks)
+    {
+      g_queue_free_full (self->pending_tasks, texture_load_data_free);
+      self->pending_tasks = NULL;
+    }
 
   g_clear_object (&self->icon_theme);
   g_clear_object (&self->cancellable);
@@ -275,42 +331,6 @@ typedef struct {
   int height;
   int scale;
 } Dimensions;
-
-/* This struct corresponds to a request for an texture.
- * It's creasted when something needs a new texture,
- * and destroyed when the texture data is loaded. */
-typedef struct {
-  StTextureCache *cache;
-  StTextureCachePolicy policy;
-  char *key;
-
-  guint width;
-  guint height;
-  guint paint_scale;
-  gfloat resource_scale;
-  GSList *actors;
-
-  StIconInfo *icon_info;
-  StIconColors *colors;
-  GFile *file;
-  CoglContext *cogl_context;
-} AsyncTextureLoadData;
-
-static void
-texture_load_data_free (gpointer p)
-{
-  AsyncTextureLoadData *data = p;
-
-  g_clear_object (&data->icon_info);
-  g_clear_pointer (&data->colors, st_icon_colors_unref);
-  g_clear_object (&data->file);
-  g_clear_pointer (&data->key, g_free);
-
-  if (data->actors)
-    g_slist_free_full (data->actors, (GDestroyNotify) g_object_unref);
-
-  g_free (data);
-}
 
 /**
  * on_image_size_prepared:
@@ -684,6 +704,12 @@ finish_texture_load (AsyncTextureLoadData *data,
 
   cache = data->cache;
 
+  g_assert (cache->loading_textures_counter > 0);
+  cache->loading_textures_counter--;
+
+  COGL_TRACE_SET_COUNTER_INT (StTextureCacheLoadingTextures,
+                              cache->loading_textures_counter);
+
   g_hash_table_remove (cache->outstanding_requests, data->key);
 
   if (pixbuf == NULL)
@@ -748,7 +774,11 @@ finish_texture_load (AsyncTextureLoadData *data,
     }
 
 out:
-  texture_load_data_free (data);
+  g_clear_pointer (&data, texture_load_data_free);
+
+  data = g_queue_pop_head (cache->pending_tasks);
+  if (data)
+    load_texture_async (cache, data);
 }
 
 static void
@@ -788,6 +818,14 @@ static void
 load_texture_async (StTextureCache       *cache,
                     AsyncTextureLoadData *data)
 {
+  if (cache->loading_textures_counter > MAX_PARALLEL_LOAD_TASKS)
+    {
+      g_queue_push_tail (cache->pending_tasks, data);
+      return;
+    }
+
+  cache->loading_textures_counter++;
+
   if (data->file)
     {
       GTask *task = g_task_new (cache, NULL, on_pixbuf_loaded, data);

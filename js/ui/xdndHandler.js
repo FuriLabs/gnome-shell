@@ -17,7 +17,7 @@ export class XdndHandler extends Signals.EventEmitter {
         Main.uiGroup.add_child(this._dummy);
         this._dummy.hide();
 
-        var dnd = global.backend.get_dnd();
+        const dnd = global.backend.get_dnd();
         dnd.connect('dnd-enter', this._onEnter.bind(this));
         dnd.connect('dnd-position-change', this._onPositionChanged.bind(this));
         dnd.connect('dnd-leave', this._onLeave.bind(this));
@@ -26,23 +26,37 @@ export class XdndHandler extends Signals.EventEmitter {
     // Called when the user cancels the drag (i.e release the button)
     _onLeave() {
         global.window_group.disconnectObject(this);
+        Main.sessionMode.disconnectObject(this);
+
         if (this._cursorWindowClone) {
             this._cursorWindowClone.destroy();
             this._cursorWindowClone = null;
         }
+
+        global.compositor.get_feedback_group().show();
 
         this.emit('drag-end');
     }
 
     _onEnter() {
         global.window_group.connectObject('notify::visible',
-            this._onWindowGroupVisibilityChanged.bind(this), this);
+            () => this._syncCursorWindowClone(), this);
+        Main.sessionMode.connectObject('updated', () => {
+            this._syncCursorWindowClone();
+
+            const feedbackGroup = global.compositor.get_feedback_group();
+            feedbackGroup.visible = !Main.sessionMode.isLocked;
+        }, this);
 
         this.emit('drag-begin', global.get_current_time());
     }
 
-    _onWindowGroupVisibilityChanged() {
-        if (!global.window_group.visible) {
+    _syncCursorWindowClone() {
+        const needsCursorClone =
+            !global.window_group.visible &&
+            !Main.sessionMode.isLocked;
+
+        if (needsCursorClone) {
             if (this._cursorWindowClone)
                 return;
 

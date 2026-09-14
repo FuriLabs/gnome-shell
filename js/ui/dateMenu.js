@@ -892,6 +892,8 @@ class DateMenuButton extends PanelMenu.Button {
         bin._delegate = this;
         this.menu.box.add_child(bin);
         this.menu.box.add_style_class_name('datemenu-popover');
+        // Default vertical wraparound keynav behavior is unwanted here
+        this.menu.actor.set_keynav_flags(St.KeynavFlags.NONE);
 
         const hbox = new St.BoxLayout({name: 'calendarArea'});
         bin.add_child(hbox);
@@ -916,19 +918,8 @@ class DateMenuButton extends PanelMenu.Button {
 
         // Fill up the first column
         this._messageList = new Calendar.CalendarMessageList();
+        this._messageList.setCaptureContainer(this.menu.actor);
         hbox.add_child(this._messageList);
-
-        // Collapse notification groups when the user clicks outside of the expanded group
-        this.menu.actor.connectObject(
-            'captured-event::button', (_, event) => {
-                return this._messageList.maybeCollapseMessageGroupForEvent(event);
-            },
-            'captured-event::touch', (_, event) => {
-                return this._messageList.maybeCollapseMessageGroupForEvent(event);
-            },
-            'captured-event::key', (_, event) => {
-                return this._messageList.maybeCollapseMessageGroupForEvent(event);
-            });
 
         // Fill up the second column
         const boxLayout = new CalendarColumnLayout([this._calendar, this._date]);

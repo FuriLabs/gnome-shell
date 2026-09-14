@@ -116,7 +116,7 @@ void                  st_widget_set_track_hover           (StWidget        *widg
 gboolean              st_widget_get_track_hover           (StWidget        *widget);
 void                  st_widget_set_hover                 (StWidget        *widget,
                                                            gboolean         hover);
-void                  st_widget_sync_hover                (StWidget        *widget);
+void                  st_widget_sync_hover                (StWidget        *widget) G_GNUC_DEPRECATED;
 gboolean              st_widget_get_hover                 (StWidget        *widget);
 void                  st_widget_popup_menu                (StWidget        *self);
 
@@ -133,6 +133,10 @@ gboolean              st_widget_navigate_focus            (StWidget        *widg
 ClutterActor *        st_widget_get_label_actor           (StWidget        *widget);
 void                  st_widget_set_label_actor           (StWidget        *widget,
                                                            ClutterActor    *label);
+
+StKeynavFlags         st_widget_get_keynav_flags          (StWidget        *widget);
+void                  st_widget_set_keynav_flags          (StWidget        *widget,
+                                                           StKeynavFlags    flags);
 
 /* Only to be used by sub-classes of StWidget */
 void                  st_widget_style_changed             (StWidget        *widget);
