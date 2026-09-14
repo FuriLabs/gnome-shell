@@ -4,11 +4,11 @@ Subject: Match the Plymouth boot logo size and position on the login screen
 
 Bug-Ubuntu: https://bugs.launchpad.net/bugs/1872594
 ---
- js/gdm/loginDialog.js | 40 ++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 38 insertions(+), 2 deletions(-)
+ js/gdm/loginDialog.js | 39 +++++++++++++++++++++++++++++++++++++--
+ 1 file changed, 37 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 024ec7d..2cbba27 100644
+index 024ec7d..4e7629d 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -22,6 +22,7 @@ import Gdm from 'gi://Gdm';
@@ -51,7 +51,7 @@ index 024ec7d..2cbba27 100644
          actorBox.x2 = actorBox.x1 + natWidth;
          actorBox.y2 = actorBox.y1 + natHeight;
  
-@@ -967,6 +979,30 @@ export const LoginDialog = GObject.registerClass({
+@@ -967,6 +979,29 @@ export const LoginDialog = GObject.registerClass({
          this._updateLogoTexture(this._textureCache, this._logoFile);
      }
  
@@ -66,17 +66,16 @@ index 024ec7d..2cbba27 100644
 +
 +        // This should match Plymouth's algorithm in ply-utils.c
 +        if (height > width) {
-+           const tmp = width;
-+           width = height;
-+           height = tmp;
++            const tmp = width;
++            width = height;
++            height = tmp;
 +        }
 +
 +        const aspect = width / height;
-+        if (aspect == 1.5) {
-+            return (width >= 1800 && height >= 1200) ? 2 : 1;
-+        }
++        if (aspect === 1.5)
++            return width >= 1800 && height >= 1200 ? 2 : 1;
 +
-+        return (width >= 2880 && height >= 1620) ? 2 : 1;
++        return width >= 2880 && height >= 1620 ? 2 : 1;
 +    }
 +
      _onPrompted() {

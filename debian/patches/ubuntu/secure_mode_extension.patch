@@ -18,7 +18,7 @@ Forwarded: https://bugzilla.gnome.org/show_bug.cgi?id=789852
  2 files changed, 20 insertions(+)
 
 diff --git a/js/ui/extensionDownloader.js b/js/ui/extensionDownloader.js
-index 16f765a..4fd457b 100644
+index 16f765a..a38aa74 100644
 --- a/js/ui/extensionDownloader.js
 +++ b/js/ui/extensionDownloader.js
 @@ -5,6 +5,7 @@ import GObject from 'gi://GObject';
@@ -34,7 +34,7 @@ index 16f765a..4fd457b 100644
      };
  
 +    if (Desktop.is('ubuntu') && Main.extensionManager.isModeExtension(uuid)) {
-+        const msg = _("This is an extension enabled by your current mode, you can’t install manually any update in that session.");
++        const msg = _('This is an extension enabled by your current mode, you can’t install manually any update in that session.');
 +        Main.notifyError(_("Can't install “%s”:").format(uuid), msg);
 +        invocation.return_dbus_error('org.gnome.Shell.ExtensionError', msg);
 +        return;
