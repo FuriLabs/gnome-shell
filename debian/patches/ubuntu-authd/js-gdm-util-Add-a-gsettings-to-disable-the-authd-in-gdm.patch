@@ -30,7 +30,7 @@ index ee8b3a2..136d67a 100644
    </schema>
  </schemalist>
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
-index 9d02b4a..cfa1af2 100644
+index 1b1e502..8eba074 100644
 --- a/js/gdm/authd.js
 +++ b/js/gdm/authd.js
 @@ -14,6 +14,8 @@ const STRING_PROTOCOL_VERSION_ = 1;

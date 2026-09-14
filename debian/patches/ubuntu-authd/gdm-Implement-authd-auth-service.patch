@@ -3,22 +3,22 @@ Date: Sun, 26 Jul 2026 07:00:57 +0200
 Subject: gdm: Implement authd auth service
 
 ---
- js/gdm/authd.js               | 1031 ++++++++
+ js/gdm/authd.js               | 1025 ++++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/userVerifier.js        |    2 +
  js/js-resources.gresource.xml |    3 +
  js/ui/popupMenu.js            |    5 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6708 insertions(+)
+ 6 files changed, 6702 insertions(+)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..9a56978
+index 0000000..23a37f3
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,1031 @@
+@@ -0,0 +1,1025 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +import GLib from 'gi://GLib';
 +import GObject from 'gi://GObject';
@@ -343,13 +343,9 @@ index 0000000..9a56978
 +            });
 +            break;
 +        case AuthdRoles.WebLogin:
-+            // FIXME: Use join of mechanism data, but need to adjuts the props names.
 +            this.emit('web-login', {
++                ...mechanism,
 +                serviceName: SERVICE_NAME,
-+                message: mechanism.init_prompt,
-+                url: mechanism.link_prompt,
-+                code: mechanism.code,
-+                buttons: mechanism.buttons,
 +            });
 +            this.handleAuthSelectionResponse(this.selectMechanism, mechanism.role);
 +            break;
@@ -937,11 +933,9 @@ index 0000000..9a56978
 +        case UILayoutTypes.QrCode: {
 +            const mechanism = this._authMechanisms[this._selectedAuthMode];
 +            mechanism.role = AuthdRoles.WebLogin;
-+            mechanism.link_prompt = this._uiLayout.label;
-+            mechanism.init_prompt = null;
-+            mechanism.uri = this._uiLayout.content;
++            mechanism.message = this._uiLayout.label;
++            mechanism.url = this._uiLayout.content;
 +            mechanism.code = this._uiLayout.code;
-+            mechanism.autoAck = true;
 +
 +            if (this._uiLayout.button) {
 +                mechanism.buttons = [{
