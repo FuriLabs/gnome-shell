@@ -32,12 +32,12 @@ index 9a55ee71..650d9fa 100644
      <child name="app-switcher" schema="org.gnome.shell.app-switcher"/>
      <child name="window-switcher" schema="org.gnome.shell.window-switcher"/>
 diff --git a/js/ui/layout.js b/js/ui/layout.js
-index 36cebbd..9101ec7 100644
+index 9a48241..72a19b5 100644
 --- a/js/ui/layout.js
 +++ b/js/ui/layout.js
-@@ -217,6 +217,9 @@ export const LayoutManager = GObject.registerClass({
+@@ -205,6 +205,9 @@ export const LayoutManager = GObject.registerClass({
+         this._trackedActors = [];
          this._topActors = [];
-         this._isPopupWindowVisible = false;
          this._startingUp = true;
 +        this._startInOverview =
 +            Main.sessionMode.hasOverview &&
@@ -45,7 +45,7 @@ index 36cebbd..9101ec7 100644
  
          // Set up stage hierarchy to group all UI actors under one container.
          this.uiGroup = new UiActor({name: 'uiGroup'});
-@@ -775,7 +778,7 @@ export const LayoutManager = GObject.registerClass({
+@@ -761,7 +764,7 @@ export const LayoutManager = GObject.registerClass({
  
              const monitor = this.primaryMonitor;
  
@@ -54,7 +54,7 @@ index 36cebbd..9101ec7 100644
                  const x = monitor.x + monitor.width / 2.0;
                  const y = monitor.y + monitor.height / 2.0;
  
-@@ -814,7 +817,7 @@ export const LayoutManager = GObject.registerClass({
+@@ -800,7 +803,7 @@ export const LayoutManager = GObject.registerClass({
      }
  
      async _startupAnimationSession() {

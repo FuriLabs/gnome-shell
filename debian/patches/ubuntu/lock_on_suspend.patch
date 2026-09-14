@@ -8,7 +8,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/1063110
  1 file changed, 5 insertions(+), 2 deletions(-)
 
 diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js
-index cc30e6a..ac17784 100644
+index 5961ea1..2e050f9 100644
 --- a/js/ui/screenShield.js
 +++ b/js/ui/screenShield.js
 @@ -24,6 +24,7 @@ import {adjustAnimationTime} from '../misc/animationUtils.js';

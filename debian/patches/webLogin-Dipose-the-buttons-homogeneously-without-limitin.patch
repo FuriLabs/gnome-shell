@@ -28,7 +28,7 @@ index 7d50e62..c78d4a6 100644
  }
  
 diff --git a/js/gdm/webLogin.js b/js/gdm/webLogin.js
-index 62597b4..909308e 100644
+index af1766f..cb8d1bf 100644
 --- a/js/gdm/webLogin.js
 +++ b/js/gdm/webLogin.js
 @@ -169,6 +169,7 @@ export class WebLoginDialog extends St.Widget {

@@ -16,10 +16,10 @@ Forwarded: not-needed
  1 file changed, 12 insertions(+), 1 deletion(-)
 
 diff --git a/js/ui/background.js b/js/ui/background.js
-index aa38f85..1420b26 100644
+index 4edd2e5..0ac75bc 100644
 --- a/js/ui/background.js
 +++ b/js/ui/background.js
-@@ -100,8 +100,10 @@ import GObject from 'gi://GObject';
+@@ -97,8 +97,10 @@ import Glycin from 'gi://Gly';
  import GnomeBG from 'gi://GnomeBG';
  import GnomeDesktop from 'gi://GnomeDesktop';
  import Meta from 'gi://Meta';
@@ -30,7 +30,7 @@ index aa38f85..1420b26 100644
  import * as LoginManager from '../misc/loginManager.js';
  import * as Main from './main.js';
  import * as Params from '../misc/params.js';
-@@ -530,7 +532,16 @@ export const SystemBackground = GObject.registerClass({
+@@ -688,7 +690,16 @@ export const SystemBackground = GObject.registerClass({
      _init() {
          if (_systemBackground == null) {
              _systemBackground = new Meta.Background({meta_display: global.display});

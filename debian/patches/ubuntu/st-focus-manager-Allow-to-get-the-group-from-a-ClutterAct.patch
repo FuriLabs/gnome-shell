@@ -13,14 +13,14 @@ Origin: https://gitlab.gnome.org/GNOME/gnome-shell/-/merge_requests/4181
 Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2148587
 ---
  src/st/st-focus-manager.c | 10 ++++------
- src/st/st-focus-manager.h |  2 +-
- 2 files changed, 5 insertions(+), 7 deletions(-)
+ src/st/st-focus-manager.h |  5 ++++-
+ 2 files changed, 8 insertions(+), 7 deletions(-)
 
 diff --git a/src/st/st-focus-manager.c b/src/st/st-focus-manager.c
-index 41f3380..40ce264 100644
+index cb1d928..99c3a96 100644
 --- a/src/st/st-focus-manager.c
 +++ b/src/st/st-focus-manager.c
-@@ -208,20 +208,18 @@ st_focus_manager_remove_group (StFocusManager *manager,
+@@ -257,20 +257,18 @@ st_focus_manager_remove_group (StFocusManager *manager,
  /**
   * st_focus_manager_get_group:
   * @manager: the #StFocusManager
@@ -46,15 +46,17 @@ index 41f3380..40ce264 100644
      actor = clutter_actor_get_parent (actor);
  
 diff --git a/src/st/st-focus-manager.h b/src/st/st-focus-manager.h
-index c85e601..1cb9cea 100644
+index 7318344..e7f16cf 100644
 --- a/src/st/st-focus-manager.h
 +++ b/src/st/st-focus-manager.h
-@@ -41,7 +41,7 @@ void            st_focus_manager_add_group     (StFocusManager *manager,
+@@ -41,6 +41,9 @@ void            st_focus_manager_add_group     (StFocusManager *manager,
  void            st_focus_manager_remove_group  (StFocusManager *manager,
                                                  StWidget       *root);
  StWidget       *st_focus_manager_get_group     (StFocusManager *manager,
 -                                                StWidget       *widget);
 +                                                ClutterActor   *actor);
- gboolean        st_focus_manager_navigate_from_event (StFocusManager *manager,
-                                                       ClutterEvent   *event);
++
++gboolean        st_focus_manager_navigate_from_event (StFocusManager *manager,
++                                                      ClutterEvent   *event);
  
+ G_END_DECLS

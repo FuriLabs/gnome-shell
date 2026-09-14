@@ -15,11 +15,11 @@ Bug-Ubuntu: https://bugs.launchpad.net/ubuntu/+source/gnome-shell/+bug/2148587
  1 file changed, 1 deletion(-)
 
 diff --git a/js/ui/workspacesView.js b/js/ui/workspacesView.js
-index b530265..c885273 100644
+index 5fcfbb7..e653ad7 100644
 --- a/js/ui/workspacesView.js
 +++ b/js/ui/workspacesView.js
-@@ -36,7 +36,6 @@ const WorkspacesViewBase = GObject.registerClass({
-             y_expand: true,
+@@ -37,7 +37,6 @@ const WorkspacesViewBase = GObject.registerClass({
+             reactive: true,
          });
          this.connect('destroy', this._onDestroy.bind(this));
 -        global.focus_manager.add_group(this);

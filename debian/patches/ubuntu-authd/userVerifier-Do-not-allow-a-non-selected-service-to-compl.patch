@@ -48,10 +48,10 @@ index ba97ec8..be69a9f 100644
  
      _onChoiceListQuery(serviceName, promptMessage, list) {
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 589e8ba..102e299 100644
+index cd1a50c..79d932c 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
-@@ -451,7 +451,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -462,7 +462,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                      () => this._filterServiceMessages(args)),
                  'verification-failed', (_, args) => maybeForwardSignal(args,
                      () => this._verificationFailed(args)),

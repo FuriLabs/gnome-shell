@@ -9,10 +9,10 @@ Subject: st: Add support for brown accent color
  3 files changed, 16 insertions(+)
 
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 86d101b..37281e8 100644
+index 93c74d7..5868f0d 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
-@@ -502,6 +502,8 @@ export function getYaruVariantFromAccent() {
+@@ -500,6 +500,8 @@ export function getYaruVariantFromAccent() {
        return "purple";
      case St.SystemAccentColor.SLATE:
        return "sage";

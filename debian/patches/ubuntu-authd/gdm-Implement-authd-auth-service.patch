@@ -6702,7 +6702,7 @@ index 0000000..ad2b5ea
 +
 +export { authd, $root as default, gdm, pam };
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index c65a65f..d1c3d21 100644
+index 5934f7a..046322b 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -5,6 +5,7 @@ import * as Signals from '../misc/signals.js';
@@ -6722,7 +6722,7 @@ index c65a65f..d1c3d21 100644
  ];
  
 diff --git a/js/js-resources.gresource.xml b/js/js-resources.gresource.xml
-index 4fa9b7b..89acdef 100644
+index 026b08a..92879f6 100644
 --- a/js/js-resources.gresource.xml
 +++ b/js/js-resources.gresource.xml
 @@ -22,6 +22,9 @@
@@ -6736,10 +6736,10 @@ index 4fa9b7b..89acdef 100644
      <file>extensions/sharedInternals.js</file>
  
 diff --git a/js/ui/popupMenu.js b/js/ui/popupMenu.js
-index 8e4eb02..a90b3ec 100644
+index db05d52..c7beac1 100644
 --- a/js/ui/popupMenu.js
 +++ b/js/ui/popupMenu.js
-@@ -798,6 +798,11 @@ export class PopupMenuBase extends Signals.EventEmitter {
+@@ -787,6 +787,11 @@ export class PopupMenuBase extends Signals.EventEmitter {
                      this._activeMenuItem = null;
              }, this);
  

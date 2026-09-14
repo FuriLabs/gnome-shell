@@ -99,10 +99,10 @@ index 7f4eb1c..0eb0422 100644
          this._trackWebLoginTimeout();
  
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 701e752..ad430de 100644
+index 841d086..c36b89c 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
-@@ -500,13 +500,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -512,13 +512,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
          // Report the currently selected mechanism. If one is already selected
          // we keep it (matching by service); otherwise we pick the first

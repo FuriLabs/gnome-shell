@@ -34,10 +34,10 @@ index b45cc5a..cb42d47 100644
          if (this._mode === AuthPromptMode.UNLOCK_OR_LOG_IN)
              return;
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 7da0659..879dd25 100644
+index 88061e7..691754a 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -593,17 +593,15 @@ export const LoginDialog = GObject.registerClass({
+@@ -596,17 +596,15 @@ export const LoginDialog = GObject.registerClass({
      }
  
      _selectAuthMechanism(authMechanism) {
@@ -60,7 +60,7 @@ index 7da0659..879dd25 100644
  
      _getBannerAllocation(dialogBox) {
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index 2efa4ae..9be17d9 100644
+index 6b39aa9..ac4b336 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
 @@ -763,18 +763,17 @@ export const UnlockDialog = GObject.registerClass({

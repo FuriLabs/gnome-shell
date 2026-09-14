@@ -120,10 +120,10 @@ index 6f9da96..0bcbbe2 100644
    command: [find_program('glib-compile-schemas'), '--strict', data_builddir],
  )
 diff --git a/js/ui/background.js b/js/ui/background.js
-index 1420b26..25b4f18 100644
+index 0ac75bc..a9e3e69 100644
 --- a/js/ui/background.js
 +++ b/js/ui/background.js
-@@ -535,7 +535,11 @@ export const SystemBackground = GObject.registerClass({
+@@ -693,7 +693,11 @@ export const SystemBackground = GObject.registerClass({
  
              let backgroundColor = DEFAULT_BACKGROUND_COLOR;
              if (Desktop.is('ubuntu')) {
@@ -136,7 +136,7 @@ index 1420b26..25b4f18 100644
                  backgroundColor = dummyBgActor.get_theme_node().get_background_color();
                  dummyBgActor.destroy();
 diff --git a/js/ui/screenShield.js b/js/ui/screenShield.js
-index ac17784..4c93795 100644
+index 2e050f9..39c8e28 100644
 --- a/js/ui/screenShield.js
 +++ b/js/ui/screenShield.js
 @@ -31,6 +31,12 @@ const DISABLE_LOCK_KEY = 'disable-lock-screen';

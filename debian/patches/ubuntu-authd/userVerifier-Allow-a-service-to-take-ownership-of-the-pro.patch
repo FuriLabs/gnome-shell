@@ -24,7 +24,7 @@ mechanism selection restores both the previous selected service and UI owner.
  1 file changed, 30 insertions(+), 11 deletions(-)
 
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 102e299..f8f6d22 100644
+index 79d932c..f26c0b4 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -63,6 +63,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
@@ -33,9 +33,9 @@ index 102e299..f8f6d22 100644
          this._selectedServiceName = null;
 +        this._uiOwnerServiceName = null;
  
-         this._messageQueue = [];
-         this._messageQueueTimeoutId = 0;
-@@ -123,15 +124,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this._beginPromise = null;
+         this._redistributingRoles = false;
+@@ -132,15 +133,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      selectMechanism(mechanism) {
          const previousServiceName = this._selectedServiceName;
@@ -56,7 +56,7 @@ index 102e299..f8f6d22 100644
  
          return selected;
      }
-@@ -177,6 +182,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -186,6 +191,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      clear({serviceName = null} = {}) {
          this._authServices.forEach(s => s.clear());
          this._selectedServiceName = serviceName;
@@ -64,7 +64,7 @@ index 102e299..f8f6d22 100644
          this._redistributeRoles();
  
          this._clearMessageQueue();
-@@ -424,28 +430,41 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -434,15 +440,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _connectAuthServices() {
@@ -80,12 +80,13 @@ index 102e299..f8f6d22 100644
                  .some(m => m.serviceName === serviceName && m.background);
          const maybeForwardSignal = (args, handler) => {
              const {serviceName} = args ?? {};
--            if (this._selectedServiceName && this._selectedServiceName !== serviceName &&
-+            const ownerServiceName = this._uiOwnerServiceName ?? this._selectedServiceName;
-+            if (ownerServiceName && ownerServiceName !== serviceName &&
+-            const ownerServiceName = this._driverService ?? this._selectedServiceName;
++            const ownerServiceName = this._driverService ??
++                this._uiOwnerServiceName ?? this._selectedServiceName;
+             if (ownerServiceName && ownerServiceName !== serviceName &&
                  !isBackgroundService(serviceName))
                  return;
- 
+@@ -450,13 +458,24 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              handler();
          };
  
@@ -113,7 +114,7 @@ index 102e299..f8f6d22 100644
                      () => this._queuePriorityMessage(args)),
                  'filter-messages', (_, args) => maybeForwardSignal(args,
                      () => this._filterServiceMessages(args)),
-@@ -455,12 +474,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -466,12 +485,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                      () => this.emit('verification-complete')),
                  'reset', (_, args) => maybeForwardSignal(args,
                      () => this.emit('reset', args)),
@@ -123,7 +124,7 @@ index 102e299..f8f6d22 100644
 -                'show-button', (_, args) => maybeForwardSignal(args,
 +                'show-button', (_, args) => maybeForwardUISignal(args,
                      () => this.emit('show-button', args)),
-                 'mechanisms-changed', () => this._onMechanismsChanged(),
+                 'mechanisms-changed', () => this._onMechanismsChanged().catch(logError),
 -                'web-login', (_, args) => maybeForwardSignal(args,
 +                'web-login', (_, args) => maybeForwardUISignal(args,
                      () => this.emit('web-login', args)),

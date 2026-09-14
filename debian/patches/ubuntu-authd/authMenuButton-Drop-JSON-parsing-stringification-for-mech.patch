@@ -8,7 +8,7 @@ They are just JS objects so we can treat them natively
  1 file changed, 29 insertions(+), 35 deletions(-)
 
 diff --git a/js/gdm/authMenuButton.js b/js/gdm/authMenuButton.js
-index 5aaa45f..2fd4a15 100644
+index 8a50f34..c08cfc7 100644
 --- a/js/gdm/authMenuButton.js
 +++ b/js/gdm/authMenuButton.js
 @@ -183,8 +183,8 @@ export class AuthMenuButton extends St.Button {

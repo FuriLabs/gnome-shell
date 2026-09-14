@@ -18,10 +18,10 @@ Bug-Ubuntu: https://launchpad.net/bugs/2145786
  3 files changed, 91 insertions(+), 5 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 4e7629d..3b10f09 100644
+index 9d6e8f5..96eb12a 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -964,11 +964,16 @@ export const LoginDialog = GObject.registerClass({
+@@ -967,11 +967,16 @@ export const LoginDialog = GObject.registerClass({
          const resourceScale = this._logoBin.get_resource_scale();
          if (this._logoFile) {
              const scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
@@ -44,10 +44,10 @@ index 4e7629d..3b10f09 100644
      }
  
 diff --git a/src/st/st-texture-cache.c b/src/st/st-texture-cache.c
-index 7d46df4..27ce025 100644
+index 133d948..2696db3 100644
 --- a/src/st/st-texture-cache.c
 +++ b/src/st/st-texture-cache.c
-@@ -1200,6 +1200,79 @@ st_texture_cache_load_file_async (StTextureCache *cache,
+@@ -1238,6 +1238,79 @@ st_texture_cache_load_file_async (StTextureCache *cache,
    return actor;
  }
  

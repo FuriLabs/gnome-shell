@@ -1,8 +1,3 @@
-gdm-userVerifier-Use-every-in-needsUsername.patch
-gdm-authServicesLegacy-Fix-credentialManagers-authenticat.patch
-qrCode-Rename-url-property-to-text.patch
-authPrompt-Fix-the-profile-picture-vanishing-when-pressin.patch
-style-Fix-color-styles-to-adapt-when-on-light-mode-classi.patch
 shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
 notificationDaemon-Do-not-ignore-GtkNotification-sources-.patch
 debian/Revert-tests-Fail-on-warnings-too.patch
@@ -39,16 +34,12 @@ ubuntu/match-plymouth-logo.patch
 ubuntu/Standardize-icon-sizes-and-fit-the-grid-to-the-screen.patch
 ubuntu/appDisplay-Display-two-lines-of-application-name-as-a-min.patch
 ubuntu/gdm-loginDialog-Load-the-logo-image-synchronously.patch
-popupMenu-Do-not-emit-any-active-changed-signal-if-no-sub.patch
-popupMenu-Clear-the-active-menu-item-when-it-s-destroyed.patch
-popupMenu-Use-connectObject-to-connect-to-click-gestures-.patch
 ubuntu-authd/userVerifier-Do-not-allow-any-other-service-to-take-contr.patch
 ubuntu-authd/userVerifier-Do-not-allow-a-auth-service-to-reset-if-not-.patch
 ubuntu-authd/userVerifier-Do-not-auto-select-services-that-are-not-aut.patch
 ubuntu-authd/loginDialog-Close-auth-menu-before-selecting-the-active-m.patch
 ubuntu-authd/unlockDialog-Close-auth-menu-before-selecting-the-active-.patch
 ubuntu-authd/gdm-authServices-Do-not-call-handleSelectMechanism-if-no-.patch
-ubuntu-authd/gdm-userVerifier-Disconnect-from-settings-signals-on-dest.patch
 ubuntu-authd/userVerifier-Do-not-stop-at-first-auth-service-error.patch
 ubuntu-authd/authServices-Do-not-increase-the-failed-counter-for-unava.patch
 ubuntu-authd/userVerifier-Do-not-override-fallback-roles-for-unavailab.patch
@@ -59,7 +50,6 @@ ubuntu-authd/userVerifier-Do-not-allow-a-non-selected-service-to-compl.patch
 ubuntu-authd/gdm-userVerifier-Make-_handleUpdateEnabledMechanisms-retu.patch
 ubuntu-authd/loginDialog-unlockDialog-Rely-on-user-verifier-mechanism-.patch
 ubuntu-authd/userVerifier-Allow-a-service-to-take-ownership-of-the-pro.patch
-ubuntu-authd/userVerifier-Report-init-error-for-all-InitError-failures.patch
 ubuntu-authd/gdm-Implement-authd-auth-service.patch
 ubuntu-authd/js-Minify-the-authd-protocol-during-build.patch
 ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch

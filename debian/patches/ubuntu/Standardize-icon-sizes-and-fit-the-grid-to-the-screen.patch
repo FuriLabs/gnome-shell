@@ -27,7 +27,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/2146524
  js/ui/components/polkitAgent.js                    |   4 +-
  js/ui/ctrlAltTab.js                                |   6 +-
  js/ui/dash.js                                      |  16 +-
- js/ui/endSessionDialog.js                          |   7 +-
+ js/ui/endSessionDialog.js                          |   6 +-
  js/ui/iconGrid.js                                  | 205 ++++++++-------------
  js/ui/main.js                                      |   6 +
  js/ui/overviewControls.js                          |   2 +-
@@ -35,7 +35,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/2146524
  js/ui/switchMonitor.js                             |   5 +-
  js/ui/userWidget.js                                |   5 +-
  js/ui/windowPreview.js                             |   7 +-
- 15 files changed, 122 insertions(+), 188 deletions(-)
+ 15 files changed, 121 insertions(+), 188 deletions(-)
 
 diff --git a/data/theme/gnome-shell-sass/widgets/_app-grid.scss b/data/theme/gnome-shell-sass/widgets/_app-grid.scss
 index 2fe110f..d7dc2f5 100644
@@ -142,10 +142,10 @@ index 1a6c705..c5852d2 100644
          }
  
 diff --git a/js/ui/appDisplay.js b/js/ui/appDisplay.js
-index 29c8dfb..359f157 100644
+index 85f7b08..b59395d 100644
 --- a/js/ui/appDisplay.js
 +++ b/js/ui/appDisplay.js
-@@ -2074,13 +2074,6 @@ class FolderGrid extends AppGrid {
+@@ -2073,13 +2073,6 @@ class FolderGrid extends AppGrid {
              page_halign: Clutter.ActorAlign.CENTER,
              page_valign: Clutter.ActorAlign.CENTER,
          });
@@ -159,7 +159,7 @@ index 29c8dfb..359f157 100644
      }
  });
  
-@@ -2504,6 +2497,10 @@ export const AppFolderDialog = GObject.registerClass({
+@@ -2503,6 +2496,10 @@ export const AppFolderDialog = GObject.registerClass({
              orientation: Clutter.Orientation.VERTICAL,
          });
  
@@ -224,7 +224,7 @@ index 1d8163f..028bafb 100644
          }
          box.add_child(icon);
 diff --git a/js/ui/dash.js b/js/ui/dash.js
-index 970bf94..9c8a471 100644
+index 61bd14c..09e0ce1 100644
 --- a/js/ui/dash.js
 +++ b/js/ui/dash.js
 @@ -300,8 +300,6 @@ class DashIconsLayout extends Clutter.BoxLayout {
@@ -245,7 +245,7 @@ index 970bf94..9c8a471 100644
          this._shownInitially = false;
  
          this._separator = null;
-@@ -618,12 +616,14 @@ export const Dash = GObject.registerClass({
+@@ -619,12 +617,14 @@ export const Dash = GObject.registerClass({
          const maxIconSize = Math.min(availWidth / iconChildren.length, availHeight);
  
          const scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
@@ -266,18 +266,10 @@ index 970bf94..9c8a471 100644
  
          if (newIconSize === this.iconSize)
 diff --git a/js/ui/endSessionDialog.js b/js/ui/endSessionDialog.js
-index 02028a0..9e270cc 100644
+index fa207b1..d0cee86 100644
 --- a/js/ui/endSessionDialog.js
 +++ b/js/ui/endSessionDialog.js
-@@ -29,6 +29,7 @@ import * as CheckBox from './checkBox.js';
- import * as Dialog from './dialog.js';
- import * as GnomeSession from '../misc/gnomeSession.js';
- import * as LoginManager from '../misc/loginManager.js';
-+import * as Main from './main.js';
- import * as ModalDialog from './modalDialog.js';
- import * as UserWidget from './userWidget.js';
- 
-@@ -36,8 +37,6 @@ import {ModalDialogErrors, ModalDialogError} from '../misc/dbusErrors.js';
+@@ -37,8 +37,6 @@ import {ModalDialogErrors, ModalDialogError} from '../misc/dbusErrors.js';
  
  import {loadInterfaceXML} from '../misc/fileUtils.js';
  
@@ -286,7 +278,7 @@ index 02028a0..9e270cc 100644
  const LOW_BATTERY_THRESHOLD = 30;
  
  const EndSessionDialogIface = loadInterfaceXML('org.gnome.SessionManager.EndSessionDialog');
-@@ -580,7 +579,7 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
+@@ -584,7 +582,7 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
          if (app && flags & GnomeSession.InhibitFlags.LOGOUT) {
              const [description] = inhibitor.GetReasonSync();
              const listItem = new Dialog.ListSectionItem({
@@ -295,7 +287,7 @@ index 02028a0..9e270cc 100644
                  title: app.get_name(),
                  description,
              });
-@@ -624,7 +623,7 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
+@@ -628,7 +626,7 @@ class EndSessionDialog extends ModalDialog.ModalDialog {
              const nSessions = this._sessions.push(session);
  
              const userAvatar = new UserWidget.Avatar(session.user, {
@@ -648,7 +640,7 @@ index e87225c..24a1b6e 100644
          const layoutManager = this.layout_manager;
          return layoutManager.getDropTarget(x, y, this._currentPage);
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 3543d41..37d42fd 100644
+index 4973b5e..a506601 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -100,6 +100,12 @@ export let timeLimitsDispatcher = null;
@@ -665,7 +657,7 @@ index 3543d41..37d42fd 100644
  let _defaultCssStylesheet = null;
  let _cssStylesheet = null;
 diff --git a/js/ui/overviewControls.js b/js/ui/overviewControls.js
-index 06bae16..27ae0c8 100644
+index 253f5ee..1681eaf 100644
 --- a/js/ui/overviewControls.js
 +++ b/js/ui/overviewControls.js
 @@ -20,7 +20,7 @@ import * as WorkspacesView from './workspacesView.js';
@@ -768,7 +760,7 @@ index cb4150a..92bf5d9 100644
  
          super._init({
 diff --git a/js/ui/windowPreview.js b/js/ui/windowPreview.js
-index 8afce1c..9297896 100644
+index a9b9bdd..9f51f79 100644
 --- a/js/ui/windowPreview.js
 +++ b/js/ui/windowPreview.js
 @@ -9,6 +9,7 @@ import Shell from 'gi://Shell';
@@ -787,7 +779,7 @@ index 8afce1c..9297896 100644
  const ICON_OVERLAP = 0.7;
  
  const ICON_TITLE_SPACING = 6;
-@@ -161,7 +161,8 @@ export class WindowPreview extends Shell.WindowPreview {
+@@ -147,7 +147,8 @@ export class WindowPreview extends Shell.WindowPreview {
  
          const tracker = Shell.WindowTracker.get_default();
          const app = tracker.get_window_app(this.metaWindow);
@@ -797,7 +789,7 @@ index 8afce1c..9297896 100644
          this._icon.add_style_class_name('window-icon');
          this._icon.add_style_class_name('icon-dropshadow');
          this._icon.set({
-@@ -196,7 +197,7 @@ export class WindowPreview extends Shell.WindowPreview {
+@@ -182,7 +183,7 @@ export class WindowPreview extends Shell.WindowPreview {
              source: windowContainer,
              coordinate: Clutter.BindCoordinate.X,
          }));

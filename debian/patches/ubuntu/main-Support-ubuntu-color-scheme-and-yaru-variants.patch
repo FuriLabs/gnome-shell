@@ -67,7 +67,7 @@ index 0000000..6f9cc62
 +  </schema>
 +</schemalist>
 diff --git a/js/ui/main.js b/js/ui/main.js
-index b3c5afe..86d101b 100644
+index fc09446..93c74d7 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -182,6 +182,7 @@ export async function start() {
@@ -78,7 +78,7 @@ index b3c5afe..86d101b 100644
  
      // Initialize ParentalControlsManager before the UI
      ParentalControlsManager.getDefault();
-@@ -452,7 +453,19 @@ function _getStylesheet(name) {
+@@ -450,7 +451,19 @@ function _getStylesheet(name) {
  
  /** @returns {string} */
  export function getStyleVariant() {
@@ -99,7 +99,7 @@ index b3c5afe..86d101b 100644
      switch (sessionMode.colorScheme) {
      case 'force-dark':
          return 'dark';
-@@ -469,6 +482,29 @@ export function getStyleVariant() {
+@@ -467,6 +480,29 @@ export function getStyleVariant() {
      }
  }
  

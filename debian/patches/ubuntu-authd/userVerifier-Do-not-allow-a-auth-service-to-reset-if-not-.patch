@@ -220,10 +220,10 @@ index cf6a4e1..7f4eb1c 100644
      }
  }
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index fe3e9b6..701e752 100644
+index fa97167..841d086 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
-@@ -106,13 +106,16 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -115,13 +115,16 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      selectMechanism(mechanism) {
@@ -242,7 +242,7 @@ index fe3e9b6..701e752 100644
  
          return selected;
      }
-@@ -147,17 +150,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -156,17 +159,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              s.selectedMechanism === selectedMechanism)?.cancelRequested() ?? false;
      }
  
@@ -264,7 +264,7 @@ index fe3e9b6..701e752 100644
          this._redistributeRoles();
  
          this._clearMessageQueue();
-@@ -434,7 +437,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -444,7 +447,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                  'verification-failed', (_, args) => maybeForwardSignal(args,
                      () => this._verificationFailed(args)),
                  'verification-complete', () => this.emit('verification-complete'),

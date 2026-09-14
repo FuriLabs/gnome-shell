@@ -11,7 +11,7 @@ PopupMenu can deactivate it before selection triggers the rebuild.
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index 5d92a6b..d751017 100644
+index 21b4736..45c38d9 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
 @@ -685,8 +685,8 @@ export const UnlockDialog = GObject.registerClass({

@@ -19,8 +19,8 @@ This prevents background or unrelated services from taking over the prompt
 while keeping selection valid when the set of available mechanisms changes.
 ---
  js/gdm/authServices.js |  1 +
- js/gdm/userVerifier.js | 77 +++++++++++++++++++++++++++++++++++++++-----------
- 2 files changed, 62 insertions(+), 16 deletions(-)
+ js/gdm/userVerifier.js | 78 +++++++++++++++++++++++++++++++++++++++-----------
+ 2 files changed, 63 insertions(+), 16 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
 index d0f7659..fed9dc2 100644
@@ -35,7 +35,7 @@ index d0f7659..fed9dc2 100644
  };
  
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index da3965e..fe3e9b6 100644
+index 039da1d..fa97167 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -62,6 +62,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
@@ -44,9 +44,9 @@ index da3965e..fe3e9b6 100644
          this._driverService = null;
 +        this._selectedServiceName = null;
  
-         this._messageQueue = [];
-         this._messageQueueTimeoutId = 0;
-@@ -106,9 +107,14 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         this._beginPromise = null;
+         this._redistributingRoles = false;
+@@ -115,9 +116,14 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      selectMechanism(mechanism) {
          // Every authServices needs to update its selected mechanism
@@ -62,7 +62,7 @@ index da3965e..fe3e9b6 100644
      }
  
      needsUsername() {
-@@ -133,6 +139,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -142,6 +148,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      cancelRequested() {
@@ -72,7 +72,7 @@ index da3965e..fe3e9b6 100644
          const {selectedMechanism} = this;
          return this._authServices.find(s =>
              s.selectedMechanism === selectedMechanism)?.cancelRequested() ?? false;
-@@ -148,6 +157,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -157,6 +166,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      clear() {
          this._authServices.forEach(s => s.clear());
@@ -80,7 +80,7 @@ index da3965e..fe3e9b6 100644
          this._redistributeRoles();
  
          this._clearMessageQueue();
-@@ -396,20 +406,42 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -405,20 +415,43 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _connectAuthServices() {
@@ -92,7 +92,8 @@ index da3965e..fe3e9b6 100644
 +                .some(m => m.serviceName === serviceName && m.background);
 +        const maybeForwardSignal = (args, handler) => {
 +            const {serviceName} = args ?? {};
-+            if (this._selectedServiceName && this._selectedServiceName !== serviceName &&
++            const ownerServiceName = this._driverService ?? this._selectedServiceName;
++            if (ownerServiceName && ownerServiceName !== serviceName &&
 +                !isBackgroundService(serviceName))
 +                return;
 +
@@ -125,14 +126,14 @@ index da3965e..fe3e9b6 100644
 +                    () => this.emit('show-choice-list', args)),
 +                'show-button', (_, args) => maybeForwardSignal(args,
 +                    () => this.emit('show-button', args)),
-                 'mechanisms-changed', () => this._onMechanismsChanged(),
+                 'mechanisms-changed', () => this._onMechanismsChanged().catch(logError),
 -                'web-login', (_, args) => this.emit('web-login', args),
 +                'web-login', (_, args) => maybeForwardSignal(args,
 +                    () => this.emit('web-login', args)),
                  this);
          });
      }
-@@ -420,8 +452,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -429,8 +462,9 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      get selectedMechanism() {
@@ -144,7 +145,7 @@ index da3965e..fe3e9b6 100644
      }
  
      _redistributeRoles() {
-@@ -461,11 +494,23 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -472,11 +506,23 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                  return visibleMechanisms;
              });
  

@@ -150,10 +150,10 @@ index 0eb0422..948464c 100644
          this._trackWebLoginTimeout();
  
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index bd367d0..7da0659 100644
+index 6925ca3..88061e7 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -595,7 +595,7 @@ export const LoginDialog = GObject.registerClass({
+@@ -598,7 +598,7 @@ export const LoginDialog = GObject.registerClass({
      _selectAuthMechanism(authMechanism) {
          const oldMechanism = this._selectedAuthMechanism;
  
@@ -163,7 +163,7 @@ index bd367d0..7da0659 100644
  
          if (!this._authPrompt.selectMechanism(authMechanism)) {
 diff --git a/js/ui/unlockDialog.js b/js/ui/unlockDialog.js
-index d751017..2efa4ae 100644
+index 45c38d9..6b39aa9 100644
 --- a/js/ui/unlockDialog.js
 +++ b/js/ui/unlockDialog.js
 @@ -765,7 +765,7 @@ export const UnlockDialog = GObject.registerClass({

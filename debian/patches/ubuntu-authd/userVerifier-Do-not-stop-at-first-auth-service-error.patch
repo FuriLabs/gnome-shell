@@ -9,14 +9,14 @@ services that may be around.
 
 And only if none is found we should then report an error
 ---
- js/gdm/userVerifier.js | 28 ++++++++++++++++++++++------
- 1 file changed, 22 insertions(+), 6 deletions(-)
+ js/gdm/userVerifier.js | 23 +++++++++++++++++++++--
+ 1 file changed, 21 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 77021dd..af130a0 100644
+index ce60897..32e60c8 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
-@@ -91,15 +91,31 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -97,10 +97,29 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          try {
              const proxies = await this._getUserVerifierProxies(userName, this._cancellable);
              this._setUserVerifier(proxies.userVerifier);
@@ -44,13 +44,7 @@ index 77021dd..af130a0 100644
              }
 +
 +            if (!anyBegan && lastInitError)
-+                this._reportInitError(lastInitError);
++                throw lastInitError;
          } catch (e) {
--            if (e instanceof InitError)
--                this._reportInitError(e);
--            else
--                logErrorUnlessCancelled(e);
-+            logErrorUnlessCancelled(e);
-         }
- 
-         hold?.release();
+             if (e instanceof InitError)
+                 this._reportInitError(e);
