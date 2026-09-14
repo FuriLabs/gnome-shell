@@ -13,10 +13,10 @@ Expose the verifier selected mechanism through AuthPrompt and use it for
 mechanism comparison and menu rollback in both dialogs. This makes the
 verifier the single source of truth for mechanism selection.
 ---
- js/gdm/authPrompt.js  | 4 ++++
- js/gdm/loginDialog.js | 9 ++++-----
- js/ui/unlockDialog.js | 7 +++----
- 3 files changed, 11 insertions(+), 9 deletions(-)
+ js/gdm/authPrompt.js  |  4 ++++
+ js/gdm/loginDialog.js | 10 ++++------
+ js/ui/unlockDialog.js |  7 +++----
+ 3 files changed, 11 insertions(+), 10 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
 index b45cc5a..cb42d47 100644
@@ -34,10 +34,10 @@ index b45cc5a..cb42d47 100644
          if (this._mode === AuthPromptMode.UNLOCK_OR_LOG_IN)
              return;
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 5c16c6c..21445cc 100644
+index 7da0659..879dd25 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
-@@ -593,17 +593,16 @@ export const LoginDialog = GObject.registerClass({
+@@ -593,17 +593,15 @@ export const LoginDialog = GObject.registerClass({
      }
  
      _selectAuthMechanism(authMechanism) {
@@ -50,9 +50,9 @@ index 5c16c6c..21445cc 100644
  
          if (!this._authPrompt.selectMechanism(authMechanism)) {
 -            this._authMenuButton.setActiveItem(oldMechanism);
+-            return;
 +            if (oldMechanism)
 +                this._authMenuButton.setActiveItem(oldMechanism);
-             return;
          }
 -
 -        this._selectedAuthMechanism = authMechanism;

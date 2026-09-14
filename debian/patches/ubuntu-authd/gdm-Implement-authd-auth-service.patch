@@ -15,7 +15,7 @@ Subject: gdm: Implement authd auth service
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..7a097d0
+index 0000000..9a56978
 --- /dev/null
 +++ b/js/gdm/authd.js
 @@ -0,0 +1,1031 @@
@@ -815,7 +815,7 @@ index 0000000..7a097d0
 +    }
 +
 +    _handleUpdateEnabledMechanisms() {
-+        this._enabledMechanisms = Object.values(this._authMechanisms);
++        return Object.values(this._authMechanisms);
 +    }
 +
 +    _maybeStartChallenge() {
@@ -905,7 +905,7 @@ index 0000000..7a097d0
 +            }
 +
 +            mechanism.prompt = prompt ?? '';
-+            this._handleUpdateEnabledMechanisms();
++            this._setEnabledMechanisms(this._handleUpdateEnabledMechanisms());
 +            this._selectAndStartMechanism(mechanism);
 +
 +            if (infoMsg?.length && mechanism.prompt !== infoMsg) {
@@ -957,7 +957,7 @@ index 0000000..7a097d0
 +                }];
 +            }
 +
-+            this._handleUpdateEnabledMechanisms();
++            this._setEnabledMechanisms(this._handleUpdateEnabledMechanisms());
 +            this._selectAndStartMechanism(mechanism);
 +            break;
 +        }

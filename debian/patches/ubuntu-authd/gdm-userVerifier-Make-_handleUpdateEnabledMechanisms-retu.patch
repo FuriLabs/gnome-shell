@@ -1,0 +1,77 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 25 Aug 2026 19:55:18 +0200
+Subject: gdm/userVerifier: Make _handleUpdateEnabledMechanisms return the
+ mechanisms list
+
+Move ownership of this._enabledMechanisms into the base class: subclasses
+now return the list of enabled mechanisms and the base sets them via
+_setEnabledMechanisms (the single point that attaches `equals`). A new
+_onEnabledMechanismsUpdated() hook lets subclasses do post-processing once
+the array is populated (fingerprint readiness, SSSD selection/timeout).
+---
+ js/gdm/authServices.js               | 6 +++++-
+ js/gdm/authServicesLegacy.js         | 9 +++++----
+ js/gdm/authServicesSSSDSwitchable.js | 4 +++-
+ 3 files changed, 13 insertions(+), 6 deletions(-)
+
+diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
+index be69a9f..9a8d16c 100644
+--- a/js/gdm/authServices.js
++++ b/js/gdm/authServices.js
+@@ -301,7 +301,9 @@ export class AuthServices extends GObject.Object {
+     _updateEnabledMechanisms() {
+         const selectedMechanism = this._selectedMechanism;
+ 
+-        this._handleUpdateEnabledMechanisms();
++        this._setEnabledMechanisms(this._handleUpdateEnabledMechanisms() ?? []);
++
++        this._onEnabledMechanismsUpdated();
+ 
+         this._selectedMechanism = this._enabledMechanisms.find(mechanism =>
+             this._mechanismEquals(mechanism, selectedMechanism));
+@@ -309,6 +311,8 @@ export class AuthServices extends GObject.Object {
+         this.emit('mechanisms-changed');
+     }
+ 
++    _onEnabledMechanismsUpdated() {}
++
+     _waitPendingMessages() {
+         const cancellable = this._cancellable;
+         const timeoutId = GLib.timeout_add_seconds_once(GLib.PRIORITY_DEFAULT, 10,
+diff --git a/js/gdm/authServicesLegacy.js b/js/gdm/authServicesLegacy.js
+index 81df132..ff35dbd 100644
+--- a/js/gdm/authServicesLegacy.js
++++ b/js/gdm/authServicesLegacy.js
+@@ -171,11 +171,12 @@ export class AuthServicesLegacy extends AuthServices {
+                     : true,
+             }));
+ 
+-        this._setEnabledMechanisms(
+-            !this._fingerprintManager?.readerFound
+-                ? mechanisms.filter(m => m.role !== Role.FINGERPRINT)
+-                : mechanisms);
++        return !this._fingerprintManager?.readerFound
++            ? mechanisms.filter(m => m.role !== Role.FINGERPRINT)
++            : mechanisms;
++    }
+ 
++    _onEnabledMechanismsUpdated() {
+         // Mark fingerprint as not ready until the service confirms it's
+         // working for this user
+         if (this._fingerprintManager?.readerFound)
+diff --git a/js/gdm/authServicesSSSDSwitchable.js b/js/gdm/authServicesSSSDSwitchable.js
+index 948464c..189c0cb 100644
+--- a/js/gdm/authServicesSSSDSwitchable.js
++++ b/js/gdm/authServicesSSSDSwitchable.js
+@@ -277,8 +277,10 @@ export class AuthServicesSSSDSwitchable extends AuthServices {
+             });
+         }
+ 
+-        this._setEnabledMechanisms(mechanisms);
++        return mechanisms;
++    }
+ 
++    _onEnabledMechanismsUpdated() {
+         this._trackWebLoginTimeout();
+ 
+         const selectedMechanism =

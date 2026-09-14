@@ -18,24 +18,23 @@ This lets auth services customize how their mechanisms are compared,
 while login and unlock dialogs can avoid reselecting a mechanism that
 did not change.
 ---
- js/gdm/authServices.js | 18 ++++++++++++++----
- js/gdm/loginDialog.js  |  2 +-
- js/ui/unlockDialog.js  |  2 +-
- 3 files changed, 16 insertions(+), 6 deletions(-)
+ js/gdm/authServices.js               | 21 ++++++++++++++++-----
+ js/gdm/authServicesLegacy.js         | 21 +++++++++++----------
+ js/gdm/authServicesSSSDSwitchable.js | 20 ++++++++++++++------
+ js/gdm/loginDialog.js                |  2 +-
+ js/ui/unlockDialog.js                |  2 +-
+ 5 files changed, 43 insertions(+), 23 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index ac4f8da..01080a6 100644
+index ac4f8da..ba97ec8 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
-@@ -285,10 +285,20 @@ export class AuthServices extends GObject.Object {
+@@ -162,6 +162,22 @@ export class AuthServices extends GObject.Object {
+         return this._enabledMechanisms?.filter(m => m.ready !== false);
+     }
  
-         this._handleUpdateEnabledMechanisms();
- 
--        this._enabledMechanisms = this._enabledMechanisms.map(m => ({
--            ...m,
--            ...RoleProperties[m.role],
--        }));
-+        this._enabledMechanisms = this._enabledMechanisms.map(m => {
++    _setEnabledMechanisms(mechanisms) {
++        this._enabledMechanisms = mechanisms.map(m => {
 +            const mechanism = {
 +                ...m,
 +                ...RoleProperties[m.role],
@@ -48,12 +47,110 @@ index ac4f8da..01080a6 100644
 +
 +            return mechanism;
 +        });
++    }
 +
+     get _roleToService() {
+         return this.constructor.RoleToService;
+     }
+@@ -281,14 +297,9 @@ export class AuthServices extends GObject.Object {
+ 
+     _updateEnabledMechanisms() {
+         const selectedMechanism = this._selectedMechanism;
+-        this._enabledMechanisms = [];
+ 
+         this._handleUpdateEnabledMechanisms();
+ 
+-        this._enabledMechanisms = this._enabledMechanisms.map(m => ({
+-            ...m,
+-            ...RoleProperties[m.role],
+-        }));
          this._selectedMechanism = this._enabledMechanisms.find(mechanism =>
              this._mechanismEquals(mechanism, selectedMechanism));
  
+diff --git a/js/gdm/authServicesLegacy.js b/js/gdm/authServicesLegacy.js
+index 088c765..81df132 100644
+--- a/js/gdm/authServicesLegacy.js
++++ b/js/gdm/authServicesLegacy.js
+@@ -158,7 +158,7 @@ export class AuthServicesLegacy extends AuthServices {
+     }
+ 
+     _handleUpdateEnabledMechanisms() {
+-        this._enabledMechanisms.push(...Mechanisms
++        const mechanisms = Mechanisms
+             .filter(m => this._enabledRoles.includes(m.role) &&
+                 this._settings.get_boolean(m.setting))
+             .map(m => ({
+@@ -169,16 +169,17 @@ export class AuthServicesLegacy extends AuthServices {
+                 autoSelectable: m.role === Role.SMARTCARD
+                     ? this._smartcardManager.hasInsertedTokens()
+                     : true,
+-            })));
+-
+-        if (!this._fingerprintManager?.readerFound) {
+-            this._enabledMechanisms = this._enabledMechanisms.filter(m =>
+-                m.role !== Role.FINGERPRINT);
+-        } else {
+-            // Mark fingerprint as not ready until service confirms
+-            // it's working for this user
++            }));
++
++        this._setEnabledMechanisms(
++            !this._fingerprintManager?.readerFound
++                ? mechanisms.filter(m => m.role !== Role.FINGERPRINT)
++                : mechanisms);
++
++        // Mark fingerprint as not ready until the service confirms it's
++        // working for this user
++        if (this._fingerprintManager?.readerFound)
+             this._setFingerprintReady(false);
+-        }
+     }
+ 
+     _handleOnInfo(serviceName, info) {
+diff --git a/js/gdm/authServicesSSSDSwitchable.js b/js/gdm/authServicesSSSDSwitchable.js
+index 0eb0422..948464c 100644
+--- a/js/gdm/authServicesSSSDSwitchable.js
++++ b/js/gdm/authServicesSSSDSwitchable.js
+@@ -253,23 +253,31 @@ export class AuthServicesSSSDSwitchable extends AuthServices {
+     }
+ 
+     _handleUpdateEnabledMechanisms() {
+-        this._enabledMechanisms.push(...Object.keys(this._mechanisms)
+-            .map(id => ({
++        const mechanisms = [];
++
++        for (const id of Object.keys(this._mechanisms ?? {})) {
++            const m = {
+                 serviceName: SWITCHABLE_AUTH_SERVICE_NAME,
+                 id,
+                 ...this._mechanisms[id],
+-            }))
++            };
++
+             // filter out mechanisms with roles that are not enabled
+-            .filter(m => this._enabledRoles.includes(m.role))
++            if (!this._enabledRoles.includes(m.role))
++                continue;
++
+             // Passkey (like smartcard) is only auto-selected when a token
+             // is actually inserted, otherwise it stays available but must
+             // not be started by default.
+-            .map(m => ({
++            mechanisms.push({
+                 ...m,
+                 autoSelectable: m.role === Role.PASSKEY
+                     ? this._fido2TokenManager.hasInsertedTokens
+                     : true,
+-            })));
++            });
++        }
++
++        this._setEnabledMechanisms(mechanisms);
+ 
+         this._trackWebLoginTimeout();
+ 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 7e7ca0c..5c16c6c 100644
+index bd367d0..7da0659 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -595,7 +595,7 @@ export const LoginDialog = GObject.registerClass({

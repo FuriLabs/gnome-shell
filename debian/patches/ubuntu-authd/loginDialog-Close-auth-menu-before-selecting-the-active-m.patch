@@ -56,7 +56,7 @@ PopupMenuBase._activeMenuItem ends up pointing at a disposed object.
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 533c931..7e7ca0c 100644
+index 3b10f09..bd367d0 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -553,12 +553,12 @@ export const LoginDialog = GObject.registerClass({

@@ -56,6 +56,7 @@ ubuntu-authd/authServices-Preserve-selected-mechanisms-across-updates.patch
 ubuntu-authd/authMenuButton-Drop-JSON-parsing-stringification-for-mech.patch
 ubuntu-authd/loginDialog-unlockDialog-Deeply-check-if-authentication-m.patch
 ubuntu-authd/userVerifier-Do-not-allow-a-non-selected-service-to-compl.patch
+ubuntu-authd/gdm-userVerifier-Make-_handleUpdateEnabledMechanisms-retu.patch
 ubuntu-authd/loginDialog-unlockDialog-Rely-on-user-verifier-mechanism-.patch
 ubuntu-authd/userVerifier-Allow-a-service-to-take-ownership-of-the-pro.patch
 ubuntu-authd/userVerifier-Report-init-error-for-all-InitError-failures.patch
