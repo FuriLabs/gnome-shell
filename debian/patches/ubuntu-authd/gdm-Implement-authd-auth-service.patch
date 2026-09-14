@@ -3,22 +3,22 @@ Date: Sun, 26 Jul 2026 07:00:57 +0200
 Subject: gdm: Implement authd auth service
 
 ---
- js/gdm/authd.js               | 1025 ++++++++
+ js/gdm/authd.js               | 1010 ++++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/userVerifier.js        |    2 +
  js/js-resources.gresource.xml |    3 +
  js/ui/popupMenu.js            |    5 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6702 insertions(+)
+ 6 files changed, 6687 insertions(+)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..23a37f3
+index 0000000..81b634f
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,1025 @@
+@@ -0,0 +1,1010 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +import GLib from 'gi://GLib';
 +import GObject from 'gi://GObject';
@@ -487,7 +487,7 @@ index 0000000..23a37f3
 +        }
 +
 +        this._maybeShowChoiceList(AuthMechanismIDs.BrokerSelection,
-+            _('Select the broker'), this._brokers);
++            _('Select the broker'), this._brokers, key => this._selectBroker(key));
 +    }
 +
 +    _selectBroker(brokerId) {
@@ -522,7 +522,8 @@ index 0000000..23a37f3
 +        }
 +
 +        this._maybeShowChoiceList(AuthMechanismIDs.AuthModeSelection,
-+            _('Select the authentication mode'), this._authModes);
++            _('Select the authentication mode'), this._authModes,
++            key => this._selectAuthMode(key));
 +    }
 +
 +    _selectAuthMode(authModeId) {
@@ -542,7 +543,7 @@ index 0000000..23a37f3
 +        delete this._autoSelectTimeoutID;
 +    }
 +
-+    _maybeShowChoiceList(id, prompt, choices) {
++    _maybeShowChoiceList(id, prompt, choices, choiceHandler) {
 +        // This is a workaround to handle the cases in which authd is now fast
 +        // enough to provide us a choice together with the list.
 +        // So let's wait a bit, before asking the user for a choice.
@@ -550,7 +551,7 @@ index 0000000..23a37f3
 +        this._maybeCancelPendingAutoSelection();
 +
 +        if (this._skipNextAutoSelection) {
-+            this._showChoiceList(id, prompt, choices);
++            this._showChoiceList(id, prompt, choices, choiceHandler);
 +            delete this._skipNextAutoSelection;
 +            return;
 +        }
@@ -558,34 +559,18 @@ index 0000000..23a37f3
 +        this._autoSelectTimeoutID = GLib.timeout_add(GLib.PRIORITY_DEFAULT,
 +            AUTO_SELECTION_MAX_WAIT, () => {
 +                delete this._autoSelectTimeoutID;
-+                this._showChoiceList(id, prompt, choices);
++                this._showChoiceList(id, prompt, choices, choiceHandler);
 +                return GLib.SOURCE_REMOVE;
 +            });
 +    }
 +
-+    _showChoiceList(id, promptMessage, choiceList) {
++    _showChoiceList(id, promptMessage, choiceList, choiceHandler) {
 +        this.emit('show-choice-list', {
 +            serviceName: SERVICE_NAME,
 +            promptMessage,
 +            choiceList,
-+            // FIXME: move choiceHandler to argument.
-+            choiceHandler: key => this._handleSelectChoice(SERVICE_NAME, id, key),
++            choiceHandler,
 +        });
-+    }
-+
-+    _handleSelectChoice(serviceName, id, key) {
-+        if (serviceName !== SERVICE_NAME)
-+            return;
-+
-+        switch (id) {
-+        case AuthMechanismIDs.BrokerSelection:
-+            this._selectBroker(key);
-+            break;
-+
-+        case AuthMechanismIDs.AuthModeSelection:
-+            this._selectAuthMode(key);
-+            break;
-+        }
 +    }
 +
 +    cancelRequested() {
