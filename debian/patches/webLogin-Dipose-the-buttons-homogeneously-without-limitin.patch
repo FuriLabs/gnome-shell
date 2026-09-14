@@ -1,0 +1,49 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 4 Sep 2026 21:10:04 +0200
+Subject: webLogin: Dipose the buttons homogeneously without limiting their
+ width
+
+We do not do it anywhere in the UI and given that their content is
+provided by backends that may have translated values, it's hard to
+predict how long they can be.
+
+So let's just not limit their size, but let's just dispose them
+homogeneously so that they use the space they should
+---
+ data/theme/gnome-shell-sass/widgets/_login-lock.scss | 2 +-
+ js/gdm/webLogin.js                                   | 2 ++
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/data/theme/gnome-shell-sass/widgets/_login-lock.scss b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
+index 7d50e62..c78d4a6 100644
+--- a/data/theme/gnome-shell-sass/widgets/_login-lock.scss
++++ b/data/theme/gnome-shell-sass/widgets/_login-lock.scss
+@@ -423,7 +423,7 @@ $_gdm_dialog_width: 25em;
+   .web-login-prompt-button {
+     padding: $base_padding * 2.5 $base_padding * 4;
+     margin: $base_margin * 6 $base_margin * 2;
+-    width: 8em;
++    min-width: 8em;
+   }
+ }
+ 
+diff --git a/js/gdm/webLogin.js b/js/gdm/webLogin.js
+index 62597b4..909308e 100644
+--- a/js/gdm/webLogin.js
++++ b/js/gdm/webLogin.js
+@@ -169,6 +169,7 @@ export class WebLoginDialog extends St.Widget {
+             x_align: Clutter.ActorAlign.CENTER,
+             x_expand: true,
+         });
++        this._buttonBox.layout_manager.homogeneous = true;
+         this._contentBox.add_child(this._buttonBox);
+ 
+         this._updateButtons(buttons);
+@@ -201,6 +202,7 @@ export class WebLoginDialog extends St.Widget {
+             can_focus: true,
+             accessible_name: b.label,
+             button_mask: St.ButtonMask.PRIMARY | St.ButtonMask.SECONDARY,
++            x_expand: true,
+             child: new St.Label({
+                 text: b.label,
+                 style_class: 'login-button-label',
