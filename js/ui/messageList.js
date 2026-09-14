@@ -465,13 +465,6 @@ export class Message extends St.Button {
                 return Clutter.EVENT_STOP;
             }
         );
-        bindingPool.install_closure(
-            'close', Clutter.KEY_KP_Delete, 0,
-            obj => {
-                obj._closeIfAllowed();
-                return Clutter.EVENT_STOP;
-            }
-        );
     }
 
     constructor(source) {
@@ -1538,6 +1531,8 @@ export const MessageView = GObject.registerClass({
 
         this._setupMpris();
         this._setupNotifications();
+
+        this._expandedGroup = null;
     }
 
     get empty() {
@@ -2019,7 +2014,7 @@ const FadeEffect = GObject.registerClass({
     }
 
     _vadjustmentChanged() {
-        const newAdj = this.actor.vadjustment;
+        const newAdj = this.actor?.vadjustment;
         if (this._vadjustment === newAdj)
             return;
 

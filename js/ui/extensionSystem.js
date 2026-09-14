@@ -5,6 +5,7 @@ import St from 'gi://St';
 import Shell from 'gi://Shell';
 import * as Signals from '../misc/signals.js';
 
+import {AsyncMutex} from '../misc/asyncMutex.js';
 import * as Config from '../misc/config.js';
 import * as ExtensionDownloader from './extensionDownloader.js';
 import {formatError} from '../misc/errorUtils.js';
@@ -30,6 +31,7 @@ export class ExtensionManager extends Signals.EventEmitter {
     constructor() {
         super();
 
+        this._enableExtensionMutex = new AsyncMutex();
         this._initializationPromise = null;
         this._updateNotified = false;
         this._updateInProgress = false;
@@ -562,6 +564,8 @@ export class ExtensionManager extends Signals.EventEmitter {
     }
 
     async _onEnabledExtensionsChanged() {
+        await this._enableExtensionMutex.hold();
+
         const newEnabledExtensions = this._getEnabledExtensions();
 
         for (const extension of this._extensions.values()) {
@@ -595,6 +599,8 @@ export class ExtensionManager extends Signals.EventEmitter {
         }
 
         this._enabledExtensions = newEnabledExtensions;
+
+        this._enableExtensionMutex.release();
     }
 
     _onSettingsWritableChanged() {
@@ -685,12 +691,23 @@ export class ExtensionManager extends Signals.EventEmitter {
         return modesB.length - modesA.length;
     }
 
+
+    _queueEnabledExtensionsChanged() {
+        if (this._idleId)
+            GLib.source_remove(this._idleId);
+        this._idleId = GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+            this._idleId = 0;
+            this._onEnabledExtensionsChanged().catch(logError);
+            return GLib.SOURCE_REMOVE;
+        });
+    }
+
     async _loadExtensions() {
         global.settings.connect(`changed::${ENABLED_EXTENSIONS_KEY}`, () => {
-            this._onEnabledExtensionsChanged();
+            this._queueEnabledExtensionsChanged();
         });
         global.settings.connect(`changed::${DISABLED_EXTENSIONS_KEY}`, () => {
-            this._onEnabledExtensionsChanged();
+            this._queueEnabledExtensionsChanged();
         });
         global.settings.connect(`changed::${DISABLE_USER_EXTENSIONS_KEY}`, () => {
             this._onUserExtensionsEnabledChanged();

@@ -24,7 +24,13 @@
 #include <libecal/libecal.h>
 
 #include "calendar-sources.h"
+#include "gnome-shell-calendar-server.h"
+#include "reminder-launch-context.h"
 #include "reminder-watcher.h"
+
+#if !ICAL_CHECK_VERSION(4, 0, 0)
+#define i_cal_duration_as_utc_seconds i_cal_duration_as_int
+#endif
 
 /* Snooze for 9 minutes */
 #define SNOOZE_TIME_SECS (60 * 9)
@@ -283,7 +289,7 @@ reminders_process_one (ReminderWatcher *rw,
 
           case E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_START:
           case E_CAL_COMPONENT_ALARM_TRIGGER_RELATIVE_END:
-            offset = i_cal_duration_as_int (e_cal_component_alarm_trigger_get_duration (trigger));
+            offset = i_cal_duration_as_utc_seconds (e_cal_component_alarm_trigger_get_duration (trigger));
             break;
 
           default:
@@ -638,8 +644,11 @@ void
 reminder_watcher_open_in_app_by_id (EReminderWatcher *reminder_watcher,
                                     const char *id)
 {
+  CalendarServerApp *app = CALENDAR_SERVER_APP (g_application_get_default ());
   g_autoptr(GAppInfo) app_info = NULL;
+  g_autoptr(ReminderLaunchContext) launch_context = NULL;
   g_autoptr(GError) local_error = NULL;
+  g_autofree char *startup_notify_id = NULL;
 
   app_info = reminder_watcher_get_calendar_app ();
   if (app_info == NULL)
@@ -648,7 +657,11 @@ reminder_watcher_open_in_app_by_id (EReminderWatcher *reminder_watcher,
       return;
     }
 
-  if (g_app_info_launch_uris (app_info, NULL, NULL, &local_error))
+  startup_notify_id = calendar_server_app_take_startup_notify_id (app);
+  launch_context = reminder_launch_context_new ();
+  reminder_launch_context_set_startup_notify_id (launch_context, startup_notify_id);
+
+  if (g_app_info_launch_uris (app_info, NULL, G_APP_LAUNCH_CONTEXT (launch_context), &local_error))
     print_debug ("OpenInApp: Launched '%s'", g_app_info_get_id (app_info));
    else
     print_debug ("OpenInApp: Failed to launch '%s': %s", g_app_info_get_id (app_info), local_error ? local_error->message : "Unknown error");

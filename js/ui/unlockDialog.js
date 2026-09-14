@@ -15,7 +15,7 @@ import * as Main from './main.js';
 import * as MessageTray from './messageTray.js';
 import * as SwipeTracker from './swipeTracker.js';
 import {formatDateWithCFormatString} from '../misc/dateUtils.js';
-import {TimeLimitsState} from '../misc/timeLimitsManager.js';
+import {fixMarkup} from '../misc/util.js';
 import * as AuthMenuButton from '../gdm/authMenuButton.js';
 import * as AuthPrompt from '../gdm/authPrompt.js';
 import {AuthPromptStatus} from '../gdm/authPrompt.js';
@@ -170,13 +170,13 @@ const NotificationsBox = GObject.registerClass({
             let body = '';
             if (n.body) {
                 const bodyText = n.body.replace(/\n/g, ' ');
-                body = n.useBodyMarkup
-                    ? bodyText
-                    : GLib.markup_escape_text(bodyText, -1);
+                body = fixMarkup(bodyText, n.useBodyMarkup);
             }
 
+            const escapedTitle = fixMarkup(n.title, false);
+
             const label = new St.Label({style_class: 'unlock-dialog-notification-count-text'});
-            label.clutter_text.set_markup(`<b>${n.title}</b> ${body}`);
+            label.clutter_text.set_markup(`<b>${escapedTitle}</b> ${body}`);
             textBox.add_child(label);
 
             visible = true;
@@ -718,7 +718,7 @@ export const UnlockDialog = GObject.registerClass({
         // locked upon reaching the time limit. In those cases, tweak the lock screen,
         // so that the children cannot unlock without parental supervision.
         Main.timeLimitsManager.connectObject(
-            'notify::state', () => this._updateAuthBlocked(),
+            'notify::should-lock-session', () => this._updateAuthBlocked(),
             this);
         this._updateAuthBlocked();
 
@@ -1064,7 +1064,7 @@ export const UnlockDialog = GObject.registerClass({
 
     _updateAuthBlocked() {
         this._authPrompt?.setAuthBlocked(
-            Main.timeLimitsManager.state === TimeLimitsState.LIMIT_REACHED);
+            Main.timeLimitsManager.shouldLockSession);
     }
 
     cancel() {

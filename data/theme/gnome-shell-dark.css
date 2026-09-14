@@ -3134,19 +3134,19 @@ StScrollBar {
     .login-dialog-auth-menu-button-popup .login-dialog-auth-menu-item-section-label {
       font-size: 0.909em;
       font-weight: bold;
-      color: #fafafb; }
+      color: #ffffff; }
   .login-dialog-auth-menu-button-popup .login-dialog-auth-menu-item-icon {
-    color: #fafafb;
+    color: #ffffff;
     icon-size: 1.091em;
     margin-right: 8px; }
   .login-dialog-auth-menu-button-popup .login-dialog-auth-menu-item-box {
     spacing: 3px; }
     .login-dialog-auth-menu-button-popup .login-dialog-auth-menu-item-box-name {
-      color: #fafafb;
+      color: #ffffff;
       font-size: 1em;
       font-weight: bold; }
     .login-dialog-auth-menu-button-popup .login-dialog-auth-menu-item-box-description {
-      color: #fafafb;
+      color: #ffffff;
       font-size: 0.909em; }
 
 .login-dialog-auth-menu-button-indicator {
