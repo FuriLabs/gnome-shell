@@ -178,10 +178,12 @@ shell_polkit_authentication_agent_new (void)
 struct _AuthRequest {
   /* not holding ref */
   ShellPolkitAuthenticationAgent *agent;
-  GCancellable *cancellable;
-  gulong handler_id;
+  gulong cancelled_id;
+  guint idle_id;
 
   /* copies */
+  GCancellable *cancellable;
+
   gchar          *action_id;
   gchar          *message;
   gchar          *icon_name;
@@ -189,12 +191,14 @@ struct _AuthRequest {
   gchar          *cookie;
   GList          *identities;
 
-  GTask *simple;
+  GTask *task;
 };
 
 static void
 auth_request_free (AuthRequest *request)
 {
+  g_cancellable_disconnect (request->cancellable, request->cancelled_id);
+  g_clear_handle_id (&request->idle_id, g_source_remove);
   g_free (request->action_id);
   g_free (request->message);
   g_free (request->icon_name);
@@ -202,7 +206,8 @@ auth_request_free (AuthRequest *request)
   g_free (request->cookie);
   g_list_foreach (request->identities, (GFunc) g_object_unref, NULL);
   g_list_free (request->identities);
-  g_object_unref (request->simple);
+  g_object_unref (request->task);
+  g_clear_object (&request->cancellable);
   g_free (request);
 }
 
@@ -267,6 +272,8 @@ handle_cancelled_in_idle (gpointer user_data)
 {
   AuthRequest *request = user_data;
 
+  g_clear_handle_id (&request->idle_id, g_source_remove);
+
   print_debug ("CANCELLED %s cookie %s", request->action_id, request->cookie);
   if (request == request->agent->current_request)
     {
@@ -285,14 +292,13 @@ on_request_cancelled (GCancellable *cancellable,
                       gpointer      user_data)
 {
   AuthRequest *request = user_data;
-  guint id;
 
   /* post-pone to idle to handle GCancellable deadlock in
    *
    *  https://bugzilla.gnome.org/show_bug.cgi?id=642968
    */
-  id = g_idle_add_once (handle_cancelled_in_idle, request);
-  g_source_set_name_by_id (id, "[gnome-shell] handle_cancelled_in_idle");
+  request->idle_id = g_idle_add_once (handle_cancelled_in_idle, request);
+  g_source_set_name_by_id (request->idle_id, "[gnome-shell] handle_cancelled_in_idle");
 }
 
 static void
@@ -333,15 +339,14 @@ auth_request_complete (AuthRequest *request,
 
   if (!is_current)
     agent->scheduled_requests = g_list_remove (agent->scheduled_requests, request);
-  g_cancellable_disconnect (request->cancellable, request->handler_id);
 
   if (dismissed)
-    g_task_return_new_error (request->simple,
+    g_task_return_new_error (request->task,
                              POLKIT_ERROR,
                              POLKIT_ERROR_CANCELLED,
                              _("Authentication dialog was dismissed by the user"));
   else
-    g_task_return_boolean (request->simple, TRUE);
+    g_task_return_boolean (request->task, TRUE);
 
   auth_request_free (request);
 
@@ -395,13 +400,13 @@ initiate_authentication (PolkitAgentListener  *listener,
   request->cookie = g_strdup (cookie);
   request->identities = g_list_copy (identities);
   g_list_foreach (request->identities, (GFunc) g_object_ref, NULL);
-  request->simple = g_task_new (listener, NULL, callback, user_data);
-  g_task_set_source_tag (request->simple, initiate_authentication);
-  request->cancellable = cancellable;
-  request->handler_id = g_cancellable_connect (request->cancellable,
-                                               G_CALLBACK (on_request_cancelled),
-                                               request,
-                                               NULL); /* GDestroyNotify for request */
+  g_set_object (&request->cancellable, cancellable);
+  request->task = g_task_new (listener, NULL, callback, user_data);
+  g_task_set_source_tag (request->task, initiate_authentication);
+  request->cancelled_id = g_cancellable_connect (request->cancellable,
+                                                 G_CALLBACK (on_request_cancelled),
+                                                 request,
+                                                 NULL); /* GDestroyNotify for request */
 
   print_debug ("SCHEDULING %s cookie %s", request->action_id, request->cookie);
   agent->scheduled_requests = g_list_append (agent->scheduled_requests, request);
