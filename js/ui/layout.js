@@ -27,17 +27,6 @@ const HOT_CORNER_PRESSURE_TIMEOUT = 1000; // ms
 const SCREEN_TRANSITION_DELAY = 250; // ms
 const SCREEN_TRANSITION_DURATION = 500; // ms
 
-function isPopupMetaWindow(actor) {
-    switch (actor.meta_window.get_window_type()) {
-    case Meta.WindowType.DROPDOWN_MENU:
-    case Meta.WindowType.POPUP_MENU:
-    case Meta.WindowType.COMBO:
-        return true;
-    default:
-        return false;
-    }
-}
-
 export const MonitorConstraint = GObject.registerClass({
     Properties: {
         'primary': GObject.ParamSpec.boolean(
@@ -215,7 +204,6 @@ export const LayoutManager = GObject.registerClass({
 
         this._trackedActors = [];
         this._topActors = [];
-        this._isPopupWindowVisible = false;
         this._startingUp = true;
 
         // Set up stage hierarchy to group all UI actors under one container.
@@ -334,8 +322,6 @@ export const LayoutManager = GObject.registerClass({
             this._queueUpdateRegions.bind(this));
 
         const display = global.display;
-        display.connect('restacked',
-            this._windowsRestacked.bind(this));
         display.connect('in-fullscreen-changed',
             this._updateFullscreen.bind(this));
 
@@ -1052,18 +1038,6 @@ export const LayoutManager = GObject.registerClass({
         this._queueUpdateRegions();
     }
 
-    _windowsRestacked() {
-        let changed = false;
-
-        if (this._isPopupWindowVisible !== global.top_window_group.get_children().some(isPopupMetaWindow))
-            changed = true;
-
-        if (changed) {
-            this._updateVisibility();
-            this._queueUpdateRegions();
-        }
-    }
-
     _updateRegions() {
         if (this._updateRegionIdle) {
             const laters = global.compositor.get_laters();
@@ -1072,11 +1046,14 @@ export const LayoutManager = GObject.registerClass({
         }
 
         const struts = [];
-        const isPopupMenuVisible = global.top_window_group.get_children().some(isPopupMetaWindow);
 
         for (let i = 0; i < this._trackedActors.length; i++) {
             const actorData = this._trackedActors[i];
             if (!actorData.affectsStruts)
+                continue;
+
+            const monitor = this.findMonitorForActor(actorData.actor);
+            if (!monitor)
                 continue;
 
             let [x, y] = actorData.actor.get_transformed_position();
@@ -1086,61 +1063,53 @@ export const LayoutManager = GObject.registerClass({
             w = Math.round(w);
             h = Math.round(h);
 
-            let monitor = null;
-            if (actorData.affectsStruts)
-                monitor = this.findMonitorForActor(actorData.actor);
+            // Limit struts to the size of the screen
+            const x1 = Math.max(x, 0);
+            const x2 = Math.min(x + w, global.screen_width);
+            const y1 = Math.max(y, 0);
+            const y2 = Math.min(y + h, global.screen_height);
 
-            if (monitor) {
-                // Limit struts to the size of the screen
-                const x1 = Math.max(x, 0);
-                const x2 = Math.min(x + w, global.screen_width);
-                const y1 = Math.max(y, 0);
-                const y2 = Math.min(y + h, global.screen_height);
+            // Metacity wants to know what side of the monitor the
+            // strut is considered to be attached to. First, we find
+            // the monitor that contains the strut. If the actor is
+            // only touching one edge, or is touching the entire
+            // border of that monitor, then it's obvious which side
+            // to call it. If it's in a corner, we pick a side
+            // arbitrarily. If it doesn't touch any edges, or it
+            // spans the width/height across the middle of the
+            // screen, then we don't create a strut for it at all.
 
-                // Metacity wants to know what side of the monitor the
-                // strut is considered to be attached to. First, we find
-                // the monitor that contains the strut. If the actor is
-                // only touching one edge, or is touching the entire
-                // border of that monitor, then it's obvious which side
-                // to call it. If it's in a corner, we pick a side
-                // arbitrarily. If it doesn't touch any edges, or it
-                // spans the width/height across the middle of the
-                // screen, then we don't create a strut for it at all.
-
-                let side;
-                if (x1 <= monitor.x && x2 >= monitor.x + monitor.width) {
-                    if (y1 <= monitor.y)
-                        side = Meta.Side.TOP;
-                    else if (y2 >= monitor.y + monitor.height)
-                        side = Meta.Side.BOTTOM;
-                    else
-                        continue;
-                } else if (y1 <= monitor.y && y2 >= monitor.y + monitor.height) {
-                    if (x1 <= monitor.x)
-                        side = Meta.Side.LEFT;
-                    else if (x2 >= monitor.x + monitor.width)
-                        side = Meta.Side.RIGHT;
-                    else
-                        continue;
-                } else if (x1 <= monitor.x) {
-                    side = Meta.Side.LEFT;
-                } else if (y1 <= monitor.y) {
+            let side;
+            if (x1 <= monitor.x && x2 >= monitor.x + monitor.width) {
+                if (y1 <= monitor.y)
                     side = Meta.Side.TOP;
-                } else if (x2 >= monitor.x + monitor.width) {
-                    side = Meta.Side.RIGHT;
-                } else if (y2 >= monitor.y + monitor.height) {
+                else if (y2 >= monitor.y + monitor.height)
                     side = Meta.Side.BOTTOM;
-                } else {
+                else
                     continue;
-                }
-
-                const strutRect = new Mtk.Rectangle({x: x1, y: y1, width: x2 - x1, height: y2 - y1});
-                const strut = new Meta.Strut({rect: strutRect, side});
-                struts.push(strut);
+            } else if (y1 <= monitor.y && y2 >= monitor.y + monitor.height) {
+                if (x1 <= monitor.x)
+                    side = Meta.Side.LEFT;
+                else if (x2 >= monitor.x + monitor.width)
+                    side = Meta.Side.RIGHT;
+                else
+                    continue;
+            } else if (x1 <= monitor.x) {
+                side = Meta.Side.LEFT;
+            } else if (y1 <= monitor.y) {
+                side = Meta.Side.TOP;
+            } else if (x2 >= monitor.x + monitor.width) {
+                side = Meta.Side.RIGHT;
+            } else if (y2 >= monitor.y + monitor.height) {
+                side = Meta.Side.BOTTOM;
+            } else {
+                continue;
             }
-        }
 
-        this._isPopupWindowVisible = isPopupMenuVisible;
+            const strutRect = new Mtk.Rectangle({x: x1, y: y1, width: x2 - x1, height: y2 - y1});
+            const strut = new Meta.Strut({rect: strutRect, side});
+            struts.push(strut);
+        }
 
         const workspaceManager = global.workspace_manager;
         for (let w = 0; w < workspaceManager.n_workspaces; w++) {

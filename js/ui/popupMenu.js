@@ -20,6 +20,9 @@ export const Ornament = {
     NO_DOT: 4,
 };
 
+/**
+ * @param {St.Widget} child
+ */
 function isPopupMenuItemVisible(child) {
     if (child._delegate instanceof PopupMenuSection) {
         if (child._delegate.isEmpty())
@@ -751,9 +754,19 @@ export class PopupMenuBase extends Signals.EventEmitter {
     }
 
     _subMenuActiveChanged(submenu, submenuItem) {
-        if (this._activeMenuItem && this._activeMenuItem !== submenuItem)
+        if (this._activeMenuItem === submenuItem)
+            return;
+
+        if (this._activeMenuItem)
             this._activeMenuItem.active = false;
+
         this._activeMenuItem = submenuItem;
+
+        submenuItem?.connectObject('destroy', () => {
+            if (this._activeMenuItem === submenuItem)
+                this._activeMenuItem = null;
+        }, this);
+
         this.emit('active-changed', submenuItem);
     }
 
@@ -866,7 +879,11 @@ export class PopupMenuBase extends Signals.EventEmitter {
         if (menuItem instanceof PopupMenuSection) {
             menuItem.connectObject(
                 'active-changed', this._subMenuActiveChanged.bind(this),
-                'destroy', () => this.length--, this);
+                'destroy', () => {
+                    this.length--;
+                    this.disconnectObject(menuItem);
+                    menuItem.disconnectObject(this);
+                }, this);
 
             this.connectObject(
                 'open-state-changed', (self, open) => {
@@ -885,8 +902,10 @@ export class PopupMenuBase extends Signals.EventEmitter {
                 this.box.insert_child_below(menuItem.menu.actor, beforeItem);
 
             this._connectItemSignals(menuItem);
-            menuItem.menu.connectObject('active-changed',
-                this._subMenuActiveChanged.bind(this), this);
+            menuItem.menu.connectObject(
+                'active-changed', this._subMenuActiveChanged.bind(this),
+                'destroy', () => menuItem.menu.disconnectObject(this),
+                this);
             this.connectObject('menu-closed', () => {
                 menuItem.menu.close(BoxPointer.PopupAnimation.NONE);
             }, menuItem);

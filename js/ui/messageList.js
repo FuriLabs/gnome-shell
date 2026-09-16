@@ -30,6 +30,9 @@ const WIDTH_OFFSET_STACKED = 6;
 const HEIGHT_OFFSET_STACKED = 10;
 const HEIGHT_OFFSET_REDUCTION_STACKED = 1.4;
 
+const MAX_TITLE_LENGTH = 150;
+const MAX_BODY_LENGTH = 850;
+
 export const URLHighlighter = GObject.registerClass(
 class URLHighlighter extends St.Label {
     _init(text = '', lineWrap, allowMarkup) {
@@ -58,7 +61,8 @@ class URLHighlighter extends St.Label {
         this._clickGesture = new Clutter.ClickGesture();
         this._clickGesture.connectObject(
             'recognize', this._onClick.bind(this),
-            'may-recognize', this._checkInUrl.bind(this));
+            'may-recognize', this._checkInUrl.bind(this),
+            this);
         this.add_action(this._clickGesture);
     }
 
@@ -563,7 +567,7 @@ export const Message = GObject.registerClass({
     }
 
     set title(text) {
-        this._titleText = text;
+        this._titleText = this._limitString(text, MAX_TITLE_LENGTH);
         const title = text ? Util.fixMarkup(text.replace(/\n/g, ' '), false) : '';
         this.titleLabel.clutter_text.set_markup(title);
         this.notify('title');
@@ -574,7 +578,7 @@ export const Message = GObject.registerClass({
     }
 
     set body(text) {
-        this._bodyText = text;
+        this._bodyText = this._limitString(text, MAX_BODY_LENGTH);
         this._bodyLabel.setMarkup(text ? text.replace(/\n/g, ' ') : '',
             this._useBodyMarkup);
         this.notify('body');
@@ -682,6 +686,15 @@ export const Message = GObject.registerClass({
             }
         }
         return super.vfunc_key_press_event(event);
+    }
+
+    _limitString(string, limit) {
+        const segmenter = new Intl.Segmenter();
+        const graphemes =
+            Array.from(segmenter.segment(string))
+            .splice(0, limit)
+            .map(o => o.segment);
+        return graphemes.join('');
     }
 });
 
@@ -1516,6 +1529,8 @@ export const MessageView = GObject.registerClass({
 
         this._setupMpris();
         this._setupNotifications();
+
+        this._expandedGroup = null;
     }
 
     get empty() {
@@ -2008,13 +2023,15 @@ const FadeEffect = GObject.registerClass({
     }
 
     _vadjustmentChanged() {
-        const newAdj = this.actor.vadjustment;
+        const newAdj = this.actor?.vadjustment;
         if (this._vadjustment === newAdj)
             return;
 
         this._vadjustment?.disconnectObject(this);
         this._vadjustment = newAdj;
-        this._vadjustment?.connectObject('changed', this._updateEnabled.bind(this));
+        this._vadjustment?.connectObject(
+            'changed', this._updateEnabled.bind(this),
+            this);
         this._updateEnabled();
     }
 
@@ -2024,7 +2041,9 @@ const FadeEffect = GObject.registerClass({
 
         this.actor?.disconnectObject(this);
 
-        actor?.connectObject('notify::vadjustment', this._vadjustmentChanged.bind(this));
+        actor?.connectObject(
+            'notify::vadjustment', this._vadjustmentChanged.bind(this),
+            this);
         super.vfunc_set_actor(actor);
         this._vadjustmentChanged();
     }

@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '50.4',
+  version: '50.5',
   meson_version: '>= 1.3.0',
   license: 'GPL-2.0-or-later',
 )
@@ -32,7 +32,7 @@ gnome_desktop_req = '>= 40'
 pipewire_req = '>= 0.3.49'
 pango_req = '>= 1.46.0'
 
-nm_req = '>= 1.10.4'
+nm_req = '>= 1.24'
 secret_req = '>= 0.18'
 
 fs = import('fs')
