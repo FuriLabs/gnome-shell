@@ -34,7 +34,7 @@ index b45cc5a..cb42d47 100644
          if (this._mode === AuthPromptMode.UNLOCK_OR_LOG_IN)
              return;
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 88061e7..691754a 100644
+index c23be2c..4de323a 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -596,17 +596,15 @@ export const LoginDialog = GObject.registerClass({

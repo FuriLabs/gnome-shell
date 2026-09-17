@@ -8,10 +8,10 @@ They are just JS objects so we can treat them natively
  1 file changed, 29 insertions(+), 35 deletions(-)
 
 diff --git a/js/gdm/authMenuButton.js b/js/gdm/authMenuButton.js
-index 8a50f34..c08cfc7 100644
+index 52ff6bb..1ad4c71 100644
 --- a/js/gdm/authMenuButton.js
 +++ b/js/gdm/authMenuButton.js
-@@ -183,8 +183,8 @@ export class AuthMenuButton extends St.Button {
+@@ -188,8 +188,8 @@ export class AuthMenuButton extends St.Button {
          for (const menuItem of this._items.values())
              menuItem.setOrnament(PopupMenu.Ornament.NO_DOT);
  
@@ -22,7 +22,7 @@ index 8a50f34..c08cfc7 100644
              if (menuItem)
                  menuItem.setOrnament(PopupMenu.Ornament.DOT);
          }
-@@ -219,9 +219,7 @@ export class AuthMenuButton extends St.Button {
+@@ -224,9 +224,7 @@ export class AuthMenuButton extends St.Button {
  
      _findItems(searchCriteria) {
          const items = [];
@@ -33,7 +33,7 @@ index 8a50f34..c08cfc7 100644
              let criteriaMismatch = false;
              for (const key of Object.keys(searchCriteria)) {
                  if (this._deepEquals(item[key], searchCriteria[key]))
-@@ -234,22 +232,22 @@ export class AuthMenuButton extends St.Button {
+@@ -239,22 +237,22 @@ export class AuthMenuButton extends St.Button {
              if (criteriaMismatch)
                  continue;
  
@@ -62,7 +62,7 @@ index 8a50f34..c08cfc7 100644
          });
  
          this._sections.keys().forEach(sectionName => {
-@@ -268,12 +266,11 @@ export class AuthMenuButton extends St.Button {
+@@ -273,12 +271,11 @@ export class AuthMenuButton extends St.Button {
      }
  
      addItem(item) {
@@ -78,7 +78,7 @@ index 8a50f34..c08cfc7 100644
  
          const menuItem = new AuthMenuItem(item, {reactive: !this.readOnly});
          menuItem.connect('activate', () => {
-@@ -283,7 +280,7 @@ export class AuthMenuButton extends St.Button {
+@@ -288,7 +285,7 @@ export class AuthMenuButton extends St.Button {
          const section = this._getSection(item.sectionName);
          section.addMenuItem(menuItem);
  
@@ -87,7 +87,7 @@ index 8a50f34..c08cfc7 100644
          this.updateVisibility();
      }
  
-@@ -373,16 +370,16 @@ export class AuthMenuButton extends St.Button {
+@@ -378,16 +375,16 @@ export class AuthMenuButton extends St.Button {
      }
  
      _resolveItem(searchCriteria) {
@@ -109,7 +109,7 @@ index 8a50f34..c08cfc7 100644
          return {item, menuItem};
      }
  
-@@ -392,34 +389,32 @@ export class AuthMenuButton extends St.Button {
+@@ -397,34 +394,32 @@ export class AuthMenuButton extends St.Button {
              return;
  
          const {item} = resolved;
@@ -154,7 +154,7 @@ index 8a50f34..c08cfc7 100644
      }
  
      closeMenu() {
-@@ -489,8 +484,7 @@ export class AuthMenuButtonIndicator extends AuthMenuButton {
+@@ -494,8 +489,7 @@ export class AuthMenuButtonIndicator extends AuthMenuButton {
      }
  
      clearItems(searchCriteria = {}) {

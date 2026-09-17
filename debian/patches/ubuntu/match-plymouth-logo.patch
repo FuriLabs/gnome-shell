@@ -8,7 +8,7 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/1872594
  1 file changed, 37 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 307d08b..9d6e8f5 100644
+index a0c6434..d55ff34 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -22,6 +22,7 @@ import Gdm from 'gi://Gdm';

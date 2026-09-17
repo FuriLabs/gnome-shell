@@ -65,4 +65,3 @@ ubuntu/OverviewAdjustment-Add-function-to-wait-for-adjustments-c.patch
 ubuntu/overviewControls-Do-focus-navigation-on-Ctrl-Alt-Tab-afte.patch
 gnome-shell-test-tool-Wait-before-final-cleanup.patch
 ubuntu/Multi-monitor-magnifier-fixes.patch
-webLogin-Dipose-the-buttons-homogeneously-without-limitin.patch

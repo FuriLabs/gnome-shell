@@ -8,10 +8,10 @@ It's a safe component that should be able to access to shell bus
  1 file changed, 1 insertion(+)
 
 diff --git a/js/ui/shellDBus.js b/js/ui/shellDBus.js
-index 1e5a6a3..cfc7e79 100644
+index 89aa982..d4dc4f6 100644
 --- a/js/ui/shellDBus.js
 +++ b/js/ui/shellDBus.js
-@@ -25,6 +25,7 @@ export class GnomeShell {
+@@ -26,6 +26,7 @@ export class GnomeShell {
          this._dbusImpl.export(Gio.DBus.session, '/org/gnome/Shell');
  
          this._senderChecker = new DBusSenderChecker([

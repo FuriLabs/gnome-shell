@@ -17,7 +17,7 @@ get a null user name from the user manager.
  1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 691754a..369814e 100644
+index 4de323a..95656dc 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -529,6 +529,7 @@ export const LoginDialog = GObject.registerClass({

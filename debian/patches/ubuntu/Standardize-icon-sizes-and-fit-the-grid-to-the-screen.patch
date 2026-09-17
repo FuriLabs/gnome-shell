@@ -640,7 +640,7 @@ index e87225c..24a1b6e 100644
          const layoutManager = this.layout_manager;
          return layoutManager.getDropTarget(x, y, this._currentPage);
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 4973b5e..a506601 100644
+index e7426e6..d25eb51 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -100,6 +100,12 @@ export let timeLimitsDispatcher = null;
@@ -657,7 +657,7 @@ index 4973b5e..a506601 100644
  let _defaultCssStylesheet = null;
  let _cssStylesheet = null;
 diff --git a/js/ui/overviewControls.js b/js/ui/overviewControls.js
-index 253f5ee..1681eaf 100644
+index d7ef077..049f3d3 100644
 --- a/js/ui/overviewControls.js
 +++ b/js/ui/overviewControls.js
 @@ -20,7 +20,7 @@ import * as WorkspacesView from './workspacesView.js';

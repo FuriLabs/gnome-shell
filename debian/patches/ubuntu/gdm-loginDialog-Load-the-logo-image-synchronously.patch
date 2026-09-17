@@ -18,7 +18,7 @@ Bug-Ubuntu: https://launchpad.net/bugs/2145786
  3 files changed, 91 insertions(+), 5 deletions(-)
 
 diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
-index 9d6e8f5..96eb12a 100644
+index d55ff34..acb9579 100644
 --- a/js/gdm/loginDialog.js
 +++ b/js/gdm/loginDialog.js
 @@ -967,11 +967,16 @@ export const LoginDialog = GObject.registerClass({

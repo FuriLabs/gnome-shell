@@ -25,7 +25,7 @@ index 6f9cc62..10b7dbb 100644
    </schema>
  </schemalist>
 diff --git a/js/ui/main.js b/js/ui/main.js
-index 5868f0d..4973b5e 100644
+index 3fa7566..e7426e6 100644
 --- a/js/ui/main.js
 +++ b/js/ui/main.js
 @@ -13,6 +13,7 @@ import * as BrightnessManager from '../misc/brightnessManager.js';

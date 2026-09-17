@@ -54,7 +54,7 @@ index 16f765a..a38aa74 100644
              version: extension.metadata.version,
          };
 diff --git a/js/ui/extensionSystem.js b/js/ui/extensionSystem.js
-index df7819b..f1526cf 100644
+index 5ae8f24..da901dd 100644
 --- a/js/ui/extensionSystem.js
 +++ b/js/ui/extensionSystem.js
 @@ -7,6 +7,7 @@ import * as Signals from '../misc/signals.js';

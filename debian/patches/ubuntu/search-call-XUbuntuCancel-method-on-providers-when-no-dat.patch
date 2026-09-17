@@ -91,7 +91,7 @@ index b7289ad..de623cb 100644
          this.proxy.ActivateResultAsync(id).catch(logError);
      }
 diff --git a/js/ui/search.js b/js/ui/search.js
-index 0d8e188..483e2f1 100644
+index 0341739..721846e 100644
 --- a/js/ui/search.js
 +++ b/js/ui/search.js
 @@ -256,7 +256,9 @@ const SearchResultsBase = GObject.registerClass({
@@ -104,7 +104,7 @@ index 0d8e188..483e2f1 100644
  
          if (cancellable.is_cancelled()) {
              if (metas.length > 0)
-@@ -653,6 +655,10 @@ export const SearchResultsView = GObject.registerClass({
+@@ -656,6 +658,10 @@ export const SearchResultsView = GObject.registerClass({
  
          this._searchTimeoutId = 0;
          this._cancellable = new Gio.Cancellable();
@@ -115,7 +115,7 @@ index 0d8e188..483e2f1 100644
  
          this._registerProvider(new AppDisplay.AppSearchProvider());
  
-@@ -704,11 +710,31 @@ export const SearchResultsView = GObject.registerClass({
+@@ -707,11 +713,31 @@ export const SearchResultsView = GObject.registerClass({
          }
      }
  
@@ -147,7 +147,7 @@ index 0d8e188..483e2f1 100644
          this._defaultResult = null;
          this._startingSearch = false;
  
-@@ -783,6 +809,13 @@ export const SearchResultsView = GObject.registerClass({
+@@ -786,6 +812,13 @@ export const SearchResultsView = GObject.registerClass({
          if (this._terms.length > 0)
              isSubSearch = searchString.indexOf(previousSearchString) === 0;
  
