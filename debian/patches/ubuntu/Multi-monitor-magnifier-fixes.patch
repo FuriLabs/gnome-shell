@@ -13,10 +13,10 @@ Bug-Ubuntu: https://bugs.launchpad.net/bugs/2108011
  2 files changed, 7 insertions(+), 10 deletions(-)
 
 diff --git a/js/ui/background.js b/js/ui/background.js
-index 25b4f18..c0ddc53 100644
+index a9e3e69..b4769db 100644
 --- a/js/ui/background.js
 +++ b/js/ui/background.js
-@@ -108,7 +108,7 @@ import * as LoginManager from '../misc/loginManager.js';
+@@ -105,7 +105,7 @@ import * as LoginManager from '../misc/loginManager.js';
  import * as Main from './main.js';
  import * as Params from '../misc/params.js';
  
@@ -26,10 +26,10 @@ index 25b4f18..c0ddc53 100644
  const BACKGROUND_SCHEMA = 'org.gnome.desktop.background';
  const PRIMARY_COLOR_KEY = 'primary-color';
 diff --git a/js/ui/magnifier.js b/js/ui/magnifier.js
-index 9da1f77..3707589 100644
+index 27dddf2..18af9b8 100644
 --- a/js/ui/magnifier.js
 +++ b/js/ui/magnifier.js
-@@ -797,7 +797,6 @@ class ZoomRegion {
+@@ -825,7 +825,6 @@ class ZoomRegion {
          this._contrast = {r: NO_CHANGE, g: NO_CHANGE, b: NO_CHANGE};
  
          this._magView = null;
@@ -37,7 +37,7 @@ index 9da1f77..3707589 100644
          this._uiGroupClone = null;
          this._mouseSourceActor = mouseSourceActor;
          this._mouseActor  = null;
-@@ -1494,23 +1493,23 @@ class ZoomRegion {
+@@ -1522,23 +1521,23 @@ class ZoomRegion {
  
      _createActors() {
          // Add a group to clip the contents of the magnified view.
@@ -67,7 +67,7 @@ index 9da1f77..3707589 100644
          // Clone the group that contains all of UI on the screen.  This is the
          // chrome, the windows, etc.
          this._uiGroupClone = new Clutter.Clone({
-@@ -1550,7 +1549,6 @@ class ZoomRegion {
+@@ -1578,7 +1577,6 @@ class ZoomRegion {
          this._magShaderEffects = null;
          this._magView.destroy();
          this._magView = null;
@@ -75,7 +75,7 @@ index 9da1f77..3707589 100644
          this._uiGroupClone = null;
          this._mouseActor = null;
          this._crossHairsActor = null;
-@@ -1837,7 +1835,6 @@ class ZoomRegion {
+@@ -1865,7 +1863,6 @@ class ZoomRegion {
      }
  
      _monitorsChanged() {

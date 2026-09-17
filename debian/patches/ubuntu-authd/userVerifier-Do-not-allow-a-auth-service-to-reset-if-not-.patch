@@ -220,7 +220,7 @@ index cf6a4e1..7f4eb1c 100644
      }
  }
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index fa97167..841d086 100644
+index 0110c10..176a0c0 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -115,13 +115,16 @@ export class ShellUserVerifier extends Signals.EventEmitter {
