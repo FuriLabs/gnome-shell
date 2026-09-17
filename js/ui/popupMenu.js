@@ -862,7 +862,11 @@ export class PopupMenuBase extends Signals.EventEmitter {
         if (menuItem instanceof PopupMenuSection) {
             menuItem.connectObject(
                 'active-changed', this._subMenuActiveChanged.bind(this),
-                'destroy', () => this.length--, this);
+                'destroy', () => {
+                    this.length--;
+                    this.disconnectObject(menuItem);
+                    menuItem.disconnectObject(this);
+                }, this);
 
             this.connectObject(
                 'open-state-changed', (self, open) => {
@@ -881,8 +885,10 @@ export class PopupMenuBase extends Signals.EventEmitter {
                 this.box.insert_child_below(menuItem.menu.actor, beforeItem);
 
             this._connectItemSignals(menuItem);
-            menuItem.menu.connectObject('active-changed',
-                this._subMenuActiveChanged.bind(this), this);
+            menuItem.menu.connectObject(
+                'active-changed', this._subMenuActiveChanged.bind(this),
+                'destroy', () => menuItem.menu.disconnectObject(this),
+                this);
             this.connectObject('menu-closed', () => {
                 menuItem.menu.close({animate: false});
             }, menuItem);
@@ -1496,15 +1502,15 @@ export class PopupMenuManager {
         this._clickGesture = new Clutter.ClickGesture({
             recognize_on_press: true,
         });
-        this._clickGesture.connectObject(
-            'may-recognize', () => {
-                const menu = this.activeMenu;
-                const event = this._clickGesture.get_point_event(0);
-                const targetActor = global.stage.get_event_actor(event);
-                return !menu.actor.contains(targetActor);
-            },
-            'recognize', () => this.activeMenu.close(),
-            this);
+        this._clickGesture.connect('may-recognize', () => {
+            const menu = this.activeMenu;
+            const event = this._clickGesture.get_point_event(0);
+            const targetActor = global.stage.get_event_actor(event);
+            return !menu.actor.contains(targetActor);
+        });
+        this._clickGesture.connect('recognize', () => {
+            this.activeMenu.close();
+        });
 
         this._motionController = new Clutter.MotionController();
         this._motionController.connect(

@@ -187,6 +187,10 @@ const NMMenuItem = GObject.registerClass({
         return 0;
     }
 
+    activate() {
+        super.activate(Clutter.get_current_event());
+    }
+
     _activeConnectionStateChanged() {
         this.notify('is-active');
         this.notify('icon-name');
@@ -1079,7 +1083,7 @@ const NMWirelessDeviceItem = GObject.registerClass({
 
         this._deviceName = '';
 
-        this._networkItems = new Map();
+        this._networks = [];
         this._itemSorter = new ItemSorter({
             sortFunc: (one, two) => one.network.compare(two.network),
         });
@@ -1120,10 +1124,8 @@ const NMWirelessDeviceItem = GObject.registerClass({
         this._availableConnectionsChanged();
         this._updateItemsVisibility();
 
-        this.connect('destroy', () => {
-            for (const net of this._networkItems.keys())
-                net.destroy();
-        });
+        this.connect('destroy',
+            () => this._networks.forEach(net => net.destroy()));
     }
 
     get icon_name() {
@@ -1215,8 +1217,7 @@ const NMWirelessDeviceItem = GObject.registerClass({
 
     _availableConnectionsChanged() {
         const connections = this._device.get_available_connections();
-        for (const net of this._networkItems.keys())
-            net.checkConnections(connections);
+        this._networks.forEach(net => net.checkConnections(connections));
     }
 
     _addAccessPoint(ap) {
@@ -1232,8 +1233,7 @@ const NMWirelessDeviceItem = GObject.registerClass({
             return;
         }
 
-        let network = [...this._networkItems.keys()]
-            .find(n => n.checkAccessPoint(ap));
+        let network = this._networks.find(n => n.checkAccessPoint(ap));
 
         if (!network) {
             network = new WirelessNetwork(this._device);
@@ -1244,28 +1244,32 @@ const NMWirelessDeviceItem = GObject.registerClass({
             network.connectObject(
                 'notify::icon-name', () => this._resortItem(item),
                 'notify::is-active', () => this._resortItem(item),
+                'destroy', () => {
+                    const idx = this._networks.indexOf(network);
+                    if (idx >= 0)
+                        this._networks.splice(idx, 1);
+
+                    this._itemSorter.delete(item);
+                    item.destroy();
+                },
                 this);
 
             const pos = this._itemSorter.upsert(item);
             this.section.addMenuItem(item, pos);
-            this._networkItems.set(network, item);
+            this._networks.push(network);
         }
 
         network.addAccessPoint(ap);
     }
 
     _removeAccessPoint(ap) {
-        const network = [...this._networkItems.keys()]
-            .find(n => n.removeAccessPoint(ap));
+        ap.disconnectObject(this);
+
+        const network = this._networks.find(n => n.removeAccessPoint(ap));
 
         if (!network || network.hasAccessPoints())
             return;
 
-        const item = this._networkItems.get(network);
-        this._itemSorter.delete(item);
-        this._networkItems.delete(network);
-
-        item?.destroy();
         network.destroy();
     }
 
@@ -1799,7 +1803,7 @@ class NMWirelessToggle extends NMDeviceToggle {
                 this._startScanning();
             else
                 this._stopScanning();
-        });
+        }, this);
 
         this.menu.setHeader('network-wireless-symbolic', _('Wi–Fi'));
         this.menuButtonAccessibleName = _('Open Wi–Fi menu');

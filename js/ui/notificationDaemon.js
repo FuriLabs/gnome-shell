@@ -5,6 +5,7 @@ import GObject from 'gi://GObject';
 import Shell from 'gi://Shell';
 
 import * as Config from '../misc/config.js';
+import {emitSignalToDestination} from '../misc/dbusUtils.js';
 import * as Main from './main.js';
 import * as MessageTray from './messageTray.js';
 
@@ -12,6 +13,9 @@ import {loadInterfaceXML} from '../misc/fileUtils.js';
 import {NotificationErrors, NotificationError} from '../misc/dbusErrors.js';
 
 const FdoNotificationsIface = loadInterfaceXML('org.freedesktop.Notifications');
+
+const NOTIFICATION_SERIALIZED_NAME = 'notifications';
+const NOTIFICATION_SERIALIZED_FORMAT = 'a(sa(sv))';
 
 /** @enum {number} */
 const NotificationClosedReason = {
@@ -192,7 +196,7 @@ class FdoNotificationDaemon {
                     notificationClosedReason = NotificationClosedReason.UNDEFINED;
                     break;
                 }
-                this._emitNotificationClosed(id, notificationClosedReason);
+                this._emitNotificationClosed(id, notificationClosedReason, invocation);
                 notification.disconnectObject(this);
             });
         }
@@ -222,8 +226,8 @@ class FdoNotificationDaemon {
                     hasDefaultAction = true;
                 } else {
                     notification.addAction(label, () => {
-                        this._emitActivationToken(source, id);
-                        this._emitActionInvoked(id, actionId);
+                        this._emitActivationToken(source, id, invocation);
+                        this._emitActionInvoked(id, actionId, invocation);
                     });
                 }
             }
@@ -231,8 +235,8 @@ class FdoNotificationDaemon {
 
         if (hasDefaultAction) {
             notification.connectObject('activated', () => {
-                this._emitActivationToken(source, id);
-                this._emitActionInvoked(id, 'default');
+                this._emitActivationToken(source, id, invocation);
+                this._emitActionInvoked(id, 'default', invocation);
             }, this);
         } else {
             notification.connectObject('activated', () => {
@@ -297,20 +301,23 @@ class FdoNotificationDaemon {
         ];
     }
 
-    _emitNotificationClosed(id, reason) {
-        this._dbusImpl.emit_signal('NotificationClosed',
+    _emitNotificationClosed(id, reason, invocation) {
+        const sender = invocation.get_sender();
+        emitSignalToDestination(this._dbusImpl, sender, 'NotificationClosed',
             GLib.Variant.new('(uu)', [id, reason]));
     }
 
-    _emitActionInvoked(id, action) {
-        this._dbusImpl.emit_signal('ActionInvoked',
+    _emitActionInvoked(id, action, invocation) {
+        const sender = invocation.get_sender();
+        emitSignalToDestination(this._dbusImpl, sender, 'ActionInvoked',
             GLib.Variant.new('(us)', [id, action]));
     }
 
-    _emitActivationToken(source, id) {
+    _emitActivationToken(source, id, invocation) {
+        const sender = invocation.get_sender();
         const context = global.create_app_launch_context(0, -1);
         const token = context.get_startup_notify_id(null, []);
-        this._dbusImpl.emit_signal('ActivationToken',
+        emitSignalToDestination(this._dbusImpl, sender, 'ActivationToken',
             GLib.Variant.new('(us)', [id, token]));
     }
 }
@@ -461,6 +468,9 @@ class GtkNotificationDaemonNotification extends MessageTray.Notification {
             this.source.activateAction(actionId.slice('app.'.length), target);
         else
             this.source.emitActionInvoked(this.id, actionId, target);
+
+        Main.overview.hide();
+        Main.panel.closeCalendar();
     }
 
     _onButtonClicked(button) {
@@ -513,9 +523,6 @@ class GtkNotificationDaemonAppSource extends MessageTray.Source {
         this._app.activate_action(actionId, params, 0, -1, null).catch(error => {
             logError(error, `Failed to activate action for ${this._appId}`);
         });
-
-        Main.overview.hide();
-        Main.panel.closeCalendar();
     }
 
     emitActionInvoked(notificationId, actionId, target) {
@@ -611,7 +618,10 @@ class GtkNotificationDaemon {
         this._isLoading = true;
 
         try {
-            const value = global.get_persistent_state('a(sa(sv))', 'notifications');
+            const value = global.get_persistent_state(
+                NOTIFICATION_SERIALIZED_FORMAT,
+                NOTIFICATION_SERIALIZED_NAME);
+
             if (value) {
                 const sources = value.deepUnpack();
                 sources.forEach(([appId, notifications]) => {
@@ -654,7 +664,10 @@ class GtkNotificationDaemon {
             sources.push(source.serialize());
         }
 
-        global.set_persistent_state('notifications', new GLib.Variant('a(sa(sv))', sources));
+        global.set_persistent_state(NOTIFICATION_SERIALIZED_NAME,
+            sources.length
+                ? new GLib.Variant(NOTIFICATION_SERIALIZED_FORMAT, sources)
+                : null);
     }
 
     AddNotificationAsync(params, invocation) {
