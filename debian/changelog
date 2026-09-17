@@ -1,4 +1,4 @@
-gnome-shell (51~beta-1) UNRELEASED; urgency=medium
+gnome-shell (51.0-1) UNRELEASED; urgency=medium
 
   [ Daniel van Vugt ]
   * New upstream release 51.alpha
@@ -12,12 +12,13 @@ gnome-shell (51~beta-1) UNRELEASED; urgency=medium
   * d/control: Update dependency versions as per meson.build
   * d/control: Explicitly build-depend on cairo as per meson.build
   * d/copyright: Update
+  * New upstream release 51.0
 
   [ Marco Trevisan (Treviño) ]
   * debian/source_gnome-shell.py: Add all mutter package versions
   * debian/control: Update build and runtime dependencies
 
- -- Simon McVittie <smcv@debian.org>  Thu, 17 Sep 2026 14:56:41 +0100
+ -- Simon McVittie <smcv@debian.org>  Thu, 17 Sep 2026 14:57:23 +0100
 
 gnome-shell (50.5-1) unstable; urgency=medium
 
