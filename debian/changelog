@@ -4,6 +4,7 @@ gnome-shell (51~rc-1) UNRELEASED; urgency=medium
   * Add Multi-monitor-magnifier-fixes.patch (LP: #2108011)
 
   [ Marco Trevisan (Treviño) ]
+  * New upstream release
   * d/p: Handle various linting issues in ubuntu patches
   * d/p: Ensure enabled mechanisms equality function is always set
   * d/p/ubuntu-authd: Fix mechanisms mapping for new webView API.
@@ -11,9 +12,13 @@ gnome-shell (51~rc-1) UNRELEASED; urgency=medium
   * d/p/ubuntu-authd: Simplify the choice list selectors
   * d/p: Dispose the webLogin buttons homogeneously without limiting their size.
     Related to: https://github.com/canonical/authd/issues/1928
-  * New upstream release
+  * d/p: Refresh patches and drop the ones applied upstream
+  * debian/control: Update build and runtime dependencies
+  * d/p/ubuntu-authd: Fix selecting owner service when none was set
+  * d/p/ubuntu-authd: Do not cause unneeded resets on no changes
+  * d/p/ubuntu-authd: Properly support users that have not been created yet
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 14 Sep 2026 16:16:41 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Thu, 17 Sep 2026 18:32:44 +0200
 
 gnome-shell (51~beta-0ubuntu1) stonking; urgency=medium
 
