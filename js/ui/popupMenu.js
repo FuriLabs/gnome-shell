@@ -20,6 +20,9 @@ export const Ornament = {
     NO_DOT: 4,
 };
 
+/**
+ * @param {St.Widget} child
+ */
 function isPopupMenuItemVisible(child) {
     if (child._delegate instanceof PopupMenuSection) {
         if (child._delegate.isEmpty())
@@ -62,8 +65,8 @@ export function arrowIcon(side) {
     return arrow;
 }
 
-export const PopupBaseMenuItem = GObject.registerClass({
-    Properties: {
+export class PopupBaseMenuItem extends St.BoxLayout {
+    static [GObject.properties] = {
         'active': GObject.ParamSpec.boolean(
             'active', null, null,
             GObject.ParamFlags.READWRITE,
@@ -72,11 +75,23 @@ export const PopupBaseMenuItem = GObject.registerClass({
             'sensitive', null, null,
             GObject.ParamFlags.READWRITE,
             true),
-    },
-    Signals: {
+    };
+
+    static [GObject.signals] = {
         'activate': {param_types: [Clutter.Event.$gtype]},
-    },
-}, class PopupBaseMenuItem extends St.BoxLayout {
+    };
+
+    static {
+        GObject.registerClass(this);
+
+        const bindingPool = this.get_binding_pool();
+
+        bindingPool.install_closure(
+            'activate', Clutter.KEY_space, 0, obj => obj._activateBinding());
+        bindingPool.install_closure(
+            'activate', Clutter.KEY_Return, 0, obj => obj._activateBinding());
+    }
+
     _init(params) {
         params = Params.parse(params, {
             reactive: true,
@@ -126,6 +141,16 @@ export const PopupBaseMenuItem = GObject.registerClass({
             this.bind_property('hover', this, 'active', GObject.BindingFlags.SYNC_CREATE);
     }
 
+    _activateBinding() {
+        if (this._activatable) {
+            const event = Clutter.get_current_event();
+            this.activate(event);
+            return Clutter.EVENT_STOP;
+        }
+
+        return Clutter.EVENT_PROPAGATE;
+    }
+
     get actor() {
         /* This is kept for compatibility with current implementation, and we
            don't want to warn here yet since PopupMenu depends on this */
@@ -141,42 +166,6 @@ export const PopupBaseMenuItem = GObject.registerClass({
 
     _setParent(parent) {
         this._parent = parent;
-    }
-
-    vfunc_key_press_event(event) {
-        if (global.focus_manager.navigate_from_event(event))
-            return Clutter.EVENT_STOP;
-
-        if (!this._activatable)
-            return super.vfunc_key_press_event(event);
-
-        let state = event.get_state();
-
-        // if user has a modifier down (except capslock and numlock)
-        // then don't handle the key press here
-        state &= ~Clutter.ModifierType.LOCK_MASK;
-        state &= ~Clutter.ModifierType.MOD2_MASK;
-        state &= Clutter.ModifierType.MODIFIER_MASK;
-
-        if (state)
-            return Clutter.EVENT_PROPAGATE;
-
-        const symbol = event.get_key_symbol();
-        if (symbol === Clutter.KEY_space || symbol === Clutter.KEY_Return) {
-            this.activate(event);
-            return Clutter.EVENT_STOP;
-        }
-
-        // Support wrapping navigation in the menu
-        if (symbol === Clutter.KEY_Up || symbol === Clutter.KEY_Down) {
-            const group = global.focus_manager.get_group(this);
-            const direction = symbol === Clutter.KEY_Up
-                ? St.DirectionType.UP
-                : St.DirectionType.DOWN;
-            if (group?.navigate_focus(this, direction, true))
-                return Clutter.EVENT_STOP;
-        }
-        return Clutter.EVENT_PROPAGATE;
     }
 
     vfunc_key_focus_in() {
@@ -278,7 +267,7 @@ export const PopupBaseMenuItem = GObject.registerClass({
         else
             this.remove_style_class_name('popup-ornamented-menu-item');
     }
-});
+};
 
 export const PopupMenuItem = GObject.registerClass(
 class PopupMenuItem extends PopupBaseMenuItem {
@@ -748,9 +737,19 @@ export class PopupMenuBase extends Signals.EventEmitter {
     }
 
     _subMenuActiveChanged(submenu, submenuItem) {
-        if (this._activeMenuItem && this._activeMenuItem !== submenuItem)
+        if (this._activeMenuItem === submenuItem)
+            return;
+
+        if (this._activeMenuItem)
             this._activeMenuItem.active = false;
+
         this._activeMenuItem = submenuItem;
+
+        submenuItem?.connectObject('destroy', () => {
+            if (this._activeMenuItem === submenuItem)
+                this._activeMenuItem = null;
+        }, this);
+
         this.emit('active-changed', submenuItem);
     }
 
@@ -863,7 +862,11 @@ export class PopupMenuBase extends Signals.EventEmitter {
         if (menuItem instanceof PopupMenuSection) {
             menuItem.connectObject(
                 'active-changed', this._subMenuActiveChanged.bind(this),
-                'destroy', () => this.length--, this);
+                'destroy', () => {
+                    this.length--;
+                    this.disconnectObject(menuItem);
+                    menuItem.disconnectObject(this);
+                }, this);
 
             this.connectObject(
                 'open-state-changed', (self, open) => {
@@ -882,8 +885,10 @@ export class PopupMenuBase extends Signals.EventEmitter {
                 this.box.insert_child_below(menuItem.menu.actor, beforeItem);
 
             this._connectItemSignals(menuItem);
-            menuItem.menu.connectObject('active-changed',
-                this._subMenuActiveChanged.bind(this), this);
+            menuItem.menu.connectObject(
+                'active-changed', this._subMenuActiveChanged.bind(this),
+                'destroy', () => menuItem.menu.disconnectObject(this),
+                this);
             this.connectObject('menu-closed', () => {
                 menuItem.menu.close({animate: false});
             }, menuItem);
@@ -934,13 +939,29 @@ export class PopupMenuBase extends Signals.EventEmitter {
         }
     }
 
+    _maybeStartKeynav(params) {
+        let currentEvent = params['triggerEvent'];
+        if (currentEvent === undefined) {
+            currentEvent = Clutter.get_current_event();
+            if (global.backend.get_last_input_device() !== currentEvent?.get_source_device())
+                return;
+        }
+        switch (currentEvent?.type()) {
+        case Clutter.EventType.KEY_PRESS:
+        case Clutter.EventType.KEY_RELEASE:
+            this.actor.navigate_focus(null, St.DirectionType.TAB_FORWARD, false);
+            break;
+        }
+    }
+
     /**
-     * @param {object} _params
-     * @param {bool} [_params.animate=true] whether to animate the transition
+     * @param {object} params
+     * @param {bool} [params.animate=true] whether to animate the transition
+     * @param {Clutter.Event} [params.triggerEvent] the keyboard/mouse event that triggered opening this
      *
      * @returns {bool} whether the open state changed
      */
-    open(_params) {
+    open(params = {}) {
         if (this.isOpen)
             return false;
 
@@ -949,6 +970,8 @@ export class PopupMenuBase extends Signals.EventEmitter {
 
         this.isOpen = true;
         this.emit('open-state-changed', true);
+        this.actor.show();
+        this._maybeStartKeynav(params);
         return true;
     }
 
@@ -999,17 +1022,21 @@ export class PopupMenu extends PopupMenuBase {
 
         this._boxPointer.bin.set_child(this.box);
         this.actor.add_style_class_name('popup-menu');
+        this.actor.set_keynav_flags(St.KeynavFlags.WRAP_VERTICALLY);
 
         global.focus_manager.add_group(this.actor);
         this.actor.reactive = true;
 
+        this._keyController = new Clutter.KeyController();
+        this._keyController.connect('key-press', () => this._onKeyPress());
+
         if (this.sourceActor) {
             this.sourceActor.connectObject(
-                'key-press-event', this._onKeyPress.bind(this),
                 'notify::mapped', () => {
                     if (!this.sourceActor.mapped)
                         this.close();
                 }, this);
+            this.sourceActor.add_action(this._keyController);
         }
 
         this._systemModalOpenedId = 0;
@@ -1023,10 +1050,10 @@ export class PopupMenu extends PopupMenuBase {
         this._openedSubMenu = submenu;
     }
 
-    _onKeyPress(actor, event) {
+    _onKeyPress() {
         // Disable toggling the menu by keyboard
         // when it cannot be toggled by pointer
-        if (!actor.reactive)
+        if (!this.sourceActor.reactive)
             return Clutter.EVENT_PROPAGATE;
 
         let navKey;
@@ -1045,18 +1072,12 @@ export class PopupMenu extends PopupMenuBase {
             break;
         }
 
-        let state = event.get_state();
+        const [, symbol] = this._keyController.get_key();
+        const [, pressed, latched] = this._keyController.get_state();
 
-        // if user has a modifier down (except capslock and numlock)
-        // then don't handle the key press here
-        state &= ~Clutter.ModifierType.LOCK_MASK;
-        state &= ~Clutter.ModifierType.MOD2_MASK;
-        state &= Clutter.ModifierType.MODIFIER_MASK;
-
-        if (state)
+        // If user has a modifier down then don't handle the key presses
+        if (pressed || latched)
             return Clutter.EVENT_PROPAGATE;
-
-        const symbol = event.get_key_symbol();
 
         if (symbol === Clutter.KEY_space || symbol === Clutter.KEY_Return) {
             this.toggle();
@@ -1093,10 +1114,11 @@ export class PopupMenu extends PopupMenuBase {
      * @param {object} params
      * @param {bool} [params.animate=true] whether to animate the transition
      * @param {bool} [params.fadeOnly=false] whether to skip motion bits of the animation
+     * @param {Clutter.Event} [params.triggerEvent] the keyboard/mouse event that triggered opening this
      *
      * @returns {bool} whether the open state changed
      */
-    open(params) {
+    open(params = {}) {
         if (!super.open(params))
             return false;
 
@@ -1208,8 +1230,12 @@ export class PopupSubMenu extends PopupMenuBase {
 
         this.actor._delegate = this;
         this.actor.clip_to_allocation = true;
-        this.actor.connect('key-press-event', this._onKeyPressEvent.bind(this));
         this.actor.hide();
+
+        const keyController = new Clutter.KeyController();
+        keyController.connect(
+            'key-press', controller => this._onKeyPress(controller));
+        this.actor.add_action(keyController);
     }
 
     _needsScrollbar() {
@@ -1232,14 +1258,13 @@ export class PopupSubMenu extends PopupMenuBase {
     /**
      * @param {object} params
      * @param {bool} [params.animate=true] whether to animate the transition
+     * @param {Clutter.Event} [params.triggerEvent] the keyboard/mouse event that triggered opening this
      *
      * @returns {bool} whether the open state changed
      */
     open(params = {}) {
         if (!super.open(params))
             return false;
-
-        this.actor.show();
 
         let {animate = true} = params;
         const needsScrollbar = this._needsScrollbar();
@@ -1316,12 +1341,13 @@ export class PopupSubMenu extends PopupMenuBase {
         return true;
     }
 
-    _onKeyPressEvent(actor, event) {
+    _onKeyPress(controller) {
         // Move focus back to parent menu if the user types Left.
+        const [, symbol] = controller.get_key();
 
-        if (this.isOpen && event.get_key_symbol() === Clutter.KEY_Left) {
+        if (this.isOpen && symbol === Clutter.KEY_Left) {
             this.close();
-            this.sourceActor._delegate.active = true;
+            this.sourceActor.grab_key_focus();
             return Clutter.EVENT_STOP;
         }
 
@@ -1359,8 +1385,21 @@ export class PopupMenuSection extends PopupMenuBase {
     }
 }
 
-export const PopupSubMenuMenuItem = GObject.registerClass(
-class PopupSubMenuMenuItem extends PopupBaseMenuItem {
+export class PopupSubMenuMenuItem extends PopupBaseMenuItem {
+    static {
+        GObject.registerClass(this);
+
+        const bindingPool = this.get_binding_pool();
+
+        bindingPool.install_closure(
+            'open', Clutter.KEY_Right, 0,
+            obj => {
+                obj._setOpenState(true);
+                obj.menu.actor.navigate_focus(null, St.DirectionType.DOWN, false);
+                return Clutter.EVENT_STOP;
+            });
+    }
+
     _init(text, wantIcon) {
         super._init();
 
@@ -1443,25 +1482,10 @@ class PopupSubMenuMenuItem extends PopupBaseMenuItem {
         return this.menu.isOpen;
     }
 
-    vfunc_key_press_event(event) {
-        const symbol = event.get_key_symbol();
-
-        if (symbol === Clutter.KEY_Right) {
-            this._setOpenState(true);
-            this.menu.actor.navigate_focus(null, St.DirectionType.DOWN, false);
-            return Clutter.EVENT_STOP;
-        } else if (symbol === Clutter.KEY_Left && this._getOpenState()) {
-            this._setOpenState(false);
-            return Clutter.EVENT_STOP;
-        }
-
-        return super.vfunc_key_press_event(event);
-    }
-
     activate(_event) {
         this._setOpenState(!this._getOpenState());
     }
-});
+};
 
 /* Basic implementation of a menu manager.
  * Call addMenu to add menus
@@ -1471,6 +1495,26 @@ export class PopupMenuManager {
         this._grabParams = Params.parse(grabParams,
             {actionMode: Shell.ActionMode.POPUP});
         this._menus = [];
+
+        this._keyController = new Clutter.KeyController();
+        this._keyController.connect('key-press', () => this._keyPress());
+
+        this._clickGesture = new Clutter.ClickGesture({
+            recognize_on_press: true,
+        });
+        this._clickGesture.connect('may-recognize', () => {
+            const menu = this.activeMenu;
+            const event = this._clickGesture.get_point_event(0);
+            const targetActor = global.stage.get_event_actor(event);
+            return !menu.actor.contains(targetActor);
+        });
+        this._clickGesture.connect('recognize', () => {
+            this.activeMenu.close();
+        });
+
+        this._motionController = new Clutter.MotionController();
+        this._motionController.connect(
+            'enter', (_, sprite) => this._checkHoveredMenu(sprite));
     }
 
     addMenu(menu, position) {
@@ -1480,8 +1524,6 @@ export class PopupMenuManager {
         menu.connectObject(
             'open-state-changed', this._onMenuOpenState.bind(this),
             'destroy', () => this.removeMenu(menu), this);
-        menu.actor.connectObject('captured-event',
-            this._onCapturedEvent.bind(this), this);
 
         if (position === undefined)
             this._menus.push(menu);
@@ -1493,6 +1535,10 @@ export class PopupMenuManager {
         if (menu === this.activeMenu) {
             Main.popModal(this._grab);
             this._grab = null;
+
+            menu.actor.remove_action(this._keyController);
+            menu.actor.remove_action(this._clickGesture);
+            menu.actor.remove_action(this._motionController);
 
             if (this._keyFocusId) {
                 global.stage.disconnect(this._keyFocusId);
@@ -1519,9 +1565,22 @@ export class PopupMenuManager {
             const oldGrab = this._grab;
             this._grab = Main.pushModal(menu.actor, this._grabParams);
             this.activeMenu = menu;
+            oldMenu?.actor.remove_action(this._keyController);
+            oldMenu?.actor.remove_action(this._clickGesture);
+            oldMenu?.actor.remove_action(this._motionController);
             oldMenu?.close({fadeOnly: true});
             if (oldGrab)
                 Main.popModal(oldGrab);
+
+            menu.actor.add_action_full(
+                'popup-manager-key-controller', Clutter.EventPhase.CAPTURE,
+                this._keyController);
+            menu.actor.add_action_full(
+                'popup-manager-click-gesture', Clutter.EventPhase.CAPTURE,
+                this._clickGesture);
+            menu.actor.add_action_full(
+                'popup-manager-motion-controller', Clutter.EventPhase.CAPTURE,
+                this._motionController);
 
             if (!this._keyFocusId) {
                 this._keyFocusId =
@@ -1541,6 +1600,10 @@ export class PopupMenuManager {
             Main.popModal(this._grab);
             this._grab = null;
 
+            menu.actor.remove_action(this._keyController);
+            menu.actor.remove_action(this._clickGesture);
+            menu.actor.remove_action(this._motionController);
+
             if (this._keyFocusId) {
                 global.stage.disconnect(this._keyFocusId);
                 delete this._keyFocusId;
@@ -1552,33 +1615,30 @@ export class PopupMenuManager {
         newMenu.open({fadeOnly: this.activeMenu != null});
     }
 
-    _onCapturedEvent(actor, event) {
-        const menu = actor._delegate;
-        const targetActor = global.stage.get_event_actor(event);
+    _keyPress() {
+        const [, symbol] = this._keyController.get_key();
+        const menu = this.activeMenu;
 
-        if (event.type() === Clutter.EventType.KEY_PRESS) {
-            const symbol = event.get_key_symbol();
-            if (symbol === Clutter.KEY_Down &&
-                global.stage.get_key_focus() === menu.actor) {
-                actor.navigate_focus(null, St.DirectionType.TAB_FORWARD, false);
-                return Clutter.EVENT_STOP;
-            } else if (symbol === Clutter.KEY_Escape && menu.isOpen) {
-                menu.close();
-                return Clutter.EVENT_STOP;
-            }
-        } else if (event.type() === Clutter.EventType.ENTER &&
-                   (event.get_flags() & Clutter.EventFlags.FLAG_GRAB_NOTIFY) === 0) {
-            const hoveredMenu = this._findMenuForSource(targetActor);
-
-            if (hoveredMenu && hoveredMenu !== menu)
-                this._changeMenu(hoveredMenu);
-        } else if ((event.type() === Clutter.EventType.BUTTON_PRESS ||
-                    event.type() === Clutter.EventType.TOUCH_BEGIN) &&
-                   !actor.contains(targetActor)) {
+        if (symbol === Clutter.KEY_Down &&
+            global.stage.get_key_focus() === menu.actor) {
+            menu.actor.navigate_focus(null, St.DirectionType.TAB_FORWARD, false);
+            return Clutter.EVENT_STOP;
+        } else if (symbol === Clutter.KEY_Escape && menu.isOpen) {
             menu.close();
+            return Clutter.EVENT_STOP;
         }
 
         return Clutter.EVENT_PROPAGATE;
+    }
+
+    _checkHoveredMenu(sprite) {
+        const {x, y} = sprite.get_coords();
+        const targetActor =
+              global.stage.get_actor_at_pos(Clutter.PickMode.ALL, x, y);
+        const hoveredMenu = this._findMenuForSource(targetActor);
+
+        if (hoveredMenu && hoveredMenu !== this.activeMenu)
+            this._changeMenu(hoveredMenu);
     }
 
     _findMenuForSource(source) {

@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '51.beta',
+  version: '51.0',
   meson_version: '>= 1.3.0',
   license: 'GPL-2.0-or-later',
 )
@@ -24,7 +24,7 @@ gcr_req = '>= 3.90.0'
 gio_req = '>= 2.86.0'
 gjs_req = '>= 1.87.1'
 gtk_req = '>= 4.0'
-mutter_req = '>= 51.beta'
+mutter_req = '>= 51.0'
 polkit_req = '>= 0.100'
 schemas_req = '>= 50.alpha'
 systemd_req = '>= 246'
@@ -33,8 +33,9 @@ pipewire_req = '>= 0.3.49'
 pango_req = '>= 1.46.0'
 json_glib_req = '>= 1.6'
 rsvg_req = '>= 2.46'
+glycin_req = '>= 2.0'
 
-nm_req = '>= 1.10.4'
+nm_req = '>= 1.24'
 secret_req = '>= 0.18'
 
 fs = import('fs')
@@ -91,6 +92,7 @@ gnome_desktop_dep = dependency('gnome-desktop-4', version: gnome_desktop_req)
 pango_dep = dependency('pango', version: pango_req)
 json_glib_dep = dependency('json-glib-1.0', version: json_glib_req)
 rsvg_dep = dependency('librsvg-2.0', version: rsvg_req)
+glycin_dep = dependency('glycin-2', version: glycin_req)
 
 have_fonts = mutter_dep.get_variable('have_fonts') == 'true'
 have_xwayland = mutter_dep.get_variable('have_xwayland') == 'true'

@@ -33,4 +33,10 @@ typedef enum {
   ST_BACKGROUND_SIZE_FIXED
 } StBackgroundSize;
 
+typedef enum {
+  ST_KEYNAV_FLAG_NONE = 0,
+  ST_KEYNAV_FLAG_WRAP_HORIZONTALLY = 1 << 0,
+  ST_KEYNAV_FLAG_WRAP_VERTICALLY = 1 << 1,
+} StKeynavFlags;
+
 G_END_DECLS

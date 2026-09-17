@@ -42,24 +42,6 @@ export class SearchEntry extends St.Entry {
                 return Clutter.EVENT_STOP;
             }
         );
-        bindingPool.install_closure(
-            'activate-new-instance',
-            Clutter.KEY_KP_Enter,
-            Clutter.ModifierType.CONTROL_MASK,
-            obj => {
-                obj.emit('activate-new-instance');
-                return Clutter.EVENT_STOP;
-            }
-        );
-        bindingPool.install_closure(
-            'activate-new-instance',
-            Clutter.KEY_ISO_Enter,
-            Clutter.ModifierType.CONTROL_MASK,
-            obj => {
-                obj.emit('activate-new-instance');
-                return Clutter.EVENT_STOP;
-            }
-        );
     }
 }
 
@@ -613,7 +595,10 @@ export const SearchResultsView = GObject.registerClass({
             orientation: Clutter.Orientation.VERTICAL,
             x_expand: true,
             y_expand: true,
+            reactive: true,
         });
+
+        global.focus_manager.add_group(this);
 
         this._parentalControlsManager = ParentalControlsManager.getDefault();
         this._parentalControlsManager.connect('app-filter-changed', this._reloadRemoteProviders.bind(this));

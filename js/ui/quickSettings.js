@@ -383,6 +383,7 @@ class QuickToggleMenu extends PopupMenu.PopupMenuBase {
         });
         this.actor._delegate = this;
         this.actor.add_child(this.box);
+        this.actor.set_keynav_flags(St.KeynavFlags.WRAP_VERTICALLY);
 
         global.focus_manager.add_group(this.actor);
 
@@ -455,14 +456,13 @@ class QuickToggleMenu extends PopupMenu.PopupMenuBase {
     /**
      * @param {object} params
      * @param {bool} [params.animate=true] whether to animate the transition
+     * @param {Clutter.Event} [params.triggerEvent] the keyboard/mouse event that triggered opening this
      *
      * @returns {bool} whether the open state changed
      */
     open(params = {}) {
         if (!super.open(params))
             return false;
-
-        this.actor.show();
 
         const previousHeight = this.actor.height;
         this.actor.height = -1;
@@ -743,6 +743,8 @@ export const QuickSettingsMenu = class extends PopupMenu.PopupMenu {
         this.actor = new St.Widget({reactive: true, width: 0, height: 0});
         this.actor.add_child(this._boxPointer);
         this.actor._delegate = this;
+        // Undo superclass defaults
+        this._boxPointer.set_keynav_flags(St.KeynavFlags.NONE);
 
         global.focus_manager.add_group(this.actor);
 
@@ -845,14 +847,6 @@ export const QuickSettingsMenu = class extends PopupMenu.PopupMenu {
 
     getFirstItem() {
         return this._grid.get_first_child();
-    }
-
-    open(params = {}) {
-        if (!super.open(params))
-            return false;
-
-        this.actor.show();
-        return true;
     }
 
     close(params = {}) {

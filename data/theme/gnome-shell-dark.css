@@ -54,7 +54,8 @@ stage {
 .unlock-dialog .message .message-header .message-close-button,
 .message .message-header .unlock-dialog .message-close-button,
 .unlock-dialog .screenshot-ui-show-pointer-button, .unlock-dialog .login-button,
-.unlock-dialog .web-login-prompt-button, .unlock-dialog .login-dialog-auth-list-title, .unlock-dialog .login-dialog-auth-list-item, #LookingGlassDialog .notebook-tab, .screenshot-ui-show-pointer-button, .screenshot-ui-type-button, #LookingGlassDebugFlags .lg-debug-flag-button, #LookingGlassPropertyInspector .lg-obj-inspector-close-button,
+.unlock-dialog .web-login-prompt-button, .unlock-dialog .login-dialog-auth-list-item,
+.unlock-dialog .login-dialog-auth-list-title, #LookingGlassDialog .notebook-tab, .screenshot-ui-show-pointer-button, .screenshot-ui-type-button, #LookingGlassDebugFlags .lg-debug-flag-button, #LookingGlassPropertyInspector .lg-obj-inspector-close-button,
 #LookingGlassPropertyInspector .lg-obj-inspector-button, #LookingGlassDialog > #Toolbar .lg-toolbar-button, .icon-button, .login-dialog-button.next-button, .login-dialog-button.a11y-button, .login-dialog-button.cancel-button, .login-dialog-button.switch-user-button, .login-dialog-button.login-dialog-auth-menu-button, .login-dialog-button.login-dialog-session-list-button, .message .message-header .message-expand-button,
 .message .message-header .message-close-button, .message-notification-group .message-collapse-button, .calendar .calendar-month-header .pager-button, .button {
   border-radius: 8px;
@@ -576,7 +577,8 @@ StEntry {
 .unlock-dialog .login-dialog-button.switch-user-button,
 .unlock-dialog .login-dialog-button.login-dialog-auth-menu-button,
 .unlock-dialog .login-dialog-button.login-dialog-session-list-button, .unlock-dialog .login-button,
-.unlock-dialog .web-login-prompt-button, .unlock-dialog .login-dialog-auth-list-title, .unlock-dialog .login-dialog-auth-list-item {
+.unlock-dialog .web-login-prompt-button, .unlock-dialog .login-dialog-auth-list-item,
+.unlock-dialog .login-dialog-auth-list-title {
   color: #fafafb;
   background-color: rgba(250, 250, 251, 0.1); }
   .unlock-dialog-notifications-container .message StButton:focus,
@@ -597,9 +599,11 @@ StEntry {
   .unlock-dialog .login-dialog-button.switch-user-button:focus,
   .unlock-dialog .login-dialog-button.login-dialog-auth-menu-button:focus,
   .unlock-dialog .login-dialog-button.login-dialog-session-list-button:focus, .unlock-dialog .login-button:focus,
-  .unlock-dialog .web-login-prompt-button:focus, .unlock-dialog .login-dialog-auth-list-title:focus, .unlock-dialog .login-dialog-auth-list-item:focus {
+  .unlock-dialog .web-login-prompt-button:focus, .unlock-dialog .login-dialog-auth-list-item:focus,
+  .unlock-dialog .login-dialog-auth-list-title:focus {
     color: #fafafb;
     box-shadow: inset 0 0 0 2px st-transparentize(st-mix(-st-accent-color, #ffffff, 60%), 0.2) !important;
+    box-shadow: inset 0 0 0 2px st-transparentize(rgba(250, 250, 251, 0.4), 0.2) !important;
     background-color: st-mix(st-mix(-st-accent-color, #ffffff, 60%), rgba(250, 250, 251, 0.1), 5%); }
     .unlock-dialog-notifications-container .message StButton:focus:hover,
     .unlock-dialog-notifications-container .unlock-dialog-notification-source StButton:focus:hover, .parental-controls-shield .parental-controls-shield-button:focus:hover, .unlock-dialog .button:focus:hover,
@@ -619,7 +623,8 @@ StEntry {
     .unlock-dialog .login-dialog-button.switch-user-button:focus:hover,
     .unlock-dialog .login-dialog-button.login-dialog-auth-menu-button:focus:hover,
     .unlock-dialog .login-dialog-button.login-dialog-session-list-button:focus:hover, .unlock-dialog .login-button:focus:hover,
-    .unlock-dialog .web-login-prompt-button:focus:hover, .unlock-dialog .login-dialog-auth-list-title:focus:hover, .unlock-dialog .login-dialog-auth-list-item:focus:hover {
+    .unlock-dialog .web-login-prompt-button:focus:hover, .unlock-dialog .login-dialog-auth-list-item:focus:hover,
+    .unlock-dialog .login-dialog-auth-list-title:focus:hover {
       background-color: st-mix(st-mix(-st-accent-color, #ffffff, 60%), rgba(250, 250, 251, 0.13), 5%); }
   .unlock-dialog-notifications-container .message StButton:hover,
   .unlock-dialog-notifications-container .unlock-dialog-notification-source StButton:hover, .parental-controls-shield .parental-controls-shield-button:hover, .unlock-dialog .button:hover,
@@ -639,7 +644,8 @@ StEntry {
   .unlock-dialog .login-dialog-button.switch-user-button:hover,
   .unlock-dialog .login-dialog-button.login-dialog-auth-menu-button:hover,
   .unlock-dialog .login-dialog-button.login-dialog-session-list-button:hover, .unlock-dialog .login-button:hover,
-  .unlock-dialog .web-login-prompt-button:hover, .unlock-dialog .login-dialog-auth-list-title:hover, .unlock-dialog .login-dialog-auth-list-item:hover {
+  .unlock-dialog .web-login-prompt-button:hover, .unlock-dialog .login-dialog-auth-list-item:hover,
+  .unlock-dialog .login-dialog-auth-list-title:hover {
     color: #fafafb;
     background-color: rgba(250, 250, 251, 0.13); }
   .unlock-dialog-notifications-container .message StButton:active,
@@ -660,7 +666,8 @@ StEntry {
   .unlock-dialog .login-dialog-button.switch-user-button:active,
   .unlock-dialog .login-dialog-button.login-dialog-auth-menu-button:active,
   .unlock-dialog .login-dialog-button.login-dialog-session-list-button:active, .unlock-dialog .login-button:active,
-  .unlock-dialog .web-login-prompt-button:active, .unlock-dialog .login-dialog-auth-list-title:active, .unlock-dialog .login-dialog-auth-list-item:active {
+  .unlock-dialog .web-login-prompt-button:active, .unlock-dialog .login-dialog-auth-list-item:active,
+  .unlock-dialog .login-dialog-auth-list-title:active {
     color: #fafafb;
     background-color: rgba(250, 250, 251, 0.16); }
     .unlock-dialog-notifications-container .message StButton:active:hover,
@@ -681,7 +688,8 @@ StEntry {
     .unlock-dialog .login-dialog-button.switch-user-button:active:hover,
     .unlock-dialog .login-dialog-button.login-dialog-auth-menu-button:active:hover,
     .unlock-dialog .login-dialog-button.login-dialog-session-list-button:active:hover, .unlock-dialog .login-button:active:hover,
-    .unlock-dialog .web-login-prompt-button:active:hover, .unlock-dialog .login-dialog-auth-list-title:active:hover, .unlock-dialog .login-dialog-auth-list-item:active:hover {
+    .unlock-dialog .web-login-prompt-button:active:hover, .unlock-dialog .login-dialog-auth-list-item:active:hover,
+    .unlock-dialog .login-dialog-auth-list-title:active:hover {
       background-color: rgba(250, 250, 251, 0.19); }
     .unlock-dialog-notifications-container .message StButton:active:focus,
     .unlock-dialog-notifications-container .unlock-dialog-notification-source StButton:active:focus, .parental-controls-shield .parental-controls-shield-button:active:focus, .unlock-dialog .button:active:focus,
@@ -701,7 +709,8 @@ StEntry {
     .unlock-dialog .login-dialog-button.switch-user-button:active:focus,
     .unlock-dialog .login-dialog-button.login-dialog-auth-menu-button:active:focus,
     .unlock-dialog .login-dialog-button.login-dialog-session-list-button:active:focus, .unlock-dialog .login-button:active:focus,
-    .unlock-dialog .web-login-prompt-button:active:focus, .unlock-dialog .login-dialog-auth-list-title:active:focus, .unlock-dialog .login-dialog-auth-list-item:active:focus {
+    .unlock-dialog .web-login-prompt-button:active:focus, .unlock-dialog .login-dialog-auth-list-item:active:focus,
+    .unlock-dialog .login-dialog-auth-list-title:active:focus {
       background-color: st-mix(st-mix(-st-accent-color, #ffffff, 60%), rgba(250, 250, 251, 0.16), 5%); }
   .unlock-dialog-notifications-container .message StButton:checked,
   .unlock-dialog-notifications-container .unlock-dialog-notification-source StButton:checked, .parental-controls-shield .parental-controls-shield-button:checked, .unlock-dialog .button:checked,
@@ -721,7 +730,8 @@ StEntry {
   .unlock-dialog .login-dialog-button.switch-user-button:checked,
   .unlock-dialog .login-dialog-button.login-dialog-auth-menu-button:checked,
   .unlock-dialog .login-dialog-button.login-dialog-session-list-button:checked, .unlock-dialog .login-button:checked,
-  .unlock-dialog .web-login-prompt-button:checked, .unlock-dialog .login-dialog-auth-list-title:checked, .unlock-dialog .login-dialog-auth-list-item:checked {
+  .unlock-dialog .web-login-prompt-button:checked, .unlock-dialog .login-dialog-auth-list-item:checked,
+  .unlock-dialog .login-dialog-auth-list-title:checked {
     color: #fafafb;
     background-color: st-lighten(st-mix(#fafafb, #36363a, 9%), 8%); }
     .unlock-dialog-notifications-container .message StButton:checked:hover,
@@ -742,7 +752,8 @@ StEntry {
     .unlock-dialog .login-dialog-button.switch-user-button:checked:hover,
     .unlock-dialog .login-dialog-button.login-dialog-auth-menu-button:checked:hover,
     .unlock-dialog .login-dialog-button.login-dialog-session-list-button:checked:hover, .unlock-dialog .login-button:checked:hover,
-    .unlock-dialog .web-login-prompt-button:checked:hover, .unlock-dialog .login-dialog-auth-list-title:checked:hover, .unlock-dialog .login-dialog-auth-list-item:checked:hover {
+    .unlock-dialog .web-login-prompt-button:checked:hover, .unlock-dialog .login-dialog-auth-list-item:checked:hover,
+    .unlock-dialog .login-dialog-auth-list-title:checked:hover {
       background-color: st-lighten(st-lighten(st-mix(#fafafb, #36363a, 9%), 8%), 4%); }
     .unlock-dialog-notifications-container .message StButton:checked:active,
     .unlock-dialog-notifications-container .unlock-dialog-notification-source StButton:checked:active, .parental-controls-shield .parental-controls-shield-button:checked:active, .unlock-dialog .button:checked:active,
@@ -762,7 +773,8 @@ StEntry {
     .unlock-dialog .login-dialog-button.switch-user-button:checked:active,
     .unlock-dialog .login-dialog-button.login-dialog-auth-menu-button:checked:active,
     .unlock-dialog .login-dialog-button.login-dialog-session-list-button:checked:active, .unlock-dialog .login-button:checked:active,
-    .unlock-dialog .web-login-prompt-button:checked:active, .unlock-dialog .login-dialog-auth-list-title:checked:active, .unlock-dialog .login-dialog-auth-list-item:checked:active {
+    .unlock-dialog .web-login-prompt-button:checked:active, .unlock-dialog .login-dialog-auth-list-item:checked:active,
+    .unlock-dialog .login-dialog-auth-list-title:checked:active {
       background-color: st-lighten(st-lighten(st-mix(#fafafb, #36363a, 9%), 8%), 9%); }
   .unlock-dialog-notifications-container .message StButton:insensitive,
   .unlock-dialog-notifications-container .unlock-dialog-notification-source StButton:insensitive, .parental-controls-shield .parental-controls-shield-button:insensitive, .unlock-dialog .button:insensitive,
@@ -782,7 +794,8 @@ StEntry {
   .unlock-dialog .login-dialog-button.switch-user-button:insensitive,
   .unlock-dialog .login-dialog-button.login-dialog-auth-menu-button:insensitive,
   .unlock-dialog .login-dialog-button.login-dialog-session-list-button:insensitive, .unlock-dialog .login-button:insensitive,
-  .unlock-dialog .web-login-prompt-button:insensitive, .unlock-dialog .login-dialog-auth-list-title:insensitive, .unlock-dialog .login-dialog-auth-list-item:insensitive {
+  .unlock-dialog .web-login-prompt-button:insensitive, .unlock-dialog .login-dialog-auth-list-item:insensitive,
+  .unlock-dialog .login-dialog-auth-list-title:insensitive {
     color: st-transparentize(#fafafb, 0.5);
     background-color: rgba(250, 250, 251, 0.1); }
 
@@ -3134,19 +3147,19 @@ StScrollBar {
     .login-dialog-auth-menu-button-popup .login-dialog-auth-menu-item-section-label {
       font-size: 0.909em;
       font-weight: bold;
-      color: #fafafb; }
+      color: #ffffff; }
   .login-dialog-auth-menu-button-popup .login-dialog-auth-menu-item-icon {
-    color: #fafafb;
+    color: #ffffff;
     icon-size: 1.091em;
     margin-right: 8px; }
   .login-dialog-auth-menu-button-popup .login-dialog-auth-menu-item-box {
     spacing: 3px; }
     .login-dialog-auth-menu-button-popup .login-dialog-auth-menu-item-box-name {
-      color: #fafafb;
+      color: #ffffff;
       font-size: 1em;
       font-weight: bold; }
     .login-dialog-auth-menu-button-popup .login-dialog-auth-menu-item-box-description {
-      color: #fafafb;
+      color: #ffffff;
       font-size: 0.909em; }
 
 .login-dialog-auth-menu-button-indicator {
@@ -3277,18 +3290,22 @@ StScrollBar {
   .login-dialog .login-dialog-auth-list-item.compact {
     min-height: 1.3em; }
 
-.unlock-dialog .login-dialog-auth-list-item {
+.unlock-dialog .login-dialog-auth-list-item,
+.unlock-dialog .login-dialog-auth-list-title {
   border-radius: 12px;
   min-height: 3em;
   padding: 9px;
   margin-bottom: 4px;
   margin-right: 4px; }
+  .unlock-dialog .login-dialog-auth-list-item.compact,
+  .unlock-dialog .login-dialog-auth-list-title.compact {
+    min-height: 1.3em; }
 
 .unlock-dialog .login-dialog-auth-list-title {
-  background-color: transparent !important;
+  background-color: rgba(250, 250, 251, 0.15) !important;
   color: #fafafb !important;
-  padding: 0;
-  margin: 0; }
+  margin: 0.5em 20px;
+  padding: 0; }
 
 .login-dialog-auth-list-title-label {
   padding: 6px;
@@ -3401,6 +3418,14 @@ StScrollBar {
   padding-right: 27px;
   spacing: 1.75em; }
 
+.unlock-dialog .web-login-title-label,
+.unlock-dialog .web-login-url-label,
+.unlock-dialog .web-login-url-label-long,
+.unlock-dialog .web-login-code-title-label,
+.unlock-dialog .web-login-code-label,
+.unlock-dialog .web-login-prompt {
+  color: #fafafb !important; }
+
 .login-dialog .login-button,
 .login-dialog .web-login-prompt-button {
   color: #fafafb;
@@ -3447,7 +3472,7 @@ StScrollBar {
 .login-dialog .web-login-prompt-button {
   padding: 15px 24px;
   margin: 24px 8px;
-  width: 8em; }
+  min-width: 8em; }
 
 .unlock-dialog .login-button,
 .unlock-dialog .web-login-prompt-button {
@@ -3465,7 +3490,7 @@ StScrollBar {
 .unlock-dialog .web-login-prompt-button {
   padding: 15px 24px;
   margin: 24px 8px;
-  width: 8em; }
+  min-width: 8em; }
 
 .unlock-dialog {
   background-color: transparent; }
