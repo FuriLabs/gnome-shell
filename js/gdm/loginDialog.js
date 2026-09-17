@@ -27,11 +27,13 @@ import Pango from 'gi://Pango';
 import Shell from 'gi://Shell';
 import St from 'gi://St';
 
+import * as AuthMenuButton from './authMenuButton.js';
 import * as AuthPrompt from './authPrompt.js';
 import * as Batch from './batch.js';
 import {ConflictingSessionDialog} from './conflictingSessionDialog.js';
 import * as CtrlAltTab from '../ui/ctrlAltTab.js';
 import * as GdmUtil from './util.js';
+import * as Settings from './settings.js';
 import * as Layout from '../ui/layout.js';
 import * as LoginManager from '../misc/loginManager.js';
 import * as Main from '../ui/main.js';
@@ -40,12 +42,16 @@ import * as PopupMenu from '../ui/popupMenu.js';
 import * as Realmd from './realmd.js';
 import * as UserWidget from '../ui/userWidget.js';
 import {QuickSettingsMenu} from '../ui/quickSettings.js';
+import {MessageType} from './userVerifier.js';
 import * as A11y from '../ui/status/accessibility.js';
 
 const _FADE_ANIMATION_TIME = 250;
 const _SCROLL_ANIMATION_TIME = 500;
+const _FIXED_TOP_ACTOR_HEIGHT = 550;
 const _TIMED_LOGIN_IDLE_THRESHOLD = 5.0;
 const _CONFLICTING_SESSION_DIALOG_TIMEOUT = 60;
+const _PRIMARY_LOGIN_METHOD_SECTION_NAME = _('Login Options');
+const _SESSION_TYPE_SECTION_NAME = _('Session Type');
 
 const N_A11Y_MENU_COLUMNS = 2;
 
@@ -317,104 +323,6 @@ const UserList = GObject.registerClass({
     }
 });
 
-const SessionMenuButton = GObject.registerClass({
-    Signals: {'session-activated': {param_types: [GObject.TYPE_STRING]}},
-}, class SessionMenuButton extends St.Bin {
-    _init() {
-        const button = new St.Button({
-            style_class: 'login-dialog-button login-dialog-session-list-button',
-            icon_name: 'cog-wheel-symbolic',
-            reactive: true,
-            track_hover: true,
-            can_focus: true,
-            accessible_name: _('Choose Session'),
-            accessible_role: Atk.Role.MENU,
-            button_mask: St.ButtonMask.PRIMARY | St.ButtonMask.SECONDARY,
-            x_align: Clutter.ActorAlign.CENTER,
-            y_align: Clutter.ActorAlign.CENTER,
-        });
-
-        super._init({child: button});
-        this._button = button;
-
-        this._menu = new PopupMenu.PopupMenu(this._button, 0, St.Side.BOTTOM);
-        Main.uiGroup.add_child(this._menu.actor);
-        this._menu.actor.hide();
-
-        this._menu.connect('open-state-changed', (menu, isOpen) => {
-            if (isOpen)
-                this._button.add_style_pseudo_class('active');
-            else
-                this._button.remove_style_pseudo_class('active');
-        });
-
-        this._manager = new PopupMenu.PopupMenuManager(this._button,
-            {actionMode: Shell.ActionMode.NONE});
-        this._manager.addMenu(this._menu);
-
-        this._button.connect('clicked', () => this._menu.toggle());
-
-        this._items = new Map();
-        this._activeSessionId = null;
-        this._populate();
-    }
-
-    updateSensitivity(sensitive) {
-        this._button.reactive = sensitive;
-        this._button.can_focus = sensitive;
-        this.opacity = sensitive ? 255 : 0;
-        this._menu.close({animate: false});
-    }
-
-    _updateOrnament() {
-        for (const itemId of this._items.keys()) {
-            if (itemId === this._activeSessionId)
-                this._items.get(itemId).setOrnament(PopupMenu.Ornament.DOT);
-            else
-                this._items.get(itemId).setOrnament(PopupMenu.Ornament.NO_DOT);
-        }
-    }
-
-    setActiveSession(sessionId) {
-        if (sessionId === this._activeSessionId)
-            return;
-
-        this._activeSessionId = sessionId;
-        this._updateOrnament();
-    }
-
-    close() {
-        this._menu.close({animate: false});
-    }
-
-    _populate() {
-        const ids = Gdm.get_session_ids();
-
-        if (ids.length <= 1) {
-            this._button.hide();
-            return;
-        }
-
-        const sessions = ids.map(id => {
-            const [sessionName] = Gdm.get_session_name_and_description(id);
-            return {id, sessionName};
-        });
-
-        sessions.sort((a, b) => a.sessionName.localeCompare(b.sessionName));
-
-        for (const {id, sessionName} of sessions) {
-            const item = new PopupMenu.PopupMenuItem(sessionName);
-            this._menu.addMenuItem(item);
-            this._items.set(id, item);
-
-            item.connect('activate', () => {
-                this.setActiveSession(id);
-                this.emit('session-activated', this._activeSessionId);
-            });
-        }
-    }
-});
-
 const A11yMenuButton = GObject.registerClass(
 class A11yMenuButton extends St.Button {
     constructor() {
@@ -480,29 +388,32 @@ export const LoginDialog = GObject.registerClass({
         this._gdmClient = new Gdm.Client();
 
         try {
-            this._gdmClient.set_enabled_extensions([Gdm.UserVerifierChoiceList.interface_info().name]);
+            this._gdmClient.set_enabled_extensions([
+                Gdm.UserVerifierChoiceList.interface_info().name,
+                Gdm.UserVerifierCustomJSON.interface_info().name,
+            ]);
         } catch {
         }
 
-        this._settings = new Gio.Settings({schema_id: GdmUtil.LOGIN_SCREEN_SCHEMA});
+        this._settings = new Gio.Settings({schema_id: Settings.LOGIN_SCREEN_SCHEMA});
 
-        this._settings.connect(`changed::${GdmUtil.BANNER_MESSAGE_KEY}`,
+        this._settings.connect(`changed::${Settings.BANNER_MESSAGE_KEY}`,
             () => this._updateBanner().catch(logError));
-        this._settings.connect(`changed::${GdmUtil.BANNER_MESSAGE_TEXT_KEY}`,
+        this._settings.connect(`changed::${Settings.BANNER_MESSAGE_TEXT_KEY}`,
             () => this._updateBanner().catch(logError));
-        this._settings.connect(`changed::${GdmUtil.BANNER_MESSAGE_SOURCE_KEY}`,
+        this._settings.connect(`changed::${Settings.BANNER_MESSAGE_SOURCE_KEY}`,
             () => {
                 if (this._updateBannerMessageFile())
                     this._updateBanner().catch(logError);
             });
-        this._settings.connect(`changed::${GdmUtil.BANNER_MESSAGE_PATH_KEY}`,
+        this._settings.connect(`changed::${Settings.BANNER_MESSAGE_PATH_KEY}`,
             () => {
                 if (this._updateBannerMessageFile())
                     this._updateBanner().catch(logError);
             });
-        this._settings.connect(`changed::${GdmUtil.DISABLE_USER_LIST_KEY}`,
+        this._settings.connect(`changed::${Settings.DISABLE_USER_LIST_KEY}`,
             this._updateDisableUserList.bind(this));
-        this._settings.connect(`changed::${GdmUtil.LOGO_KEY}`,
+        this._settings.connect(`changed::${Settings.LOGO_KEY}`,
             this._updateLogo.bind(this));
 
         this._textureCache = St.TextureCache.get_default();
@@ -524,6 +435,11 @@ export const LoginDialog = GObject.registerClass({
         this._authPrompt = new AuthPrompt.AuthPrompt(this._gdmClient, AuthPrompt.AuthPromptMode.UNLOCK_OR_LOG_IN);
         this._authPrompt.connect('prompted', this._onPrompted.bind(this));
         this._authPrompt.connect('reset', this._onReset.bind(this));
+        this._authPrompt.connect('verification-complete', this._onVerificationComplete.bind(this));
+        this._authPrompt.connect('loading', this._onLoading.bind(this));
+        this._authPrompt.connect('mechanisms-changed', this._onMechanismsChanged.bind(this));
+        this._authPrompt.connectObject('notify::verification-status',
+            () => this._updateCancelButton(), this);
         this._authPrompt.hide();
         this.add_child(this._authPrompt);
 
@@ -577,14 +493,7 @@ export const LoginDialog = GObject.registerClass({
         });
         this.add_child(this._bottomButtonGroup);
 
-        this._sessionMenuButton = new SessionMenuButton();
-        this._sessionMenuButton.connect('session-activated',
-            (list, sessionId) => {
-                this._greeter.call_select_session(sessionId, null).catch(logError);
-            });
-        this._sessionMenuButton.opacity = 0;
-        this._sessionMenuButton.show();
-        this._bottomButtonGroup.add_child(this._sessionMenuButton);
+        this._createAuthMenuButton();
 
         this._a11yMenuButton = new A11yMenuButton();
         this._bottomButtonGroup.add_child(this._a11yMenuButton);
@@ -618,6 +527,72 @@ export const LoginDialog = GObject.registerClass({
         // focus later
         Main.layoutManager.connectObject('startup-complete',
             this._updateDisableUserList.bind(this), this);
+    }
+
+    _createAuthMenuButton() {
+        this._authMenuButton = new AuthMenuButton.AuthMenuButton({
+            accessible_name: _('Login Options'),
+            sectionOrder: [_PRIMARY_LOGIN_METHOD_SECTION_NAME, _SESSION_TYPE_SECTION_NAME],
+            animateVisibility: true,
+            visible: false,
+        });
+
+        this._authMenuButton.connect('active-item-changed', (_button, sectionName) => {
+            const item = this._authMenuButton.getActiveItem({sectionName});
+            if (!item)
+                return;
+
+            if (sectionName === _PRIMARY_LOGIN_METHOD_SECTION_NAME)
+                this._selectAuthMechanism(item);
+            else if (sectionName === _SESSION_TYPE_SECTION_NAME)
+                this._greeter.call_select_session(item.id, null).catch(logError);
+
+            this._authMenuButton.closeMenu();
+        });
+        this._bottomButtonGroup.add_child(this._authMenuButton);
+    }
+
+    _updateSessions() {
+        this._authMenuButton.clearItems({
+            sectionName: _SESSION_TYPE_SECTION_NAME,
+        });
+
+        // User is already logged in, it can't choose a different session
+        if (this._user && this._user.is_loaded && this._user.is_logged_in())
+            return;
+
+        const ids = Gdm.get_session_ids();
+        if (ids.length === 1)
+            return;
+
+        const sessions = ids.map(id => {
+            const [sessionName] = Gdm.get_session_name_and_description(id);
+            return {id, sessionName};
+        });
+
+        sessions.sort((a, b) => a.sessionName.localeCompare(b.sessionName));
+
+        for (const {id, sessionName} of sessions) {
+            this._authMenuButton.addItem({
+                sectionName: _SESSION_TYPE_SECTION_NAME,
+                name: sessionName,
+                id,
+            });
+        }
+    }
+
+    _selectAuthMechanism(authMechanism) {
+        const oldMechanism = this._selectedAuthMechanism;
+
+        if (authMechanism === oldMechanism)
+            return;
+
+        if (!this._authPrompt.selectMechanism(authMechanism)) {
+            this._authMenuButton.setActiveItem(oldMechanism);
+            return;
+        }
+
+        this._selectedAuthMechanism = authMechanism;
     }
 
     _getBannerAllocation(dialogBox) {
@@ -665,6 +640,28 @@ export const LoginDialog = GObject.registerClass({
         return actorBox;
     }
 
+    _getFixedTopActorAllocation(dialogBox, actor) {
+        const actorBox = new Clutter.ActorBox();
+
+        let [, , natWidth, natHeight] = actor.get_preferred_size();
+        const dialogWidth = dialogBox.x2 - dialogBox.x1;
+        const dialogHeight = dialogBox.y2 - dialogBox.y1;
+        const centerX = dialogBox.x1 + dialogWidth / 2;
+        const centerY = dialogBox.y1 + dialogHeight / 2;
+
+        const top = centerY - _FIXED_TOP_ACTOR_HEIGHT / 2;
+
+        natWidth = Math.min(natWidth, dialogWidth);
+        natHeight = Math.min(natHeight, dialogHeight);
+
+        actorBox.x1 = Math.floor(centerX - natWidth / 2);
+        actorBox.y1 = Math.floor(top);
+        actorBox.x2 = actorBox.x1 + natWidth;
+        actorBox.y2 = actorBox.y1 + natHeight;
+
+        return actorBox;
+    }
+
     _getCenterActorAllocation(dialogBox, actor) {
         const actorBox = new Clutter.ActorBox();
 
@@ -703,7 +700,7 @@ export const LoginDialog = GObject.registerClass({
         let authPromptAllocation = null;
         let authPromptWidth = 0;
         if (this._authPrompt.visible) {
-            authPromptAllocation = this._getCenterActorAllocation(dialogBox, this._authPrompt);
+            authPromptAllocation = this._getFixedTopActorAllocation(dialogBox, this._authPrompt);
             authPromptWidth = authPromptAllocation.x2 - authPromptAllocation.x1;
         }
 
@@ -844,7 +841,7 @@ export const LoginDialog = GObject.registerClass({
     }
 
     _updateDisableUserList() {
-        let disableUserList = this._settings.get_boolean(GdmUtil.DISABLE_USER_LIST_KEY);
+        let disableUserList = this._settings.get_boolean(Settings.DISABLE_USER_LIST_KEY);
 
         // Disable user list when there are no users.
         if (this._userListLoaded && this._userList.numItems() === 0)
@@ -876,8 +873,8 @@ export const LoginDialog = GObject.registerClass({
     }
 
     _updateBannerMessageFile() {
-        const path = this._settings.get_string(GdmUtil.BANNER_MESSAGE_SOURCE_KEY) === 'file'
-            ? this._settings.get_string(GdmUtil.BANNER_MESSAGE_PATH_KEY)
+        const path = this._settings.get_string(Settings.BANNER_MESSAGE_SOURCE_KEY) === 'file'
+            ? this._settings.get_string(Settings.BANNER_MESSAGE_PATH_KEY)
             : null;
         const file = path
             ? Gio.File.new_for_path(path)
@@ -904,7 +901,7 @@ export const LoginDialog = GObject.registerClass({
     }
 
     async _getBannerText() {
-        const enabled = this._settings.get_boolean(GdmUtil.BANNER_MESSAGE_KEY);
+        const enabled = this._settings.get_boolean(Settings.BANNER_MESSAGE_KEY);
         if (!enabled)
             return null;
 
@@ -918,7 +915,7 @@ export const LoginDialog = GObject.registerClass({
             }
         }
 
-        return this._settings.get_string(GdmUtil.BANNER_MESSAGE_TEXT_KEY);
+        return this._settings.get_string(Settings.BANNER_MESSAGE_TEXT_KEY);
     }
 
     async _updateBanner() {
@@ -964,17 +961,15 @@ export const LoginDialog = GObject.registerClass({
     }
 
     _updateLogo() {
-        const path = this._settings.get_string(GdmUtil.LOGO_KEY);
+        const path = this._settings.get_string(Settings.LOGO_KEY);
 
         this._logoFile = path ? Gio.file_new_for_path(path) : null;
         this._updateLogoTexture(this._textureCache, this._logoFile);
     }
 
     _onPrompted() {
-        const showSessionMenu = this._shouldShowSessionMenuButton();
+        this._authMenuButton.updateVisibility({visible: true});
 
-        this._sessionMenuButton.updateSensitivity(showSessionMenu);
-        this._sessionMenuButton.visible = showSessionMenu;
         this._showPrompt();
     }
 
@@ -999,9 +994,9 @@ export const LoginDialog = GObject.registerClass({
         }
     }
 
-    _onReset(authPrompt, beginRequest) {
+    _onReset(authPrompt, resetType) {
         this._ensureGreeterProxy();
-        this._sessionMenuButton.updateSensitivity(true);
+        this._showBottomButtonGroup();
 
         const previousUser = this._user;
         this._user = null;
@@ -1011,11 +1006,11 @@ export const LoginDialog = GObject.registerClass({
             this._nextSignalId = 0;
         }
 
-        if (previousUser && beginRequest === AuthPrompt.BeginRequestType.REUSE_USERNAME) {
+        if (previousUser && resetType === AuthPrompt.ResetType.REUSE_USERNAME) {
             this._user = previousUser;
             this._authPrompt.setUser(this._user);
             this._authPrompt.begin({userName: previousUser.get_user_name()});
-        } else if (beginRequest === AuthPrompt.BeginRequestType.PROVIDE_USERNAME) {
+        } else if (resetType === AuthPrompt.ResetType.PROVIDE_USERNAME) {
             if (!this._disableUserList)
                 this._showUserList();
             else
@@ -1025,23 +1020,58 @@ export const LoginDialog = GObject.registerClass({
         }
     }
 
-    _onDefaultSessionChanged(client, sessionId) {
-        this._sessionMenuButton.setActiveSession(sessionId);
+    _showBottomButtonGroup() {
+        this._bottomButtonGroup.reactive = true;
+        this._bottomButtonGroup.ease({
+            opacity: 255,
+            duration: _FADE_ANIMATION_TIME,
+            mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+        });
     }
 
-    _shouldShowSessionMenuButton() {
-        const visibleStatuses = [
-            AuthPrompt.AuthPromptStatus.VERIFYING,
-            AuthPrompt.AuthPromptStatus.VERIFICATION_FAILED,
-            AuthPrompt.AuthPromptStatus.VERIFICATION_IN_PROGRESS,
-        ];
-        if (!visibleStatuses.includes(this._authPrompt.verificationStatus))
-            return false;
+    _hideBottomButtonGroup() {
+        this._bottomButtonGroup.reactive = false;
+        this._bottomButtonGroup.ease({
+            opacity: 0,
+            duration: _FADE_ANIMATION_TIME,
+            mode: Clutter.AnimationMode.EASE_OUT_QUAD,
+        });
+    }
 
-        if (this._user && this._user.is_loaded && this._user.is_logged_in())
-            return false;
+    _onVerificationComplete() {
+        this._hideBottomButtonGroup();
+    }
 
-        return true;
+    _onLoading(_authPrompt, isLoading) {
+        this._authMenuButton.reactive = !isLoading;
+    }
+
+    _onMechanismsChanged(_authPrompt, {mechanisms, selectedMechanism}) {
+        this._authMenuButton.clearItems({
+            sectionName: _PRIMARY_LOGIN_METHOD_SECTION_NAME,
+        });
+
+        if (mechanisms.length === 0)
+            return;
+
+        for (const m of mechanisms) {
+            if (m.selectable) {
+                this._authMenuButton.addItem({
+                    sectionName: _PRIMARY_LOGIN_METHOD_SECTION_NAME,
+                    ...m,
+                });
+            }
+        }
+
+        if (Object.keys(selectedMechanism).length > 0)
+            this._authMenuButton.setActiveItem(selectedMechanism);
+    }
+
+    _onDefaultSessionChanged(client, sessionId) {
+        this._authMenuButton.setActiveItem({
+            sectionName: _SESSION_TYPE_SECTION_NAME,
+            id: sessionId,
+        });
     }
 
     _showPrompt() {
@@ -1067,11 +1097,13 @@ export const LoginDialog = GObject.registerClass({
 
         // Translators: this message is shown below the username entry field
         // to clue the user in on how to login to the local network realm
-        this._authPrompt.setMessage(_('(e.g., user or %s)').format(hint), GdmUtil.MessageType.HINT);
+        this._authPrompt.setMessage(_('(e.g., user or %s)').format(hint),
+            MessageType.HINT);
     }
 
     _askForUsernameAndBeginVerification() {
         this._authPrompt.setUser(null);
+        this._authPrompt.updateEntry(false);
         this._authPrompt.setQuestion(_('Username'));
 
         this._showRealmLoginHint(this._realmManager.loginFormat);
@@ -1082,17 +1114,15 @@ export const LoginDialog = GObject.registerClass({
             () => {
                 this._authPrompt.disconnect(this._nextSignalId);
                 this._nextSignalId = 0;
-                this._authPrompt.updateSensitivity(false);
+                this._authPrompt.updateSensitivity({sensitive: false});
                 const answer = this._authPrompt.getAnswer();
                 this._user = this._userManager.get_user(answer);
+                this._updateSessions();
                 this._authPrompt.clear();
                 this._authPrompt.begin({userName: answer});
-                this._updateCancelButton();
             });
-        this._updateCancelButton();
 
-        this._sessionMenuButton.updateSensitivity(false);
-        this._authPrompt.updateSensitivity(true);
+        this._authMenuButton.updateVisibility({visible: false});
         this._showPrompt();
     }
 
@@ -1375,13 +1405,23 @@ export const LoginDialog = GObject.registerClass({
         this._startTimedLogin(userName, seconds);
 
         // Restart timed login on user interaction
-        global.stage.connect('captured-event', (actor, event) => {
-            if (event.type() === Clutter.EventType.KEY_PRESS ||
-                event.type() === Clutter.EventType.BUTTON_PRESS)
-                this._startTimedLogin(userName, seconds);
+        const clickGesture = new Clutter.ClickGesture({
+            recognize_on_press: true,
+        });
+        clickGesture.connect('may-recognize', () => {
+            this._startTimedLogin(userName, seconds);
+            return false;
+        });
+        global.stage.add_action_full(
+            'timed-login-click-capture', Clutter.EventPhase.CAPTURE, clickGesture);
 
+        const keyController = new Clutter.KeyController();
+        keyController.connect('key-press', () => {
+            this._startTimedLogin(userName, seconds);
             return Clutter.EVENT_PROPAGATE;
         });
+        global.stage.add_action_full(
+            'timed-login-key-capture', Clutter.EventPhase.CAPTURE, keyController);
     }
 
     _setUserListExpanded(expanded) {
@@ -1409,8 +1449,7 @@ export const LoginDialog = GObject.registerClass({
         this._ensureUserListLoaded();
         this._authPrompt.hide();
         this._hideBannerView();
-        this._sessionMenuButton.close();
-        this._sessionMenuButton.hide();
+        this._authMenuButton.updateVisibility({visible: false});
         this._setUserListExpanded(true);
         this._notListedButton.show();
         this._userList.grab_key_focus();
@@ -1428,6 +1467,8 @@ export const LoginDialog = GObject.registerClass({
 
     _onUserListActivated(activatedItem) {
         this._user = activatedItem.user;
+
+        this._updateSessions();
 
         this._updateCancelButton();
 
@@ -1516,10 +1557,6 @@ export const LoginDialog = GObject.registerClass({
 
     cancel() {
         this._authPrompt.cancel();
-    }
-
-    addCharacter(_unichar) {
-        // Don't allow type ahead at the login screen
     }
 
     finish(onComplete) {

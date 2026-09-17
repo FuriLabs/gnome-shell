@@ -1,5 +1,5 @@
 project('gnome-shell', 'c',
-  version: '51.alpha',
+  version: '51.beta',
   meson_version: '>= 1.3.0',
   license: 'GPL-2.0-or-later',
 )
@@ -24,13 +24,15 @@ gcr_req = '>= 3.90.0'
 gio_req = '>= 2.86.0'
 gjs_req = '>= 1.87.1'
 gtk_req = '>= 4.0'
-mutter_req = '>= 51.alpha'
+mutter_req = '>= 51.beta'
 polkit_req = '>= 0.100'
 schemas_req = '>= 50.alpha'
 systemd_req = '>= 246'
 gnome_desktop_req = '>= 40'
 pipewire_req = '>= 0.3.49'
 pango_req = '>= 1.46.0'
+json_glib_req = '>= 1.6'
+rsvg_req = '>= 2.46'
 
 nm_req = '>= 1.10.4'
 secret_req = '>= 0.18'
@@ -68,6 +70,7 @@ else
 endif
 
 atk_bridge_dep = dependency('atk-bridge-2.0')
+cairo_dep = dependency('cairo')
 ecal_dep = dependency('libecal-2.0', version: ecal_req)
 eds_dep = dependency('libedataserver-1.2', version: eds_req)
 gcr_dep = dependency('gcr-4', version: gcr_req)
@@ -86,6 +89,8 @@ polkit_dep = dependency('polkit-agent-1', version: polkit_req)
 schemas_dep = dependency('gsettings-desktop-schemas', version: schemas_req)
 gnome_desktop_dep = dependency('gnome-desktop-4', version: gnome_desktop_req)
 pango_dep = dependency('pango', version: pango_req)
+json_glib_dep = dependency('json-glib-1.0', version: json_glib_req)
+rsvg_dep = dependency('librsvg-2.0', version: rsvg_req)
 
 have_fonts = mutter_dep.get_variable('have_fonts') == 'true'
 have_xwayland = mutter_dep.get_variable('have_xwayland') == 'true'
@@ -151,7 +156,10 @@ if get_option('man')
   subdir('man')
 endif
 
+have_asan_tests = get_option('b_sanitize') == 'address'
+
 mutter_typelibdir = mutter_dep.get_variable('typelibdir')
+mutter_pkglibdir = mutter_dep.get_variable('pkglibdir')
 python = find_program('python3')
 gjs = find_program('gjs')
 generate_app_list = find_program('build-aux/generate-app-list.py')
@@ -299,6 +307,16 @@ if get_option('tests')
   common_test_env.set('GSETTINGS_SCHEMA_DIR', meson.project_build_root() / 'data')
   common_test_env.set('GSETTINGS_BACKEND', 'memory')
   common_test_env.set('XDG_CURRENT_DESKTOP', '')
+  if have_asan_tests
+    asan_options = [
+      'halt_on_error=1',
+      'abort_on_error=1',
+      'detect_leaks=0',
+      'verify_asan_link_order=0',
+    ]
+    common_test_env.set('ASAN_OPTIONS', ':'.join(asan_options))
+    common_test_env.set('LD_PRELOAD', mutter_pkglibdir / 'libasan-preloader.so')
+  endif
 
   jasmine = find_program('jasmine')
 

@@ -59,6 +59,11 @@ class URLHighlighter extends St.Label {
             'recognize', this._onClick.bind(this),
             'may-recognize', this._checkInUrl.bind(this));
         this.add_action(this._clickGesture);
+
+        const motionController = new Clutter.MotionController();
+        motionController.connect('leave', () => this._onLeave());
+        motionController.connect('motion', this._onMotion.bind(this));
+        this.add_action(motionController);
     }
 
     _checkInUrl() {
@@ -80,11 +85,11 @@ class URLHighlighter extends St.Label {
         }
     }
 
-    vfunc_motion_event(event) {
+    _onMotion(_controller, _sprite, x, y) {
         if (!this.visible || this.get_paint_opacity() === 0)
-            return Clutter.EVENT_PROPAGATE;
+            return;
 
-        const urlId = this._findUrlAtPos(...event.get_coords());
+        const urlId = this._findUrlAtPos(x, y);
         if (urlId !== -1 && !this._cursorChanged) {
             this.set_cursor_type(Clutter.CursorType.POINTER);
             this._cursorChanged = true;
@@ -92,18 +97,16 @@ class URLHighlighter extends St.Label {
             this.set_cursor_type(Clutter.CursorType.DEFAULT);
             this._cursorChanged = false;
         }
-        return Clutter.EVENT_PROPAGATE;
     }
 
-    vfunc_leave_event(event) {
+    _onLeave() {
         if (!this.visible || this.get_paint_opacity() === 0)
-            return Clutter.EVENT_PROPAGATE;
+            return;
 
         if (this._cursorChanged) {
             this._cursorChanged = false;
             this.set_cursor_type(Clutter.CursorType.DEFAULT);
         }
-        return super.vfunc_leave_event(event);
     }
 
     setMarkup(text, allowMarkup) {
@@ -411,8 +414,8 @@ class MessageHeader extends St.BoxLayout {
     }
 });
 
-export const Message = GObject.registerClass({
-    Properties: {
+export class Message extends St.Button {
+    static [GObject.properties] = {
         'title': GObject.ParamSpec.string(
             'title', null, null,
             GObject.ParamFlags.READWRITE,
@@ -433,15 +436,44 @@ export const Message = GObject.registerClass({
             'datetime', null, null,
             GObject.ParamFlags.READWRITE,
             GLib.DateTime),
-    },
-    Signals: {
+    };
+
+    static [GObject.signals] = {
         'close': {
             flags: GObject.SignalFlags.RUN_LAST,
         },
         'expanded': {},
         'unexpanded': {},
-    },
-}, class Message extends St.Button {
+    };
+
+    static {
+        GObject.registerClass(this);
+
+        const bindingPool = this.get_binding_pool();
+
+        bindingPool.install_closure(
+            'close', Clutter.KEY_BackSpace, 0,
+            obj => {
+                obj._closeIfAllowed();
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'close', Clutter.KEY_Delete, 0,
+            obj => {
+                obj._closeIfAllowed();
+                return Clutter.EVENT_STOP;
+            }
+        );
+        bindingPool.install_closure(
+            'close', Clutter.KEY_KP_Delete, 0,
+            obj => {
+                obj._closeIfAllowed();
+                return Clutter.EVENT_STOP;
+            }
+        );
+    }
+
     constructor(source) {
         super({
             style_class: 'message',
@@ -669,20 +701,11 @@ export const Message = GObject.registerClass({
         return false;
     }
 
-    vfunc_key_press_event(event) {
-        const keysym = event.get_key_symbol();
-
-        if (keysym === Clutter.KEY_Delete ||
-            keysym === Clutter.KEY_KP_Delete ||
-            keysym === Clutter.KEY_BackSpace) {
-            if (this.canClose()) {
-                this.close();
-                return Clutter.EVENT_STOP;
-            }
-        }
-        return super.vfunc_key_press_event(event);
+    _closeIfAllowed() {
+        if (this.canClose())
+            this.close();
     }
-});
+}
 
 export const NotificationMessage = GObject.registerClass(
 class NotificationMessage extends Message {

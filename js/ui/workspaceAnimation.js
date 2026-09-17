@@ -76,8 +76,18 @@ class BaseWorkspaceGroup extends Clutter.Actor {
             this._windowRecords.splice(this._windowRecords.indexOf(record), 1);
         }, this);
 
+        windowActor.meta_window.connectObject('notify::minimized',
+            () => this._syncCloneVisibility(clone),
+            this);
+        this._syncCloneVisibility(clone);
+
         this._windowRecords.push(record);
         return clone;
+    }
+
+    _syncCloneVisibility(clone) {
+        const window = clone.source.meta_window;
+        clone.visible = window.showing_on_its_workspace();
     }
 
     _removeWindows() {
@@ -102,7 +112,7 @@ class WorkspaceGroup extends BaseWorkspaceGroup {
     }
 
     _shouldShowWindow(window) {
-        if (!window.showing_on_its_workspace() || this._isDesktopWindow(window))
+        if (this._isDesktopWindow(window))
             return false;
 
         if (window.is_override_redirect())
@@ -123,15 +133,20 @@ class WorkspaceGroup extends BaseWorkspaceGroup {
     }
 
     _syncStacking() {
-        const windowActors = global.get_window_actors().filter(w =>
-            this._shouldShowWindow(w.meta_window));
+        const stackIndeces = new Map(
+            global.get_window_actors().map((w, i) => [w, i]));
+
+        this._windowRecords.sort((a, b) => {
+            const seqA = a.windowActor;
+            const seqB = b.windowActor;
+
+            return stackIndeces.get(seqA) - stackIndeces.get(seqB);
+        });
 
         let lastRecord;
         const bottomActor = this._background ?? null;
 
-        for (const windowActor of windowActors) {
-            const record = this._windowRecords.find(r => r.windowActor === windowActor);
-
+        for (const record of this._windowRecords) {
             this.set_child_above_sibling(record.clone,
                 lastRecord ? lastRecord.clone : bottomActor);
             lastRecord = record;

@@ -84,6 +84,15 @@ export const SwitcherPopup = GObject.registerClass({
         });
         this.add_action(longPressGesture);
 
+        const keyController = new Clutter.KeyController();
+        keyController.connect('key-press', this._onKeyPress.bind(this));
+        keyController.connect('modifier-change', this._onModifierChange.bind(this));
+        this.add_action(keyController);
+
+        const scrollController = new Clutter.ScrollController();
+        scrollController.connect('scroll', this._onScroll.bind(this));
+        this.add_action(scrollController);
+
         // Initially disable hover so we ignore the enter-event if
         // the switcher appears underneath the current pointer location
         this._disableHover();
@@ -191,10 +200,11 @@ export const SwitcherPopup = GObject.registerClass({
         throw new GObject.NotImplementedError(`_keyPressHandler in ${this.constructor.name}`);
     }
 
-    vfunc_key_press_event(event) {
-        const keysym = event.get_key_symbol();
+    _onKeyPress(controller) {
+        const [, keysym, keycode] = controller.get_key();
+        const [, pressed, latched, locked] = controller.get_state();
         const action = global.display.get_keybinding_action(
-            event.get_key_code(), event.get_state());
+            keycode, pressed | latched | locked);
 
         this._disableHover();
 
@@ -214,18 +224,18 @@ export const SwitcherPopup = GObject.registerClass({
             keysym === Clutter.KEY_Return ||
             keysym === Clutter.KEY_KP_Enter ||
             keysym === Clutter.KEY_ISO_Enter)
-            this._finish(event.get_time());
+            this._finish(Clutter.get_current_event_time());
 
         return Clutter.EVENT_STOP;
     }
 
-    vfunc_key_release_event(event) {
+    _onModifierChange(controller) {
         if (this._modifierMask) {
-            const [x_, y_, mods] = global.get_pointer();
-            const state = mods & this._modifierMask;
+            const [, pressed, latched, locked] = controller.get_state();
+            const state = (pressed | latched | locked) & this._modifierMask;
 
             if (state === 0)
-                this._finish(event.get_time());
+                this._finish(Clutter.get_current_event_time());
         } else {
             this._resetNoModsTimeout();
         }
@@ -240,11 +250,12 @@ export const SwitcherPopup = GObject.registerClass({
             this._select(this._next());
     }
 
-    vfunc_scroll_event(event) {
+    _onScroll(_controller, _sprite, _source, _dx, dy) {
         this._disableHover();
 
-        this._scrollHandler(event.get_scroll_direction());
-        return Clutter.EVENT_PROPAGATE;
+        const direction =
+              dy > 0 ? Clutter.ScrollDirection.DOWN : Clutter.ScrollDirection.UP;
+        this._scrollHandler(direction);
     }
 
     _itemActivatedHandler(n) {
@@ -456,7 +467,11 @@ export const SwitcherList = GObject.registerClass({
         this._list.add_child(bbox);
 
         bbox.connect('clicked', () => this._onItemClicked(bbox));
-        bbox.connect('motion-event', () => this._onItemMotion(bbox));
+
+        const motionController = new Clutter.MotionController();
+        motionController.connect('motion', () => this._onItemMotion(bbox));
+        motionController.connect('enter', () => this._onItemMotion(bbox));
+        bbox.add_action(motionController);
 
         bbox.label_actor = label;
 
