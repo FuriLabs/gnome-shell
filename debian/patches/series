@@ -50,6 +50,7 @@ ubuntu-authd/userVerifier-Do-not-allow-a-non-selected-service-to-compl.patch
 ubuntu-authd/gdm-userVerifier-Make-_handleUpdateEnabledMechanisms-retu.patch
 ubuntu-authd/loginDialog-unlockDialog-Rely-on-user-verifier-mechanism-.patch
 ubuntu-authd/userVerifier-Allow-a-service-to-take-ownership-of-the-pro.patch
+ubuntu-authd/authServices-Only-emit-mechanisms-changed-signals-on-mech.patch
 ubuntu-authd/gdm-Implement-authd-auth-service.patch
 ubuntu-authd/js-Minify-the-authd-protocol-during-build.patch
 ubuntu-authd/js-gdm-util-Add-a-gsettings-to-disable-the-authd-in-gdm.patch

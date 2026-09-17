@@ -1,0 +1,81 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 15 Sep 2026 06:44:48 +0200
+Subject: authServices: Only emit mechanisms-changed signals on mechanism
+ changes
+
+---
+ js/gdm/authServices.js               | 24 +++++++++++++++++++++---
+ js/gdm/authServicesSSSDSwitchable.js |  4 ++--
+ 2 files changed, 23 insertions(+), 5 deletions(-)
+
+diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
+index 9a8d16c..fb2b67b 100644
+--- a/js/gdm/authServices.js
++++ b/js/gdm/authServices.js
+@@ -220,6 +220,16 @@ export class AuthServices extends GObject.Object {
+             m1?.role === m2?.role;
+     }
+ 
++    _mechanismSetsEqual(a, b) {
++        return a.length === b.length && a.every((mechanism, i) => {
++            const other = b[i];
++            return mechanism.equals(other) &&
++                mechanism.selectable === other.selectable &&
++                mechanism.autoSelectable === other.autoSelectable &&
++                mechanism.ready === other.ready;
++        });
++    }
++
+     selectMechanism(mechanism) {
+         if (this._mechanismEquals(this._selectedMechanism, mechanism))
+             return false;
+@@ -299,16 +309,24 @@ export class AuthServices extends GObject.Object {
+     }
+ 
+     _updateEnabledMechanisms() {
+-        const selectedMechanism = this._selectedMechanism;
++        const previousMechanisms = this._enabledMechanisms ?? [];
++        const previousSelectedMechanism = this._selectedMechanism;
+ 
+         this._setEnabledMechanisms(this._handleUpdateEnabledMechanisms() ?? []);
+ 
+         this._onEnabledMechanismsUpdated();
+ 
++        const mechanismsChanged = !this._mechanismSetsEqual(
++            previousMechanisms, this._enabledMechanisms);
++
+         this._selectedMechanism = this._enabledMechanisms.find(mechanism =>
+-            this._mechanismEquals(mechanism, selectedMechanism));
++            this._mechanismEquals(mechanism, previousSelectedMechanism));
++
++        const selectionChanged = !this._mechanismEquals(
++            this._selectedMechanism, previousSelectedMechanism);
+ 
+-        this.emit('mechanisms-changed');
++        if (mechanismsChanged || selectionChanged)
++            this.emit('mechanisms-changed');
+     }
+ 
+     _onEnabledMechanismsUpdated() {}
+diff --git a/js/gdm/authServicesSSSDSwitchable.js b/js/gdm/authServicesSSSDSwitchable.js
+index 189c0cb..5a06979 100644
+--- a/js/gdm/authServicesSSSDSwitchable.js
++++ b/js/gdm/authServicesSSSDSwitchable.js
+@@ -70,7 +70,7 @@ export class AuthServicesSSSDSwitchable extends AuthServices {
+                 throw e;
+ 
+             this._mechanismsStatus = MechanismsStatus.NOT_FOUND;
+-            this.emit('mechanisms-changed');
++            this._updateEnabledMechanisms();
+         }
+     }
+ 
+@@ -444,7 +444,7 @@ export class AuthServicesSSSDSwitchable extends AuthServices {
+         // Fallback to legacy authentication services.
+         if (this._mechanismsStatus === MechanismsStatus.WAITING) {
+             this._mechanismsStatus = MechanismsStatus.NOT_FOUND;
+-            this.emit('mechanisms-changed');
++            this._updateEnabledMechanisms();
+             return false;
+         }
+ 
