@@ -34,6 +34,7 @@
 
 #include "st-widget.h"
 
+#include "st-enum-types.h"
 #include "st-label.h"
 #include "st-private.h"
 #include "st-settings.h"
@@ -77,6 +78,8 @@ struct _StWidgetPrivate
 
   int enter_count;
 
+  StKeynavFlags keynav_flags;
+
   ClutterActor *label_actor;
 
   StWidget *last_visible_child;
@@ -109,6 +112,7 @@ enum
   PROP_HOVER,
   PROP_CAN_FOCUS,
   PROP_LABEL_ACTOR,
+  PROP_KEYNAV_FLAGS,
 
   N_PROPS
 };
@@ -143,25 +147,6 @@ static gboolean st_widget_real_navigate_focus (StWidget         *widget,
 
 static void check_pseudo_class (StWidget *widget);
 static void check_labels (StWidget *widget);
-
-static gboolean
-has_binding_pools (ClutterActor *actor)
-{
-  GType type;
-
-  type = G_OBJECT_TYPE (actor);
-  g_assert (g_type_is_a (type, CLUTTER_TYPE_ACTOR));
-
-  while (type != CLUTTER_TYPE_ACTOR)
-    {
-      if (clutter_binding_pool_find (g_type_name (type)))
-        return TRUE;
-
-      type = g_type_parent (type);
-    }
-
-  return FALSE;
-}
 
 static void
 st_widget_update_insensitive (StWidget *widget)
@@ -210,6 +195,10 @@ st_widget_set_property (GObject      *gobject,
       st_widget_set_label_actor (actor, g_value_get_object (value));
       break;
 
+    case PROP_KEYNAV_FLAGS:
+      st_widget_set_keynav_flags (actor, g_value_get_flags (value));
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (gobject, prop_id, pspec);
       break;
@@ -254,6 +243,10 @@ st_widget_get_property (GObject    *gobject,
       g_value_set_object (value, priv->label_actor);
       break;
 
+    case PROP_KEYNAV_FLAGS:
+      g_value_set_flags (value, priv->keynav_flags);
+      break;
+
     default:
       G_OBJECT_WARN_INVALID_PROPERTY_ID (gobject, prop_id, pspec);
       break;
@@ -266,19 +259,6 @@ st_widget_constructed (GObject *gobject)
   G_OBJECT_CLASS (st_widget_parent_class)->constructed (gobject);
 
   st_widget_update_insensitive (ST_WIDGET (gobject));
-
-  if (has_binding_pools (CLUTTER_ACTOR (gobject)))
-    {
-      ClutterKeyController *key_controller;
-
-      key_controller =
-        CLUTTER_KEY_CONTROLLER (clutter_key_controller_new (NULL));
-      clutter_key_controller_set_trigger_keybindings (key_controller, TRUE);
-
-      clutter_actor_add_action_with_name (CLUTTER_ACTOR (gobject),
-                                          "shortcuts key controller",
-                                          CLUTTER_ACTION (key_controller));
-    }
 }
 
 static void
@@ -1022,6 +1002,18 @@ st_widget_class_init (StWidgetClass *klass)
                           CLUTTER_TYPE_ACTOR,
                           ST_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
 
+  /**
+   * StWidget:focus-flags:
+   *
+   * Flags applying as the root of a [class@FocusManager] group, modifying
+   * the behavior of focus keyboard navigation.
+   */
+  props[PROP_KEYNAV_FLAGS] =
+    g_param_spec_flags ("keynav-flags", NULL, NULL,
+                        ST_TYPE_KEYNAV_FLAGS,
+                        ST_KEYNAV_FLAG_NONE,
+                        ST_PARAM_READWRITE | G_PARAM_EXPLICIT_NOTIFY);
+
   g_object_class_install_properties (gobject_class, N_PROPS, props);
 
   /**
@@ -1505,7 +1497,7 @@ st_widget_reactive_notify (StWidget   *widget,
   st_widget_update_insensitive (widget);
 
   if (priv->track_hover)
-    st_widget_sync_hover(widget);
+    st_widget_set_hover (widget, priv->enter_count > 0);
 }
 
 static ClutterActor *
@@ -1784,11 +1776,6 @@ st_widget_ensure_style (StWidget *widget)
  * automatically to reflect whether the pointer is in @widget (or one
  * of its children), and @widget's #StWidget:pseudo-class will have
  * the "hover" class added and removed from it accordingly.
- *
- * Note that currently it is not possible to correctly track the hover
- * state when another actor has a pointer grab. You can use
- * st_widget_sync_hover() to update the property manually in this
- * case.
  */
 void
 st_widget_set_track_hover (StWidget *widget,
@@ -1806,7 +1793,7 @@ st_widget_set_track_hover (StWidget *widget,
       g_object_notify_by_pspec (G_OBJECT (widget), props[PROP_TRACK_HOVER]);
 
       if (priv->track_hover)
-        st_widget_sync_hover (widget);
+        st_widget_set_hover (widget, priv->enter_count > 0);
       else
         st_widget_set_hover (widget, FALSE);
     }
@@ -1838,8 +1825,7 @@ st_widget_get_track_hover (StWidget *widget)
  * pseudo class accordingly.
  *
  * If you have set #StWidget:track-hover, you should not need to call
- * this directly. You can call st_widget_sync_hover() if the hover
- * state might be out of sync due to another actor's pointer grab.
+ * this directly.
  */
 void
 st_widget_set_hover (StWidget *widget,
@@ -1867,8 +1853,11 @@ st_widget_set_hover (StWidget *widget,
  * @widget: A #StWidget
  *
  * Sets @widget's hover state according to the current pointer
- * position. This can be used to ensure that it is correct after
- * (or during) a pointer grab.
+ * position.
+ *
+ * In the past, the hover state could get out of sync after
+ * (or during) a pointer grab. This is no longer the case,
+ * so there should be no need for this method anymore.
  */
 void
 st_widget_sync_hover (StWidget *widget)
@@ -2598,4 +2587,44 @@ GList *
 st_widget_get_focus_chain (StWidget *widget)
 {
   return ST_WIDGET_GET_CLASS (widget)->get_focus_chain (widget);
+}
+
+/**
+ * st_widget_get_keynav_flags:
+ * @widget: An `StWidget`
+ *
+ * Gets the [flags@KeynavFlags] that this widget will use as the
+ * root of a [class@FocusManager] group.
+ *
+ * Returns: The keynav flags
+ **/
+StKeynavFlags
+st_widget_get_keynav_flags (StWidget *widget)
+{
+  StWidgetPrivate *priv = st_widget_get_instance_private (widget);
+
+  g_return_val_if_fail (ST_IS_WIDGET (widget), ST_KEYNAV_FLAG_NONE);
+
+  return priv->keynav_flags;
+}
+
+/**
+ * st_widget_set_keynav_flags:
+ * @widget: An `StWidget`
+ * @flags: The keynav flags
+ *
+ * Gets the [flags@KeynavFlags] that this widget will use as the
+ * root of a [class@FocusManager] group. These flags affect the behavior
+ * of keyboard navigation.
+ **/
+void
+st_widget_set_keynav_flags (StWidget      *widget,
+                            StKeynavFlags  flags)
+{
+  StWidgetPrivate *priv = st_widget_get_instance_private (widget);
+
+  g_return_if_fail (ST_IS_WIDGET (widget));
+
+  priv->keynav_flags = flags;
+  g_object_notify_by_pspec (G_OBJECT (widget), props[PROP_KEYNAV_FLAGS]);
 }

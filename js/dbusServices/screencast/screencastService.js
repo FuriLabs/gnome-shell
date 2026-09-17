@@ -201,7 +201,7 @@ class Recorder extends Signals.EventEmitter {
             return;
 
         if (this._pipeline.set_state(Gst.State.NULL) !== Gst.StateChangeReturn.SUCCESS)
-            log('Failed to set pipeline state to NULL');
+            console.warn('Failed to set pipeline state to NULL');
 
         this._pipelineState = PipelineState.STOPPED;
         this._pipeline = null;
@@ -216,6 +216,7 @@ class Recorder extends Signals.EventEmitter {
 
     _bailOutOnError(message, errorDomain = ScreencastErrors, errorCode = ScreencastError.RECORDER_ERROR) {
         const error = new GLib.Error(errorDomain, errorCode, message);
+        console.debug(`Bailing out with error ${error}`);
 
         // If it's a PIPELINE_ERROR, we want to leave the failing pipeline on the
         // blocklist for the next time. Other errors are pipeline-independent, so
@@ -299,21 +300,24 @@ class Recorder extends Signals.EventEmitter {
 
         if (this._pipeline) {
             if (this._pipeline.set_state(Gst.State.NULL) !== Gst.StateChangeReturn.SUCCESS)
-                log('Failed to set pipeline state to NULL');
+                console.warn('Failed to set pipeline state to NULL');
 
             this._pipeline = null;
         }
 
         try {
+            console.debug(`Creating pipeline for config ${pipelineConfig.id}`);
             this._pipeline = this._createPipeline(this._nodeId, pipelineConfig,
                 this._framerate);
+            console.debug('Pipeline created successfully');
 
             // Add the current pipeline to the blocklist, so it is skipped next
             // time in case we crash; we'll remove it again on success or on
             // non-pipeline-related failures.
             this._updateServiceCrashBlocklist(
                 [...this._blocklistFromPreviousCrashes, pipelineConfig.id]);
-        } catch {
+        } catch (e) {
+            console.debug(`Failed to create pipeline: ${e.message}`);
             this._tryNextPipeline();
             return;
         }
@@ -327,6 +331,8 @@ class Recorder extends Signals.EventEmitter {
             retval === Gst.StateChangeReturn.ASYNC) {
             // We'll wait for the state change message to PLAYING on the bus
         } else {
+            const changeString = Gst.StateChangeReturn.get_name(retval);
+            console.debug(`Setting PLAYING state on pipeline returned ${changeString}`);
             this._tryNextPipeline();
         }
     }
@@ -349,6 +355,7 @@ class Recorder extends Signals.EventEmitter {
     }
 
     startRecording() {
+        console.debug('Start recording');
         return new Promise((resolve, reject) => {
             this._startRequest = {resolve, reject};
 
@@ -382,6 +389,7 @@ class Recorder extends Signals.EventEmitter {
         if (this._startRequest)
             return Promise.reject(new Error('Unable to stop recorder while still starting'));
 
+        console.debug('Stop recording');
         return new Promise((resolve, reject) => {
             this._stopRequest = {resolve, reject};
 
@@ -417,6 +425,7 @@ class Recorder extends Signals.EventEmitter {
 
             case PipelineState.STARTING:
                 // This is something we can handle, try to switch to the next pipeline
+                console.debug('Received EOS message while trying to start pipeline');
                 this._tryNextPipeline();
                 break;
 
@@ -446,7 +455,9 @@ class Recorder extends Signals.EventEmitter {
 
             break;
 
-        case Gst.MessageType.ERROR:
+        case Gst.MessageType.ERROR: {
+            const [error] = message.parse_error();
+
             switch (this._pipelineState) {
             case PipelineState.INIT:
             case PipelineState.STOPPED:
@@ -456,13 +467,12 @@ class Recorder extends Signals.EventEmitter {
 
             case PipelineState.STARTING:
                 // This is something we can handle, try to switch to the next pipeline
+                console.debug(`Received ERROR message while trying to start pipeline: ${error.message}`);
                 this._tryNextPipeline();
                 break;
 
             case PipelineState.PLAYING:
             case PipelineState.FLUSHING: {
-                const [error] = message.parse_error();
-
                 if (error.matches(Gst.ResourceError, Gst.ResourceError.NO_SPACE_LEFT)) {
                     this._handleFatalPipelineError('Out of disk space',
                         ScreencastErrors, ScreencastError.OUT_OF_DISK_SPACE);
@@ -480,6 +490,7 @@ class Recorder extends Signals.EventEmitter {
             }
 
             break;
+        }
 
         default:
             break;
@@ -627,7 +638,7 @@ export const ScreencastService = class extends ServiceImplementation {
                 }
 
                 default:
-                    log(`Warning: Unknown escape ${c}`);
+                    console.warn(`Unknown escape ${c}`);
                 }
 
                 escape = false;
@@ -678,7 +689,7 @@ export const ScreencastService = class extends ServiceImplementation {
                 options,
                 invocation);
         } catch (error) {
-            log(`Failed to create recorder: ${error.message}`);
+            console.error(`Failed to create recorder: ${error.message}`);
             invocation.return_error_literal(ScreencastErrors,
                 ScreencastError.RECORDER_ERROR,
                 error.message);
@@ -692,7 +703,7 @@ export const ScreencastService = class extends ServiceImplementation {
             const pathWithExtension = await recorder.startRecording();
             invocation.return_value(GLib.Variant.new('(bs)', [true, pathWithExtension]));
         } catch (error) {
-            log(`Failed to start recorder: ${error.message}`);
+            console.error(`Failed to start recorder: ${error.message}`);
             this._removeRecorder(sender);
             if (error instanceof GLib.Error) {
                 invocation.return_gerror(error);
@@ -706,7 +717,7 @@ export const ScreencastService = class extends ServiceImplementation {
         }
 
         recorder.connect('error', (r, error) => {
-            log(`Fatal error while recording: ${error.message}`);
+            console.error(`Fatal error while recording: ${error.message}`);
             this._removeRecorder(sender);
             this._dbusImpl.emit_signal('Error',
                 new GLib.Variant('(ss)', [
@@ -749,7 +760,7 @@ export const ScreencastService = class extends ServiceImplementation {
                 options,
                 invocation);
         } catch (error) {
-            log(`Failed to create recorder: ${error.message}`);
+            console.error(`Failed to create recorder: ${error.message}`);
             invocation.return_error_literal(ScreencastErrors,
                 ScreencastError.RECORDER_ERROR,
                 error.message);
@@ -763,7 +774,7 @@ export const ScreencastService = class extends ServiceImplementation {
             const pathWithExtension = await recorder.startRecording();
             invocation.return_value(GLib.Variant.new('(bs)', [true, pathWithExtension]));
         } catch (error) {
-            log(`Failed to start recorder: ${error.message}`);
+            console.error(`Failed to start recorder: ${error.message}`);
             this._removeRecorder(sender);
             if (error instanceof GLib.Error) {
                 invocation.return_gerror(error);
@@ -777,7 +788,7 @@ export const ScreencastService = class extends ServiceImplementation {
         }
 
         recorder.connect('error', (r, error) => {
-            log(`Fatal error while recording: ${error.message}`);
+            console.error(`Fatal error while recording: ${error.message}`);
             this._removeRecorder(sender);
             this._dbusImpl.emit_signal('Error',
                 new GLib.Variant('(ss)', [
@@ -799,7 +810,7 @@ export const ScreencastService = class extends ServiceImplementation {
         try {
             await recorder.stopRecording();
         } catch (error) {
-            log(`${sender}: Error while stopping recorder: ${error.message}`);
+            console.error(`${sender}: Error while stopping recorder: ${error.message}`);
         } finally {
             this._removeRecorder(sender);
             invocation.return_value(GLib.Variant.new('(b)', [true]));

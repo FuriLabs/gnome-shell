@@ -27,7 +27,7 @@ export class WebLoginPrompt extends St.BoxLayout {
 
         super({
             styleClass: 'web-login-prompt',
-            vertical: true,
+            orientation: Clutter.Orientation.VERTICAL,
             y_align: Clutter.ActorAlign.CENTER,
         });
 
@@ -85,7 +85,7 @@ export class WebLoginPrompt extends St.BoxLayout {
             this._urlTitleLabel.text = message;
 
         if (url !== null) {
-            this._qrCode.set({url});
+            this._qrCode.set({text: url});
 
             const formattedUrl = this._formatURLForDisplay(url);
             this._urlLabel.text = formattedUrl;
@@ -169,6 +169,7 @@ export class WebLoginDialog extends St.Widget {
             x_align: Clutter.ActorAlign.CENTER,
             x_expand: true,
         });
+        this._buttonBox.layout_manager.homogeneous = true;
         this._contentBox.add_child(this._buttonBox);
 
         this._updateButtons(buttons);
@@ -201,6 +202,7 @@ export class WebLoginDialog extends St.Widget {
             can_focus: true,
             accessible_name: b.label,
             button_mask: St.ButtonMask.PRIMARY | St.ButtonMask.SECONDARY,
+            x_expand: true,
             child: new St.Label({
                 text: b.label,
                 style_class: 'login-button-label',
