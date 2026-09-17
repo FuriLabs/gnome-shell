@@ -21,6 +21,7 @@ Copyright: © 2000 Helix Code, Inc.
            © 2006-2026 Red Hat, Inc.
            © 2007 Ryan Lortie
            © 2008 Intel Corp.
+           © 2026 Sebastian Keller
 License: GPL-2+ (/usr/share/common-licenses/GPL-2)
 
 Files: data/cursor-theme/icons/Adwaita/cursors_scalable/*/*.svg
