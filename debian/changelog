@@ -1,3 +1,25 @@
+gnome-shell (51.0-1) UNRELEASED; urgency=medium
+
+  [ Daniel van Vugt ]
+  * New upstream release 51.alpha
+  * Refreshed: shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
+  * Binary package 'gnome-shell-extension-prefs' has been removed and
+    relocated to upstream project 'gnome-extensions-app'.
+
+  [ Simon McVittie ]
+  * Merge packaging from unstable
+  * New upstream release 51.beta
+  * d/control: Update dependency versions as per meson.build
+  * d/control: Explicitly build-depend on cairo as per meson.build
+  * d/copyright: Update
+  * New upstream release 51.0
+
+  [ Marco Trevisan (Treviño) ]
+  * debian/source_gnome-shell.py: Add all mutter package versions
+  * debian/control: Update build and runtime dependencies
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 17 Sep 2026 14:57:23 +0100
+
 gnome-shell (51~rc-1) UNRELEASED; urgency=medium
 
   [ Daniel van Vugt ]
@@ -111,6 +133,31 @@ gnome-shell (51~alpha-0ubuntu1) stonking; urgency=medium
     Debian.
 
  -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Tue, 07 Jul 2026 18:50:34 +0800
+
+gnome-shell (50.5-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream release
+
+ -- Simon McVittie <smcv@debian.org>  Thu, 17 Sep 2026 14:33:46 +0100
+
+gnome-shell (50.4-1) unstable; urgency=medium
+
+  * Team upload
+  * d/watch: Only watch for version 50.x on this branch
+  * New upstream release
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 23 Aug 2026 13:28:02 +0100
+
+gnome-shell (50.3-1) unstable; urgency=medium
+
+  * Team upload
+  * New upstream stable release
+  * d/control, d/gbp.conf: Branch for GNOME 50.
+    The debian/latest branch now contains GNOME 51 prereleases, for
+    experimental.
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 03 Aug 2026 10:52:09 +0100
 
 gnome-shell (50.2-3ubuntu1) stonking; urgency=medium
 
