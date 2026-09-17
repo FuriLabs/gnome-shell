@@ -1,0 +1,66 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Tue, 15 Sep 2026 20:16:28 +0200
+Subject: loginDialog: Use previously typed userName if any
+
+In case the user name gets written directly, it may happen that the user
+does not exist yet, and it will created during the authentication phase
+by an NSS source.
+
+Thus we connot make assumptions about it. It also may happen the same if
+the user is not yet loaded.
+
+As per this, if the previous user has been written and we are asked to
+re-use the previous user, let's try to go with it rather than trying to
+get a null user name from the user manager.
+---
+ js/gdm/loginDialog.js | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/js/gdm/loginDialog.js b/js/gdm/loginDialog.js
+index 691754a..369814e 100644
+--- a/js/gdm/loginDialog.js
++++ b/js/gdm/loginDialog.js
+@@ -529,6 +529,7 @@ export const LoginDialog = GObject.registerClass({
+ 
+         this._disableUserList = undefined;
+         this._userListLoaded = false;
++        this._userName = null;
+ 
+         this._realmManager = new Realmd.Manager();
+         this._realmManager.connectObject('login-format-changed',
+@@ -1040,7 +1041,9 @@ export const LoginDialog = GObject.registerClass({
+         this._showBottomButtonGroup();
+ 
+         const previousUser = this._user;
++        const previousUserName = this._userName;
+         this._user = null;
++        this._userName = null;
+ 
+         if (this._nextSignalId) {
+             this._authPrompt.disconnect(this._nextSignalId);
+@@ -1050,7 +1053,8 @@ export const LoginDialog = GObject.registerClass({
+         if (previousUser && resetType === AuthPrompt.ResetType.REUSE_USERNAME) {
+             this._user = previousUser;
+             this._authPrompt.setUser(this._user);
+-            this._authPrompt.begin({userName: previousUser.get_user_name()});
++            this._userName = previousUser.get_user_name() ?? previousUserName;
++            this._authPrompt.begin({userName: this._userName});
+         } else if (resetType === AuthPrompt.ResetType.PROVIDE_USERNAME) {
+             if (!this._disableUserList)
+                 this._showUserList();
+@@ -1157,6 +1161,7 @@ export const LoginDialog = GObject.registerClass({
+                 this._nextSignalId = 0;
+                 this._authPrompt.updateSensitivity({sensitive: false});
+                 const answer = this._authPrompt.getAnswer();
++                this._userName = answer;
+                 this._user = this._userManager.get_user(answer);
+                 this._updateSessions();
+                 this._authPrompt.clear();
+@@ -1501,6 +1506,7 @@ export const LoginDialog = GObject.registerClass({
+         this._authPrompt.setUser(item.user);
+ 
+         const userName = item.user.get_user_name();
++        this._userName = userName;
+         const hold = new Batch.Hold();
+ 
+         this._authPrompt.begin({userName, hold});
