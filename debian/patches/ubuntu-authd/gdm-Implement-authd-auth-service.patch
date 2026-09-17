@@ -7,9 +7,8 @@ Subject: gdm: Implement authd auth service
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/userVerifier.js        |    2 +
  js/js-resources.gresource.xml |    3 +
- js/ui/popupMenu.js            |    5 +
  po/POTFILES.in                |    1 +
- 6 files changed, 6687 insertions(+)
+ 5 files changed, 6682 insertions(+)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
@@ -6735,22 +6734,6 @@ index 026b08a..92879f6 100644
      <file>extensions/extension.js</file>
      <file>extensions/sharedInternals.js</file>
  
-diff --git a/js/ui/popupMenu.js b/js/ui/popupMenu.js
-index 12730d1..de52a5b 100644
---- a/js/ui/popupMenu.js
-+++ b/js/ui/popupMenu.js
-@@ -787,6 +787,11 @@ export class PopupMenuBase extends Signals.EventEmitter {
-                     this._activeMenuItem = null;
-             }, this);
- 
-+        // menuItem.connect('destroy', () => {
-+        //     if (menuItem === this._activeMenuItem)
-+        //         this._activeMenuItem = null;
-+        // });
-+
-         this.connectObject('notify::sensitive',
-             () => menuItem.syncSensitive(), menuItem);
-     }
 diff --git a/po/POTFILES.in b/po/POTFILES.in
 index 7a4b97b..03dfc73 100644
 --- a/po/POTFILES.in
