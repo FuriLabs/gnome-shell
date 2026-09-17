@@ -35,7 +35,7 @@ index d0f7659..fed9dc2 100644
  };
  
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 039da1d..fa97167 100644
+index 039da1d..0110c10 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -62,6 +62,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
@@ -93,7 +93,7 @@ index 039da1d..fa97167 100644
 +        const maybeForwardSignal = (args, handler) => {
 +            const {serviceName} = args ?? {};
 +            const ownerServiceName = this._driverService ?? this._selectedServiceName;
-+            if (ownerServiceName && ownerServiceName !== serviceName &&
++            if ((!ownerServiceName || ownerServiceName !== serviceName) &&
 +                !isBackgroundService(serviceName))
 +                return;
 +

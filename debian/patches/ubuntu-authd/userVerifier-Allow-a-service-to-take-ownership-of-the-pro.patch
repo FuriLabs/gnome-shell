@@ -24,7 +24,7 @@ mechanism selection restores both the previous selected service and UI owner.
  1 file changed, 30 insertions(+), 11 deletions(-)
 
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 79d932c..f26c0b4 100644
+index 4ae3364..830780b 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -63,6 +63,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
@@ -35,7 +35,7 @@ index 79d932c..f26c0b4 100644
  
          this._beginPromise = null;
          this._redistributingRoles = false;
-@@ -132,15 +133,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -135,15 +136,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      selectMechanism(mechanism) {
          const previousServiceName = this._selectedServiceName;
@@ -56,7 +56,7 @@ index 79d932c..f26c0b4 100644
  
          return selected;
      }
-@@ -186,6 +191,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -189,6 +194,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      clear({serviceName = null} = {}) {
          this._authServices.forEach(s => s.clear());
          this._selectedServiceName = serviceName;
@@ -64,7 +64,7 @@ index 79d932c..f26c0b4 100644
          this._redistributeRoles();
  
          this._clearMessageQueue();
-@@ -434,15 +440,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -437,15 +443,17 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _connectAuthServices() {
@@ -83,10 +83,10 @@ index 79d932c..f26c0b4 100644
 -            const ownerServiceName = this._driverService ?? this._selectedServiceName;
 +            const ownerServiceName = this._driverService ??
 +                this._uiOwnerServiceName ?? this._selectedServiceName;
-             if (ownerServiceName && ownerServiceName !== serviceName &&
+             if ((!ownerServiceName || ownerServiceName !== serviceName) &&
                  !isBackgroundService(serviceName))
                  return;
-@@ -450,13 +458,24 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -453,13 +461,24 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              handler();
          };
  
@@ -114,7 +114,7 @@ index 79d932c..f26c0b4 100644
                      () => this._queuePriorityMessage(args)),
                  'filter-messages', (_, args) => maybeForwardSignal(args,
                      () => this._filterServiceMessages(args)),
-@@ -466,12 +485,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -469,12 +488,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                      () => this.emit('verification-complete')),
                  'reset', (_, args) => maybeForwardSignal(args,
                      () => this.emit('reset', args)),
