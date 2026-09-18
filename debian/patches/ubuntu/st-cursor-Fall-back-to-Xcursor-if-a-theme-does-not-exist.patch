@@ -1,0 +1,98 @@
+From: Alessandro Astone <alessandro.astone@canonical.com>
+Date: Fri, 18 Sep 2026 11:06:14 +0200
+Subject: st-cursor: Fall-back to Xcursor if a theme does not exist
+
+St.Cursor implements the SVG+JSON cursor format, and would fallback to the
+built-in Adwaita theme if the requested theme does not exist.
+
+We want to keep supporting the old theme format, so fall back to the Xcursor
+implementation instead.
+
+Bug-Ubuntu: https://launchpad.net/bugs/2166801
+Forwarded: not-needed, upstream is not interested, and this is hacky anyways
+---
+ src/st/st-cursor.c | 64 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 64 insertions(+)
+
+diff --git a/src/st/st-cursor.c b/src/st/st-cursor.c
+index e32dc73..aa4bd4a 100644
+--- a/src/st/st-cursor.c
++++ b/src/st/st-cursor.c
+@@ -476,6 +476,69 @@ st_cursor_prepare_at (ClutterCursor *clutter_cursor,
+                                         frame->height * scale);
+ }
+ 
++static GType
++find_fallback_extension (GType my_type)
++{
++  GIOExtensionPoint *ep = g_io_extension_point_lookup (META_CURSOR_EXTENSION_POINT_NAME);
++  GList *extensions = g_io_extension_point_get_extensions (ep);
++  GType fallback_type = G_TYPE_INVALID;
++  gboolean found_self = FALSE;
++
++  for (GList *l = extensions; l; l = l->next)
++    {
++      GIOExtension *ext = l->data;
++      GType other_type = g_io_extension_get_type (ext);
++
++      if (found_self)
++        {
++          fallback_type = other_type; /* Next highest priority extension */
++          break;
++        }
++
++      if (other_type == my_type)
++        found_self = TRUE;
++    }
++
++  return fallback_type;
++}
++
++static GObject *
++st_cursor_constructor (GType                  type,
++                       guint                  n_construct_properties,
++                       GObjectConstructParam *construct_properties)
++{
++  GObjectClass *parent_class = G_OBJECT_CLASS (st_cursor_parent_class);
++  GObject *obj = parent_class->constructor (type,
++                                            n_construct_properties,
++                                            construct_properties);
++  StCursor *self = ST_CURSOR (obj);
++
++  if (!find_cursor_metadata (self)) {
++    GType fallback_type = find_fallback_extension (type);
++
++    if (fallback_type != G_TYPE_INVALID)
++      {
++        /* Unpack construct_properties into arrays for g_object_new_with_properties */
++        g_autofree const char **names = g_new (const char *, n_construct_properties);
++        g_autofree GValue *values = g_new (GValue, n_construct_properties);
++
++        for (guint i = 0; i < n_construct_properties; i++)
++          {
++            names[i] = construct_properties[i].pspec->name;
++            values[i] = *construct_properties[i].value;
++          }
++
++        g_object_unref (obj);
++        return g_object_new_with_properties (find_fallback_extension (type),
++                                             n_construct_properties,
++                                             names,
++                                             values);
++      }
++  }
++
++  return obj;
++}
++
+ static void
+ st_cursor_class_init (StCursorClass *klass)
+ {
+@@ -483,6 +546,7 @@ st_cursor_class_init (StCursorClass *klass)
+   ClutterCursorClass *clutter_cursor_class = CLUTTER_CURSOR_CLASS (klass);
+ 
+   object_class->finalize = st_cursor_finalize;
++  object_class->constructor = st_cursor_constructor;
+   object_class->constructed = st_cursor_constructed;
+ 
+   clutter_cursor_class->get_geometry = st_cursor_get_geometry;

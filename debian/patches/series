@@ -74,3 +74,4 @@ ubuntu/OverviewAdjustment-Add-function-to-wait-for-adjustments-c.patch
 ubuntu/overviewControls-Do-focus-navigation-on-Ctrl-Alt-Tab-afte.patch
 gnome-shell-test-tool-Wait-before-final-cleanup.patch
 ubuntu/Multi-monitor-magnifier-fixes.patch
+ubuntu/st-cursor-Fall-back-to-Xcursor-if-a-theme-does-not-exist.patch
