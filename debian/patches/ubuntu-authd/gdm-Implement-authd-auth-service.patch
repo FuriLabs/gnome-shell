@@ -6710,7 +6710,7 @@ index 0000000..ad2b5ea
 +
 +export { authd, $root as default, gdm, pam };
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 56d4fd0..17e705d 100644
+index ba13b9a..bd1c2ff 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -5,6 +5,7 @@ import * as Signals from '../misc/signals.js';
