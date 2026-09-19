@@ -23,10 +23,10 @@ non-completion signals.
  2 files changed, 7 insertions(+), 3 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index ba97ec8..be69a9f 100644
+index 8640c43..574fdb5 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
-@@ -79,7 +79,10 @@ export class AuthServices extends GObject.Object {
+@@ -78,7 +78,10 @@ export class AuthServices extends GObject.Object {
           * @param {boolean} [canRetry]
           */
          'verification-failed': {param_types: [GObject.TYPE_JSOBJECT]},
@@ -38,7 +38,7 @@ index ba97ec8..be69a9f 100644
          /**
           * @param {string} serviceName
           * @param {string} question
-@@ -410,7 +413,7 @@ export class AuthServices extends GObject.Object {
+@@ -387,7 +390,7 @@ export class AuthServices extends GObject.Object {
  
      _onVerificationComplete(serviceName) {
          this._handleOnVerificationComplete(serviceName);
@@ -48,10 +48,10 @@ index ba97ec8..be69a9f 100644
  
      _onChoiceListQuery(serviceName, promptMessage, list) {
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 7aaffae..4ae3364 100644
+index fcbf73d..318e215 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
-@@ -465,7 +465,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -448,7 +448,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                      () => this._filterServiceMessages(args)),
                  'verification-failed', (_, args) => maybeForwardSignal(args,
                      () => this._verificationFailed(args)),

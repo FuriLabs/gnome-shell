@@ -22,10 +22,10 @@ or password) authentication.
  2 files changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 20ba560..ac4f8da 100644
+index 771aa7a..79cb2c4 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
-@@ -280,7 +280,7 @@ export class AuthServices extends GObject.Object {
+@@ -284,7 +284,7 @@ export class AuthServices extends GObject.Object {
      }
  
      _updateEnabledMechanisms() {
@@ -34,7 +34,7 @@ index 20ba560..ac4f8da 100644
          this._enabledMechanisms = [];
  
          this._handleUpdateEnabledMechanisms();
-@@ -289,6 +289,8 @@ export class AuthServices extends GObject.Object {
+@@ -293,6 +293,8 @@ export class AuthServices extends GObject.Object {
              ...m,
              ...RoleProperties[m.role],
          }));

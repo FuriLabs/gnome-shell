@@ -1,6 +1,7 @@
 From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
 Date: Thu, 20 Aug 2026 12:57:28 +0200
-Subject: userVerifier: Do not allow a auth service to reset if not in control
+Subject: userVerifier: Do not allow an auth service to reset if not in
+ control
 
 Authentication services share the same user verifier. A reset emitted by any
 of them is propagated to the auth prompt, where it cancels the current
@@ -220,7 +221,7 @@ index cf6a4e1..7f4eb1c 100644
      }
  }
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 0110c10..176a0c0 100644
+index c48b1bc..fcbf73d 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -115,13 +115,16 @@ export class ShellUserVerifier extends Signals.EventEmitter {
@@ -264,7 +265,7 @@ index 0110c10..176a0c0 100644
          this._redistributeRoles();
  
          this._clearMessageQueue();
-@@ -444,7 +447,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -446,7 +449,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                  'verification-failed', (_, args) => maybeForwardSignal(args,
                      () => this._verificationFailed(args)),
                  'verification-complete', () => this.emit('verification-complete'),

@@ -26,10 +26,10 @@ did not change.
  5 files changed, 43 insertions(+), 23 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index ac4f8da..ba97ec8 100644
+index 79cb2c4..8a48619 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
-@@ -162,6 +162,22 @@ export class AuthServices extends GObject.Object {
+@@ -166,6 +166,22 @@ export class AuthServices extends GObject.Object {
          return this._enabledMechanisms?.filter(m => m.ready !== false);
      }
  
@@ -52,7 +52,7 @@ index ac4f8da..ba97ec8 100644
      get _roleToService() {
          return this.constructor.RoleToService;
      }
-@@ -281,14 +297,9 @@ export class AuthServices extends GObject.Object {
+@@ -285,14 +301,9 @@ export class AuthServices extends GObject.Object {
  
      _updateEnabledMechanisms() {
          const selectedMechanism = this._selectedMechanism;

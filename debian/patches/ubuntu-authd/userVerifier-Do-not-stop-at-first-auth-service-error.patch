@@ -13,10 +13,10 @@ And only if none is found we should then report an error
  1 file changed, 21 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index ce60897..32e60c8 100644
+index ebc9169..bf13763 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
-@@ -97,10 +97,29 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -98,10 +98,29 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          try {
              const proxies = await this._getUserVerifierProxies(userName, this._cancellable);
              this._setUserVerifier(proxies.userVerifier);

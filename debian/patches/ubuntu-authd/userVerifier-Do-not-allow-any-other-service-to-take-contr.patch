@@ -145,7 +145,7 @@ index 039da1d..0110c10 100644
      }
  
      _redistributeRoles() {
-@@ -472,11 +506,23 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -472,11 +508,21 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                  return visibleMechanisms;
              });
  
@@ -153,14 +153,12 @@ index 039da1d..0110c10 100644
 -            mechanisms.find(m => m.selectable) ??
 -            {};
 +        // Report the currently selected mechanism. If one is already selected
-+        // we keep it (matching by service); otherwise we pick the first
-+        // selectable mechanism in priority order.
-+        let selectedMechanism = this._selectedServiceName
-+            ? mechanisms.find(m => m.serviceName === this._selectedServiceName)
-+            : null;
-+
-+        if (!selectedMechanism)
-+            selectedMechanism = mechanisms.find(m => m.selectable);
++        // we keep it (matching the actual mechanism, so that services exposing
++        // multiple mechanisms under the same service name are handled too);
++        // otherwise we pick the first mechanism in priority order.
++        const {selectedMechanism: currentMechanism} = this;
++        const selectedMechanism =
++            mechanisms.find(m => currentMechanism?.equals(m));
  
 -        this.emit('mechanisms-changed', {mechanisms, selectedMechanism});
 +        if (!this._selectedServiceName && selectedMechanism?.serviceName)

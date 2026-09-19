@@ -20,11 +20,11 @@ background services may update the prompt.
 Resetting or changing mechanism clears UI ownership, while a failed
 mechanism selection restores both the previous selected service and UI owner.
 ---
- js/gdm/userVerifier.js | 65 +++++++++++++++++++++++++++++++++++---------------
- 1 file changed, 46 insertions(+), 19 deletions(-)
+ js/gdm/userVerifier.js | 53 +++++++++++++++++++++++++++++++++++++-------------
+ 1 file changed, 40 insertions(+), 13 deletions(-)
 
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 4ae3364..1e81a51 100644
+index 318e215..5249c89 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -63,6 +63,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
@@ -35,7 +35,7 @@ index 4ae3364..1e81a51 100644
  
          this._beginPromise = null;
          this._redistributingRoles = false;
-@@ -135,15 +136,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -116,15 +117,19 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      selectMechanism(mechanism) {
          const previousServiceName = this._selectedServiceName;
@@ -56,7 +56,7 @@ index 4ae3364..1e81a51 100644
  
          return selected;
      }
-@@ -189,6 +194,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -170,6 +175,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      clear({serviceName = null} = {}) {
          this._authServices.forEach(s => s.clear());
          this._selectedServiceName = serviceName;
@@ -64,7 +64,7 @@ index 4ae3364..1e81a51 100644
          this._redistributeRoles();
  
          this._clearMessageQueue();
-@@ -437,15 +443,20 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -418,15 +424,20 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _connectAuthServices() {
@@ -89,7 +89,7 @@ index 4ae3364..1e81a51 100644
              if ((!ownerServiceName || ownerServiceName !== serviceName) &&
                  !isBackgroundService(serviceName))
                  return;
-@@ -453,13 +464,29 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -434,16 +445,32 @@ export class ShellUserVerifier extends Signals.EventEmitter {
              handler();
          };
  

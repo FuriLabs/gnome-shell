@@ -36,6 +36,8 @@ ubuntu/appDisplay-Display-two-lines-of-application-name-as-a-min.patch
 ubuntu/gdm-loginDialog-Load-the-logo-image-synchronously.patch
 ubuntu-authd/userVerifier-Do-not-allow-any-other-service-to-take-contr.patch
 ubuntu-authd/userVerifier-Do-not-allow-a-auth-service-to-reset-if-not-.patch
+ubuntu-authd/userVerifier-Do-not-allow-a-non-selected-service-to-compl.patch
+ubuntu-authd/userVerifier-Allow-a-service-to-take-ownership-of-the-pro.patch
 ubuntu-authd/userVerifier-Do-not-auto-select-services-that-are-not-aut.patch
 ubuntu-authd/loginDialog-Close-auth-menu-before-selecting-the-active-m.patch
 ubuntu-authd/unlockDialog-Close-auth-menu-before-selecting-the-active-.patch
@@ -46,10 +48,8 @@ ubuntu-authd/userVerifier-Do-not-override-fallback-roles-for-unavailab.patch
 ubuntu-authd/authServices-Preserve-selected-mechanisms-across-updates.patch
 ubuntu-authd/authMenuButton-Drop-JSON-parsing-stringification-for-mech.patch
 ubuntu-authd/loginDialog-unlockDialog-Deeply-check-if-authentication-m.patch
-ubuntu-authd/userVerifier-Do-not-allow-a-non-selected-service-to-compl.patch
 ubuntu-authd/gdm-userVerifier-Make-_handleUpdateEnabledMechanisms-retu.patch
 ubuntu-authd/loginDialog-unlockDialog-Rely-on-user-verifier-mechanism-.patch
-ubuntu-authd/userVerifier-Allow-a-service-to-take-ownership-of-the-pro.patch
 ubuntu-authd/authServices-Only-emit-mechanisms-changed-signals-on-mech.patch
 ubuntu-authd/loginDialog-Use-previously-typed-userName-if-any.patch
 ubuntu-authd/gdm-Implement-authd-auth-service.patch

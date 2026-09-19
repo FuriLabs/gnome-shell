@@ -13,11 +13,11 @@ but do not start the service automatically
  js/gdm/authServices.js               |  2 ++
  js/gdm/authServicesLegacy.js         | 21 ++++++++++++++++-----
  js/gdm/authServicesSSSDSwitchable.js | 11 ++++++++++-
- js/gdm/userVerifier.js               |  4 ++--
- 4 files changed, 30 insertions(+), 8 deletions(-)
+ js/gdm/userVerifier.js               |  6 ++++--
+ 4 files changed, 32 insertions(+), 8 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 5652b99..afbe042 100644
+index 574fdb5..23ab4f1 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -27,6 +27,7 @@ export const RoleProperties = {
@@ -99,22 +99,21 @@ index 7f4eb1c..0eb0422 100644
          this._trackWebLoginTimeout();
  
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 176a0c0..ce60897 100644
+index 5249c89..ebc9169 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
-@@ -512,13 +512,13 @@ export class ShellUserVerifier extends Signals.EventEmitter {
- 
+@@ -543,10 +543,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          // Report the currently selected mechanism. If one is already selected
-         // we keep it (matching by service); otherwise we pick the first
--        // selectable mechanism in priority order.
-+        // auto-selectable mechanism in priority order.
-         let selectedMechanism = this._selectedServiceName
-             ? mechanisms.find(m => m.serviceName === this._selectedServiceName)
-             : null;
- 
-         if (!selectedMechanism)
--            selectedMechanism = mechanisms.find(m => m.selectable);
-+            selectedMechanism = mechanisms.find(m => m.autoSelectable);
+         // we keep it (matching the actual mechanism, so that services exposing
+         // multiple mechanisms under the same service name are handled too);
+-        // otherwise we pick the first mechanism in priority order.
++        // otherwise we pick the first auto-selectable mechanism in priority
++        // order.
+         const {selectedMechanism: currentMechanism} = this;
+         const selectedMechanism =
+-            mechanisms.find(m => currentMechanism?.equals(m));
++            mechanisms.find(m => currentMechanism?.equals(m)) ??
++            mechanisms.find(m => m.autoSelectable);
  
          if (!this._selectedServiceName && selectedMechanism?.serviceName)
              this._selectedServiceName = selectedMechanism.serviceName;
