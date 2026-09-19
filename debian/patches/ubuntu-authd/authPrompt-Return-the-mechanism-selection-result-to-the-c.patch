@@ -1,0 +1,26 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Sat, 19 Sep 2026 17:04:40 +0200
+Subject: authPrompt: Return the mechanism selection result to the caller
+
+In case switching to a mechanism fails, we should send this information
+back to the caller, to adjust the menu selection back
+---
+ js/gdm/authPrompt.js | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 18c8853..57349ce 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -931,8 +931,10 @@ export const AuthPrompt = GObject.registerClass({
+ 
+         const oldPromptStep = this.promptStep;
+         this.promptStep = 0;
+-        if (!this._userVerifier.selectMechanism(mechanism))
++        if (!this._userVerifier.selectMechanism(mechanism)) {
+             this.promptStep = oldPromptStep;
++            return false;
++        }
+ 
+         return true;
+     }

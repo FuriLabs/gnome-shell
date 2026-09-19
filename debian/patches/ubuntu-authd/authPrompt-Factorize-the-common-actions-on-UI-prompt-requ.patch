@@ -1,0 +1,100 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Sat, 19 Sep 2026 16:51:30 +0200
+Subject: authPrompt: Factorize the common actions on UI prompt request
+
+---
+ js/gdm/authPrompt.js | 44 ++++++++++++++++----------------------------
+ 1 file changed, 16 insertions(+), 28 deletions(-)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 03235a9..a9ed7e4 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -509,17 +509,13 @@ export const AuthPrompt = GObject.registerClass({
+     }
+ 
+     _onAskQuestion({serviceName, question, secret, answerHandler}) {
+-        if (this._queryingService)
+-            this.clear();
+-
+-        this._queryingService = serviceName;
+-        this.promptStep++;
++        const preemptiveAnswer = this._preemptiveAnswer;
++        this._promptStarted(serviceName);
+ 
+         this._setPendingCallback(answerHandler);
+ 
+-        const preemptiveAnswer = this._preemptiveAnswer;
+-        this._clearPreemptiveState();
+         if (preemptiveAnswer) {
++            this.verificationStatus = AuthPromptStatus.VERIFICATION_IN_PROGRESS;
+             this._completePendingCallback(preemptiveAnswer);
+             return;
+         }
+@@ -538,13 +534,7 @@ export const AuthPrompt = GObject.registerClass({
+     }
+ 
+     _onShowChoiceList({serviceName, promptMessage, choiceList, choiceHandler}) {
+-        if (this._queryingService)
+-            this.clear();
+-
+-        this._queryingService = serviceName;
+-        this.promptStep++;
+-
+-        this._clearPreemptiveState();
++        this._promptStarted(serviceName);
+ 
+         this._connectAuthListActivate();
+         this._setPendingCallback(choiceHandler);
+@@ -578,13 +568,7 @@ export const AuthPrompt = GObject.registerClass({
+     }
+ 
+     _onShowButton({serviceName, label, callback}) {
+-        if (this._queryingService)
+-            this.clear();
+-
+-        this._queryingService = serviceName;
+-        this.promptStep++;
+-
+-        this._clearPreemptiveState();
++        this._promptStarted(serviceName);
+ 
+         this._setPendingCallback(callback);
+ 
+@@ -596,18 +580,12 @@ export const AuthPrompt = GObject.registerClass({
+     }
+ 
+     _onWebLogin({serviceName, message, url, code, buttons}) {
+-        if (this._queryingService)
+-            this.clear();
+-
+-        this._queryingService = serviceName;
+-        this.promptStep++;
++        this._promptStarted(serviceName);
+ 
+         this._webLoginParams = {message, url, code, buttons};
+ 
+         this._entryArea.hide();
+ 
+-        this._clearPreemptiveState();
+-
+         this._openWebLoginDialog();
+ 
+         this.emit('prompted');
+@@ -909,6 +887,16 @@ export const AuthPrompt = GObject.registerClass({
+         }
+     }
+ 
++    _promptStarted(serviceName) {
++        if (this._queryingService)
++            this.clear();
++
++        this._queryingService = serviceName;
++        this.promptStep++;
++
++        this._clearPreemptiveState();
++    }
++
+     vfunc_hide() {
+         this.stopSpinning();
+         super.vfunc_hide();

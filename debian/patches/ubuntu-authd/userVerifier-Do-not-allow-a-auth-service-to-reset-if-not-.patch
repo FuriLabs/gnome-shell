@@ -37,10 +37,10 @@ restart and take control of its own verification.
  5 files changed, 36 insertions(+), 24 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 03235a9..b45cc5a 100644
+index 57349ce..193c936 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -946,9 +946,10 @@ export const AuthPrompt = GObject.registerClass({
+@@ -940,9 +940,10 @@ export const AuthPrompt = GObject.registerClass({
      }
  
      reset(params) {
@@ -52,7 +52,7 @@ index 03235a9..b45cc5a 100644
          });
  
          const oldStatus = this.verificationStatus;
-@@ -958,7 +959,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -952,7 +953,7 @@ export const AuthPrompt = GObject.registerClass({
          this.promptStep = 0;
  
          if (softReset)

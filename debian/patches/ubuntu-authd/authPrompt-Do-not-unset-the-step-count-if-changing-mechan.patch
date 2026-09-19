@@ -1,0 +1,27 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Sat, 19 Sep 2026 17:01:45 +0200
+Subject: authPrompt: Do not unset the step count if changing mechanism of the
+ same service
+
+In case we're switching the mechanism within the same service, the auth
+steps should not be reset, as it may just be another mechanism of a MFA
+setup.
+---
+ js/gdm/authPrompt.js | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index a9ed7e4..18c8853 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -925,6 +925,10 @@ export const AuthPrompt = GObject.registerClass({
+         if (invalidStatus.includes(this.verificationStatus))
+             return false;
+ 
++        if (this._queryingService &&
++            mechanism?.serviceName === this._queryingService)
++            return this._userVerifier.selectMechanism(mechanism);
++
+         const oldPromptStep = this.promptStep;
+         this.promptStep = 0;
+         if (!this._userVerifier.selectMechanism(mechanism))
