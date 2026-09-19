@@ -3,21 +3,21 @@ Date: Sun, 26 Jul 2026 07:00:57 +0200
 Subject: gdm: Implement authd auth service
 
 ---
- js/gdm/authd.js               | 1007 ++++++++
+ js/gdm/authd.js               |  998 ++++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/userVerifier.js        |    2 +
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 5 files changed, 6679 insertions(+)
+ 5 files changed, 6670 insertions(+)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..9940e92
+index 0000000..a0d74e2
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,1007 @@
+@@ -0,0 +1,998 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +import GLib from 'gi://GLib';
 +import GObject from 'gi://GObject';
@@ -627,7 +627,7 @@ index 0000000..9940e92
 +
 +        switch (stage) {
 +        case AuthdPam.Stage.userSelection:
-+            this._cancelAndReset();
++            this._emitReset();
 +            break;
 +
 +        case AuthdPam.Stage.brokerSelection:
@@ -977,9 +977,7 @@ index 0000000..9940e92
 +                });
 +            }
 +
-+            if (response.access === AuthResult.Denied)
-+                this._failVerification();
-+            else if (response.access === AuthResult.Retry)
++            if (response.access === AuthResult.Retry)
 +                this._maybeStartAuthModeSelection();
 +
 +            break;
@@ -1008,21 +1006,14 @@ index 0000000..9940e92
 +        }
 +    }
 +
-+    _failVerification() {
++    _handleVerificationFailed(serviceName, _shouldRetry) {
++        if (serviceName !== SERVICE_NAME)
++            return;
++
 +        this._authMechanisms = {};
 +        this._authModes = {};
 +        this._selectedAuthMode = null;
-+        this._updateEnabledMechanisms();
-+
-+        this.emit('verification-failed', {
-+            serviceName: SERVICE_NAME,
-+            canRetry: false,
-+        });
-+    }
-+
-+    _cancelAndReset() {
-+        this.emit('cancel');
-+        this._emitReset();
++        this._setEnabledMechanisms([]);
 +    }
 +}
 diff --git a/js/gdm/authdProtocol.js b/js/gdm/authdProtocol.js
