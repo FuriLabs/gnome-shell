@@ -3,21 +3,21 @@ Date: Sun, 26 Jul 2026 07:00:57 +0200
 Subject: gdm: Implement authd auth service
 
 ---
- js/gdm/authd.js               | 1028 ++++++++
+ js/gdm/authd.js               | 1035 ++++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/userVerifier.js        |    2 +
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 5 files changed, 6700 insertions(+)
+ 5 files changed, 6707 insertions(+)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..4ec5e61
+index 0000000..dba8c2f
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,1028 @@
+@@ -0,0 +1,1035 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +import GLib from 'gi://GLib';
 +import GObject from 'gi://GObject';
@@ -33,6 +33,8 @@ index 0000000..4ec5e61
 +const STRING_PROTOCOL_VERSION_ = 1;
 +
 +const AUTO_SELECTION_MAX_WAIT = 1000;
++
++const LOCAL_BROKER_ID = 'local';
 +
 +const AuthMechanismIDs = Object.freeze({
 +    BrokerSelection: 'authd-broker-selection',
@@ -712,7 +714,10 @@ index 0000000..4ec5e61
 +            this._brokers = {};
 +            event.brokersReceived.brokersInfos.forEach(brokerInfo => {
 +                this._brokers[brokerInfo.id] = {
-+                    title: brokerInfo.name,
++                    title: brokerInfo.id === LOCAL_BROKER_ID
++                        // TRANSLATORS: This refers to a local authentication mechanism
++                        ? _('Local mechanism')
++                        : brokerInfo.name,
 +                    // FIXME: We need to support the icon, but it requires Gio.Icon()
 +                    // support in StButton.
 +                    // iconName: brokerInfo.brandIcon,
@@ -818,7 +823,9 @@ index 0000000..4ec5e61
 +        if (serviceName !== SERVICE_NAME)
 +            return;
 +
-+        this._verificationFailed(serviceName, false);
++        const shouldRetry = this._selectedBroker === LOCAL_BROKER_ID;
++        this._verificationFailed(serviceName, shouldRetry).catch(
++            logErrorUnlessCancelled);
 +    }
 +
 +    _handleClear() {

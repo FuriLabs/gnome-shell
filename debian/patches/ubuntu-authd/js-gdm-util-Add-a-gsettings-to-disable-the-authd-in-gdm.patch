@@ -30,19 +30,19 @@ index ee8b3a2..136d67a 100644
    </schema>
  </schemalist>
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
-index 33c1f99..c6cec7a 100644
+index 53a1cc5..8e55c57 100644
 --- a/js/gdm/authd.js
 +++ b/js/gdm/authd.js
-@@ -14,6 +14,8 @@ const STRING_PROTOCOL_VERSION_ = 1;
+@@ -16,6 +16,8 @@ const AUTO_SELECTION_MAX_WAIT = 1000;
  
- const AUTO_SELECTION_MAX_WAIT = 1000;
+ const LOCAL_BROKER_ID = 'local';
  
 +const AUTHD_AUTHENTICATION_KEY = 'enable-authd-authentication';
 +
  const AuthMechanismIDs = Object.freeze({
      BrokerSelection: 'authd-broker-selection',
      AuthModeSelection: 'authd-auth-mode-selection',
-@@ -89,6 +91,10 @@ export class AuthServicesAuthd extends AuthServices {
+@@ -91,6 +93,10 @@ export class AuthServicesAuthd extends AuthServices {
          [AuthdRoles.WebLogin]: SERVICE_NAME,
      };
  
