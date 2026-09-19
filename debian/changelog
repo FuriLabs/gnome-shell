@@ -1,4 +1,4 @@
-gnome-shell (51.0-1) UNRELEASED; urgency=medium
+gnome-shell (51.0-0ubuntu1) UNRELEASED; urgency=medium
 
   [ Daniel van Vugt ]
   * New upstream release 51.alpha
@@ -17,8 +17,44 @@ gnome-shell (51.0-1) UNRELEASED; urgency=medium
   [ Marco Trevisan (Treviño) ]
   * debian/source_gnome-shell.py: Add all mutter package versions
   * debian/control: Update build and runtime dependencies
+  * d/p/ubuntu-authd (LP: #2166745):
+    - Remove disabled debug code
+    - Do not allow authd to take control when not selected
+    - Do not add checks for features we support
+    - Do not allow services without mechanisms to take control
+    - Do not change mechanism if not different from current
+    - Add missing service name to wait-pending-messages
+    - Handle wait-pending-messages requests
+    - Fix authPrompt management of multiple auth steps
+    - Avoid initializing user verifiers if not needed
+    - Properly handle setting null mechanisms
+    - Support changing mechanism with MFA auth systems
+    - Cleanup filtering UI events
+    - Avoid selecting mechanisms if current has not changed
+    - Avoid handling events on cancelled requests
+    - Cleanup auth services fields
+    - Do not reset on problems
+    - Reset when cancellation is requested on the first step
+    - Factorize clearing messages
+    - Rely on PAM failures to fail the authentication
+    - Rely on PAM events to emit verification completed
+    - Cleanup unused or invalid code
+    - Avoid cancelling messages on auth mode selection
+    - Do not allow retrying after conversation stopped
+    - Fix mechanism selection
+    - Mark authd broker selection mechanism as password
+    - Do not export service name
+    - Cleanup the choice list selection code
+    - Only rely on mechanism selection for broker selection
+    - Improve handling of local broker
+  * d/p/ubuntu: Drop actors-pre-allocation patch
+  * debian/control: Update breaks on gnome-shell-ubuntu-extensions
+  * d/p: Cherry-pick upstream notification length fix
 
- -- Simon McVittie <smcv@debian.org>  Thu, 17 Sep 2026 14:57:23 +0100
+  [ Alessandro Astone ]
+  * d/p/u: Keep supporting the Xcursor cursor themes (LP: #2166801)
+
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sun, 20 Sep 2026 16:22:33 +0200
 
 gnome-shell (51~rc-1) UNRELEASED; urgency=medium
 
@@ -26,7 +62,7 @@ gnome-shell (51~rc-1) UNRELEASED; urgency=medium
   * Add Multi-monitor-magnifier-fixes.patch (LP: #2108011)
 
   [ Marco Trevisan (Treviño) ]
-  * New upstream release
+  * New upstream release (LP: #2166646, LP: #2139524)
   * d/p: Handle various linting issues in ubuntu patches
   * d/p: Ensure enabled mechanisms equality function is always set
   * d/p/ubuntu-authd: Fix mechanisms mapping for new webView API.
