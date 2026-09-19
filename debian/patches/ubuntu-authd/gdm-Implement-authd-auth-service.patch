@@ -3,21 +3,21 @@ Date: Sun, 26 Jul 2026 07:00:57 +0200
 Subject: gdm: Implement authd auth service
 
 ---
- js/gdm/authd.js               |  998 ++++++++
+ js/gdm/authd.js               | 1002 ++++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/userVerifier.js        |    2 +
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 5 files changed, 6670 insertions(+)
+ 5 files changed, 6674 insertions(+)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..a0d74e2
+index 0000000..9a29635
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,998 @@
+@@ -0,0 +1,1002 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +import GLib from 'gi://GLib';
 +import GObject from 'gi://GObject';
@@ -964,7 +964,11 @@ index 0000000..a0d74e2
 +
 +        switch (response.access) {
 +        case AuthResult.Granted:
-+            this.emit('verification-complete', {serviceName: SERVICE_NAME});
++            // This is only for debug, in a real env we should just consider
++            // this only an information, while the actual verification completed
++            // happens only when the PAM transaction completes, if ever does.
++            // this.emit('verification-complete', {serviceName: SERVICE_NAME});
++            console.log('authd: Verification completed');
 +            break;
 +
 +        case AuthResult.Retry:
