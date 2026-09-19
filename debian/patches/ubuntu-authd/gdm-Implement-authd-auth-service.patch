@@ -14,7 +14,7 @@ Subject: gdm: Implement authd auth service
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..83c3de7
+index 0000000..cb9bcbf
 --- /dev/null
 +++ b/js/gdm/authd.js
 @@ -0,0 +1,988 @@
@@ -778,7 +778,7 @@ index 0000000..83c3de7
 +        if (serviceName !== SERVICE_NAME)
 +            return;
 +
-+        this._verificationFailed(serviceName, true);
++        this._verificationFailed(serviceName, false);
 +    }
 +
 +    _handleClear() {
