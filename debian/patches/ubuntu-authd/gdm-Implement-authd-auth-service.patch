@@ -14,7 +14,7 @@ Subject: gdm: Implement authd auth service
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..132aa29
+index 0000000..e0e5250
 --- /dev/null
 +++ b/js/gdm/authd.js
 @@ -0,0 +1,1015 @@
@@ -27,7 +27,7 @@ index 0000000..132aa29
 +import {AuthServices, Role} from './authServices.js';
 +import {logErrorUnlessCancelled} from '../misc/errorUtils.js';
 +
-+export const SERVICE_NAME = 'gdm-authd';
++const SERVICE_NAME = 'gdm-authd';
 +
 +const STRING_PROTOCOL_NAME_ = 'com.ubuntu.authd.gdm';
 +const STRING_PROTOCOL_VERSION_ = 1;
