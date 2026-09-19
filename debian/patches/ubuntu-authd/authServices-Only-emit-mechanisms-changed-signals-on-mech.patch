@@ -9,7 +9,7 @@ Subject: authServices: Only emit mechanisms-changed signals on mechanism
  2 files changed, 23 insertions(+), 5 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 7d523b1..29c49b2 100644
+index ab686f0..ba6896c 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -226,6 +226,16 @@ export class AuthServices extends GObject.Object {

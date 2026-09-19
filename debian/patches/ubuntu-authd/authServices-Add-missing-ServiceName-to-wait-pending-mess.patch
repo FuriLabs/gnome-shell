@@ -9,7 +9,7 @@ allowed to do so
  1 file changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 2194a58..dfccdbb 100644
+index 09ab2e5..65535cf 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -63,6 +63,7 @@ export class AuthServices extends GObject.Object {

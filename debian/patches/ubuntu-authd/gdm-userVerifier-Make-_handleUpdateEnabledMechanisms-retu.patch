@@ -15,7 +15,7 @@ the array is populated (fingerprint readiness, SSSD selection/timeout).
  3 files changed, 13 insertions(+), 6 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index a4e330f..7d523b1 100644
+index 048b98b..ab686f0 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -308,7 +308,9 @@ export class AuthServices extends GObject.Object {

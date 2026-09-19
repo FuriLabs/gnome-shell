@@ -35,6 +35,8 @@ ubuntu/Standardize-icon-sizes-and-fit-the-grid-to-the-screen.patch
 ubuntu/appDisplay-Display-two-lines-of-application-name-as-a-min.patch
 ubuntu/gdm-loginDialog-Load-the-logo-image-synchronously.patch
 ubuntu-authd/userVerifier-Ignore-mechanims-changed-if-cancellation-hap.patch
+ubuntu-authd/authService-Unset-the-selectec-mechanism-on-reset.patch
+ubuntu-authd/authServices-Remove-unused-verificationComplete-field.patch
 ubuntu-authd/authPrompt-Factorize-the-common-actions-on-UI-prompt-requ.patch
 ubuntu-authd/authPrompt-Do-not-unset-the-step-count-if-changing-mechan.patch
 ubuntu-authd/authPrompt-Return-the-mechanism-selection-result-to-the-c.patch

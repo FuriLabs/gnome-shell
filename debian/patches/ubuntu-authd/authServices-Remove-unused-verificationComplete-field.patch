@@ -1,0 +1,20 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Sat, 19 Sep 2026 19:56:40 +0200
+Subject: authServices: Remove unused verificationComplete field
+
+---
+ js/gdm/authServices.js | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
+index 9c8173e..5bdc929 100644
+--- a/js/gdm/authServices.js
++++ b/js/gdm/authServices.js
+@@ -233,7 +233,6 @@ export class AuthServices extends GObject.Object {
+         this._unavailableServices.clear();
+         this._activeServices.clear();
+ 
+-        this._verificationComplete = false;
+         this._userName = null;
+ 
+         this._clearUserVerifier();

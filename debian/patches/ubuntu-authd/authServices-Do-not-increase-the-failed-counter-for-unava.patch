@@ -10,7 +10,7 @@ not retry with them or increase the fail counter
  1 file changed, 9 insertions(+), 4 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 7192e94..a0d4546 100644
+index d509e48..21ff8f7 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -191,7 +191,9 @@ export class AuthServices extends GObject.Object {

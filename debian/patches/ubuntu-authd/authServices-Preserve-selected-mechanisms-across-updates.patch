@@ -22,7 +22,7 @@ or password) authentication.
  2 files changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index cb27340..19d8cbd 100644
+index 7fb9fc0..525d281 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -290,7 +290,7 @@ export class AuthServices extends GObject.Object {

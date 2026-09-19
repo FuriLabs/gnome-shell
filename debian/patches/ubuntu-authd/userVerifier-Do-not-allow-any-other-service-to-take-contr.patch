@@ -23,7 +23,7 @@ while keeping selection valid when the set of available mechanisms changes.
  2 files changed, 65 insertions(+), 17 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index dfccdbb..793be77 100644
+index 65535cf..35ec43e 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -42,6 +42,7 @@ export const RoleProperties = {
@@ -35,7 +35,7 @@ index dfccdbb..793be77 100644
  };
  
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 9d41acd..c49a0fb 100644
+index 7732b8e..643f153 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -62,6 +62,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
@@ -150,7 +150,7 @@ index 9d41acd..c49a0fb 100644
      }
  
      _redistributeRoles() {
-@@ -473,11 +510,21 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -476,11 +513,21 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                  return visibleMechanisms;
              });
  

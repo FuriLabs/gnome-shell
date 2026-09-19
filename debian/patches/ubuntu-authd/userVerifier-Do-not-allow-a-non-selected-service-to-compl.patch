@@ -23,7 +23,7 @@ non-completion signals.
  2 files changed, 7 insertions(+), 3 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index afd8f3a..002f56b 100644
+index fa3f045..590bc89 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -78,7 +78,10 @@ export class AuthServices extends GObject.Object {
@@ -48,7 +48,7 @@ index afd8f3a..002f56b 100644
  
      _onChoiceListQuery(serviceName, promptMessage, list) {
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index ffa06a9..afc1d6d 100644
+index f65efd9..c0456a3 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -448,7 +448,8 @@ export class ShellUserVerifier extends Signals.EventEmitter {

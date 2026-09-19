@@ -17,7 +17,7 @@ but do not start the service automatically
  4 files changed, 32 insertions(+), 8 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 002f56b..17b8912 100644
+index 590bc89..2812793 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -27,6 +27,7 @@ export const RoleProperties = {
@@ -99,10 +99,10 @@ index 7f4eb1c..0eb0422 100644
          this._trackWebLoginTimeout();
  
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index aa5778f..4623db2 100644
+index 693da34..107d9af 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
-@@ -548,10 +548,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -551,10 +551,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          // Report the currently selected mechanism. If one is already selected
          // we keep it (matching the actual mechanism, so that services exposing
          // multiple mechanisms under the same service name are handled too);

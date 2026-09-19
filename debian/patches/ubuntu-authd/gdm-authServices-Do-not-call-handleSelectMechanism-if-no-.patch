@@ -10,7 +10,7 @@ there's no need to call into the handler code
  1 file changed, 7 insertions(+), 4 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 17b8912..7192e94 100644
+index 2812793..d509e48 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -204,15 +204,18 @@ export class AuthServices extends GObject.Object {

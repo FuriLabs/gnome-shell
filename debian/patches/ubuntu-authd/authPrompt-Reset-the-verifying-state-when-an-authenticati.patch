@@ -63,7 +63,7 @@ index 57349ce..5a31f6e 100644
          let newEntry, inactiveEntry;
  
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index d0f7659..2194a58 100644
+index 5bdc929..09ab2e5 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -85,6 +85,11 @@ export class AuthServices extends GObject.Object {

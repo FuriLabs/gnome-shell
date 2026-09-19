@@ -26,7 +26,7 @@ did not change.
  5 files changed, 43 insertions(+), 23 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 19d8cbd..a4e330f 100644
+index 525d281..048b98b 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -171,6 +171,22 @@ export class AuthServices extends GObject.Object {
