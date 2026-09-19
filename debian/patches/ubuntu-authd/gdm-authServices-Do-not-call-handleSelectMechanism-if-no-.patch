@@ -6,23 +6,32 @@ Subject: gdm/authServices: Do not call handleSelectMechanism if no mechanism
 In case there's no selected mechanism for the given auth service,
 there's no need to call into the handler code
 ---
- js/gdm/authServices.js | 6 ++++--
- 1 file changed, 4 insertions(+), 2 deletions(-)
+ js/gdm/authServices.js | 11 +++++++----
+ 1 file changed, 7 insertions(+), 4 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 17b8912..d49c000 100644
+index 17b8912..7192e94 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
-@@ -210,9 +210,11 @@ export class AuthServices extends GObject.Object {
+@@ -204,15 +204,18 @@ export class AuthServices extends GObject.Object {
+     }
+ 
+     selectMechanism(mechanism) {
+-        if (this._mechanismEquals(this._selectedMechanism, mechanism))
+-            return false;
++        const wasSelected = this._selectedMechanism?.equals(mechanism);
+ 
          this._selectedMechanism = this._enabledMechanisms?.find(
              m => this._mechanismEquals(m, mechanism));
  
 -        this._handleSelectMechanism();
 +        if (!this._selectedMechanism)
 +            return false;
++
++        if (!wasSelected)
++            this._handleSelectMechanism();
  
 -        return !!this._selectedMechanism;
-+        this._handleSelectMechanism();
 +        return true;
      }
  
