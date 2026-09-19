@@ -13,7 +13,7 @@ And only if none is found we should then report an error
  1 file changed, 21 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index c5671c9..91163cb 100644
+index 4623db2..8675fe6 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -98,10 +98,29 @@ export class ShellUserVerifier extends Signals.EventEmitter {

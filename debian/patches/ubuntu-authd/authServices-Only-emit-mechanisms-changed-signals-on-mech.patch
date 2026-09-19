@@ -9,7 +9,7 @@ Subject: authServices: Only emit mechanisms-changed signals on mechanism
  2 files changed, 23 insertions(+), 5 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 04c370e..cfc975c 100644
+index 7d523b1..29c49b2 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -226,6 +226,16 @@ export class AuthServices extends GObject.Object {
@@ -27,9 +27,9 @@ index 04c370e..cfc975c 100644
 +    }
 +
      selectMechanism(mechanism) {
-         if (this._mechanismEquals(this._selectedMechanism, mechanism))
-             return false;
-@@ -305,16 +315,24 @@ export class AuthServices extends GObject.Object {
+         const wasSelected = this._selectedMechanism?.equals(mechanism);
+ 
+@@ -306,16 +316,24 @@ export class AuthServices extends GObject.Object {
      }
  
      _updateEnabledMechanisms() {

@@ -20,11 +20,11 @@ background services may update the prompt.
 Resetting or changing mechanism clears UI ownership, while a failed
 mechanism selection restores both the previous selected service and UI owner.
 ---
- js/gdm/userVerifier.js | 53 +++++++++++++++++++++++++++++++++++++-------------
- 1 file changed, 40 insertions(+), 13 deletions(-)
+ js/gdm/userVerifier.js | 62 +++++++++++++++++++++++++++++++++++++-------------
+ 1 file changed, 46 insertions(+), 16 deletions(-)
 
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index afc1d6d..cdfb400 100644
+index afc1d6d..aa5778f 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -63,6 +63,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
@@ -64,7 +64,7 @@ index afc1d6d..cdfb400 100644
          this._redistributeRoles();
  
          this._clearMessageQueue();
-@@ -418,15 +424,20 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -418,32 +424,56 @@ export class ShellUserVerifier extends Signals.EventEmitter {
      }
  
      _connectAuthServices() {
@@ -78,36 +78,42 @@ index afc1d6d..cdfb400 100644
          const isBackgroundService = serviceName => this._authServices
                  .flatMap(s => s.enabledMechanisms ?? [])
                  .some(m => m.serviceName === serviceName && m.background);
+-        const maybeForwardSignal = (args, handler) => {
 +        const serviceHasMechanisms = serviceName => this._authServices
 +                .flatMap(s => s.enabledMechanisms ?? [])
 +                .some(m => m.serviceName === serviceName);
-         const maybeForwardSignal = (args, handler) => {
++
++        const maybeForwardSignal = (args, handler, {isUISignal = false} = {}) => {
              const {serviceName} = args ?? {};
 -            const ownerServiceName = this._driverService ?? this._selectedServiceName;
+-            if ((!ownerServiceName || ownerServiceName !== serviceName) &&
+-                !isBackgroundService(serviceName))
++            const isBackground = isBackgroundService(serviceName);
++
++            if (isUISignal) {
++                const hasMechanisms = serviceHasMechanisms(serviceName);
++                const isSelected = !this._selectedServiceName ||
++                    this._selectedServiceName === serviceName;
++
++                if (!isBackground && !this._uiOwnerServiceName &&
++                    hasMechanisms && isSelected) {
++                    this._uiOwnerServiceName = serviceName;
++                    this._selectedServiceName = serviceName;
++                }
++            }
++
 +            const ownerServiceName = this._driverService ??
 +                this._uiOwnerServiceName ?? this._selectedServiceName;
-             if ((!ownerServiceName || ownerServiceName !== serviceName) &&
-                 !isBackgroundService(serviceName))
++            if (!isBackground &&
++                (!ownerServiceName || ownerServiceName !== serviceName))
                  return;
-@@ -434,16 +445,32 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+ 
              handler();
          };
  
-+        const maybeForwardUISignal = (args, handler) => {
-+            const {serviceName} = args ?? {};
-+            const hasMechanisms = serviceHasMechanisms(serviceName);
-+            const isBackground = isBackgroundService(serviceName);
-+            const isSelected = !this._selectedServiceName ||
-+                this._selectedServiceName === serviceName;
++        const maybeForwardUISignal = (args, handler) =>
++            maybeForwardSignal(args, handler, {isUISignal: true});
 +
-+            if (!this._uiOwnerServiceName && !isBackground && hasMechanisms &&
-+                isSelected) {
-+                this._uiOwnerServiceName = serviceName;
-+                this._selectedServiceName = serviceName;
-+            }
-+
-+            maybeForwardSignal(args, handler);
-+        };
 +
          this._authServices.forEach(authServices => {
              authServices.connectObject(
@@ -127,7 +133,7 @@ index afc1d6d..cdfb400 100644
                  'filter-messages', (_, args) => maybeForwardSignal(args,
                      () => this._filterServiceMessages(args)),
                  'verification-failed', (_, args) => maybeForwardSignal(args,
-@@ -452,14 +479,14 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -452,14 +482,14 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                      () => this.emit('verification-complete')),
                  'reset', (_, args) => maybeForwardSignal(args,
                      () => this.emit('reset', args)),
