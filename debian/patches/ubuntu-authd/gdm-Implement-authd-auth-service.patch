@@ -3,21 +3,21 @@ Date: Sun, 26 Jul 2026 07:00:57 +0200
 Subject: gdm: Implement authd auth service
 
 ---
- js/gdm/authd.js               | 1002 ++++++++
+ js/gdm/authd.js               |  993 ++++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/userVerifier.js        |    2 +
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 5 files changed, 6674 insertions(+)
+ 5 files changed, 6665 insertions(+)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..9a29635
+index 0000000..7529e2f
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,1002 @@
+@@ -0,0 +1,993 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +import GLib from 'gi://GLib';
 +import GObject from 'gi://GObject';
@@ -722,7 +722,6 @@ index 0000000..9a29635
 +                return;
 +
 +            this._selectedAuthMode = event.authModeSelected.authModeId;
-+            // this.emit('filter-messages', SERVICE_NAME, MessageType.ERROR);
 +            this.emit('queue-priority-message', {
 +                serviceName: SERVICE_NAME,
 +                messageType: MessageType.ERROR,
@@ -758,11 +757,11 @@ index 0000000..9a29635
 +        }
 +    }
 +
-+    reset() {
++    _handleReset() {
 +        this.cancel();
 +    }
 +
-+    cancel() {
++    _handleCancel() {
 +        if (this._stage !== undefined)
 +            console.log('authd: Cancelling authentication');
 +
@@ -823,14 +822,6 @@ index 0000000..9a29635
 +        this._showChallenge();
 +    }
 +
-+    sortMechanisms(mA, mB) {
-+        if (mA.id === this._selectedAuthMode)
-+            return -1;
-+        if (mB.id === this._selectedAuthMode)
-+            return 1;
-+        return 0;
-+    }
-+
 +    _isWaitingLayout() {
 +        return this._uiLayout?.wait === 'true';
 +    }
@@ -840,8 +831,6 @@ index 0000000..9a29635
 +            throw new Error('No authentication mode selected');
 +        if (!this._authModes[this._selectedAuthMode])
 +            throw new Error(`Selected authentication mode '${this._selectedAuthMode}' is not supported`);
-+        if (!this._authMechanisms[this._selectedAuthMode])
-+            throw new Error(`Selected authentication mode '${this._selectedAuthMode}' is not supported mechanism`);
 +        if (!this._uiLayout)
 +            throw new Error('No ui layouts defined');
 +
@@ -849,13 +838,16 @@ index 0000000..9a29635
 +            this._uiLayout.type, this._uiLayout.label);
 +        this._clearMessages();
 +
++        const mechanism = this._authMechanisms[this._selectedAuthMode];
++        if (!mechanism)
++            throw new Error(`Selected authentication mode '${this._selectedAuthMode}' is not supported mechanism`);
++
 +        switch (this._uiLayout.type) {
 +        case UILayoutTypes.Form:
 +        case UILayoutTypes.NewPassword: {
 +            const label = this._uiLayout.label;
 +            let infoMsg;
 +            let prompt;
-+            const mechanism = this._authMechanisms[this._selectedAuthMode];
 +            if (this._isWaitingLayout())
 +                infoMsg = label;
 +
@@ -922,7 +914,6 @@ index 0000000..9a29635
 +        }
 +
 +        case UILayoutTypes.QrCode: {
-+            const mechanism = this._authMechanisms[this._selectedAuthMode];
 +            mechanism.role = AuthdRoles.WebLogin;
 +            mechanism.message = this._uiLayout.label;
 +            mechanism.url = this._uiLayout.content;
