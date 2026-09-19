@@ -1,0 +1,28 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Fri, 18 Sep 2026 03:09:20 +0200
+Subject: userVerifier: Avoid conditional check on gdm features we depend on
+
+We already depend on such libgdm so we don't need to be conditional
+---
+ js/gdm/userVerifier.js | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
+index 1fa09df..2e2e3dd 100644
+--- a/js/gdm/userVerifier.js
++++ b/js/gdm/userVerifier.js
+@@ -389,10 +389,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         }
+ 
+         try {
+-            if (this._client.get_user_verifier_choice_list)
+-                proxies.userVerifierChoiceList = await this._client.get_user_verifier_choice_list();
+-            if (this._client.get_user_verifier_custom_json)
+-                proxies.userVerifierCustomJSON = await this._client.get_user_verifier_custom_json();
++            proxies.userVerifierChoiceList =
++                await this._client.get_user_verifier_choice_list();
++            proxies.userVerifierCustomJSON =
++                await this._client.get_user_verifier_custom_json();
+         } catch (e) {
+             throw new InitError(e, 'Failed to obtain user verifier extensions');
+         }
