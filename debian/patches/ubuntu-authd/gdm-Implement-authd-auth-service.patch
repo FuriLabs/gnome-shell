@@ -3,21 +3,21 @@ Date: Sun, 26 Jul 2026 07:00:57 +0200
 Subject: gdm: Implement authd auth service
 
 ---
- js/gdm/authd.js               |  993 ++++++++
+ js/gdm/authd.js               |  988 +++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/userVerifier.js        |    2 +
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 5 files changed, 6665 insertions(+)
+ 5 files changed, 6660 insertions(+)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..7529e2f
+index 0000000..83c3de7
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,993 @@
+@@ -0,0 +1,988 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +import GLib from 'gi://GLib';
 +import GObject from 'gi://GObject';
@@ -722,11 +722,6 @@ index 0000000..7529e2f
 +                return;
 +
 +            this._selectedAuthMode = event.authModeSelected.authModeId;
-+            this.emit('queue-priority-message', {
-+                serviceName: SERVICE_NAME,
-+                messageType: MessageType.ERROR,
-+                message: null,
-+            });
 +
 +            if (this._stage >= AuthdPam.Stage.brokerSelection)
 +                this._maybeStartChallenge();
