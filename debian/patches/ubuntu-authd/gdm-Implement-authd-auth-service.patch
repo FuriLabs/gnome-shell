@@ -3,21 +3,21 @@ Date: Sun, 26 Jul 2026 07:00:57 +0200
 Subject: gdm: Implement authd auth service
 
 ---
- js/gdm/authd.js               |  988 +++++++
+ js/gdm/authd.js               | 1009 ++++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/userVerifier.js        |    2 +
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 5 files changed, 6660 insertions(+)
+ 5 files changed, 6681 insertions(+)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..cb9bcbf
+index 0000000..d6234d5
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,988 @@
+@@ -0,0 +1,1009 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +import GLib from 'gi://GLib';
 +import GObject from 'gi://GObject';
@@ -273,15 +273,34 @@ index 0000000..cb9bcbf
 +    _handleSelectMechanism() {
 +        const mechanism = this.selectedMechanism;
 +
-+        if (!mechanism)
-+            return;
-+        if (this._selectedAuthMode === mechanism.id)
-+            return;
-+        if (!this._authMechanisms[mechanism.id])
++        if (!this._authMechanisms[mechanism?.id])
 +            return;
 +
-+        if (this._stage === AuthdPam.Stage.authModeSelection) {
++        this._clearMessages();
++
++        if (mechanism.id === AuthMechanismIDs.BrokerSelection) {
++            if (!Object.entries(this._brokers).length) {
++                this._emitReset();
++                return;
++            }
++
++            this._maybeShowChoiceList(AuthMechanismIDs.BrokerSelection,
++                _('Select the broker'), this._brokers, key => this._selectBroker(key));
++            return;
++        }
++
++        if (this._selectedAuthMode === mechanism.id) {
++            this._maybeStartChallenge();
++            return;
++        }
++
++        const selectMechanism = () => {
++            this._uiLayout = null;
 +            this._selectAuthMode(mechanism.id);
++        };
++
++        if (this._stage === AuthdPam.Stage.authModeSelection) {
++            selectMechanism();
 +            return;
 +        }
 +
@@ -290,8 +309,7 @@ index 0000000..cb9bcbf
 +                return;
 +
 +            this._pendingStage = AuthdPam.Stage.challenge;
-+            this._uiLayout = null;
-+            this._selectAuthMode(mechanism.id);
++            selectMechanism();
 +        };
 +
 +        if (this._authenticationStarted && this._isWaitingLayout()) {
@@ -309,8 +327,11 @@ index 0000000..cb9bcbf
 +    }
 +
 +    _selectAndStartMechanism(mechanism) {
-+        log('authd: Selecting mechanism', mechanism.id);
-+        this.selectMechanism(mechanism);
++        const selected = this.selectMechanism(mechanism);
++        console.log('authd: Selecting mechanism', mechanism.id, selected);
++
++        if (selected)
++            this.emit('mechanisms-changed');
 +
 +        switch (mechanism.role) {
 +        case AuthdRoles.Password:
