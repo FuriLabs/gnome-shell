@@ -18,7 +18,6 @@ ubuntu/resolve_alternate_theme_path.patch
 ubuntu/secure_mode_extension.patch
 ubuntu/keep-ubuntu-logo-bright-lp1867133-v1.patch
 ubuntu/configure_login_screen.patch
-ubuntu/layout-Try-to-allocate-before-getting-size-of-tracke.patch
 ubuntu/sessionMode-Add-support-for-configuring-an-icons-resource.patch
 ubuntu/main-Support-ubuntu-color-scheme-and-yaru-variants.patch
 ubuntu/st-them-context-Use-yaru-colors-as-accents.patch
