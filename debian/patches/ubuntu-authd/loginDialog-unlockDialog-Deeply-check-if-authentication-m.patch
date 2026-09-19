@@ -34,7 +34,7 @@ index 79cb2c4..8a48619 100644
      }
  
 +    _setEnabledMechanisms(mechanisms) {
-+        this._enabledMechanisms = mechanisms.map(m => {
++        this._enabledMechanisms = mechanisms?.map(m => {
 +            const mechanism = {
 +                ...m,
 +                ...RoleProperties[m.role],
