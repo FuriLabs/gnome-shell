@@ -1,0 +1,123 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Sat, 19 Sep 2026 17:39:07 +0200
+Subject: authServicesLegacy: Emit step-completed after each PAM request
+
+GDM does notify us when a PAM request has been submitted and we got a
+reply for it, also because there's really not a clear API for that.
+
+The only way to be sure that a PAM service has completed the step is to
+wait for a successive reply from the module.
+
+So do this: as soon a request has been placed, track that and once we
+got a reply, inform the auth prompt that the request has been
+acknowledged by PAM
+---
+ js/gdm/authServicesLegacy.js | 27 +++++++++++++++++++++++++++
+ 1 file changed, 27 insertions(+)
+
+diff --git a/js/gdm/authServicesLegacy.js b/js/gdm/authServicesLegacy.js
+index 12adc63..6c5f861 100644
+--- a/js/gdm/authServicesLegacy.js
++++ b/js/gdm/authServicesLegacy.js
+@@ -75,6 +75,15 @@ export class AuthServicesLegacy extends AuthServices {
+         this.addCredentialManager(Vmware.SERVICE_NAME, Vmware.getVmwareCredentialsManager());
+ 
+         this._fingerprintReadyTimeoutId = 0;
++        this._pendingSteps = new Set();
++    }
++
++    _maybeEmitStepCompleted(serviceName) {
++        if (!this._pendingSteps.has(serviceName))
++            return;
++
++        this.emit('step-completed', {serviceName});
++        this._pendingSteps.delete(serviceName);
+     }
+ 
+     _handleAnswerQuery(serviceName, answer) {
+@@ -86,6 +95,7 @@ export class AuthServicesLegacy extends AuthServices {
+ 
+         this._userVerifier.call_answer_query(
+             serviceName, answer, this._cancellable).catch(logErrorUnlessCancelled);
++        this._pendingSteps.add(serviceName);
+     }
+ 
+     _handleBeginVerification() {
+@@ -109,9 +119,11 @@ export class AuthServicesLegacy extends AuthServices {
+ 
+     _handleReset() {
+         this._selectedMechanism = null;
++        this._pendingSteps.clear();
+     }
+ 
+     _handleClear() {
++        this._pendingSteps.clear();
+         this._smartcardInProgress = false;
+         this._clearFingerprintSignalHandlers();
+     }
+@@ -175,6 +187,8 @@ export class AuthServicesLegacy extends AuthServices {
+     }
+ 
+     _handleOnInfo(serviceName, info) {
++        this._maybeEmitStepCompleted(serviceName);
++
+         if (serviceName === this._selectedMechanism?.serviceName) {
+             this.emit('queue-message', {
+                 serviceName,
+@@ -201,6 +215,8 @@ export class AuthServicesLegacy extends AuthServices {
+     }
+ 
+     _handleOnProblem(serviceName, problem) {
++        this._maybeEmitStepCompleted(serviceName);
++
+         if (serviceName === this._selectedMechanism?.serviceName ||
+             (serviceName === FINGERPRINT_SERVICE_NAME &&
+             this._enabledMechanisms.some(m => m.serviceName === serviceName))) {
+@@ -245,6 +261,8 @@ export class AuthServicesLegacy extends AuthServices {
+         if (serviceName !== this._selectedMechanism?.serviceName)
+             return;
+ 
++        this._maybeEmitStepCompleted(serviceName);
++
+         this.emit('ask-question', {
+             serviceName,
+             question,
+@@ -260,6 +278,8 @@ export class AuthServicesLegacy extends AuthServices {
+         if (serviceName !== this._selectedMechanism?.serviceName)
+             return;
+ 
++        this._maybeEmitStepCompleted(serviceName);
++
+         this.emit('ask-question', {
+             serviceName,
+             question: secretQuestion,
+@@ -277,8 +297,12 @@ export class AuthServicesLegacy extends AuthServices {
+         if (!token)
+             return false;
+ 
++        this._maybeEmitStepCompleted(serviceName);
++
+         this._userVerifier.call_answer_query(
+             serviceName, token, this._cancellable).catch(logErrorUnlessCancelled);
++        this._pendingSteps.add(serviceName);
++
+         return true;
+     }
+ 
+@@ -349,6 +373,8 @@ export class AuthServicesLegacy extends AuthServices {
+         for (const [key, value] of Object.entries(list.deepUnpack()))
+             choiceList[key] = {title: value};
+ 
++        this._maybeEmitStepCompleted(serviceName);
++
+         this.emit('show-choice-list', {
+             serviceName,
+             promptMessage,
+@@ -358,6 +384,7 @@ export class AuthServicesLegacy extends AuthServices {
+                     return;
+                 this._userVerifierChoiceList.call_select_choice(
+                     serviceName, key, this._cancellable).catch(logErrorUnlessCancelled);
++                this._pendingSteps.add(serviceName);
+             },
+         });
+     }

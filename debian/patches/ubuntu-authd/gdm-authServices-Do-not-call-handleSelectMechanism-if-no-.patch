@@ -10,10 +10,10 @@ there's no need to call into the handler code
  1 file changed, 4 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 23ab4f1..a27e372 100644
+index 17b8912..d49c000 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
-@@ -205,9 +205,11 @@ export class AuthServices extends GObject.Object {
+@@ -210,9 +210,11 @@ export class AuthServices extends GObject.Object {
          this._selectedMechanism = this._enabledMechanisms?.find(
              m => this._mechanismEquals(m, mechanism));
  

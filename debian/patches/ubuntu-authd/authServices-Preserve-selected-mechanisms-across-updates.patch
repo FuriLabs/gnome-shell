@@ -22,10 +22,10 @@ or password) authentication.
  2 files changed, 3 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 771aa7a..79cb2c4 100644
+index 9afdad0..51a35da 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
-@@ -284,7 +284,7 @@ export class AuthServices extends GObject.Object {
+@@ -289,7 +289,7 @@ export class AuthServices extends GObject.Object {
      }
  
      _updateEnabledMechanisms() {
@@ -34,7 +34,7 @@ index 771aa7a..79cb2c4 100644
          this._enabledMechanisms = [];
  
          this._handleUpdateEnabledMechanisms();
-@@ -293,6 +293,8 @@ export class AuthServices extends GObject.Object {
+@@ -298,6 +298,8 @@ export class AuthServices extends GObject.Object {
              ...m,
              ...RoleProperties[m.role],
          }));
@@ -44,10 +44,10 @@ index 771aa7a..79cb2c4 100644
          this.emit('mechanisms-changed');
      }
 diff --git a/js/gdm/authServicesLegacy.js b/js/gdm/authServicesLegacy.js
-index 2f49f57..088c765 100644
+index 6c99a5e..6a3a47d 100644
 --- a/js/gdm/authServicesLegacy.js
 +++ b/js/gdm/authServicesLegacy.js
-@@ -154,7 +154,6 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -166,7 +166,6 @@ export class AuthServicesLegacy extends AuthServices {
      }
  
      _handleUpdateEnabledRoles() {

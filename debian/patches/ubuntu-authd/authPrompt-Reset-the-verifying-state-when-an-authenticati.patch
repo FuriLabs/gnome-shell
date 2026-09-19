@@ -1,0 +1,92 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Sat, 19 Sep 2026 17:24:54 +0200
+Subject: authPrompt: Reset the verifying state when an authentication step
+ completed
+
+In authPrompt we've the concept of verification state, now we set the
+state to "in progress" as soon as some step is started, however we never
+reset the value back to verifying once we got a reply.
+
+This, with the current mechanisms switch support implies that it's not
+possible to switch mechanism while one is in progress, and this is
+particularly problematic when a MFA setup is used, where multiple steps
+are acting with multiple UI requests; and an user should be free to
+switch mechanism even if just a factor has been processed.
+
+This is fine while a mechanism is checking the backend for a result, but
+once we got a result we should go back to the verifying state, so that
+changing mechanisms is always possible even if an authentication started.
+
+In fact our UI allowed this, but this was currently blocked.
+
+So introduce a new signal that auth services can emit in order to notify
+that the current step has been completed and so the state can go back
+to the verifying.
+
+We cannot manage this from auth prompt itself since since answering a
+query does not imply that the step is done, as PAM or any other
+underlying service may take a while to answer, and we want to keep the
+state in progress during that phase
+---
+ js/gdm/authPrompt.js   | 11 +++++++++++
+ js/gdm/authServices.js |  5 +++++
+ js/gdm/userVerifier.js |  1 +
+ 3 files changed, 17 insertions(+)
+
+diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
+index 57349ce..5a31f6e 100644
+--- a/js/gdm/authPrompt.js
++++ b/js/gdm/authPrompt.js
+@@ -190,6 +190,7 @@ export const AuthPrompt = GObject.registerClass({
+             'web-login', (_, args) => this._onWebLogin(args),
+             'verification-failed', (_, args) => this._onVerificationFailed(args),
+             'verification-complete', () => this._onVerificationComplete(),
++            'step-completed', (_, args) => this._onStepCompleted(args),
+             'reset', (_, args) => this._onReset(args),
+             this);
+ 
+@@ -467,6 +468,16 @@ export const AuthPrompt = GObject.registerClass({
+         this.emit('next');
+     }
+ 
++    _onStepCompleted({serviceName}) {
++        if (this._queryingService !== serviceName)
++            return;
++
++        if (this.verificationStatus === AuthPromptStatus.VERIFICATION_IN_PROGRESS) {
++            this.verificationStatus = AuthPromptStatus.VERIFYING;
++            this.stopSpinning();
++        }
++    }
++
+     updateEntry(secret) {
+         let newEntry, inactiveEntry;
+ 
+diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
+index d0f7659..2194a58 100644
+--- a/js/gdm/authServices.js
++++ b/js/gdm/authServices.js
+@@ -85,6 +85,11 @@ export class AuthServices extends GObject.Object {
+          */
+         'ask-question': {param_types: [GObject.TYPE_JSOBJECT]},
+         /**
++         * @param {string} serviceName
++         */
++        'step-completed': {param_types: [GObject.TYPE_JSOBJECT]},
++        /**
++         * @param {string} serviceName
+          * @param {boolean} [softReset]
+          * @param {boolean} [reuseEntryText]
+          */
+diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
+index 039da1d..9d41acd 100644
+--- a/js/gdm/userVerifier.js
++++ b/js/gdm/userVerifier.js
+@@ -417,6 +417,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+                 'reset', (_, args) => this.emit('reset', args),
+                 'show-choice-list', (_, args) => this.emit('show-choice-list', args),
+                 'show-button', (_, args) => this.emit('show-button', args),
++                'step-completed', (_, args) => this.emit('step-completed', args),
+                 'mechanisms-changed', () => this._onMechanismsChanged().catch(logError),
+                 'web-login', (_, args) => this.emit('web-login', args),
+                 this);

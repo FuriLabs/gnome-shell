@@ -26,10 +26,10 @@ did not change.
  5 files changed, 43 insertions(+), 23 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 79cb2c4..8a48619 100644
+index 51a35da..79e19bb 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
-@@ -166,6 +166,22 @@ export class AuthServices extends GObject.Object {
+@@ -171,6 +171,22 @@ export class AuthServices extends GObject.Object {
          return this._enabledMechanisms?.filter(m => m.ready !== false);
      }
  
@@ -52,7 +52,7 @@ index 79cb2c4..8a48619 100644
      get _roleToService() {
          return this.constructor.RoleToService;
      }
-@@ -285,14 +301,9 @@ export class AuthServices extends GObject.Object {
+@@ -290,14 +306,9 @@ export class AuthServices extends GObject.Object {
  
      _updateEnabledMechanisms() {
          const selectedMechanism = this._selectedMechanism;
@@ -68,10 +68,10 @@ index 79cb2c4..8a48619 100644
              this._mechanismEquals(mechanism, selectedMechanism));
  
 diff --git a/js/gdm/authServicesLegacy.js b/js/gdm/authServicesLegacy.js
-index 088c765..81df132 100644
+index 6a3a47d..3afb967 100644
 --- a/js/gdm/authServicesLegacy.js
 +++ b/js/gdm/authServicesLegacy.js
-@@ -158,7 +158,7 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -170,7 +170,7 @@ export class AuthServicesLegacy extends AuthServices {
      }
  
      _handleUpdateEnabledMechanisms() {
@@ -80,7 +80,7 @@ index 088c765..81df132 100644
              .filter(m => this._enabledRoles.includes(m.role) &&
                  this._settings.get_boolean(m.setting))
              .map(m => ({
-@@ -169,16 +169,17 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -181,16 +181,17 @@ export class AuthServicesLegacy extends AuthServices {
                  autoSelectable: m.role === Role.SMARTCARD
                      ? this._smartcardManager.hasInsertedTokens()
                      : true,

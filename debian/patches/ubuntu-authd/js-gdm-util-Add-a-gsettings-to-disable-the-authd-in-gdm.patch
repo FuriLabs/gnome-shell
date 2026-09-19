@@ -30,7 +30,7 @@ index ee8b3a2..136d67a 100644
    </schema>
  </schemalist>
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
-index 884796b..44e664c 100644
+index 7c57ff7..ec6dfbb 100644
 --- a/js/gdm/authd.js
 +++ b/js/gdm/authd.js
 @@ -14,6 +14,8 @@ const STRING_PROTOCOL_VERSION_ = 1;
@@ -64,7 +64,7 @@ index bb44b0a..5f32e84 100644
  export const BANNER_MESSAGE_SOURCE_KEY = 'banner-message-source';
  export const BANNER_MESSAGE_TEXT_KEY = 'banner-message-text';
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 70f29ff..030cd5f 100644
+index 563c5b1..14f9828 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -7,7 +7,11 @@ import * as Params from '../misc/params.js';

@@ -37,6 +37,8 @@ ubuntu/gdm-loginDialog-Load-the-logo-image-synchronously.patch
 ubuntu-authd/authPrompt-Factorize-the-common-actions-on-UI-prompt-requ.patch
 ubuntu-authd/authPrompt-Do-not-unset-the-step-count-if-changing-mechan.patch
 ubuntu-authd/authPrompt-Return-the-mechanism-selection-result-to-the-c.patch
+ubuntu-authd/authPrompt-Reset-the-verifying-state-when-an-authenticati.patch
+ubuntu-authd/authServicesLegacy-Emit-step-completed-after-each-PAM-req.patch
 ubuntu-authd/authServices-Add-missing-ServiceName-to-wait-pending-mess.patch
 ubuntu-authd/userVerifier-Do-not-allow-any-other-service-to-take-contr.patch
 ubuntu-authd/userVerifier-Do-not-allow-a-auth-service-to-reset-if-not-.patch

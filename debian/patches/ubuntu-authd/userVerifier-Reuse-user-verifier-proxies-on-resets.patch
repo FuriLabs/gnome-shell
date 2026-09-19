@@ -12,7 +12,7 @@ in case we're requesting a new user verifier for the same user
  1 file changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 56d4fd0..ba13b9a 100644
+index 41a6d25..7770859 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -97,7 +97,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {

@@ -24,7 +24,7 @@ mechanism selection restores both the previous selected service and UI owner.
  1 file changed, 40 insertions(+), 13 deletions(-)
 
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 318e215..5249c89 100644
+index afc1d6d..cdfb400 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -63,6 +63,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
@@ -127,7 +127,7 @@ index 318e215..5249c89 100644
                  'filter-messages', (_, args) => maybeForwardSignal(args,
                      () => this._filterServiceMessages(args)),
                  'verification-failed', (_, args) => maybeForwardSignal(args,
-@@ -452,12 +479,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -452,14 +479,14 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                      () => this.emit('verification-complete')),
                  'reset', (_, args) => maybeForwardSignal(args,
                      () => this.emit('reset', args)),
@@ -137,6 +137,8 @@ index 318e215..5249c89 100644
 -                'show-button', (_, args) => maybeForwardSignal(args,
 +                'show-button', (_, args) => maybeForwardUISignal(args,
                      () => this.emit('show-button', args)),
+                 'step-completed', (_, args) => maybeForwardSignal(args,
+                     () => this.emit('step-completed', args)),
                  'mechanisms-changed', () => this._onMechanismsChanged().catch(logError),
 -                'web-login', (_, args) => maybeForwardSignal(args,
 +                'web-login', (_, args) => maybeForwardUISignal(args,

@@ -3,21 +3,21 @@ Date: Sun, 26 Jul 2026 07:00:57 +0200
 Subject: gdm: Implement authd auth service
 
 ---
- js/gdm/authd.js               | 1019 ++++++++
+ js/gdm/authd.js               | 1009 ++++++++
  js/gdm/authdProtocol.js       | 5666 +++++++++++++++++++++++++++++++++++++++++
  js/gdm/userVerifier.js        |    2 +
  js/js-resources.gresource.xml |    3 +
  po/POTFILES.in                |    1 +
- 5 files changed, 6691 insertions(+)
+ 5 files changed, 6681 insertions(+)
  create mode 100644 js/gdm/authd.js
  create mode 100644 js/gdm/authdProtocol.js
 
 diff --git a/js/gdm/authd.js b/js/gdm/authd.js
 new file mode 100644
-index 0000000..c235ab2
+index 0000000..8df0e28
 --- /dev/null
 +++ b/js/gdm/authd.js
-@@ -0,0 +1,1019 @@
+@@ -0,0 +1,1009 @@
 +// -*- mode: js; js-indent-level: 4; indent-tabs-mode: nil -*-
 +import GLib from 'gi://GLib';
 +import GObject from 'gi://GObject';
@@ -993,28 +993,18 @@ index 0000000..c235ab2
 +        }
 +
 +        case AuthResult.Next: {
-+            this.emit('filter-messages', {
-+                serviceName: SERVICE_NAME,
-+                messageType: MessageType.INFO,
-+            });
 +            this.emit('queue-priority-message', {
 +                serviceName: SERVICE_NAME,
 +                messageType: MessageType.INFO,
-+                message: response.msg,
++                message: response.msg ?? null,
 +            });
 +            this._authModes = {};
-+            this._authMechanisms = {
-+                [AuthMechanismIDs.Message]: {
-+                    name: _('Authd Authentication'),
-+                    selectable: true,
-+                    role: AuthdRoles.Message,
-+                    id: AuthMechanismIDs.Message,
-+                    prompt: response.msg ?? '',
-+                    serviceName: SERVICE_NAME,
-+                    autoSelectable: true,
-+                },
-+            };
-+            this._updateEnabledMechanisms();
++            this._authMechanisms = {};
++            this._selectedAuthMode = null;
++            this._setEnabledMechanisms(null);
++            this._waitPendingMessages(SERVICE_NAME).finally(() =>
++                this.emit('step-completed', {serviceName: SERVICE_NAME})).catch(
++                logErrorUnlessCancelled);
 +            break;
 +        }
 +        }
@@ -6710,7 +6700,7 @@ index 0000000..ad2b5ea
 +
 +export { authd, $root as default, gdm, pam };
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index ba13b9a..bd1c2ff 100644
+index 7770859..ff2385f 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -5,6 +5,7 @@ import * as Signals from '../misc/signals.js';

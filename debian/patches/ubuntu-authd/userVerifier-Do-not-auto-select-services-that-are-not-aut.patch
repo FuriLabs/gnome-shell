@@ -17,7 +17,7 @@ but do not start the service automatically
  4 files changed, 32 insertions(+), 8 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 574fdb5..23ab4f1 100644
+index 002f56b..17b8912 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -27,6 +27,7 @@ export const RoleProperties = {
@@ -37,10 +37,10 @@ index 574fdb5..23ab4f1 100644
      [Role.FINGERPRINT]: {
          iconName: 'fingerprint-auth-symbolic',
 diff --git a/js/gdm/authServicesLegacy.js b/js/gdm/authServicesLegacy.js
-index 179daf1..2f49f57 100644
+index d32a03d..6c99a5e 100644
 --- a/js/gdm/authServicesLegacy.js
 +++ b/js/gdm/authServicesLegacy.js
-@@ -159,10 +159,18 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -171,10 +171,18 @@ export class AuthServicesLegacy extends AuthServices {
      }
  
      _handleUpdateEnabledMechanisms() {
@@ -63,7 +63,7 @@ index 179daf1..2f49f57 100644
  
          if (!this._fingerprintManager?.readerFound) {
              this._enabledMechanisms = this._enabledMechanisms.filter(m =>
-@@ -425,8 +433,11 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -452,8 +460,11 @@ export class AuthServicesLegacy extends AuthServices {
  
      _onSmartcardChanged() {
          if (this._selectedMechanism?.role !== Role.SMARTCARD ||
@@ -99,10 +99,10 @@ index 7f4eb1c..0eb0422 100644
          this._trackWebLoginTimeout();
  
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 5249c89..ebc9169 100644
+index cdfb400..c5671c9 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
-@@ -543,10 +543,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -545,10 +545,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          // Report the currently selected mechanism. If one is already selected
          // we keep it (matching the actual mechanism, so that services exposing
          // multiple mechanisms under the same service name are handled too);

@@ -9,7 +9,7 @@ allowed to do so
  1 file changed, 4 insertions(+), 3 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index d0f7659..ae247b2 100644
+index 2194a58..dfccdbb 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -63,6 +63,7 @@ export class AuthServices extends GObject.Object {
@@ -20,7 +20,7 @@ index d0f7659..ae247b2 100644
           * @param {Gio.Task} task
           */
          'wait-pending-messages': {param_types: [GObject.TYPE_JSOBJECT]},
-@@ -281,7 +282,7 @@ export class AuthServices extends GObject.Object {
+@@ -286,7 +287,7 @@ export class AuthServices extends GObject.Object {
          this.emit('mechanisms-changed');
      }
  
@@ -29,7 +29,7 @@ index d0f7659..ae247b2 100644
          const cancellable = this._cancellable;
          const timeoutId = GLib.timeout_add_seconds_once(GLib.PRIORITY_DEFAULT, 10,
              () => cancellable.cancel());
-@@ -300,7 +301,7 @@ export class AuthServices extends GObject.Object {
+@@ -305,7 +306,7 @@ export class AuthServices extends GObject.Object {
              }
          });
  
@@ -38,7 +38,7 @@ index d0f7659..ae247b2 100644
  
          return promise;
      }
-@@ -409,7 +410,7 @@ export class AuthServices extends GObject.Object {
+@@ -414,7 +415,7 @@ export class AuthServices extends GObject.Object {
          this.emit('verification-failed', {serviceName, canRetry: !doneTrying});
  
          try {

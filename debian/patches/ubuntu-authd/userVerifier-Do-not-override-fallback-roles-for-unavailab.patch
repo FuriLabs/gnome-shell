@@ -21,10 +21,10 @@ actually provide a role disable it from others.
  2 files changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 4294a8e..771aa7a 100644
+index 7d6e55c..9afdad0 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
-@@ -174,6 +174,11 @@ export class AuthServices extends GObject.Object {
+@@ -179,6 +179,11 @@ export class AuthServices extends GObject.Object {
          return this._handleGetSupportedRoles();
      }
  
@@ -37,10 +37,10 @@ index 4294a8e..771aa7a 100644
          this._cancellable?.cancel();
          this._cancellable = new Gio.Cancellable();
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index bf13763..56d4fd0 100644
+index 91163cb..41a6d25 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
-@@ -532,7 +532,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -534,7 +534,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          for (let i = 1; i < authServices.length; i++) {
              const prev = authServices[i - 1];
              const current = authServices[i];

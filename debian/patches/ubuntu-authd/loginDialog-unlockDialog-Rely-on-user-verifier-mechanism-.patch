@@ -19,10 +19,10 @@ verifier the single source of truth for mechanism selection.
  3 files changed, 11 insertions(+), 10 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 193c936..652eaac 100644
+index 0c3aab2..ffaeeba 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -404,6 +404,10 @@ export const AuthPrompt = GObject.registerClass({
+@@ -405,6 +405,10 @@ export const AuthPrompt = GObject.registerClass({
          }));
      }
  

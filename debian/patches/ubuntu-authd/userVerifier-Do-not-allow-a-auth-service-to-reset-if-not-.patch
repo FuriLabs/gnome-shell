@@ -37,10 +37,10 @@ restart and take control of its own verification.
  5 files changed, 36 insertions(+), 24 deletions(-)
 
 diff --git a/js/gdm/authPrompt.js b/js/gdm/authPrompt.js
-index 57349ce..193c936 100644
+index 5a31f6e..0c3aab2 100644
 --- a/js/gdm/authPrompt.js
 +++ b/js/gdm/authPrompt.js
-@@ -940,9 +940,10 @@ export const AuthPrompt = GObject.registerClass({
+@@ -951,9 +951,10 @@ export const AuthPrompt = GObject.registerClass({
      }
  
      reset(params) {
@@ -52,7 +52,7 @@ index 57349ce..193c936 100644
          });
  
          const oldStatus = this.verificationStatus;
-@@ -952,7 +953,7 @@ export const AuthPrompt = GObject.registerClass({
+@@ -963,7 +964,7 @@ export const AuthPrompt = GObject.registerClass({
          this.promptStep = 0;
  
          if (softReset)
@@ -62,10 +62,10 @@ index 57349ce..193c936 100644
              this._userVerifier?.reset();
  
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 1d11e25..8640c43 100644
+index 793be77..afd8f3a 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
-@@ -328,7 +328,7 @@ export class AuthServices extends GObject.Object {
+@@ -333,7 +333,7 @@ export class AuthServices extends GObject.Object {
              'conversation-started', (_, ...args) => this._onConversationStarted(...args),
              'conversation-stopped', (_, ...args) => this._onConversationStopped(...args),
              'service-unavailable', (_, ...args) => this._onServiceUnavailable(...args),
@@ -74,7 +74,7 @@ index 1d11e25..8640c43 100644
              'verification-complete', (_, ...args) => this._onVerificationComplete(...args),
              this);
  
-@@ -412,7 +412,7 @@ export class AuthServices extends GObject.Object {
+@@ -417,7 +417,7 @@ export class AuthServices extends GObject.Object {
  
          try {
              await this._waitPendingMessages(serviceName);
@@ -83,7 +83,7 @@ index 1d11e25..8640c43 100644
          } catch (e) {
              logErrorUnlessCancelled(e);
          }
-@@ -474,6 +474,13 @@ export class AuthServices extends GObject.Object {
+@@ -479,6 +479,13 @@ export class AuthServices extends GObject.Object {
          }
      }
  
@@ -98,10 +98,10 @@ index 1d11e25..8640c43 100644
          return this.constructor.SupportedRoles;
      }
 diff --git a/js/gdm/authServicesLegacy.js b/js/gdm/authServicesLegacy.js
-index 12adc63..179daf1 100644
+index 6c5f861..d32a03d 100644
 --- a/js/gdm/authServicesLegacy.js
 +++ b/js/gdm/authServicesLegacy.js
-@@ -96,7 +96,7 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -106,7 +106,7 @@ export class AuthServicesLegacy extends AuthServices {
  
      _handleSelectMechanism() {
          if (this._selectedMechanism)
@@ -110,7 +110,7 @@ index 12adc63..179daf1 100644
      }
  
      _handleNeedsUsername() {
-@@ -402,7 +402,7 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -429,7 +429,7 @@ export class AuthServicesLegacy extends AuthServices {
          delete this._credentialManagers[serviceName];
  
          if (this._selectedMechanism?.serviceName === serviceName)
@@ -119,7 +119,7 @@ index 12adc63..179daf1 100644
      }
  
      _connectSmartcardManager() {
-@@ -428,7 +428,7 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -455,7 +455,7 @@ export class AuthServicesLegacy extends AuthServices {
              this._smartcardInProgress && this._smartcardManager.hasInsertedTokens())
              return;
  
@@ -128,7 +128,7 @@ index 12adc63..179daf1 100644
      }
  
      _onFingerprintChanged() {
-@@ -436,7 +436,7 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -463,7 +463,7 @@ export class AuthServicesLegacy extends AuthServices {
              return;
  
          this._updateEnabledMechanisms();
@@ -137,7 +137,7 @@ index 12adc63..179daf1 100644
      }
  
      _onCredentialManagerAuthenticated(credentialManager) {
-@@ -445,6 +445,6 @@ export class AuthServicesLegacy extends AuthServices {
+@@ -472,6 +472,6 @@ export class AuthServicesLegacy extends AuthServices {
              role: Role.PASSWORD,
              ...RoleProperties[Role.PASSWORD],
          };
@@ -221,7 +221,7 @@ index cf6a4e1..7f4eb1c 100644
      }
  }
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index c48b1bc..fcbf73d 100644
+index c49a0fb..ffa06a9 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -115,13 +115,16 @@ export class ShellUserVerifier extends Signals.EventEmitter {

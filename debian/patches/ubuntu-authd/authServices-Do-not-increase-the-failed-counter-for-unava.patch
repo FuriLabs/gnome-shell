@@ -10,10 +10,10 @@ not retry with them or increase the fail counter
  1 file changed, 9 insertions(+), 4 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index a27e372..4294a8e 100644
+index d49c000..7d6e55c 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
-@@ -186,7 +186,9 @@ export class AuthServices extends GObject.Object {
+@@ -191,7 +191,9 @@ export class AuthServices extends GObject.Object {
              if (e.cause?.matches(Gio.IOErrorEnum, Gio.IOErrorEnum.CANCELLED))
                  return;
  
@@ -24,7 +24,7 @@ index a27e372..4294a8e 100644
              throw e;
          }
  
-@@ -466,14 +468,17 @@ export class AuthServices extends GObject.Object {
+@@ -471,14 +473,17 @@ export class AuthServices extends GObject.Object {
                      serviceName, cancellable);
              }
          } catch (e) {
