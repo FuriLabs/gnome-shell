@@ -79,7 +79,7 @@ index d0f7659..2194a58 100644
           * @param {boolean} [reuseEntryText]
           */
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 039da1d..9d41acd 100644
+index 53dd3f1..7732b8e 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -417,6 +417,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {

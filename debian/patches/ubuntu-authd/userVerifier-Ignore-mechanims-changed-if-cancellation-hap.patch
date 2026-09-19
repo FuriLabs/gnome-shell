@@ -1,0 +1,28 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Sat, 19 Sep 2026 19:49:31 +0200
+Subject: userVerifier: Ignore mechanims changed if cancellation happened
+
+We're now waiting for begin being completed, but in case a cancellation
+happens the signal should not be handled, since at this point the
+handler has been already disconnected.
+
+Fixes: https://gitlab.gnome.org/GNOME/gnome-shell/-/commit/ecbeedfd33df161660133a4b65c3a95b4f921dc6
+---
+ js/gdm/userVerifier.js | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
+index 039da1d..53dd3f1 100644
+--- a/js/gdm/userVerifier.js
++++ b/js/gdm/userVerifier.js
+@@ -455,7 +455,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+         if (this._redistributingRoles)
+             return;
+ 
++        const currentCancellable = this._cancellable;
+         await this._beginPromise;
++        if (currentCancellable?.is_cancelled())
++            return;
+ 
+         this._redistributeRoles();
+ 

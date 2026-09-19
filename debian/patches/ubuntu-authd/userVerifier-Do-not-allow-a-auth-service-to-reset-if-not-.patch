@@ -62,7 +62,7 @@ index 5a31f6e..0c3aab2 100644
              this._userVerifier?.reset();
  
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 793be77..afd8f3a 100644
+index 35ec43e..fa3f045 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -333,7 +333,7 @@ export class AuthServices extends GObject.Object {
@@ -221,7 +221,7 @@ index cf6a4e1..7f4eb1c 100644
      }
  }
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index c49a0fb..ffa06a9 100644
+index 643f153..f65efd9 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -115,13 +115,16 @@ export class ShellUserVerifier extends Signals.EventEmitter {
