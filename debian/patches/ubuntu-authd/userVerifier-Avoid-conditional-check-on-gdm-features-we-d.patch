@@ -8,10 +8,10 @@ We already depend on such libgdm so we don't need to be conditional
  1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index c6d5b76..61d41f7 100644
+index 64acb14..85760d7 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
-@@ -393,10 +393,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -389,10 +389,10 @@ export class ShellUserVerifier extends Signals.EventEmitter {
          }
  
          try {

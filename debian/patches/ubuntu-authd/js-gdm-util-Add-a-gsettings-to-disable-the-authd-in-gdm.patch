@@ -64,7 +64,7 @@ index bb44b0a..5f32e84 100644
  export const BANNER_MESSAGE_SOURCE_KEY = 'banner-message-source';
  export const BANNER_MESSAGE_TEXT_KEY = 'banner-message-text';
 diff --git a/js/gdm/userVerifier.js b/js/gdm/userVerifier.js
-index 61d41f7..026de64 100644
+index 85760d7..8e33fa0 100644
 --- a/js/gdm/userVerifier.js
 +++ b/js/gdm/userVerifier.js
 @@ -7,7 +7,11 @@ import * as Params from '../misc/params.js';
@@ -89,7 +89,7 @@ index 61d41f7..026de64 100644
          this._updateAuthServices();
      }
  
-@@ -232,6 +238,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -228,6 +234,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
          this._settings.disconnectObject(this);
          this._settings = null;
@@ -97,7 +97,7 @@ index 61d41f7..026de64 100644
      }
  
      addCredentialManager(serviceName, credentialManager) {
-@@ -410,7 +417,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+@@ -406,7 +413,7 @@ export class ShellUserVerifier extends Signals.EventEmitter {
  
      _updateAuthServices() {
          let enabledAuthServicesClasses = AuthServicesClasses

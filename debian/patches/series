@@ -54,7 +54,6 @@ ubuntu-authd/gdm-authServices-Do-not-call-handleSelectMechanism-if-no-.patch
 ubuntu-authd/userVerifier-Do-not-stop-at-first-auth-service-error.patch
 ubuntu-authd/authServices-Do-not-increase-the-failed-counter-for-unava.patch
 ubuntu-authd/userVerifier-Do-not-override-fallback-roles-for-unavailab.patch
-ubuntu-authd/userVerifier-Reuse-user-verifier-proxies-on-resets.patch
 ubuntu-authd/authServices-Preserve-selected-mechanisms-across-updates.patch
 ubuntu-authd/authMenuButton-Drop-JSON-parsing-stringification-for-mech.patch
 ubuntu-authd/loginDialog-unlockDialog-Deeply-check-if-authentication-m.patch
