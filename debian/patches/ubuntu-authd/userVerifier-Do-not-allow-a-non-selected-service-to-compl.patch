@@ -23,10 +23,10 @@ non-completion signals.
  2 files changed, 7 insertions(+), 3 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 2e99f74..8a48619 100644
+index 8640c43..574fdb5 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
-@@ -80,7 +80,10 @@ export class AuthServices extends GObject.Object {
+@@ -78,7 +78,10 @@ export class AuthServices extends GObject.Object {
           * @param {boolean} [canRetry]
           */
          'verification-failed': {param_types: [GObject.TYPE_JSOBJECT]},
@@ -38,7 +38,7 @@ index 2e99f74..8a48619 100644
          /**
           * @param {string} serviceName
           * @param {string} question
-@@ -411,7 +414,7 @@ export class AuthServices extends GObject.Object {
+@@ -387,7 +390,7 @@ export class AuthServices extends GObject.Object {
  
      _onVerificationComplete(serviceName) {
          this._handleOnVerificationComplete(serviceName);

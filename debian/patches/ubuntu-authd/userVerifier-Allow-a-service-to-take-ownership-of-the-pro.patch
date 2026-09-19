@@ -120,9 +120,14 @@ index 318e215..5249c89 100644
 -                'queue-priority-message', (_, args) => maybeForwardSignal(args,
 +                'queue-priority-message', (_, args) => maybeForwardUISignal(args,
                      () => this._queuePriorityMessage(args)),
+-                'wait-pending-messages', (_, args) => maybeForwardSignal(args,
+-                    () => this._waitPendingMessages(args)),
++                'wait-pending-messages', (_, args) => maybeForwardUISignal(args,
++                    () => this._waitPendingMessages(args).catch(logErrorUnlessCancelled)),
                  'filter-messages', (_, args) => maybeForwardSignal(args,
                      () => this._filterServiceMessages(args)),
-@@ -469,12 +496,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
+                 'verification-failed', (_, args) => maybeForwardSignal(args,
+@@ -452,12 +479,12 @@ export class ShellUserVerifier extends Signals.EventEmitter {
                      () => this.emit('verification-complete')),
                  'reset', (_, args) => maybeForwardSignal(args,
                      () => this.emit('reset', args)),
