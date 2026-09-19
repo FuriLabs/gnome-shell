@@ -62,10 +62,10 @@ index 03235a9..b45cc5a 100644
              this._userVerifier?.reset();
  
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index fed9dc2..5652b99 100644
+index 1d11e25..8640c43 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
-@@ -327,7 +327,7 @@ export class AuthServices extends GObject.Object {
+@@ -328,7 +328,7 @@ export class AuthServices extends GObject.Object {
              'conversation-started', (_, ...args) => this._onConversationStarted(...args),
              'conversation-stopped', (_, ...args) => this._onConversationStopped(...args),
              'service-unavailable', (_, ...args) => this._onServiceUnavailable(...args),
@@ -74,16 +74,16 @@ index fed9dc2..5652b99 100644
              'verification-complete', (_, ...args) => this._onVerificationComplete(...args),
              this);
  
-@@ -411,7 +411,7 @@ export class AuthServices extends GObject.Object {
+@@ -412,7 +412,7 @@ export class AuthServices extends GObject.Object {
  
          try {
-             await this._waitPendingMessages();
+             await this._waitPendingMessages(serviceName);
 -            this.emit('reset', {softReset: !doneTrying});
 +            this._emitReset({softReset: !doneTrying, serviceName});
          } catch (e) {
              logErrorUnlessCancelled(e);
          }
-@@ -473,6 +473,13 @@ export class AuthServices extends GObject.Object {
+@@ -474,6 +474,13 @@ export class AuthServices extends GObject.Object {
          }
      }
  

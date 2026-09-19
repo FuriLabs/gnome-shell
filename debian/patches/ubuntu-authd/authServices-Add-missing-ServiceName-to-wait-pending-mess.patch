@@ -1,0 +1,49 @@
+From: =?utf-8?b?Ik1hcmNvIFRyZXZpc2FuIChUcmV2acOxbyki?= <mail@3v1n0.net>
+Date: Sat, 19 Sep 2026 15:51:43 +0200
+Subject: authServices: Add missing ServiceName to wait-pending-messages
+
+We want to be able to check who's requesting the await and whether is
+allowed to do so
+---
+ js/gdm/authServices.js | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
+index d0f7659..ae247b2 100644
+--- a/js/gdm/authServices.js
++++ b/js/gdm/authServices.js
+@@ -63,6 +63,7 @@ export class AuthServices extends GObject.Object {
+          */
+         'queue-priority-message': {param_types: [GObject.TYPE_JSOBJECT]},
+         /**
++         * @param {string} serviceName
+          * @param {Gio.Task} task
+          */
+         'wait-pending-messages': {param_types: [GObject.TYPE_JSOBJECT]},
+@@ -281,7 +282,7 @@ export class AuthServices extends GObject.Object {
+         this.emit('mechanisms-changed');
+     }
+ 
+-    _waitPendingMessages() {
++    _waitPendingMessages(serviceName) {
+         const cancellable = this._cancellable;
+         const timeoutId = GLib.timeout_add_seconds_once(GLib.PRIORITY_DEFAULT, 10,
+             () => cancellable.cancel());
+@@ -300,7 +301,7 @@ export class AuthServices extends GObject.Object {
+             }
+         });
+ 
+-        this.emit('wait-pending-messages', {task});
++        this.emit('wait-pending-messages', {serviceName, task});
+ 
+         return promise;
+     }
+@@ -409,7 +410,7 @@ export class AuthServices extends GObject.Object {
+         this.emit('verification-failed', {serviceName, canRetry: !doneTrying});
+ 
+         try {
+-            await this._waitPendingMessages();
++            await this._waitPendingMessages(serviceName);
+             this.emit('reset', {softReset: !doneTrying});
+         } catch (e) {
+             logErrorUnlessCancelled(e);

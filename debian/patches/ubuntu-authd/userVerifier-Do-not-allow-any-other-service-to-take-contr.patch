@@ -23,7 +23,7 @@ while keeping selection valid when the set of available mechanisms changes.
  2 files changed, 63 insertions(+), 16 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index d0f7659..fed9dc2 100644
+index ae247b2..1d11e25 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -42,6 +42,7 @@ export const RoleProperties = {

@@ -15,10 +15,10 @@ the array is populated (fingerprint readiness, SSSD selection/timeout).
  3 files changed, 13 insertions(+), 6 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index be69a9f..9a8d16c 100644
+index 8a48619..dd2f03d 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
-@@ -301,7 +301,9 @@ export class AuthServices extends GObject.Object {
+@@ -302,7 +302,9 @@ export class AuthServices extends GObject.Object {
      _updateEnabledMechanisms() {
          const selectedMechanism = this._selectedMechanism;
  
@@ -29,13 +29,13 @@ index be69a9f..9a8d16c 100644
  
          this._selectedMechanism = this._enabledMechanisms.find(mechanism =>
              this._mechanismEquals(mechanism, selectedMechanism));
-@@ -309,6 +311,8 @@ export class AuthServices extends GObject.Object {
+@@ -310,6 +312,8 @@ export class AuthServices extends GObject.Object {
          this.emit('mechanisms-changed');
      }
  
 +    _onEnabledMechanismsUpdated() {}
 +
-     _waitPendingMessages() {
+     _waitPendingMessages(serviceName) {
          const cancellable = this._cancellable;
          const timeoutId = GLib.timeout_add_seconds_once(GLib.PRIORITY_DEFAULT, 10,
 diff --git a/js/gdm/authServicesLegacy.js b/js/gdm/authServicesLegacy.js

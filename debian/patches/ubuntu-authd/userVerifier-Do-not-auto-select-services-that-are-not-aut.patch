@@ -17,7 +17,7 @@ but do not start the service automatically
  4 files changed, 32 insertions(+), 8 deletions(-)
 
 diff --git a/js/gdm/authServices.js b/js/gdm/authServices.js
-index 574fdb5..23ab4f1 100644
+index 8640c43..a03da8d 100644
 --- a/js/gdm/authServices.js
 +++ b/js/gdm/authServices.js
 @@ -27,6 +27,7 @@ export const RoleProperties = {

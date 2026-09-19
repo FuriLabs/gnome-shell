@@ -34,6 +34,7 @@ ubuntu/match-plymouth-logo.patch
 ubuntu/Standardize-icon-sizes-and-fit-the-grid-to-the-screen.patch
 ubuntu/appDisplay-Display-two-lines-of-application-name-as-a-min.patch
 ubuntu/gdm-loginDialog-Load-the-logo-image-synchronously.patch
+ubuntu-authd/authServices-Add-missing-ServiceName-to-wait-pending-mess.patch
 ubuntu-authd/userVerifier-Do-not-allow-any-other-service-to-take-contr.patch
 ubuntu-authd/userVerifier-Do-not-allow-a-auth-service-to-reset-if-not-.patch
 ubuntu-authd/userVerifier-Do-not-allow-a-non-selected-service-to-compl.patch
