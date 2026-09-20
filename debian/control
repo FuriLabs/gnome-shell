@@ -78,7 +78,8 @@ Vcs-Browser: https://salsa.debian.org/gnome-team/gnome-shell
 
 Package: gnome-shell
 Architecture: linux-any
-Depends: gir1.2-accountsservice-1.0,
+Depends: evolution-data-server-common,
+         gir1.2-accountsservice-1.0,
          gir1.2-adw-1,
          gir1.2-atk-1.0,
          gir1.2-atspi-2.0,
