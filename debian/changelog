@@ -1,4 +1,4 @@
-gnome-shell (51.0-1ubuntu1) UNRELEASED; urgency=medium
+gnome-shell (51.0-1ubuntu1) stonking; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
   * Merge with debian, including new upstream release 51.0
@@ -41,7 +41,7 @@ gnome-shell (51.0-1ubuntu1) UNRELEASED; urgency=medium
   [ Alessandro Astone ]
   * d/p/u: Keep supporting the Xcursor cursor themes (LP: #2166801)
 
- -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sun, 20 Sep 2026 16:22:33 +0200
+ -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Mon, 21 Sep 2026 02:53:05 +0200
 
 gnome-shell (51.0-1) experimental; urgency=medium
 
