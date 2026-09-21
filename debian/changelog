@@ -1,3 +1,10 @@
+gnome-shell (51.0-2ubuntu1) stonking; urgency=medium
+
+  * Merge with debian:
+    - Fix missing runtime dependency on gir1.2-gly-2
+
+ -- Alessandro Astone <alessandro.astone@canonical.com>  Mon, 21 Sep 2026 15:19:13 +0200
+
 gnome-shell (51.0-2) experimental; urgency=medium
 
   * Team upload
