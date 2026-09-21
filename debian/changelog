@@ -1,3 +1,10 @@
+gnome-shell (51.0-2) experimental; urgency=medium
+
+  * Team upload
+  * d/control: Depend on gir1.2-gly-2 at runtime (Closes: #1148566)
+
+ -- Simon McVittie <smcv@debian.org>  Mon, 21 Sep 2026 11:27:23 +0100
+
 gnome-shell (51.0-1ubuntu1) stonking; urgency=medium
 
   [ Marco Trevisan (Treviño) ]

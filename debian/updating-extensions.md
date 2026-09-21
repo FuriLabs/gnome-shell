@@ -28,8 +28,15 @@ GNOME Shell 51 can be installed from experimental.
 All binary packages from `src:gnome-shell`, `src:mutter` and `src:gjs`
 should be upgraded.
 
+Known issues affecting upgrades:
+
+* Until a version fixing [#1148566] becomes available,
+    you will need to install the `gir1.2-gly-2` package as well
+
 If testing an extension that is active in the gdm session,
 all binary packages from `src:gdm3` should also be upgraded.
+
+[#1148566]: https://bugs.debian.org/1148566
 
 Dependencies
 ------------
