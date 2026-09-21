@@ -1,20 +1,7 @@
-gnome-shell (51.0-0ubuntu1) UNRELEASED; urgency=medium
-
-  [ Daniel van Vugt ]
-  * New upstream release 51.alpha
-  * Refreshed: shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
-  * Binary package 'gnome-shell-extension-prefs' has been removed and
-    relocated to upstream project 'gnome-extensions-app'.
-
-  [ Simon McVittie ]
-  * Merge packaging from unstable
-  * New upstream release 51.beta
-  * d/control: Update dependency versions as per meson.build
-  * d/control: Explicitly build-depend on cairo as per meson.build
-  * d/copyright: Update
-  * New upstream release 51.0
+gnome-shell (51.0-1ubuntu1) UNRELEASED; urgency=medium
 
   [ Marco Trevisan (Treviño) ]
+  * Merge with debian, including new upstream release 51.0
   * debian/source_gnome-shell.py: Add all mutter package versions
   * debian/control: Update build and runtime dependencies
   * d/p/ubuntu-authd (LP: #2166745):
@@ -55,6 +42,46 @@ gnome-shell (51.0-0ubuntu1) UNRELEASED; urgency=medium
   * d/p/u: Keep supporting the Xcursor cursor themes (LP: #2166801)
 
  -- Marco Trevisan (Treviño) <marco@ubuntu.com>  Sun, 20 Sep 2026 16:22:33 +0200
+
+gnome-shell (51.0-1) experimental; urgency=medium
+
+  * Team upload
+  * Initial upload of v51 to experimental
+
+  [ Daniel van Vugt ]
+  * New upstream release 51.alpha
+  * Refreshed: shell-app-Warn-instead-of-crashing-if-disposed-before-sta.patch
+  * Binary package 'gnome-shell-extension-prefs' has been removed and
+    relocated to upstream project 'gnome-extensions-app'.
+
+  [ Simon McVittie ]
+  * Merge packaging from unstable
+  * New upstream release 51.0
+  * d/control: Update dependencies as per meson.build
+  * d/copyright: Update
+  * d/control: Increase gsettings-desktop-schemas dependency to 51
+  * d/control: Explicitly depend on package containing e-d-s GSettings
+    schemas, for the calendar server
+  * d/control: Require gjs 1.90, to make testing updated GNOME Shell
+    extensions simpler while in experimental
+  * d/control: Bump mutter (build-)dependency to 51.0-2~,
+    to ensure that experimental buildds will upgrade mutter-common to a
+    sufficient version for the tests to pass
+  * d/updating-extensions.md: Briefly document how to update Shell
+    extensions for v51, so we can link to this document in future bug
+    reports and update it in a single place
+
+  [ Marco Trevisan (Treviño) ]
+  * debian/source_gnome-shell.py: Add all mutter package versions
+  * debian/control: Update build and runtime dependencies
+  * d/control: Add gnome-qr runtime dependency
+
+  [ Jeremy Bícha ]
+  * debian/gnome-shell.gsettings-override: Always show the Log Out
+    menu item, even if there is only one session type (GNOME on Wayland)
+    and only one user account (presumably the current one)
+
+ -- Simon McVittie <smcv@debian.org>  Sun, 20 Sep 2026 17:28:37 +0100
 
 gnome-shell (51~rc-1) UNRELEASED; urgency=medium
 
