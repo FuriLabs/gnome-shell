@@ -11,14 +11,14 @@ implementation instead.
 Bug-Ubuntu: https://launchpad.net/bugs/2166801
 Forwarded: not-needed, upstream is not interested, and this is hacky anyways
 ---
- src/st/st-cursor.c | 64 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 64 insertions(+)
+ src/st/st-cursor.c | 67 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 67 insertions(+)
 
 diff --git a/src/st/st-cursor.c b/src/st/st-cursor.c
-index e32dc73..aa4bd4a 100644
+index e32dc73..e855a34 100644
 --- a/src/st/st-cursor.c
 +++ b/src/st/st-cursor.c
-@@ -476,6 +476,69 @@ st_cursor_prepare_at (ClutterCursor *clutter_cursor,
+@@ -476,6 +476,72 @@ st_cursor_prepare_at (ClutterCursor *clutter_cursor,
                                          frame->height * scale);
  }
  
@@ -58,8 +58,11 @@ index e32dc73..aa4bd4a 100644
 +                                            n_construct_properties,
 +                                            construct_properties);
 +  StCursor *self = ST_CURSOR (obj);
++  g_autoptr (GFile) file = NULL;
 +
-+  if (!find_cursor_metadata (self)) {
++  file = find_cursor_metadata (self);
++
++  if (!file) {
 +    GType fallback_type = find_fallback_extension (type);
 +
 +    if (fallback_type != G_TYPE_INVALID)
@@ -88,7 +91,7 @@ index e32dc73..aa4bd4a 100644
  static void
  st_cursor_class_init (StCursorClass *klass)
  {
-@@ -483,6 +546,7 @@ st_cursor_class_init (StCursorClass *klass)
+@@ -483,6 +549,7 @@ st_cursor_class_init (StCursorClass *klass)
    ClutterCursorClass *clutter_cursor_class = CLUTTER_CURSOR_CLASS (klass);
  
    object_class->finalize = st_cursor_finalize;
