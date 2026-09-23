@@ -1,3 +1,11 @@
+gnome-shell (50.1-0ubuntu1.4) UNRELEASED; urgency=medium
+
+  * Add debian/patches/ubuntu/Multi-monitor-magnifier-fixes.patch to resolve
+    graphical corruption seen in the screen magnifier when using multiple
+    monitors (LP: #2108011)
+
+ -- Daniel van Vugt <daniel.van.vugt@canonical.com>  Wed, 23 Sep 2026 17:31:36 +0800
+
 gnome-shell (50.1-0ubuntu1.3) resolute; urgency=medium
 
   [ Adrian Dombeck ]

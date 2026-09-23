@@ -76,3 +76,4 @@ ubuntu/overviewControls-Do-focus-navigation-on-Ctrl-Alt-Tab-afte.patch
 ubuntu/dash-Don-t-notify-two-elements-for-each-icon.patch
 ubuntu/gdm-loginDialog-Load-the-logo-image-synchronously.patch
 ubuntu/search-Do-not-unregister-a-provider-that-was-not-register.patch
+ubuntu/Multi-monitor-magnifier-fixes.patch
