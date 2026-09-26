@@ -1,3 +1,10 @@
+gnome-shell (51.0-2ubuntu2) stonking; urgency=medium
+
+  * d/p/u: Plug leak of GFile when constructing St.Cursor
+  * d/p/u: Fix crash when requested an empty cursor (LP: #2168585)
+
+ -- Alessandro Astone <alessandro.astone@canonical.com>  Sat, 26 Sep 2026 10:43:45 +0200
+
 gnome-shell (51.0-2ubuntu1) stonking; urgency=medium
 
   * Merge with debian:
