@@ -1048,6 +1048,9 @@ class InputSourceIndicator extends PanelMenu.Button {
 
     _keymapChanged() {
         this._sourcesChanged();
+        const currentSource = this._getCurrentSource();
+        if (!currentSource)
+            return;
         this._setSourceAsActive(this._getCurrentSource());
     }
 
