@@ -121,14 +121,14 @@ export class PopupBaseMenuItem extends St.BoxLayout {
         this._clickGesture = new Clutter.ClickGesture({
             enabled: this._activatable,
         });
-        this._clickGesture.connect('recognize',
-            () => this.activate(Clutter.get_current_event()));
-        this._clickGesture.connect('notify::pressed', () => {
-            if (this._clickGesture.pressed)
-                this.add_style_pseudo_class('active');
-            else
-                this.remove_style_pseudo_class('active');
-        });
+        this._clickGesture.connectObject(
+            'recognize', () => this.activate(Clutter.get_current_event()),
+            'notify::pressed', () => {
+                if (this._clickGesture.pressed)
+                    this.add_style_pseudo_class('active');
+                else
+                    this.remove_style_pseudo_class('active');
+            }, this);
         this.add_action(this._clickGesture);
 
         if (!this._activatable)
